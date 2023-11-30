@@ -1,4 +1,4 @@
-.PHONY: help build test
+.PHONY: help build tests mocks
 
 include .env
 
@@ -13,5 +13,5 @@ mocks: ## generates mocks
 	go install go.uber.org/mock/mockgen@v0.3.0
 	go generate ./...
 
-test: ## runs all tests
+tests: ## runs all tests
 	go test ./... -covermode=atomic
