@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/Layr-Labs/eigenlayer-cli/operator"
-	"github.com/Layr-Labs/eigenlayer-cli/utils"
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/operator"
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 	"github.com/urfave/cli/v2"
 	"os"
 )

@@ -2,7 +2,7 @@ package keys
 
 import (
 	"fmt"
-	"github.com/Layr-Labs/eigenlayer-cli/utils"
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 	"github.com/urfave/cli/v2"
 )
 

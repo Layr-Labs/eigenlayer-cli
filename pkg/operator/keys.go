@@ -1,8 +1,8 @@
 package operator
 
 import (
-	"github.com/Layr-Labs/eigenlayer-cli/operator/keys"
-	"github.com/Layr-Labs/eigenlayer-cli/utils"
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/operator/keys"
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 	"github.com/urfave/cli/v2"
 )
 
