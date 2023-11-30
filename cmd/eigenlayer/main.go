@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/Layr-Labs/eigenlayer-cli/operator"
+	"github.com/Layr-Labs/eigenlayer-cli/utils"
 	"github.com/urfave/cli/v2"
 	"os"
 )
@@ -13,7 +14,10 @@ func main() {
 	app.Name = "eigenlayer"
 	app.Usage = "EigenLayer CLI"
 	app.Version = "0.1.0"
-	app.Commands = append(app.Commands, operator.KeysCmd())
+
+	// Initialize the dependencies
+	prompter := utils.NewPrompter()
+	app.Commands = append(app.Commands, operator.KeysCmd(prompter))
 
 	if err := app.Run(os.Args); err != nil {
 		_, err := fmt.Fprintln(os.Stderr, err)

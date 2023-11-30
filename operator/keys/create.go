@@ -2,17 +2,21 @@ package keys
 
 import (
 	"fmt"
-	"github.com/Layr-Labs/eigenlayer-cli/utils/prompts"
+	"github.com/Layr-Labs/eigenlayer-cli/utils"
 	"github.com/urfave/cli/v2"
 )
 
-var CreateCmd = &cli.Command{
-	Name:   "create",
-	Action: Create,
-}
-
-func Create(ctx *cli.Context) error {
-	password := prompts.GetPasswordModel()
-	fmt.Println(password.View())
-	return nil
+func CreateCmd(p utils.Prompter) *cli.Command {
+	createCmd := &cli.Command{
+		Name: "create",
+		Action: func(context *cli.Context) error {
+			confirm, err := p.Confirm("Would you like to populate the operator config file?")
+			if err != nil {
+				return err
+			}
+			fmt.Println(confirm)
+			return nil
+		},
+	}
+	return createCmd
 }
