@@ -1,4 +1,4 @@
-.PHONY: help build
+.PHONY: help build test
 
 include .env
 
@@ -8,3 +8,10 @@ help:
 build: ## Compile the binary
 	@mkdir -p bin
 	@go build -o bin/$(APP_NAME) cmd/$(APP_NAME)/main.go
+
+mocks: ## generates mocks
+	go install go.uber.org/mock/mockgen@v0.3.0
+	go generate ./...
+
+test: ## runs all tests
+	go test ./... -covermode=atomic
