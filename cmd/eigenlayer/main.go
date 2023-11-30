@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/Layr-Labs/eigenlayer-cli/pkg/operator"
+	"os"
+
+	"github.com/Layr-Labs/eigenlayer-cli/pkg"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 	"github.com/urfave/cli/v2"
-	"os"
 )
 
 func main() {
@@ -17,7 +18,7 @@ func main() {
 
 	// Initialize the dependencies
 	prompter := utils.NewPrompter()
-	app.Commands = append(app.Commands, operator.KeysCmd(prompter))
+	app.Commands = append(app.Commands, pkg.OperatorCmd(prompter))
 
 	if err := app.Run(os.Args); err != nil {
 		_, err := fmt.Fprintln(os.Stderr, err)
