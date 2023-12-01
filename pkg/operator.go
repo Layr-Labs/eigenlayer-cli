@@ -12,6 +12,7 @@ func OperatorCmd(p utils.Prompter) *cli.Command {
 		Usage: "Execute onchain operations for the operator",
 		Subcommands: []*cli.Command{
 			operator.KeysCmd(p),
+			operator.ConfigCmd(p),
 		},
 	}
 

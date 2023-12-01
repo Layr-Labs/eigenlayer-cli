@@ -186,7 +186,9 @@ func checkIfKeyExists(fileLoc string) bool {
 func validatePassword(password string) error {
 	err := passwordvalidator.Validate(password, MinEntropyBits)
 	if err != nil {
-		fmt.Println("if you want to create keys for testing with weak/no password, use --insecure flag. Do NOT use those keys in production")
+		fmt.Println(
+			"if you want to create keys for testing with weak/no password, use --insecure flag. Do NOT use those keys in production",
+		)
 	}
 	return err
 }

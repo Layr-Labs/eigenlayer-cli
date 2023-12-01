@@ -1,2 +1,8 @@
 # bin directory
 bin
+
+# Config files
+metadata.json
+operator-config.yaml
+operator.yaml
+config/*
