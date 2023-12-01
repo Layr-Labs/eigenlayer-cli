@@ -49,7 +49,7 @@ func TestCreateCmd(t *testing.T) {
 			err:  ErrKeyContainsWhitespaces,
 		},
 		{
-			name: "invalid keytype",
+			name: "invalid key type",
 			args: []string{"--key-type", "invalid", "do_not_use_this_name"},
 			err:  ErrInvalidKeyType,
 		},

@@ -13,6 +13,7 @@ func KeysCmd(p utils.Prompter) *cli.Command {
 		Subcommands: []*cli.Command{
 			keys.CreateCmd(p),
 			keys.ListCmd(),
+			keys.ImportCmd(p),
 		},
 	}
 
