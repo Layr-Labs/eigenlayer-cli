@@ -121,7 +121,7 @@ func promptOperatorInfo(config *types.OperatorConfig, p utils.Prompter) (types.O
 	//	config.Operator.DelegationApproverAddress = eigensdkTypes.ZeroAddress
 	//}
 
-	// TODO(madhur): Remove this once we have the feature working and want to ask users
+	// TODO(madhur): Remove this once we have the feature working and want to prompt users for this address
 	config.Operator.DelegationApproverAddress = eigensdkTypes.ZeroAddress
 
 	// Prompt and set earnings address
