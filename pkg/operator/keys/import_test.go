@@ -76,8 +76,13 @@ func TestImportCmd(t *testing.T) {
 		},
 		{
 			name: "invalid password based on validation function - ecdsa",
-			args: []string{"--key-type", "ecdsa", "test", "6842fb8f5fa574d0482818b8a825a15c4d68f542693197f2c2497e3562f335f6"},
-			err:  ErrInvalidPassword,
+			args: []string{
+				"--key-type",
+				"ecdsa",
+				"test",
+				"6842fb8f5fa574d0482818b8a825a15c4d68f542693197f2c2497e3562f335f6",
+			},
+			err: ErrInvalidPassword,
 			promptMock: func(p *prompterMock.MockPrompter) {
 				p.EXPECT().InputHiddenString(gomock.Any(), gomock.Any(), gomock.Any()).Return("", ErrInvalidPassword)
 			},
@@ -92,8 +97,13 @@ func TestImportCmd(t *testing.T) {
 		},
 		{
 			name: "valid ecdsa key import",
-			args: []string{"--key-type", "ecdsa", "test", "6842fb8f5fa574d0482818b8a825a15c4d68f542693197f2c2497e3562f335f6"},
-			err:  nil,
+			args: []string{
+				"--key-type",
+				"ecdsa",
+				"test",
+				"6842fb8f5fa574d0482818b8a825a15c4d68f542693197f2c2497e3562f335f6",
+			},
+			err: nil,
 			promptMock: func(p *prompterMock.MockPrompter) {
 				p.EXPECT().InputHiddenString(gomock.Any(), gomock.Any(), gomock.Any()).Return("", nil)
 			},
@@ -102,8 +112,13 @@ func TestImportCmd(t *testing.T) {
 		},
 		{
 			name: "valid ecdsa key import with 0x prefix",
-			args: []string{"--key-type", "ecdsa", "test", "0x6842fb8f5fa574d0482818b8a825a15c4d68f542693197f2c2497e3562f335f6"},
-			err:  nil,
+			args: []string{
+				"--key-type",
+				"ecdsa",
+				"test",
+				"0x6842fb8f5fa574d0482818b8a825a15c4d68f542693197f2c2497e3562f335f6",
+			},
+			err: nil,
 			promptMock: func(p *prompterMock.MockPrompter) {
 				p.EXPECT().InputHiddenString(gomock.Any(), gomock.Any(), gomock.Any()).Return("", nil)
 			},
@@ -112,8 +127,13 @@ func TestImportCmd(t *testing.T) {
 		},
 		{
 			name: "valid bls key import",
-			args: []string{"--key-type", "bls", "test", "20030410000080487431431153104351076122223465926814327806350179952713280726583"},
-			err:  nil,
+			args: []string{
+				"--key-type",
+				"bls",
+				"test",
+				"20030410000080487431431153104351076122223465926814327806350179952713280726583",
+			},
+			err: nil,
 			promptMock: func(p *prompterMock.MockPrompter) {
 				p.EXPECT().InputHiddenString(gomock.Any(), gomock.Any(), gomock.Any()).Return("", nil)
 			},
@@ -122,8 +142,13 @@ func TestImportCmd(t *testing.T) {
 		},
 		{
 			name: "valid bls key import for hex key",
-			args: []string{"--key-type", "bls", "test", "0xfe198b992d97545b3b0174f026f781039f167c13f6d0ce9f511d0d2e973b7f02"},
-			err:  nil,
+			args: []string{
+				"--key-type",
+				"bls",
+				"test",
+				"0xfe198b992d97545b3b0174f026f781039f167c13f6d0ce9f511d0d2e973b7f02",
+			},
+			err: nil,
 			promptMock: func(p *prompterMock.MockPrompter) {
 				p.EXPECT().InputHiddenString(gomock.Any(), gomock.Any(), gomock.Any()).Return("", nil)
 			},

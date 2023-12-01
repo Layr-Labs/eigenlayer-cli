@@ -4,11 +4,12 @@ import (
 	"crypto/ecdsa"
 	"encoding/json"
 	"fmt"
-	"github.com/ethereum/go-ethereum/accounts/keystore"
-	"github.com/urfave/cli/v2"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/ethereum/go-ethereum/accounts/keystore"
+	"github.com/urfave/cli/v2"
 )
 
 func ListCmd() *cli.Command {
