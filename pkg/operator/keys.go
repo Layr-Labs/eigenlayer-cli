@@ -12,6 +12,7 @@ func KeysCmd(p utils.Prompter) *cli.Command {
 		Usage: "Manage the operator's keys",
 		Subcommands: []*cli.Command{
 			keys.CreateCmd(p),
+			keys.ListCmd(),
 		},
 	}
 
