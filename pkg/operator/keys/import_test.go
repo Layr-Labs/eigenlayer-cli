@@ -5,11 +5,12 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"github.com/urfave/cli/v2"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/urfave/cli/v2"
 
 	"github.com/Layr-Labs/eigensdk-go/crypto/bls"
 
@@ -69,7 +70,7 @@ func TestImportCmd(t *testing.T) {
 			err:  ErrPrivateKeyContainsWhitespaces,
 		},
 		{
-			name: "invalid keytype",
+			name: "invalid key type",
 			args: []string{"--key-type", "invalid", "hello", "privkey"},
 			err:  ErrInvalidKeyType,
 		},

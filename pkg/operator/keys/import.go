@@ -2,13 +2,14 @@ package keys
 
 import (
 	"fmt"
+	"math/big"
+	"regexp"
+	"strings"
+
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 	"github.com/Layr-Labs/eigensdk-go/crypto/bls"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/urfave/cli/v2"
-	"math/big"
-	"regexp"
-	"strings"
 )
 
 func ImportCmd(p utils.Prompter) *cli.Command {
