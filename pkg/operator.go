@@ -13,6 +13,7 @@ func OperatorCmd(p utils.Prompter) *cli.Command {
 		Subcommands: []*cli.Command{
 			operator.KeysCmd(p),
 			operator.ConfigCmd(p),
+			operator.RegisterCmd(p),
 		},
 	}
 
