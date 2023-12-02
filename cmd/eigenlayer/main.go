@@ -18,6 +18,7 @@ func main() {
 
 	// Initialize the dependencies
 	prompter := utils.NewPrompter()
+
 	app.Commands = append(app.Commands, pkg.OperatorCmd(prompter))
 
 	if err := app.Run(os.Args); err != nil {
