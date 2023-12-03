@@ -10,11 +10,21 @@ import (
 )
 
 func main() {
-	var app = cli.NewApp()
+	cli.AppHelpTemplate = fmt.Sprintf(`        
+     _______ _                   _                              
+    (_______|_)                 | |                             
+     _____   _  ____  ____ ____ | |      ____ _   _  ____  ____ 
+    |  ___) | |/ _  |/ _  )  _ \| |     / _  | | | |/ _  )/ ___)
+    | |_____| ( ( | ( (/ /| | | | |____( ( | | |_| ( (/ /| |    
+    |_______)_|\_|| |\____)_| |_|_______)_||_|\__  |\____)_|    
+              (_____|                        (____/             
+    %s`, cli.AppHelpTemplate)
+	app := cli.NewApp()
 
 	app.Name = "eigenlayer"
 	app.Usage = "EigenLayer CLI"
 	app.Version = "0.1.0"
+	app.Copyright = "(c) 2023 EigenLabs"
 
 	// Initialize the dependencies
 	prompter := utils.NewPrompter()
