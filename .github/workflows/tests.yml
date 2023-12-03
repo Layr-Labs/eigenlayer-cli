@@ -1,4 +1,4 @@
-name: unit-tests
+name: tests
 
 on:
   push:
@@ -8,12 +8,12 @@ on:
 
 jobs:
   Test:
-    name: Test
+    name: Unit Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v4
         with:
           go-version: '1.21'
-      - name: Test
+      - name: Unit Test
         run: make tests
