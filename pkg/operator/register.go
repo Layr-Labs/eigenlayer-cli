@@ -24,6 +24,13 @@ func RegisterCmd(p utils.Prompter) *cli.Command {
 		Name:      "register",
 		Usage:     "Register the operator and the BLS public key in the EigenLayer contracts",
 		UsageText: "register <configuration-file>",
+		Description: `
+		Register command expects a yaml config file as an argument
+		to successfully register an operator address to eigenlayer
+
+		This will register operator to DelegationManager and will register
+		the BLS public key on eigenlayer
+		`,
 		Action: func(cCtx *cli.Context) error {
 			args := cCtx.Args()
 			if args.Len() != 1 {
@@ -36,17 +43,29 @@ func RegisterCmd(p utils.Prompter) *cli.Command {
 			if err != nil {
 				return err
 			}
-			fmt.Printf("Operator configuration file read successfully %s\n", operatorCfg.Operator.Address)
-			fmt.Printf("validating operator config: %s\n", operatorCfg.Operator.Address)
+			fmt.Printf(
+				"Operator configuration file read successfully %s %s\n",
+				operatorCfg.Operator.Address,
+				utils.EmojiCheckMark,
+			)
+			fmt.Printf("validating operator config: %s %s\n", operatorCfg.Operator.Address, utils.EmojiInfo)
 
 			err = operatorCfg.Operator.Validate()
 			if err != nil {
 				return fmt.Errorf("%w: with error %s", ErrInvalidYamlFile, err)
 			}
 
-			fmt.Println("Operator file validated successfully")
-
 			signerType, err := validateSignerType(operatorCfg)
+			if err != nil {
+				return err
+			}
+
+			fmt.Printf(
+				"Operator configuration file validated successfully %s %s\n",
+				operatorCfg.Operator.Address,
+				utils.EmojiCheckMark,
+			)
+
 			ctx := context.Background()
 			logger, err := eigensdkLogger.NewZapLogger(eigensdkLogger.Development)
 			if err != nil {
@@ -109,7 +128,7 @@ func RegisterCmd(p utils.Prompter) *cli.Command {
 				return err
 			}
 
-			status, err := reader.IsOperatorRegistered(context.Background(), operatorCfg.Operator)
+			status, err := reader.IsOperatorRegistered(ctx, operatorCfg.Operator)
 			if err != nil {
 				return err
 			}
@@ -117,27 +136,31 @@ func RegisterCmd(p utils.Prompter) *cli.Command {
 			if !status {
 				receipt, err := elWriter.RegisterAsOperator(ctx, operatorCfg.Operator)
 				if err != nil {
+					logger.Infof("Error while registering operator %s", utils.EmojiCrossMark)
 					return err
 				}
 				logger.Infof(
-					"Operator registration transaction at: %s",
+					"Operator registration transaction at: %s %s",
 					getTransactionLink(receipt.TxHash.String(), &operatorCfg.ChainId),
+					utils.EmojiCheckMark,
 				)
 
 			} else {
-				logger.Info("Operator is already registered")
+				logger.Infof("Operator is already registered on EigenLayer %s\n", utils.EmojiCheckMark)
 			}
 
 			receipt, err := elWriter.RegisterBLSPublicKey(ctx, keyPair, operatorCfg.Operator)
 			if err != nil {
+				logger.Infof("Error while registering BLS public key %s", utils.EmojiCrossMark)
 				return err
 			}
 			logger.Infof(
-				"Operator bls key added transaction at: %s",
+				"Operator bls key added transaction at: %s %s",
 				getTransactionLink(receipt.TxHash.String(), &operatorCfg.ChainId),
+				utils.EmojiCheckMark,
 			)
 
-			logger.Info("Operator is registered and bls key added successfully")
+			logger.Infof("Operator is registered and bls key added successfully %s\n", utils.EmojiCheckMark)
 			return nil
 		},
 	}
