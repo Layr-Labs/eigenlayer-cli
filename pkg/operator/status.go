@@ -122,9 +122,9 @@ func printOperatorDetails(operator eigensdkTypes.Operator) {
 	fmt.Println()
 	fmt.Println("--------------------------- Operator Details ---------------------------")
 	fmt.Printf("Address: %s\n", operator.Address)
-	fmt.Printf("EarningsReceiverAddress: %s\n", operator.EarningsReceiverAddress)
-	fmt.Printf("DelegationApproverAddress: %s\n", operator.DelegationApproverAddress)
-	fmt.Printf("StakerOptOutWindowBlocks: %d\n", operator.StakerOptOutWindowBlocks)
+	fmt.Printf("Earnings Receiver Address: %s\n", operator.EarningsReceiverAddress)
+	fmt.Printf("Delegation Approver Address: %s\n", operator.DelegationApproverAddress)
+	fmt.Printf("Staker Opt Out Window Blocks: %d\n", operator.StakerOptOutWindowBlocks)
 	fmt.Println("------------------------------------------------------------------------")
 	fmt.Println()
 }
