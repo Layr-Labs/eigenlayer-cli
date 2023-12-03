@@ -66,7 +66,7 @@ This command will import keys in $HOME/.eigenlayer/operator_keys/ location
 			case KeyTypeBLS:
 				privateKeyBigInt := new(big.Int)
 				_, ok := privateKeyBigInt.SetString(privateKey, 10)
-				blsKeyPair := new(bls.KeyPair)
+				var blsKeyPair *bls.KeyPair
 				var err error
 				if ok {
 					fmt.Println("Importing from large integer")

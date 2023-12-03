@@ -1,4 +1,4 @@
-.PHONY: help build tests mocks
+.PHONY: help build tests mocks fmt format-lines lint install build-linux-amd64 build-linux-arm64 build-linux
 
 include .env
 
@@ -27,3 +27,19 @@ fmt: ## formats all go files
 format-lines: ## formats all go files with golines
 	go install github.com/segmentio/golines@latest
 	golines -w -m 120 --ignore-generated --shorten-comments --ignored-dirs=${GO_LINES_IGNORED_DIRS} ${GO_FOLDERS}
+
+lint: ## runs all linters
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+	golangci-lint run ./...
+
+install: build ## compile the binary and copy it to PATH
+	@sudo cp bin/$(APP_NAME) /usr/local/bin
+
+build-linux-amd64: ## Compile the binary for amd64
+	@env GOOS=linux GOARCH=amd64 go build -o bin/$(APP_NAME)-linux-amd64 cmd/$(APP_NAME)/main.go
+
+build-linux-arm64: ## Compile the binary for arm64
+	@env GOOS=linux GOARCH=arm64 go build -o bin/$(APP_NAME)-linux-arm64 cmd/$(APP_NAME)/main.go
+
+build-linux: ## Compile the binary for linux
+	@env GOOS=linux go build -o bin/$(APP_NAME) cmd/$(APP_NAME)/main.go
