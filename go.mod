@@ -7,7 +7,7 @@ require (
 	github.com/Layr-Labs/eigensdk-go v0.0.8
 	github.com/ethereum/go-ethereum v1.13.5
 	github.com/stretchr/testify v1.8.4
-	github.com/urfave/cli/v2 v2.25.7
+	github.com/urfave/cli/v2 v2.26.0
 	github.com/wagslane/go-password-validator v0.3.0
 	go.uber.org/mock v0.3.0
 	gopkg.in/yaml.v3 v3.0.1
