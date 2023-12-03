@@ -14,6 +14,7 @@ func OperatorCmd(p utils.Prompter) *cli.Command {
 			operator.KeysCmd(p),
 			operator.ConfigCmd(p),
 			operator.RegisterCmd(p),
+			operator.StatusCmd(p),
 		},
 	}
 
