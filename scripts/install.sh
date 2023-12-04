@@ -403,7 +403,7 @@ completions() {
       touch $BASH_COMPLETION_MAIN
       sed_in_place "/.*# eigenlayer completion/d" $BASH_COMPLETION_MAIN
       echo "source $BASH_COMPLETION_SCRIPT_PATH # eigenlayer completion" >> $BASH_COMPLETION_MAIN
-      if [ $(uname) = Darwin ]
+      if [ "$(uname)" = Darwin ]
       then
         HAS_BREW=false
         which brew >/dev/null 2>&1 && HAS_BREW=true
