@@ -6,3 +6,6 @@ metadata.json
 operator-config.yaml
 operator.yaml
 config/*
+
+# build
+dist/
