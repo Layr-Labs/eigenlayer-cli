@@ -1,0 +1,35 @@
+# ref. https://goreleaser.com/customization/build/
+builds:
+  - id: eigenlayer-cli
+    main: ./cmd/eigenlayer/main.go
+    binary: eigenlayer
+    flags:
+      - -v
+    # windows is ignored by default, as the `goos` field by default only
+    # contains linux and darwin
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    overrides:
+      - goos: linux
+        goarch: arm64
+        env:
+          - CC=aarch64-linux-gnu-gcc
+      - goos: darwin
+        goarch: arm64
+        env:
+          - CC=oa64-clang
+      - goos: darwin
+        goarch: amd64
+        goamd64: v1
+        env:
+          - CC=o64-clang
+release:
+  # Repo in which the release will be created.
+  # Default is extracted from the origin remote URL or empty if its private hosted.
+  github:
+    owner: layr-labs
+    name: eigenlayer-cli
