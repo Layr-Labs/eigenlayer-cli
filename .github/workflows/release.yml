@@ -1,11 +1,6 @@
 name: Release (with lint and test)
 
 on:
-  workflow_dispatch:
-    inputs:
-      tag:
-        description: The version number (e.g. v1.2.3) of the release you want to push
-        required: true
   push:
     tags:
       - "*"
