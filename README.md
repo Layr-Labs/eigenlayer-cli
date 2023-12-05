@@ -53,7 +53,7 @@ First, install the Go programming language following the [official instructions]
 
 This command will install the `eigenlayer` executable along with the library and its dependencies in your system:
 
-> As the repository is private, you need to set the `GOPRIVATE` variable properly by running the following command: `export GOPRIVATE=github.com/NethermindEth/eigenlayer,$GOPRIVATE`. Git will automatically resolve the private access if your Git user has all the required permissions over the repository.
+> As the repository is private, you need to set the `GOPRIVATE` variable properly by running the following command: `export GOPRIVATE=github.com/Layr-Labs/eigenlayer-cli,$GOPRIVATE`. Git will automatically resolve the private access if your Git user has all the required permissions over the repository.
 
 ```bash
 go install github.com/Layr-Labs/eigenlayer/cmd/eigenlayer@latest
