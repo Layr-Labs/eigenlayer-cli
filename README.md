@@ -1,3 +1,7 @@
+![Tests](https://github.com/Layr-Labs/eigenlayer-cli/actions/workflows/tests.yml/badge.svg)
+![Linter](https://github.com/Layr-Labs/eigenlayer-cli/actions/workflows/golangci-lint.yml/badge.svg)
+![Build](https://github.com/Layr-Labs/eigenlayer-cli/actions/workflows/build.yml/badge.svg)
+
 # EigenLayer CLI
 
 EigenLayer CLI is used to manage core operator functionalities like local key management, operator registration and updates.
