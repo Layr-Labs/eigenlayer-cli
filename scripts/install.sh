@@ -1,7 +1,9 @@
 #!/bin/sh
-set -e
-
 # Scripts inspired from https://github.com/ava-labs/avalanche-cli
+# This script has not been tested yet since this is a private repo
+# TODO(madhur): Test this script once this is a public repo
+
+set -e
 
 usage() {
   this=$1
