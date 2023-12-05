@@ -33,3 +33,5 @@ release:
   github:
     owner: layr-labs
     name: eigenlayer-cli
+
+  draft: true

@@ -6,4 +6,4 @@ if ! [[ "$0" =~ scripts/build.sh ]]; then
   exit 1
 fi
 
-go build -v -o bin/eigenlayer
+go build -v -o bin/eigenlayer cmd/eigenlayer/main.go

@@ -1,11 +1,6 @@
 name: Release (with lint and test)
 
 on:
-  workflow_dispatch:
-    inputs:
-      tag:
-        description: The version number (e.g. v1.2.3) of the release you want to push
-        required: true
   push:
     tags:
       - "*"
@@ -41,7 +36,7 @@ jobs:
       - run: make tests
   release:
     needs: [lint, test]
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-20.04
     steps:
       - name: Git checkout
         uses: actions/checkout@v3
@@ -77,7 +72,7 @@ jobs:
         with:
           distribution: goreleaser
           version: latest
-          args: release --rm-dist
+          args: release --clean
           workdir: ./eigenlayer-cli/
         env:
           #https://docs.github.com/en/actions/security-guides/automatic-token-authentication#about-the-github_token-secret
