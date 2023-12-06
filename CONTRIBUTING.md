@@ -3,17 +3,19 @@
 
 ### Code of Conduct
 
-Have you read the [code of conduct](https://github.com/Layr-Labs/eigensdk-go/blob/main/CODE_OF_CONDUCT.md)?
+Have you read the [code of conduct](https://github.com/Layr-Labs/eigenlayer-cli/blob/master/CODE_OF_CONDUCT.md)?
 
 ## Bugs and Feature Request
 
-Before you make your changes, check to see if an [issue](https://github.com/Layr-Labs/eigensdk-go/issues) exists already for the change you want to make.
+Before you make your changes, check to see if an [issue](https://github.com/Layr-Labs/eigenlayer-cli/issues) exists already for the change you want to make.
 
 ### Don't see your issue? Open one
 
-If you spot something new, open an issue using a [template](https://github.com/Layr-Labs/eigensdk-go/issues/new/choose). We'll use the issue to have a conversation about the problem you want to fix.
+If you spot something new, open an issue using a [template](https://github.com/Layr-Labs/eigenlayer-cli/issues/new/choose). We'll use the issue to have a conversation about the problem you want to fix.
 
 ### Open a Pull Request
+
+Before making a pull request, please fork the repository and create a new branch.
 
 When you're done making changes and you'd like to propose them for review, use the pull request template to open your PR (pull request).
 
