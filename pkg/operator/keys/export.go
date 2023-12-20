@@ -86,32 +86,23 @@ But if you want it to export from a different location, use --key-path flag`,
 			fmt.Println("exporting key from: ", filePath)
 			switch keyType {
 			case KeyTypeECDSA:
-				return exportEcdsaKey(filePath, password)
+				key, err := ecdsa.ReadKey(filePath, password)
+				if err != nil {
+					return err
+				}
+				fmt.Println("ECDSA Private Key: ", hex.EncodeToString(key.D.Bytes()))
 			case KeyTypeBLS:
-				return exportBlsKey(filePath, password)
+				key, err := bls.ReadPrivateKeyFromFile(filePath, password)
+				if err != nil {
+					return err
+				}
+				fmt.Println("BLS Private Key: ", key.PrivKey.String())
 			default:
 				return ErrInvalidKeyType
 			}
+			return nil
 		},
 	}
 
 	return exportCmd
-}
-
-func exportEcdsaKey(filePath string, password string) error {
-	key, err := ecdsa.ReadKey(filePath, password)
-	if err != nil {
-		return err
-	}
-	fmt.Println("ECDSA Private Key: ", hex.EncodeToString(key.D.Bytes()))
-	return nil
-}
-
-func exportBlsKey(filePath string, password string) error {
-	key, err := bls.ReadPrivateKeyFromFile(filePath, password)
-	if err != nil {
-		return err
-	}
-	fmt.Println("BLS Private Key: ", key.PrivKey.String())
-	return nil
 }
