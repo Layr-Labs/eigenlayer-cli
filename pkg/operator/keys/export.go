@@ -80,6 +80,9 @@ But if you want it to export from a different location, use --key-path flag`,
 			password, err := p.InputHiddenString("Enter password to decrypt the key", "", func(s string) error {
 				return nil
 			})
+			if err != nil {
+				return err
+			}
 			fmt.Println("exporting key from: ", filePath)
 			switch keyType {
 			case KeyTypeECDSA:
