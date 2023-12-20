@@ -14,6 +14,7 @@ func KeysCmd(p utils.Prompter) *cli.Command {
 			keys.CreateCmd(p),
 			keys.ListCmd(),
 			keys.ImportCmd(p),
+			keys.ExportCmd(p),
 		},
 	}
 
