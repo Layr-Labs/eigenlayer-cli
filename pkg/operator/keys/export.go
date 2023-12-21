@@ -58,6 +58,9 @@ But if you want it to export from a different location, use --key-path flag`,
 			}
 
 			filePath, err := getKeyPath(keyPath, keyName, keyType)
+			if err != nil {
+				return err
+			}
 
 			confirm, err := p.Confirm("This will show your private key. Are you sure you want to export?")
 			if err != nil {
