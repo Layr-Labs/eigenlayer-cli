@@ -4,11 +4,13 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/Layr-Labs/eigensdk-go/chainio/txmgr"
+	"github.com/Layr-Labs/eigensdk-go/signerv2"
+
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/types"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
-	eigenChainio "github.com/Layr-Labs/eigensdk-go/chainio/clients"
+	elContracts "github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/eth"
-	elContracts "github.com/Layr-Labs/eigensdk-go/chainio/elcontracts"
 	eigensdkLogger "github.com/Layr-Labs/eigensdk-go/logging"
 	"github.com/Layr-Labs/eigensdk-go/metrics"
 	eigensdkUtils "github.com/Layr-Labs/eigensdk-go/utils"
@@ -47,17 +49,8 @@ func UpdateCmd(p utils.Prompter) *cli.Command {
 				operatorCfg.Operator.Address,
 				utils.EmojiCheckMark,
 			)
-			signerType, err := validateSignerType(operatorCfg)
-			if err != nil {
-				return err
-			}
 
 			logger, err := eigensdkLogger.NewZapLogger(eigensdkLogger.Development)
-			if err != nil {
-				return err
-			}
-
-			localSigner, err := getSigner(p, signerType, operatorCfg)
 			if err != nil {
 				return err
 			}
@@ -67,29 +60,40 @@ func UpdateCmd(p utils.Prompter) *cli.Command {
 				return err
 			}
 
-			elContractsClient, err := eigenChainio.NewELContractsChainClient(
+			ecdsaPassword, err := p.InputHiddenString("Enter password to decrypt the ecdsa private key:", "",
+				func(password string) error {
+					return nil
+				},
+			)
+			if err != nil {
+				fmt.Println("Error while reading ecdsa key password")
+				return err
+			}
+
+			signerCfg := signerv2.Config{
+				KeystorePath: operatorCfg.PrivateKeyStorePath,
+				Password:     ecdsaPassword,
+			}
+			sgn, sender, err := signerv2.SignerFromConfig(signerCfg, &operatorCfg.ChainId)
+			if err != nil {
+				return err
+			}
+			txMgr := txmgr.NewSimpleTxManager(ethClient, logger, sgn, sender)
+
+			noopMetrics := metrics.NewNoopMetrics()
+
+			elWriter, err := elContracts.BuildELChainWriter(
 				common.HexToAddress(operatorCfg.ELSlasherAddress),
 				common.HexToAddress(operatorCfg.BlsPublicKeyCompendiumAddress),
 				ethClient,
-				ethClient,
-				logger,
-			)
-			if err != nil {
-				return err
-			}
-
-			noopMetrics := metrics.NewNoopMetrics()
-			elWriter := elContracts.NewELChainWriter(
-				elContractsClient,
-				ethClient,
-				localSigner,
 				logger,
 				noopMetrics,
-			)
+				txMgr)
 
 			if err != nil {
 				return err
 			}
+
 			receipt, err := elWriter.UpdateOperatorDetails(context.Background(), operatorCfg.Operator)
 			if err != nil {
 				logger.Errorf("Error while updating operator details: %s", utils.EmojiCrossMark)

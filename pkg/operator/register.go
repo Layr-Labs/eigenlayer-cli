@@ -5,11 +5,14 @@ import (
 	"fmt"
 	"math/big"
 
+	"github.com/Layr-Labs/eigensdk-go/chainio/txmgr"
+	"github.com/Layr-Labs/eigensdk-go/signerv2"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/types"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
-	eigenChainio "github.com/Layr-Labs/eigensdk-go/chainio/clients"
+	elContracts "github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/eth"
-	elContracts "github.com/Layr-Labs/eigensdk-go/chainio/elcontracts"
 	"github.com/Layr-Labs/eigensdk-go/crypto/bls"
 	eigensdkLogger "github.com/Layr-Labs/eigensdk-go/logging"
 	"github.com/Layr-Labs/eigensdk-go/metrics"
@@ -48,16 +51,11 @@ func RegisterCmd(p utils.Prompter) *cli.Command {
 				operatorCfg.Operator.Address,
 				utils.EmojiCheckMark,
 			)
-			fmt.Printf("validating operator config: %s %s\n", operatorCfg.Operator.Address, utils.EmojiInfo)
+			fmt.Printf("validating operator config: %s %s\n", operatorCfg.Operator.Address, utils.EmojiWait)
 
 			err = operatorCfg.Operator.Validate()
 			if err != nil {
 				return fmt.Errorf("%w: with error %s", ErrInvalidYamlFile, err)
-			}
-
-			signerType, err := validateSignerType(operatorCfg)
-			if err != nil {
-				return err
 			}
 
 			fmt.Printf(
@@ -68,11 +66,6 @@ func RegisterCmd(p utils.Prompter) *cli.Command {
 
 			ctx := context.Background()
 			logger, err := eigensdkLogger.NewZapLogger(eigensdkLogger.Development)
-			if err != nil {
-				return err
-			}
-
-			localSigner, err := getSigner(p, signerType, operatorCfg)
 			if err != nil {
 				return err
 			}
@@ -97,38 +90,51 @@ func RegisterCmd(p utils.Prompter) *cli.Command {
 				return err
 			}
 
-			elContractsClient, err := eigenChainio.NewELContractsChainClient(
+			ecdsaPassword, err := p.InputHiddenString("Enter password to decrypt the ecdsa private key:", "",
+				func(password string) error {
+					return nil
+				},
+			)
+			if err != nil {
+				fmt.Println("Error while reading ecdsa key password")
+				return err
+			}
+
+			signerCfg := signerv2.Config{
+				KeystorePath: operatorCfg.PrivateKeyStorePath,
+				Password:     ecdsaPassword,
+			}
+			sgn, sender, err := signerv2.SignerFromConfig(signerCfg, &operatorCfg.ChainId)
+			if err != nil {
+				return err
+			}
+			txMgr := txmgr.NewSimpleTxManager(ethClient, logger, sgn, sender)
+
+			noopMetrics := metrics.NewNoopMetrics()
+
+			elWriter, err := elContracts.BuildELChainWriter(
 				common.HexToAddress(operatorCfg.ELSlasherAddress),
 				common.HexToAddress(operatorCfg.BlsPublicKeyCompendiumAddress),
 				ethClient,
-				ethClient,
-				logger)
-			if err != nil {
-				return err
-			}
-
-			noopMetrics := metrics.NewNoopMetrics()
-			elWriter := elContracts.NewELChainWriter(
-				elContractsClient,
-				ethClient,
-				localSigner,
 				logger,
 				noopMetrics,
-			)
+				txMgr)
+
 			if err != nil {
 				return err
 			}
 
-			reader, err := elContracts.NewELChainReader(
-				elContractsClient,
-				logger,
+			reader, err := elContracts.BuildELChainReader(
+				common.HexToAddress(operatorCfg.ELSlasherAddress),
+				common.HexToAddress(operatorCfg.BlsPublicKeyCompendiumAddress),
 				ethClient,
+				logger,
 			)
 			if err != nil {
 				return err
 			}
 
-			status, err := reader.IsOperatorRegistered(ctx, operatorCfg.Operator)
+			status, err := reader.IsOperatorRegistered(&bind.CallOpts{Context: ctx}, operatorCfg.Operator)
 			if err != nil {
 				return err
 			}
