@@ -16,7 +16,6 @@ import (
 	"github.com/Layr-Labs/eigensdk-go/crypto/bls"
 	eigensdkLogger "github.com/Layr-Labs/eigensdk-go/logging"
 	"github.com/Layr-Labs/eigensdk-go/metrics"
-	"github.com/Layr-Labs/eigensdk-go/signer"
 	eigensdkUtils "github.com/Layr-Labs/eigensdk-go/utils"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/urfave/cli/v2"
@@ -172,48 +171,6 @@ func RegisterCmd(p utils.Prompter) *cli.Command {
 	}
 
 	return registerCmd
-}
-
-func validateSignerType(operatorCfg types.OperatorConfig) (types.SignerType, error) {
-	signerType := string(operatorCfg.SignerType)
-
-	switch signerType {
-	case string(types.PrivateKeySigner):
-		return types.PrivateKeySigner, nil
-	case string(types.LocalKeystoreSigner):
-		return types.LocalKeystoreSigner, nil
-	default:
-		return "", fmt.Errorf("invalid signer type %s", signerType)
-	}
-}
-
-func getSigner(p utils.Prompter, signerType types.SignerType, operatorCfg types.OperatorConfig) (signer.Signer, error) {
-	switch signerType {
-	case types.LocalKeystoreSigner:
-		fmt.Println("Using local keystore signer")
-		ecdsaPassword, err := p.InputHiddenString("Enter password to decrypt the ecdsa private key:", "",
-			func(password string) error {
-				return nil
-			},
-		)
-		if err != nil {
-			fmt.Println("Error while reading ecdsa key password")
-			return nil, err
-		}
-		// TODO: Get chain ID from config
-		localSigner, err := signer.NewPrivateKeyFromKeystoreSigner(
-			operatorCfg.PrivateKeyStorePath,
-			ecdsaPassword,
-			&operatorCfg.ChainId,
-		)
-		if err != nil {
-			return nil, err
-		}
-		return localSigner, nil
-
-	default:
-		return nil, fmt.Errorf("invalid signer type %s", signerType)
-	}
 }
 
 func getTransactionLink(txHash string, chainId *big.Int) string {
