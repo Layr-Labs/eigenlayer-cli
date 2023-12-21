@@ -17,4 +17,11 @@ var (
 		Usage:   "Use this flag to skip password validation",
 		EnvVars: []string{"INSECURE"},
 	}
+
+	KeyPathFlag = cli.StringFlag{
+		Name:    "key-path",
+		Aliases: []string{"p"},
+		Usage:   "Use this flag to specify the path of the key",
+		EnvVars: []string{"KEY_PATH"},
+	}
 )
