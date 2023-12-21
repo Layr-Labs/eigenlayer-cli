@@ -41,33 +41,23 @@ But if you want it to export from a different location, use --key-path flag`,
 			&KeyPathFlag,
 		},
 		Action: func(c *cli.Context) error {
-			homePath, err := os.UserHomeDir()
-			if err != nil {
+			keyType := c.String(KeyTypeFlag.Name)
+
+			keyName := c.Args().Get(0)
+			if err := validateKeyName(keyName); err != nil {
 				return err
 			}
-			keyType := c.String(KeyTypeFlag.Name)
-			var filePath string
-			if c.Args().Len() > 0 {
-				keyName := c.Args().Get(0)
-				if err := validateKeyName(keyName); err != nil {
-					return err
-				}
-				switch keyType {
-				case KeyTypeECDSA:
-					filePath = filepath.Join(homePath, OperatorKeystoreSubFolder, keyName+".ecdsa.key.json")
-				case KeyTypeBLS:
-					filePath = filepath.Join(homePath, OperatorKeystoreSubFolder, keyName+".bls.key.json")
-				default:
-					return ErrInvalidKeyType
-				}
 
-			} else {
-				keyPath := c.String(KeyPathFlag.Name)
-				if keyPath == "" {
-					return errors.New("keyname or key-path flag is required")
-				}
-				filePath = filepath.Clean(keyPath)
+			keyPath := c.String(KeyPathFlag.Name)
+			if len(keyPath) == 0 && len(keyName) == 0 {
+				return errors.New("one of keyname or --key-path is required")
 			}
+
+			if len(keyPath) > 0 && len(keyName) > 0 {
+				return errors.New("keyname and --key-path both are provided. Please provide only one")
+			}
+
+			filePath, err := getKeyPath(keyPath, keyName, keyType)
 
 			confirm, err := p.Confirm("This will show your private key. Are you sure you want to export?")
 			if err != nil {
@@ -84,25 +74,58 @@ But if you want it to export from a different location, use --key-path flag`,
 				return err
 			}
 			fmt.Println("exporting key from: ", filePath)
-			switch keyType {
-			case KeyTypeECDSA:
-				key, err := ecdsa.ReadKey(filePath, password)
-				if err != nil {
-					return err
-				}
-				fmt.Println("ECDSA Private Key: ", hex.EncodeToString(key.D.Bytes()))
-			case KeyTypeBLS:
-				key, err := bls.ReadPrivateKeyFromFile(filePath, password)
-				if err != nil {
-					return err
-				}
-				fmt.Println("BLS Private Key: ", key.PrivKey.String())
-			default:
-				return ErrInvalidKeyType
+
+			privateKey, err := getPrivateKey(keyType, filePath, password)
+			if err != nil {
+				return err
 			}
+			fmt.Println("Private key: ", privateKey)
 			return nil
 		},
 	}
 
 	return exportCmd
+}
+
+func getPrivateKey(keyType string, filePath string, password string) (string, error) {
+	switch keyType {
+	case KeyTypeECDSA:
+		key, err := ecdsa.ReadKey(filePath, password)
+		if err != nil {
+			return "", err
+		}
+		return hex.EncodeToString(key.D.Bytes()), nil
+	case KeyTypeBLS:
+		key, err := bls.ReadPrivateKeyFromFile(filePath, password)
+		if err != nil {
+			return "", err
+		}
+		return key.PrivKey.String(), nil
+	default:
+		return "", ErrInvalidKeyType
+	}
+}
+
+func getKeyPath(keyPath string, keyName string, keyType string) (string, error) {
+	homePath, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+
+	var filePath string
+	if len(keyName) > 0 {
+		switch keyType {
+		case KeyTypeECDSA:
+			filePath = filepath.Join(homePath, OperatorKeystoreSubFolder, keyName+".ecdsa.key.json")
+		case KeyTypeBLS:
+			filePath = filepath.Join(homePath, OperatorKeystoreSubFolder, keyName+".bls.key.json")
+		default:
+			return "", ErrInvalidKeyType
+		}
+
+	} else {
+		filePath = filepath.Clean(keyPath)
+	}
+
+	return filePath, nil
 }
