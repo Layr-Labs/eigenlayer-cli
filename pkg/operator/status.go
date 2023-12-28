@@ -4,11 +4,12 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/types"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
-	eigenChainio "github.com/Layr-Labs/eigensdk-go/chainio/clients"
+	elContracts "github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/eth"
-	elContracts "github.com/Layr-Labs/eigensdk-go/chainio/elcontracts"
 	eigensdkLogger "github.com/Layr-Labs/eigensdk-go/logging"
 	eigensdkTypes "github.com/Layr-Labs/eigensdk-go/types"
 	eigensdkUtils "github.com/Layr-Labs/eigensdk-go/utils"
@@ -43,7 +44,7 @@ func StatusCmd(p utils.Prompter) *cli.Command {
 				operatorCfg.Operator.Address,
 				utils.EmojiCheckMark,
 			)
-			fmt.Printf("validating operator config: %s %s\n", operatorCfg.Operator.Address, utils.EmojiInfo)
+			fmt.Printf("validating operator config: %s %s\n", operatorCfg.Operator.Address, utils.EmojiWait)
 
 			err = operatorCfg.Operator.Validate()
 			if err != nil {
@@ -66,38 +67,31 @@ func StatusCmd(p utils.Prompter) *cli.Command {
 				return err
 			}
 
-			elContractsClient, err := eigenChainio.NewELContractsChainClient(
+			reader, err := elContracts.BuildELChainReader(
 				common.HexToAddress(operatorCfg.ELSlasherAddress),
 				common.HexToAddress(operatorCfg.BlsPublicKeyCompendiumAddress),
 				ethClient,
-				ethClient,
-				logger)
-			if err != nil {
-				return err
-			}
-
-			reader, err := elContracts.NewELChainReader(
-				elContractsClient,
 				logger,
-				ethClient,
 			)
 			if err != nil {
 				return err
 			}
 
-			status, err := reader.IsOperatorRegistered(context.Background(), operatorCfg.Operator)
+			callOpts := &bind.CallOpts{Context: context.Background()}
+
+			status, err := reader.IsOperatorRegistered(callOpts, operatorCfg.Operator)
 			if err != nil {
 				return err
 			}
 
 			if status {
 				fmt.Printf("Operator is registered on EigenLayer %s\n", utils.EmojiCheckMark)
-				operatorDetails, err := reader.GetOperatorDetails(context.Background(), operatorCfg.Operator)
+				operatorDetails, err := reader.GetOperatorDetails(callOpts, operatorCfg.Operator)
 				if err != nil {
 					return err
 				}
 				printOperatorDetails(operatorDetails)
-				hash, err := reader.GetOperatorPubkeyHash(context.Background(), operatorCfg.Operator)
+				hash, err := reader.GetOperatorPubkeyHash(callOpts, operatorCfg.Operator)
 				if err != nil {
 					return err
 				}
