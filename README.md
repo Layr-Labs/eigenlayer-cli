@@ -17,6 +17,7 @@ EigenLayer CLI is used to manage core operator functionalities like local key ma
     * [Create keys](#create-keys)
     * [Import keys](#import-keys)
     * [List keys](#list-keys)
+    * [Export keys](#export-keys)
   * [Operator Registration](#operator-registration)
     * [Sample config creation](#sample-config-creation)
     * [Registration](#registration)
