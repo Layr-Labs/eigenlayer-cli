@@ -79,7 +79,7 @@ export PATH=$GOBIN:$PATH
 With this method, you generate the binary manually (need Go installed), downloading and compiling the source code:
 
 ```bash
-git clone https://github.com/Layr-Labs/eigenlayer-cli.git
+git clone https://github.com/Layr-Labs/eigenlayer-cli.git && mv eigenlayer-cli eigenlayer
 cd eigenlayer
 mkdir -p build
 go build -o build/eigenlayer cmd/eigenlayer/main.go
@@ -88,7 +88,7 @@ go build -o build/eigenlayer cmd/eigenlayer/main.go
 or if you have `make` installed:
 
 ```bash
-git clone https://github.com/Layr-Labs/eigenlayer-cli.git
+git clone https://github.com/Layr-Labs/eigenlayer-cli.git && mv eigenlayer-cli eigenlayer
 cd eigenlayer
 make build
 ```
