@@ -17,6 +17,7 @@ EigenLayer CLI is used to manage core operator functionalities like local key ma
     * [Create keys](#create-keys)
     * [Import keys](#import-keys)
     * [List keys](#list-keys)
+    * [Export keys](#export-keys)
   * [Operator Registration](#operator-registration)
     * [Sample config creation](#sample-config-creation)
     * [Registration](#registration)
@@ -189,6 +190,20 @@ eigenlayer operator keys list
 
 It will show all the keys created with this command with the public key
 
+### Export keys
+If you want to see the private key of the existing keys, you can use the below command.
+
+```bash
+eigenlayer operator keys export --key-type ecdsa [keyname]
+```
+This will also prompt for the password used to encrypt the key.
+
+If your keys is not in the default location (`~/.eigenlayer/operator_keys`), you can give the path to the key file using `--key-path` flag. 
+You don't need to give the key name in that case.
+
+```bash
+eigenlayer operator keys export --key-type ecdsa --key-path [path]
+```
 ## Operator Registration
 ### Sample config creation
 
