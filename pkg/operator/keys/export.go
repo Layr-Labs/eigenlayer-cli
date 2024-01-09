@@ -44,9 +44,6 @@ But if you want it to export from a different location, use --key-path flag`,
 			keyType := c.String(KeyTypeFlag.Name)
 
 			keyName := c.Args().Get(0)
-			if err := validateKeyName(keyName); err != nil {
-				return err
-			}
 
 			keyPath := c.String(KeyPathFlag.Name)
 			if len(keyPath) == 0 && len(keyName) == 0 {
