@@ -33,7 +33,7 @@ EigenLayer CLI is used to manage core operator functionalities like local key ma
 
 
 ## Install `eigenlayer` CLI using a binary
-To download a binary for latest release, run:
+To download a binary for the latest release, run:
 ```bash
 curl -sSfL https://raw.githubusercontent.com/layr-labs/eigenlayer-cli/master/scripts/install.sh | sh -s
 ```
@@ -44,7 +44,7 @@ To add the binary to your path, run:
 export PATH=$PATH:~/bin
 ```
 
-### Installing in custom location
+### Installing in a custom location
 To download the binary in a custom location, run:
 ```bash
 curl -sSfL https://raw.githubusercontent.com/layr-labs/eigenlayer-cli/master/scripts/install.sh | sh -s -- -b <custom_location>
@@ -198,7 +198,7 @@ eigenlayer operator keys export --key-type ecdsa [keyname]
 ```
 This will also prompt for the password used to encrypt the key.
 
-If your keys is not in the default location (`~/.eigenlayer/operator_keys`), you can give the path to the key file using `--key-path` flag. 
+If your keys are not in the default location (`~/.eigenlayer/operator_keys`), you can give the path to the key file using `--key-path` flag. 
 You don't need to give the key name in that case.
 
 ```bash
@@ -213,14 +213,14 @@ You can create the config files needed for operator registration using the below
 eigenlayer operator config create
 ```
 
-It will create two file: `operator.yaml` and `metadata.json`
-After filling the details in `metadata.json`, please upload this into a publicly accessible location and fill that url in `operator.yaml`. 
-A valid metadata url is required for successful registration. 
+It will create two files: `operator.yaml` and `metadata.json`
+After filling in the details in `metadata.json`, please upload this into a publicly accessible location and fill that URL in `operator.yaml`. 
+A valid metadata URL is required for successful registration. 
 A sample yaml [operator.yaml](pkg/operator/config/operator-config-example.yaml) is provided for reference.
 
-A public metadata url is required to register the operator.
-After creating and filling the [metadata](pkg/operator/config/metadata-example.json) file, you can it to a publicly accessible location and give the url in the config file.
-You are also required to upload the image of the operator to a publicly accessible location and give the url in the metadata file. We only support `.png` images for now.
+A public metadata URL is required to register the operator.
+After creating and filling the [metadata](pkg/operator/config/metadata-example.json) file, you can it to a publicly accessible location and give the URL in the config file.
+You are also required to upload the image of the operator to a publicly accessible location and give the URL in the metadata file. We only support `.png` images for now.
 
 
 ### Registration
@@ -233,7 +233,7 @@ You can register your operator using the command below.
 eigenlayer operator register operator.yaml
 ```
 
-Make sure that if you use `local_keystore` as signer, you give the path to the keys created in above section.
+Make sure that if you use `local_keystore` as the signer, you give the path to the keys created in the above section.
 
 After you complete the registration, you can check the registration status of your operator using
 
