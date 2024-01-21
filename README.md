@@ -18,8 +18,10 @@ EigenLayer CLI is used to manage core operator functionalities like local key ma
     * [Import keys](#import-keys)
     * [List keys](#list-keys)
     * [Export keys](#export-keys)
+  * [Fund ECDSA Wallet](#fund-ecdsa-wallet)
   * [Operator Registration](#operator-registration)
     * [Sample config creation](#sample-config-creation)
+    * [Goerli Smart Contract Addresses](#goerli-smart-contract-addresses)
     * [Registration](#registration)
 <!-- TOC -->
 
@@ -204,6 +206,11 @@ You don't need to give the key name in that case.
 ```bash
 eigenlayer operator keys export --key-type ecdsa --key-path [path]
 ```
+## Fund ECDSA Wallet
+Step 1: Follow the instructions in [Obtaining Testnet ETH](https://docs.eigenlayer.xyz/restaking-guides/restaking-user-guide/stage-2-testnet/obtaining-testnet-eth-and-liquid-staking-tokens-lsts) to fund a web3 wallet with Goerli ETH.
+
+Step 2: Send at least `1 Goerli ETH` to the “address” field referenced in your `operator.yaml` file. This ETH will be used to cover the gas cost for operator registration in the subsequent steps.
+
 ## Operator Registration
 ### Sample config creation
 
@@ -222,6 +229,22 @@ A public metadata URL is required to register the operator.
 After creating and filling the [metadata](pkg/operator/config/metadata-example.json) file, you can it to a publicly accessible location and give the URL in the config file.
 You are also required to upload the image of the operator to a publicly accessible location and give the URL in the metadata file. We only support `.png` images for now.
 
+### Goerli Smart Contract Addresses
+For operator registration in a Goerli environment, you need to set the Slasher and BLS public key compendium contract as follows in the `operator.yaml` file.
+
+Slasher Contract Address: `0xD11d60b669Ecf7bE10329726043B3ac07B380C22`
+
+BLS Public Key Compendium Contract Address: `0xc81d3963087Fe09316cd1E032457989C7aC91b19`
+
+```
+# EigenLayer Slasher contract address
+# This will be provided by EigenLayer team
+el_slasher_address: 0xD11d60b669Ecf7bE10329726043B3ac07B380C22
+
+# Address of BLS Public Key Compendium contract
+# This will be provided by EigenLayer team
+bls_public_key_compendium_address: 0xc81d3963087Fe09316cd1E032457989C7aC91b19
+```
 
 ### Registration
 >ECDSA and BLS keys are required for operator registration.
