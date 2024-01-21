@@ -33,7 +33,7 @@ EigenLayer CLI is used to manage core operator functionalities like local key ma
 
 
 ## Install `eigenlayer` CLI using a binary
-To download a binary for latest release, run:
+To download a binary for the latest release, run:
 ```bash
 curl -sSfL https://raw.githubusercontent.com/layr-labs/eigenlayer-cli/master/scripts/install.sh | sh -s
 ```
@@ -44,7 +44,7 @@ To add the binary to your path, run:
 export PATH=$PATH:~/bin
 ```
 
-### Installing in custom location
+### Installing in a custom location
 To download the binary in a custom location, run:
 ```bash
 curl -sSfL https://raw.githubusercontent.com/layr-labs/eigenlayer-cli/master/scripts/install.sh | sh -s -- -b <custom_location>
@@ -119,7 +119,7 @@ eigenlayer operator keys create --key-type bls [keyname]
 
 - `keyname` - This will be the name of the created key file. It will be saved as `<keyname>.ecdsa.key.json` or `<keyname>.bls.key.json`
 
-This will prompt a password which you can use to encrypt the keys. Keys will be stored in local disk and will be shown once keys are created.
+This will prompt a password which you can use to encrypt the keys. Keys will be stored in the local disk and will be shown once keys are created.
 It will also show the private key only once, so that you can back it up in case you lose the password or keyfile.
 
 Example:
@@ -131,7 +131,7 @@ eigenlayer operator keys create --key-type ecdsa test
 ```
 
 Output
-This outputs the public key and the ethereum address associated with the key. This will also be your operator address.
+This outputs the public key and the Ethereum address associated with the key. This will also be your operator address.
 ```bash
 ? Enter password to encrypt the ecdsa private key:
 ECDSA Private Key (Hex):  b3eba201405d5b5f7aaa9adf6bb734dc6c0f448ef64dd39df80ca2d92fca6d7b
@@ -177,7 +177,7 @@ Public Key hex:  a30264c19cd7292d5153da9c9df58f81aced417e8587dd339021c45ee61f20d
 Ethereum Address 0x9F664973BF656d6077E66973c474cB58eD5E97E1
 ```
 
-This will prompt a password which you can use to encrypt the keys. Keys will be stored in local disk and will be shown once keys are created.
+This will prompt a password which you can use to encrypt the keys. Keys will be stored in the local disk and will be shown once keys are created.
 It will also show the private key only once, so that you can back it up in case you lose the password or keyfile.
 
 ### List keys
@@ -213,14 +213,14 @@ You can create the config files needed for operator registration using the below
 eigenlayer operator config create
 ```
 
-It will create two file: `operator.yaml` and `metadata.json`
-After filling the details in `metadata.json`, please upload this into a publicly accessible location and fill that url in `operator.yaml`. 
-A valid metadata url is required for successful registration. 
+It will create two files: `operator.yaml` and `metadata.json`
+After filling in the details in `metadata.json`, please upload this into a publicly accessible location and fill that URL in `operator.yaml`. 
+A valid metadata URL is required for successful registration. 
 A sample yaml [operator.yaml](pkg/operator/config/operator-config-example.yaml) is provided for reference.
 
-A public metadata url is required to register the operator.
-After creating and filling the [metadata](pkg/operator/config/metadata-example.json) file, you can it to a publicly accessible location and give the url in the config file.
-You are also required to upload the image of the operator to a publicly accessible location and give the url in the metadata file. We only support `.png` images for now.
+A public metadata URL is required to register the operator.
+After creating and filling the [metadata](pkg/operator/config/metadata-example.json) file, you can it to a publicly accessible location and give the URL in the config file.
+You are also required to upload the image of the operator to a publicly accessible location and give the URL in the metadata file. We only support `.png` images for now.
 
 
 ### Registration
@@ -233,7 +233,7 @@ You can register your operator using the command below.
 eigenlayer operator register operator.yaml
 ```
 
-Make sure that if you use `local_keystore` as signer, you give the path to the keys created in above section.
+Make sure that if you use `local_keystore` as the signer, you give the path to the keys created in the above section.
 
 After you complete the registration, you can check the registration status of your operator using
 
