@@ -4,6 +4,9 @@ import (
 	"context"
 	"fmt"
 	"math/big"
+	"os"
+
+	"gopkg.in/yaml.v2"
 
 	"github.com/Layr-Labs/eigensdk-go/chainio/txmgr"
 	"github.com/Layr-Labs/eigensdk-go/signerv2"
@@ -13,10 +16,8 @@ import (
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 	elContracts "github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/eth"
-	"github.com/Layr-Labs/eigensdk-go/crypto/bls"
 	eigensdkLogger "github.com/Layr-Labs/eigensdk-go/logging"
 	"github.com/Layr-Labs/eigensdk-go/metrics"
-	eigensdkUtils "github.com/Layr-Labs/eigensdk-go/utils"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/urfave/cli/v2"
 )
@@ -40,17 +41,16 @@ func RegisterCmd(p utils.Prompter) *cli.Command {
 			}
 
 			configurationFilePath := args.Get(0)
-			var operatorCfg types.OperatorConfig
-			err := eigensdkUtils.ReadYamlConfig(configurationFilePath, &operatorCfg)
+			operatorCfg, err := validateAndMigrateConfigFile(configurationFilePath)
 			if err != nil {
 				return err
 			}
 			fmt.Printf(
-				"Operator configuration file read successfully %s %s\n",
-				operatorCfg.Operator.Address,
+				"%s Operator configuration file read successfully %s\n",
 				utils.EmojiCheckMark,
+				operatorCfg.Operator.Address,
 			)
-			fmt.Printf("validating operator config: %s %s\n", operatorCfg.Operator.Address, utils.EmojiWait)
+			fmt.Printf("%s validating operator config: %s", utils.EmojiWait, operatorCfg.Operator.Address)
 
 			err = operatorCfg.Operator.Validate()
 			if err != nil {
@@ -58,28 +58,13 @@ func RegisterCmd(p utils.Prompter) *cli.Command {
 			}
 
 			fmt.Printf(
-				"Operator configuration file validated successfully %s %s\n",
-				operatorCfg.Operator.Address,
+				"\r%s Operator configuration file validated successfully %s\n",
 				utils.EmojiCheckMark,
+				operatorCfg.Operator.Address,
 			)
 
 			ctx := context.Background()
 			logger, err := eigensdkLogger.NewZapLogger(eigensdkLogger.Development)
-			if err != nil {
-				return err
-			}
-
-			blsKeyPassword, err := p.InputHiddenString("Enter password to decrypt the bls private key:", "",
-				func(password string) error {
-					return nil
-				},
-			)
-			if err != nil {
-				fmt.Println("Error while reading bls key password")
-				return err
-			}
-
-			keyPair, err := bls.ReadPrivateKeyFromFile(operatorCfg.BlsPrivateKeyStorePath, blsKeyPassword)
 			if err != nil {
 				return err
 			}
@@ -112,8 +97,7 @@ func RegisterCmd(p utils.Prompter) *cli.Command {
 			noopMetrics := metrics.NewNoopMetrics()
 
 			elWriter, err := elContracts.BuildELChainWriter(
-				common.HexToAddress(operatorCfg.ELSlasherAddress),
-				common.HexToAddress(operatorCfg.BlsPublicKeyCompendiumAddress),
+				common.HexToAddress(operatorCfg.ELDelegationManager),
 				ethClient,
 				logger,
 				noopMetrics,
@@ -124,8 +108,7 @@ func RegisterCmd(p utils.Prompter) *cli.Command {
 			}
 
 			reader, err := elContracts.BuildELChainReader(
-				common.HexToAddress(operatorCfg.ELSlasherAddress),
-				common.HexToAddress(operatorCfg.BlsPublicKeyCompendiumAddress),
+				common.HexToAddress(operatorCfg.ELDelegationManager),
 				ethClient,
 				logger,
 			)
@@ -141,36 +124,70 @@ func RegisterCmd(p utils.Prompter) *cli.Command {
 			if !status {
 				receipt, err := elWriter.RegisterAsOperator(ctx, operatorCfg.Operator)
 				if err != nil {
-					logger.Infof("Error while registering operator %s", utils.EmojiCrossMark)
+					fmt.Printf("%s Error while registering operator", utils.EmojiCrossMark)
 					return err
 				}
-				logger.Infof(
-					"Operator registration transaction at: %s %s",
-					getTransactionLink(receipt.TxHash.String(), &operatorCfg.ChainId),
+				fmt.Printf(
+					"%s Operator registration transaction at: %s",
 					utils.EmojiCheckMark,
+					getTransactionLink(receipt.TxHash.String(), &operatorCfg.ChainId),
 				)
 
 			} else {
-				logger.Infof("Operator is already registered on EigenLayer %s\n", utils.EmojiCheckMark)
+				fmt.Printf("%s Operator is already registered on EigenLayer\n", utils.EmojiCheckMark)
+				return nil
 			}
 
-			receipt, err := elWriter.RegisterBLSPublicKey(ctx, keyPair, operatorCfg.Operator)
-			if err != nil {
-				logger.Infof("Error while registering BLS public key %s", utils.EmojiCrossMark)
-				return err
-			}
-			logger.Infof(
-				"Operator bls key added transaction at: %s %s",
-				getTransactionLink(receipt.TxHash.String(), &operatorCfg.ChainId),
-				utils.EmojiCheckMark,
-			)
-
-			logger.Infof("Operator is registered and bls key added successfully %s\n", utils.EmojiCheckMark)
+			fmt.Printf("%s Operator is registered successfully to EigenLayer\n", utils.EmojiCheckMark)
 			return nil
 		},
 	}
 
 	return registerCmd
+}
+
+func validateAndMigrateConfigFile(path string) (*types.OperatorConfigNew, error) {
+	operatorCfg := types.OperatorConfigNew{}
+	var operatorCfgOld types.OperatorConfig
+	err := utils.ReadYamlConfig(path, &operatorCfgOld)
+	if err != nil {
+		return nil, err
+	}
+	if operatorCfgOld.ELSlasherAddress != "" || operatorCfgOld.BlsPublicKeyCompendiumAddress != "" {
+		fmt.Printf("%s Old config detected, migrating to new config\n", utils.EmojiCheckMark)
+		operatorCfg = types.OperatorConfigNew{
+			Operator:               operatorCfgOld.Operator,
+			ELDelegationManager:    operatorCfgOld.ELSlasherAddress, // How to get that?
+			EthRPCUrl:              operatorCfgOld.EthRPCUrl,
+			PrivateKeyStorePath:    operatorCfgOld.PrivateKeyStorePath,
+			SignerType:             operatorCfgOld.SignerType,
+			BlsPrivateKeyStorePath: operatorCfgOld.BlsPrivateKeyStorePath,
+			ChainId:                operatorCfgOld.ChainId,
+		}
+
+		fmt.Printf("%s Backing up old config file to %s", utils.EmojiWait, path+".old")
+		err := os.Rename(path, path+".old")
+		if err != nil {
+			return nil, err
+		}
+		fmt.Printf("\r%s Old Config file backed up at %s\n", utils.EmojiCheckMark, path+".old")
+		fmt.Printf("Writing new config to %s", path)
+		yamlData, err := yaml.Marshal(&operatorCfg)
+		if err != nil {
+			return nil, err
+		}
+		err = os.WriteFile(path, yamlData, 0o644)
+		if err != nil {
+			return nil, err
+		}
+		fmt.Printf("\r%s New config file written to %s\n", utils.EmojiCheckMark, path)
+	} else {
+		err = utils.ReadYamlConfig(path, &operatorCfg)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return &operatorCfg, nil
 }
 
 func getTransactionLink(txHash string, chainId *big.Int) string {
