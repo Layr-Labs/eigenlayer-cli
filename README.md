@@ -10,17 +10,10 @@ EigenLayer CLI is used to manage core operator functionalities like local key ma
 * [EigenLayer CLI](#eigenlayer-cli)
   * [Supported Operating Systems](#supported-operating-systems)
   * [Install `eigenlayer` CLI using a binary](#install-eigenlayer-cli-using-a-binary)
-    * [Installing in custom location](#installing-in-custom-location)
+    * [Installing in a custom location](#installing-in-a-custom-location)
   * [Install `eigenlayer` CLI using Go](#install-eigenlayer-cli-using-go)
   * [Install `eigenlayer` CLI from source](#install-eigenlayer-cli-from-source)
-  * [Create or Import Keys](#create-or-import-keys)
-    * [Create keys](#create-keys)
-    * [Import keys](#import-keys)
-    * [List keys](#list-keys)
-    * [Export keys](#export-keys)
-  * [Operator Registration](#operator-registration)
-    * [Sample config creation](#sample-config-creation)
-    * [Registration](#registration)
+  * [Documentation](#documentation)
 <!-- TOC -->
 
 ## Supported Operating Systems
@@ -107,142 +100,19 @@ sudo cp $GOPATH/bin/eigenlayer /usr/local/bin/
 sudo cp eigenlayer-cli/build/eigenlayer /usr/local/bin/
 ```
 
-## Create or Import Keys
-### Create keys
+## Documentation
+Please refer to the full documentation [here](https://docs.eigenlayer.xyz/operator-guides/operator-installation).
 
-You can create encrypted ecdsa and bls keys using the cli which will be needed for operator registration and other onchain calls
+Links to specific sections are provided below.
+* [Create Keys](https://docs.eigenlayer.xyz/operator-guides/operator-installation#create-keys)
+* [Import Keys](https://docs.eigenlayer.xyz/operator-guides/operator-installation#import-keys)
+* [List Keys](https://docs.eigenlayer.xyz/operator-guides/operator-installation#list-keys)
+* [Export Keys](https://docs.eigenlayer.xyz/operator-guides/operator-installation#export-keys)
+* [Fund Wallet with ETH](https://docs.eigenlayer.xyz/operator-guides/operator-installation#fund-ecdsa-wallet)
+* [Register Operator](https://docs.eigenlayer.xyz/operator-guides/operator-installation#registration)
+* [Operator Status](https://docs.eigenlayer.xyz/operator-guides/operator-installation#checking-status-of-registration)
+* [Metadata Updates](https://docs.eigenlayer.xyz/operator-guides/operator-installation#metadata-updates)
+* [Frequently Asked Questions](https://docs.eigenlayer.xyz/operator-guides/faq)
+* [Troubleshooting](https://docs.eigenlayer.xyz/operator-guides/troubleshooting)
 
-```bash
-eigenlayer operator keys create --key-type ecdsa [keyname]
-eigenlayer operator keys create --key-type bls [keyname]
-```
-
-- `keyname` - This will be the name of the created key file. It will be saved as `<keyname>.ecdsa.key.json` or `<keyname>.bls.key.json`
-
-This will prompt a password which you can use to encrypt the keys. Keys will be stored in the local disk and will be shown once keys are created.
-It will also show the private key only once, so that you can back it up in case you lose the password or keyfile.
-
-Example:
-
-Input command
-
-```bash
-eigenlayer operator keys create --key-type ecdsa test
-```
-
-Output
-This outputs the public key and the Ethereum address associated with the key. This will also be your operator address.
-```bash
-? Enter password to encrypt the ecdsa private key:
-ECDSA Private Key (Hex):  b3eba201405d5b5f7aaa9adf6bb734dc6c0f448ef64dd39df80ca2d92fca6d7b
-Please backup the above private key hex in safe place.
-
-Key location: /home/ubuntu/.eigenlayer/operator_keys/test.ecdsa.key.json
-Public Key hex:  f87ee475109c2943038b3c006b8a004ee17bebf3357d10d8f63ef202c5c28723906533dccfda5d76c1da0a9f05cc6d32085ca1af8aaab5a28171474b1ad0aa68
-Ethereum Address 0x6a8c0D554a694899041E52a91B4EC3Ff23d8aBD5
-```
-
-
-### Import keys
-
-You can import existing ecdsa and bls keys using the cli which will be needed for operator registration and other onchain calls
-
-```bash
-eigenlayer operator keys import --key-type ecdsa [keyname] [privatekey]
-eigenlayer operator keys import --key-type bls [keyname] [privatekey]
-```
-
-- `keyname` - This will be the name of the imported key file. It will be saved as `<keyname>.ecdsa.key.json` or `<keyname>.bls.key.json`
-- `privatekey` - This will be the private key of the key to be imported.
-    - For ecdsa key, it should be in hex format
-    - For bls key, it should be a large number
-
-Example:
-
-Input command
-
-```bash
-eigenlayer operator keys import --key-type ecdsa test 6842fb8f5fa574d0482818b8a825a15c4d68f542693197f2c2497e3562f335f6
-```
-
-Output
-
-```bash
-? Enter password to encrypt the ecdsa private key: *******
-ECDSA Private Key (Hex):  6842fb8f5fa574d0482818b8a825a15c4d68f542693197f2c2497e3562f335f6
-Please backup the above private key hex in safe place.
-
-Key location: /home/ubuntu/.eigenlayer/operator_keys/test.ecdsa.key.json
-Public Key hex:  a30264c19cd7292d5153da9c9df58f81aced417e8587dd339021c45ee61f20d55f4c3d374d6f472d3a2c4382e2a9770db395d60756d3b3ea97e8c1f9013eb1bb
-Ethereum Address 0x9F664973BF656d6077E66973c474cB58eD5E97E1
-```
-
-This will prompt a password which you can use to encrypt the keys. Keys will be stored in the local disk and will be shown once keys are created.
-It will also show the private key only once, so that you can back it up in case you lose the password or keyfile.
-
-### List keys
-
-You can also list your created keys using
-
-```bash
-eigenlayer operator keys list
-```
-
-It will show all the keys created with this command with the public key
-
-### Export keys
-If you want to see the private key of the existing keys, you can use the below command.
-
-```bash
-eigenlayer operator keys export --key-type ecdsa [keyname]
-```
-This will also prompt for the password used to encrypt the key.
-
-If your keys is not in the default location (`~/.eigenlayer/operator_keys`), you can give the path to the key file using `--key-path` flag. 
-You don't need to give the key name in that case.
-
-```bash
-eigenlayer operator keys export --key-type ecdsa --key-path [path]
-```
-## Operator Registration
-### Sample config creation
-
-You can create the config files needed for operator registration using the below command:
-
-```bash
-eigenlayer operator config create
-```
-
-It will create two files: `operator.yaml` and `metadata.json`
-After filling in the details in `metadata.json`, please upload this into a publicly accessible location and fill that URL in `operator.yaml`. 
-A valid metadata URL is required for successful registration. 
-A sample yaml [operator.yaml](pkg/operator/config/operator-config-example.yaml) is provided for reference.
-
-A public metadata URL is required to register the operator.
-After creating and filling the [metadata](pkg/operator/config/metadata-example.json) file, you can it to a publicly accessible location and give the URL in the config file.
-You are also required to upload the image of the operator to a publicly accessible location and give the URL in the metadata file. We only support `.png` images for now.
-
-
-### Registration
->ECDSA and BLS keys are required for operator registration.
-You may choose to either [create](#create-keys) your own set of keys using the EigenLayer CLI (recommended for first time users) or [import](#import-keys) your existing keys (recommended for advanced users who already have keys created).
-
-You can register your operator using the command below.
-
-```bash
-eigenlayer operator register operator.yaml
-```
-
-Make sure that if you use `local_keystore` as the signer, you give the path to the keys created in the above section.
-
-After you complete the registration, you can check the registration status of your operator using
-
-```bash
-eigenlayer operator status operator.yaml
-```
-
-You can also update the operator metadata using
-
-```bash
-eigenlayer operator update operator.yaml
-```
+If you see any issues in documentation please create an issue or PR [here](https://github.com/Layr-Labs/eigenlayer-docs)
