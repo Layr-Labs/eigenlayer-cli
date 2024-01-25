@@ -214,7 +214,8 @@ eigenlayer operator config create
 ```
 
 It will create two files: `operator.yaml` and `metadata.json`
-After filling in the details in `metadata.json`, please upload this into a publicly accessible location and fill that URL in `operator.yaml`. 
+Make sure the URL of the logo in `metadata.json` ends with ".png" to avoid receiving the following error: "invalid yaml file: with error logo must be a valid image url.". You can use websites such as "imgbb.com".
+After filling in the details in `metadata.json`, please upload this into a publicly accessible location and fill that URL in `operator.yaml`.
 A valid metadata URL is required for successful registration. 
 A sample yaml [operator.yaml](pkg/operator/config/operator-config-example.yaml) is provided for reference.
 
