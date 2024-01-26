@@ -29,7 +29,6 @@ const (
 )
 
 func CreateCmd(p utils.Prompter) *cli.Command {
-
 	createCmd := &cli.Command{
 		Name:      "create",
 		Usage:     "Used to create encrypted keys in local keystore",
@@ -119,6 +118,18 @@ func saveBlsKey(keyName string, p utils.Prompter, keyPair *bls.KeyPair, insecure
 		return err
 	}
 
+	_, err = p.InputHiddenString("Please confirm your password:", "",
+		func(s string) error {
+			if s != password {
+				return errors.New("passwords are not matched")
+			}
+			return nil
+		},
+	)
+	if err != nil {
+		return err
+	}
+
 	err = keyPair.SaveToFile(fileLoc, password)
 	if err != nil {
 		return err
@@ -149,6 +160,19 @@ func saveEcdsaKey(keyName string, p utils.Prompter, privateKey *ecdsa.PrivateKey
 				return nil
 			}
 			return validatePassword(s)
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	_, err = p.InputHiddenString("Please confirm your password:", "",
+
+		func(s string) error {
+			if s != password {
+				return errors.New("passwords are not matched")
+			}
+			return nil
 		},
 	)
 	if err != nil {

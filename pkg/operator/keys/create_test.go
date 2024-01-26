@@ -75,6 +75,7 @@ func TestCreateCmd(t *testing.T) {
 			err:  nil,
 			promptMock: func(p *prompterMock.MockPrompter) {
 				p.EXPECT().InputHiddenString(gomock.Any(), gomock.Any(), gomock.Any()).Return("", nil)
+				p.EXPECT().InputHiddenString(gomock.Any(), gomock.Any(), gomock.Any()).Return("", nil)
 			},
 			keyPath: filepath.Join(homePath, OperatorKeystoreSubFolder, "/do_not_use_this_name.ecdsa.key.json"),
 		},
@@ -83,6 +84,7 @@ func TestCreateCmd(t *testing.T) {
 			args: []string{"--key-type", "bls", "do_not_use_this_name"},
 			err:  nil,
 			promptMock: func(p *prompterMock.MockPrompter) {
+				p.EXPECT().InputHiddenString(gomock.Any(), gomock.Any(), gomock.Any()).Return("", nil)
 				p.EXPECT().InputHiddenString(gomock.Any(), gomock.Any(), gomock.Any()).Return("", nil)
 			},
 			keyPath: filepath.Join(homePath, OperatorKeystoreSubFolder, "/do_not_use_this_name.bls.key.json"),
