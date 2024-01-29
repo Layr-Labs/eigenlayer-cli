@@ -106,6 +106,7 @@ func TestImportCmd(t *testing.T) {
 			err: nil,
 			promptMock: func(p *prompterMock.MockPrompter) {
 				p.EXPECT().InputHiddenString(gomock.Any(), gomock.Any(), gomock.Any()).Return("", nil)
+				p.EXPECT().InputHiddenString(gomock.Any(), gomock.Any(), gomock.Any()).Return("", nil)
 			},
 			expectedPrivKey: "6842fb8f5fa574d0482818b8a825a15c4d68f542693197f2c2497e3562f335f6",
 			keyPath:         filepath.Join(homePath, OperatorKeystoreSubFolder, "/test.ecdsa.key.json"),
@@ -120,6 +121,7 @@ func TestImportCmd(t *testing.T) {
 			},
 			err: nil,
 			promptMock: func(p *prompterMock.MockPrompter) {
+				p.EXPECT().InputHiddenString(gomock.Any(), gomock.Any(), gomock.Any()).Return("", nil)
 				p.EXPECT().InputHiddenString(gomock.Any(), gomock.Any(), gomock.Any()).Return("", nil)
 			},
 			expectedPrivKey: "6842fb8f5fa574d0482818b8a825a15c4d68f542693197f2c2497e3562f335f6",
@@ -136,6 +138,7 @@ func TestImportCmd(t *testing.T) {
 			err: nil,
 			promptMock: func(p *prompterMock.MockPrompter) {
 				p.EXPECT().InputHiddenString(gomock.Any(), gomock.Any(), gomock.Any()).Return("", nil)
+				p.EXPECT().InputHiddenString(gomock.Any(), gomock.Any(), gomock.Any()).Return("", nil)
 			},
 			expectedPrivKey: "20030410000080487431431153104351076122223465926814327806350179952713280726583",
 			keyPath:         filepath.Join(homePath, OperatorKeystoreSubFolder, "/test.bls.key.json"),
@@ -150,6 +153,7 @@ func TestImportCmd(t *testing.T) {
 			},
 			err: nil,
 			promptMock: func(p *prompterMock.MockPrompter) {
+				p.EXPECT().InputHiddenString(gomock.Any(), gomock.Any(), gomock.Any()).Return("", nil)
 				p.EXPECT().InputHiddenString(gomock.Any(), gomock.Any(), gomock.Any()).Return("", nil)
 			},
 			expectedPrivKey: "5491383829988096583828972342810831790467090979842721151380259607665538989821",
