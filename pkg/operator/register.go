@@ -22,6 +22,26 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
+type ChainMetadata struct {
+	BlockExplorerUrl           string
+	ELDelegationManagerAddress string
+}
+
+var chainMetadataMap = map[int64]ChainMetadata{
+	utils.MainnetChainId: {
+		BlockExplorerUrl:           "https://etherscan.io/tx",
+		ELDelegationManagerAddress: "",
+	},
+	utils.GoerliChainId: {
+		BlockExplorerUrl:           "https://goerli.etherscan.io/tx",
+		ELDelegationManagerAddress: "0x1b7b8F6b258f95Cf9596EabB9aa18B62940Eb0a8",
+	},
+	utils.HoleskyChainId: {
+		BlockExplorerUrl:           "https://holesky.etherscan.io/tx",
+		ELDelegationManagerAddress: "",
+	},
+}
+
 func RegisterCmd(p utils.Prompter) *cli.Command {
 	registerCmd := &cli.Command{
 		Name:      "register",
@@ -155,9 +175,14 @@ func validateAndMigrateConfigFile(path string) (*types.OperatorConfigNew, error)
 	}
 	if operatorCfgOld.ELSlasherAddress != "" || operatorCfgOld.BlsPublicKeyCompendiumAddress != "" {
 		fmt.Printf("%s Old config detected, migrating to new config\n", utils.EmojiCheckMark)
+		chainIDInt := operatorCfgOld.ChainId.Int64()
+		chainMetadata, ok := chainMetadataMap[chainIDInt]
+		if !ok {
+			return nil, fmt.Errorf("chain ID %d not supported", chainIDInt)
+		}
 		operatorCfg = types.OperatorConfigNew{
 			Operator:               operatorCfgOld.Operator,
-			ELDelegationManager:    operatorCfgOld.ELSlasherAddress, // How to get that?
+			ELDelegationManager:    chainMetadata.ELDelegationManagerAddress, // How to get that?
 			EthRPCUrl:              operatorCfgOld.EthRPCUrl,
 			PrivateKeyStorePath:    operatorCfgOld.PrivateKeyStorePath,
 			SignerType:             operatorCfgOld.SignerType,
@@ -191,19 +216,11 @@ func validateAndMigrateConfigFile(path string) (*types.OperatorConfigNew, error)
 }
 
 func getTransactionLink(txHash string, chainId *big.Int) string {
-	// Create chainId for eth and goerli
-	ethChainId := big.NewInt(1)
-	goerliChainId := big.NewInt(5)
-	holeskyChainId := big.NewInt(17000)
-
-	// Return link of chainId is a live network
-	if chainId.Cmp(ethChainId) == 0 {
-		return fmt.Sprintf("https://etherscan.io/tx/%s", txHash)
-	} else if chainId.Cmp(goerliChainId) == 0 {
-		return fmt.Sprintf("https://goerli.etherscan.io/tx/%s", txHash)
-	} else if chainId.Cmp(holeskyChainId) == 0 {
-		return fmt.Sprintf("https://holesky.etherscan.io/tx/%s", txHash)
-	} else {
+	chainIDInt := chainId.Int64()
+	chainMetadata, ok := chainMetadataMap[chainIDInt]
+	if !ok {
 		return txHash
+	} else {
+		return fmt.Sprintf("%s/%s", chainMetadata.BlockExplorerUrl, txHash)
 	}
 }
