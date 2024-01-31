@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
-	github.com/Layr-Labs/eigensdk-go v0.0.10-0.20240121052628-2db70d4dfb61
+	github.com/Layr-Labs/eigensdk-go v0.1.0
 	github.com/ethereum/go-ethereum v1.13.8
 	github.com/stretchr/testify v1.8.4
 	github.com/urfave/cli/v2 v2.27.1
