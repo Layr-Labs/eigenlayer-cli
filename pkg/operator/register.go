@@ -182,7 +182,7 @@ func validateAndMigrateConfigFile(path string) (*types.OperatorConfigNew, error)
 		}
 		operatorCfg = types.OperatorConfigNew{
 			Operator:               operatorCfgOld.Operator,
-			ELDelegationManager:    chainMetadata.ELDelegationManagerAddress, // How to get that?
+			ELDelegationManager:    chainMetadata.ELDelegationManagerAddress,
 			EthRPCUrl:              operatorCfgOld.EthRPCUrl,
 			PrivateKeyStorePath:    operatorCfgOld.PrivateKeyStorePath,
 			SignerType:             operatorCfgOld.SignerType,
