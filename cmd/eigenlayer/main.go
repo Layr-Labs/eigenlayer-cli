@@ -23,8 +23,8 @@ func main() {
 
 	app.Name = "eigenlayer"
 	app.Usage = "EigenLayer CLI"
-	app.Version = "0.5.2"
-	app.Copyright = "(c) 2023 EigenLabs"
+	app.Version = "0.6.0"
+	app.Copyright = "(c) 2024 EigenLabs"
 
 	// Initialize the dependencies
 	prompter := utils.NewPrompter()
