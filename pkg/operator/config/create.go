@@ -66,7 +66,7 @@ func CreateCmd(p utils.Prompter) *cli.Command {
 			}
 
 			fmt.Println(
-				"Created operator.yaml and metadata.json files. Please fill in the smart contract configuration details(el_slasher_address and bls_public_key_compendium_address) provided by EigenLayer team. ",
+				"Created operator.yaml and metadata.json files. Please fill in the smart contract configuration details(el_delegation_manager) provided by EigenLayer team. ",
 			)
 			fmt.Println(
 				"Please fill in the metadata.json file and upload it to a public url. Then update the operator.yaml file with the url (metadata_url).",
@@ -155,15 +155,6 @@ func promptOperatorInfo(config *types.OperatorConfigNew, p utils.Prompter) (type
 		return types.OperatorConfigNew{}, err
 	}
 	config.PrivateKeyStorePath = ecdsaKeyPath
-
-	// Prompt for bls key path
-	blsKeyPath, err := p.InputString("Enter your bls key path:", "", "",
-		func(s string) error { return nil },
-	)
-	if err != nil {
-		return types.OperatorConfigNew{}, err
-	}
-	config.BlsPrivateKeyStorePath = blsKeyPath
 
 	// Prompt for network & set chainId
 	chainId, err := p.Select("Select your network:", []string{"mainnet", "goerli", "holesky", "local"})

@@ -65,7 +65,7 @@ func StatusCmd(p utils.Prompter) *cli.Command {
 			}
 
 			reader, err := elContracts.BuildELChainReader(
-				common.HexToAddress(operatorCfg.ELDelegationManager),
+				common.HexToAddress(operatorCfg.ELDelegationManagerAddress),
 				ethClient,
 				logger,
 			)

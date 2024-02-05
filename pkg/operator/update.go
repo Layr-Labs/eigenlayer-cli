@@ -80,7 +80,7 @@ func UpdateCmd(p utils.Prompter) *cli.Command {
 			noopMetrics := metrics.NewNoopMetrics()
 
 			elWriter, err := elContracts.BuildELChainWriter(
-				common.HexToAddress(operatorCfg.ELDelegationManager),
+				common.HexToAddress(operatorCfg.ELDelegationManagerAddress),
 				ethClient,
 				logger,
 				noopMetrics,

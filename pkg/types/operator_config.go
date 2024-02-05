@@ -47,12 +47,12 @@ func (config OperatorConfig) MarshalYAML() (interface{}, error) {
 }
 
 type OperatorConfigNew struct {
-	Operator            eigensdkTypes.Operator `yaml:"operator"`
-	ELDelegationManager string                 `yaml:"el_delegation_manager"`
-	EthRPCUrl           string                 `yaml:"eth_rpc_url"`
-	PrivateKeyStorePath string                 `yaml:"private_key_store_path"`
-	SignerType          SignerType             `yaml:"signer_type"`
-	ChainId             big.Int                `yaml:"chain_id"`
+	Operator                   eigensdkTypes.Operator `yaml:"operator"`
+	ELDelegationManagerAddress string                 `yaml:"el_delegation_manager_address"`
+	EthRPCUrl                  string                 `yaml:"eth_rpc_url"`
+	PrivateKeyStorePath        string                 `yaml:"private_key_store_path"`
+	SignerType                 SignerType             `yaml:"signer_type"`
+	ChainId                    big.Int                `yaml:"chain_id"`
 }
 
 func (config OperatorConfigNew) MarshalYAML() (interface{}, error) {
@@ -65,7 +65,7 @@ func (config OperatorConfigNew) MarshalYAML() (interface{}, error) {
 		ChainID             int64                  `yaml:"chain_id"`
 	}{
 		Operator:            config.Operator,
-		ELDelegationManager: config.ELDelegationManager,
+		ELDelegationManager: config.ELDelegationManagerAddress,
 		EthRPCUrl:           config.EthRPCUrl,
 		PrivateKeyStorePath: config.PrivateKeyStorePath,
 		SignerType:          config.SignerType,

@@ -117,7 +117,7 @@ func RegisterCmd(p utils.Prompter) *cli.Command {
 			noopMetrics := metrics.NewNoopMetrics()
 
 			elWriter, err := elContracts.BuildELChainWriter(
-				common.HexToAddress(operatorCfg.ELDelegationManager),
+				common.HexToAddress(operatorCfg.ELDelegationManagerAddress),
 				ethClient,
 				logger,
 				noopMetrics,
@@ -128,7 +128,7 @@ func RegisterCmd(p utils.Prompter) *cli.Command {
 			}
 
 			reader, err := elContracts.BuildELChainReader(
-				common.HexToAddress(operatorCfg.ELDelegationManager),
+				common.HexToAddress(operatorCfg.ELDelegationManagerAddress),
 				ethClient,
 				logger,
 			)
@@ -181,13 +181,12 @@ func validateAndMigrateConfigFile(path string) (*types.OperatorConfigNew, error)
 			return nil, fmt.Errorf("chain ID %d not supported", chainIDInt)
 		}
 		operatorCfg = types.OperatorConfigNew{
-			Operator:               operatorCfgOld.Operator,
-			ELDelegationManager:    chainMetadata.ELDelegationManagerAddress,
-			EthRPCUrl:              operatorCfgOld.EthRPCUrl,
-			PrivateKeyStorePath:    operatorCfgOld.PrivateKeyStorePath,
-			SignerType:             operatorCfgOld.SignerType,
-			BlsPrivateKeyStorePath: operatorCfgOld.BlsPrivateKeyStorePath,
-			ChainId:                operatorCfgOld.ChainId,
+			Operator:                   operatorCfgOld.Operator,
+			ELDelegationManagerAddress: chainMetadata.ELDelegationManagerAddress,
+			EthRPCUrl:                  operatorCfgOld.EthRPCUrl,
+			PrivateKeyStorePath:        operatorCfgOld.PrivateKeyStorePath,
+			SignerType:                 operatorCfgOld.SignerType,
+			ChainId:                    operatorCfgOld.ChainId,
 		}
 
 		fmt.Printf("%s Backing up old config file to %s", utils.EmojiWait, path+".old")
