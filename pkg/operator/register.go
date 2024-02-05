@@ -22,26 +22,6 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-type ChainMetadata struct {
-	BlockExplorerUrl           string
-	ELDelegationManagerAddress string
-}
-
-var chainMetadataMap = map[int64]ChainMetadata{
-	utils.MainnetChainId: {
-		BlockExplorerUrl:           "https://etherscan.io/tx",
-		ELDelegationManagerAddress: "",
-	},
-	utils.GoerliChainId: {
-		BlockExplorerUrl:           "https://goerli.etherscan.io/tx",
-		ELDelegationManagerAddress: "0x1b7b8F6b258f95Cf9596EabB9aa18B62940Eb0a8",
-	},
-	utils.HoleskyChainId: {
-		BlockExplorerUrl:           "https://holesky.etherscan.io/tx",
-		ELDelegationManagerAddress: "",
-	},
-}
-
 func RegisterCmd(p utils.Prompter) *cli.Command {
 	registerCmd := &cli.Command{
 		Name:      "register",
@@ -175,7 +155,7 @@ func validateAndMigrateConfigFile(path string) (*types.OperatorConfigNew, error)
 	if operatorCfgOld.ELSlasherAddress != "" || operatorCfgOld.BlsPublicKeyCompendiumAddress != "" {
 		fmt.Printf("%s Old config detected, migrating to new config\n", utils.EmojiCheckMark)
 		chainIDInt := operatorCfgOld.ChainId.Int64()
-		chainMetadata, ok := chainMetadataMap[chainIDInt]
+		chainMetadata, ok := utils.ChainMetadataMap[chainIDInt]
 		if !ok {
 			return nil, fmt.Errorf("chain ID %d not supported", chainIDInt)
 		}
@@ -215,7 +195,7 @@ func validateAndMigrateConfigFile(path string) (*types.OperatorConfigNew, error)
 
 func getTransactionLink(txHash string, chainId *big.Int) string {
 	chainIDInt := chainId.Int64()
-	chainMetadata, ok := chainMetadataMap[chainIDInt]
+	chainMetadata, ok := utils.ChainMetadataMap[chainIDInt]
 	if !ok {
 		return txHash
 	} else {

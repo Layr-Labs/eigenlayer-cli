@@ -66,7 +66,7 @@ func CreateCmd(p utils.Prompter) *cli.Command {
 			}
 
 			fmt.Println(
-				"Created operator.yaml and metadata.json files. Please fill in the smart contract configuration details(el_delegation_manager_address) provided by EigenLayer team. ",
+				"Created operator.yaml and metadata.json files. Please make sure configuration details(el_delegation_manager_address) is correct based on network by checking our docs.",
 			)
 			fmt.Println(
 				"Please fill in the metadata.json file and upload it to a public url. Then update the operator.yaml file with the url (metadata_url).",
@@ -164,13 +164,18 @@ func promptOperatorInfo(config *types.OperatorConfigNew, p utils.Prompter) (type
 
 	switch chainId {
 	case "mainnet":
-		config.ChainId = *big.NewInt(1)
+		config.ChainId = *big.NewInt(utils.MainnetChainId)
+		config.ELDelegationManagerAddress = utils.ChainMetadataMap[utils.MainnetChainId].ELDelegationManagerAddress
 	case "goerli":
-		config.ChainId = *big.NewInt(5)
+		config.ChainId = *big.NewInt(utils.GoerliChainId)
+		config.ELDelegationManagerAddress = utils.ChainMetadataMap[utils.GoerliChainId].ELDelegationManagerAddress
 	case "holesky":
-		config.ChainId = *big.NewInt(17000)
+		config.ChainId = *big.NewInt(utils.HoleskyChainId)
+		config.ELDelegationManagerAddress = utils.ChainMetadataMap[utils.HoleskyChainId].ELDelegationManagerAddress
 	case "local":
-		config.ChainId = *big.NewInt(31337)
+		config.ChainId = *big.NewInt(utils.LocalChainId)
+		config.ELDelegationManagerAddress = utils.ChainMetadataMap[utils.LocalChainId].ELDelegationManagerAddress
+
 	}
 
 	config.SignerType = types.LocalKeystoreSigner
