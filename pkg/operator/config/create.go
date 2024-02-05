@@ -66,7 +66,7 @@ func CreateCmd(p utils.Prompter) *cli.Command {
 			}
 
 			fmt.Println(
-				"Created operator.yaml and metadata.json files. Please fill in the smart contract configuration details(el_delegation_manager) provided by EigenLayer team. ",
+				"Created operator.yaml and metadata.json files. Please fill in the smart contract configuration details(el_delegation_manager_address) provided by EigenLayer team. ",
 			)
 			fmt.Println(
 				"Please fill in the metadata.json file and upload it to a public url. Then update the operator.yaml file with the url (metadata_url).",
