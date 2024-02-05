@@ -45,14 +45,13 @@ var chainMetadataMap = map[int64]ChainMetadata{
 func RegisterCmd(p utils.Prompter) *cli.Command {
 	registerCmd := &cli.Command{
 		Name:      "register",
-		Usage:     "Register the operator and the BLS public key in the EigenLayer contracts",
+		Usage:     "Register the operator to EigenLayer contracts",
 		UsageText: "register <configuration-file>",
 		Description: `
 		Register command expects a yaml config file as an argument
 		to successfully register an operator address to eigenlayer
 
-		This will register operator to DelegationManager and will register
-		the BLS public key on eigenlayer
+		This will register operator to DelegationManager
 		`,
 		Action: func(cCtx *cli.Context) error {
 			args := cCtx.Args()
