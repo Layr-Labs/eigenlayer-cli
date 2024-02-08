@@ -4,7 +4,9 @@ bin
 # Config files
 metadata.json
 operator-config.yaml
+operator-config.yaml.old
 operator.yaml
+operator.yaml.old
 config/*
 
 # build

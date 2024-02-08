@@ -6,13 +6,11 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 
-	"github.com/Layr-Labs/eigenlayer-cli/pkg/types"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 	elContracts "github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/eth"
 	eigensdkLogger "github.com/Layr-Labs/eigensdk-go/logging"
 	eigensdkTypes "github.com/Layr-Labs/eigensdk-go/types"
-	eigensdkUtils "github.com/Layr-Labs/eigensdk-go/utils"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/urfave/cli/v2"
 )
@@ -34,17 +32,16 @@ func StatusCmd(p utils.Prompter) *cli.Command {
 			}
 
 			configurationFilePath := args.Get(0)
-			var operatorCfg types.OperatorConfig
-			err := eigensdkUtils.ReadYamlConfig(configurationFilePath, &operatorCfg)
+			operatorCfg, err := validateAndMigrateConfigFile(configurationFilePath)
 			if err != nil {
 				return err
 			}
 			fmt.Printf(
-				"Operator configuration file read successfully %s %s\n",
-				operatorCfg.Operator.Address,
+				"%s Operator configuration file read successfully %s\n",
 				utils.EmojiCheckMark,
+				operatorCfg.Operator.Address,
 			)
-			fmt.Printf("validating operator config: %s %s\n", operatorCfg.Operator.Address, utils.EmojiWait)
+			fmt.Printf("%s validating operator config:  %s", utils.EmojiWait, operatorCfg.Operator.Address)
 
 			err = operatorCfg.Operator.Validate()
 			if err != nil {
@@ -52,9 +49,9 @@ func StatusCmd(p utils.Prompter) *cli.Command {
 			}
 
 			fmt.Printf(
-				"Operator configuration file validated successfully %s %s\n",
-				operatorCfg.Operator.Address,
+				"\r%s Operator configuration file validated successfully %s\n",
 				utils.EmojiCheckMark,
+				operatorCfg.Operator.Address,
 			)
 
 			logger, err := eigensdkLogger.NewZapLogger(eigensdkLogger.Development)
@@ -68,8 +65,7 @@ func StatusCmd(p utils.Prompter) *cli.Command {
 			}
 
 			reader, err := elContracts.BuildELChainReader(
-				common.HexToAddress(operatorCfg.ELSlasherAddress),
-				common.HexToAddress(operatorCfg.BlsPublicKeyCompendiumAddress),
+				common.HexToAddress(operatorCfg.ELDelegationManagerAddress),
 				ethClient,
 				logger,
 			)
@@ -85,26 +81,14 @@ func StatusCmd(p utils.Prompter) *cli.Command {
 			}
 
 			if status {
-				fmt.Printf("Operator is registered on EigenLayer %s\n", utils.EmojiCheckMark)
+				fmt.Printf("%s Operator is registered on EigenLayer\n", utils.EmojiCheckMark)
 				operatorDetails, err := reader.GetOperatorDetails(callOpts, operatorCfg.Operator)
 				if err != nil {
 					return err
 				}
 				printOperatorDetails(operatorDetails)
-				hash, err := reader.GetOperatorPubkeyHash(callOpts, operatorCfg.Operator)
-				if err != nil {
-					return err
-				}
-				if hash == [32]byte{} {
-					fmt.Printf(
-						"Operator BLS pubkey is empty, please run the register command again %s\n",
-						utils.EmojiCrossMark,
-					)
-					return nil
-				}
-				fmt.Printf("Operator BLS pubkey hash registered on EigenLayer %s\n", utils.EmojiCheckMark)
 			} else {
-				fmt.Printf("Operator is not registered %s\n", utils.EmojiCrossMark)
+				fmt.Printf("%s Operator is not registered to EigenLayer\n", utils.EmojiCrossMark)
 			}
 			return nil
 		},

@@ -28,7 +28,7 @@ func CreateCmd(p utils.Prompter) *cli.Command {
 		Both of these are needed for operator registration
 		`,
 		Action: func(ctx *cli.Context) error {
-			op := types.OperatorConfig{}
+			op := types.OperatorConfigNew{}
 
 			// Prompt user to generate empty or non-empty files
 			populate, err := p.Confirm("Would you like to populate the operator config file?")
@@ -66,7 +66,7 @@ func CreateCmd(p utils.Prompter) *cli.Command {
 			}
 
 			fmt.Println(
-				"Created operator.yaml and metadata.json files. Please fill in the smart contract configuration details(el_slasher_address and bls_public_key_compendium_address) provided by EigenLayer team. ",
+				"Created operator.yaml and metadata.json files. Please make sure configuration details(el_delegation_manager_address) is correct based on network by checking our docs.",
 			)
 			fmt.Println(
 				"Please fill in the metadata.json file and upload it to a public url. Then update the operator.yaml file with the url (metadata_url).",
@@ -81,7 +81,7 @@ func CreateCmd(p utils.Prompter) *cli.Command {
 	return createCmd
 }
 
-func promptOperatorInfo(config *types.OperatorConfig, p utils.Prompter) (types.OperatorConfig, error) {
+func promptOperatorInfo(config *types.OperatorConfigNew, p utils.Prompter) (types.OperatorConfigNew, error) {
 	// Prompt and set operator address
 	operatorAddress, err := p.InputString("Enter your operator address:", "", "",
 		func(s string) error {
@@ -89,7 +89,7 @@ func promptOperatorInfo(config *types.OperatorConfig, p utils.Prompter) (types.O
 		},
 	)
 	if err != nil {
-		return types.OperatorConfig{}, err
+		return types.OperatorConfigNew{}, err
 	}
 	config.Operator.Address = operatorAddress
 
@@ -134,7 +134,7 @@ func promptOperatorInfo(config *types.OperatorConfig, p utils.Prompter) (types.O
 		},
 	)
 	if err != nil {
-		return types.OperatorConfig{}, err
+		return types.OperatorConfigNew{}, err
 	}
 	config.Operator.EarningsReceiverAddress = earningsAddress
 
@@ -143,7 +143,7 @@ func promptOperatorInfo(config *types.OperatorConfig, p utils.Prompter) (types.O
 		func(s string) error { return nil },
 	)
 	if err != nil {
-		return types.OperatorConfig{}, err
+		return types.OperatorConfigNew{}, err
 	}
 	config.EthRPCUrl = rpcUrl
 
@@ -152,34 +152,30 @@ func promptOperatorInfo(config *types.OperatorConfig, p utils.Prompter) (types.O
 		func(s string) error { return nil },
 	)
 	if err != nil {
-		return types.OperatorConfig{}, err
+		return types.OperatorConfigNew{}, err
 	}
 	config.PrivateKeyStorePath = ecdsaKeyPath
-
-	// Prompt for bls key path
-	blsKeyPath, err := p.InputString("Enter your bls key path:", "", "",
-		func(s string) error { return nil },
-	)
-	if err != nil {
-		return types.OperatorConfig{}, err
-	}
-	config.BlsPrivateKeyStorePath = blsKeyPath
 
 	// Prompt for network & set chainId
 	chainId, err := p.Select("Select your network:", []string{"mainnet", "goerli", "holesky", "local"})
 	if err != nil {
-		return types.OperatorConfig{}, err
+		return types.OperatorConfigNew{}, err
 	}
 
 	switch chainId {
 	case "mainnet":
-		config.ChainId = *big.NewInt(1)
+		config.ChainId = *big.NewInt(utils.MainnetChainId)
+		config.ELDelegationManagerAddress = utils.ChainMetadataMap[utils.MainnetChainId].ELDelegationManagerAddress
 	case "goerli":
-		config.ChainId = *big.NewInt(5)
+		config.ChainId = *big.NewInt(utils.GoerliChainId)
+		config.ELDelegationManagerAddress = utils.ChainMetadataMap[utils.GoerliChainId].ELDelegationManagerAddress
 	case "holesky":
-		config.ChainId = *big.NewInt(17000)
+		config.ChainId = *big.NewInt(utils.HoleskyChainId)
+		config.ELDelegationManagerAddress = utils.ChainMetadataMap[utils.HoleskyChainId].ELDelegationManagerAddress
 	case "local":
-		config.ChainId = *big.NewInt(31337)
+		config.ChainId = *big.NewInt(utils.LocalChainId)
+		config.ELDelegationManagerAddress = utils.ChainMetadataMap[utils.LocalChainId].ELDelegationManagerAddress
+
 	}
 
 	config.SignerType = types.LocalKeystoreSigner

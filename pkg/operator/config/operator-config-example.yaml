@@ -20,13 +20,9 @@ operator:
   staker_opt_out_window_blocks: 0
   metadata_url: https://example.com/metadata.json
 
-# EigenLayer Slasher contract address
+# EigenLayer Delegation manager contract address
 # This will be provided by EigenLayer team
-el_slasher_address: 
-
-# Address of BLS Public Key Compendium contract
-# This will be provided by EigenLayer team
-bls_public_key_compendium_address:
+el_delegation_manager_address:
 
 # ETH RPC URL to the ethereum node you are using for on-chain operations
 eth_rpc_url: http://localhost:8545
@@ -37,9 +33,6 @@ signer_type: local_keystore
 
 # Full path to local ecdsa private key store file
 private_key_store_path: <path-to>/test.ecdsa.key.json
-
-# Full path to local bls private key store file
-bls_private_key_store_path: <path-to>/test.bls.key.json
 
 # Chain ID: 1 for mainnet, 5 for Goerli, 17000 for holesky, 31337 for local
 chain_id: 5

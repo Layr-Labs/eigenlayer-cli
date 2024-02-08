@@ -7,13 +7,11 @@ import (
 	"github.com/Layr-Labs/eigensdk-go/chainio/txmgr"
 	"github.com/Layr-Labs/eigensdk-go/signerv2"
 
-	"github.com/Layr-Labs/eigenlayer-cli/pkg/types"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 	elContracts "github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/eth"
 	eigensdkLogger "github.com/Layr-Labs/eigensdk-go/logging"
 	"github.com/Layr-Labs/eigensdk-go/metrics"
-	eigensdkUtils "github.com/Layr-Labs/eigensdk-go/utils"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/urfave/cli/v2"
 )
@@ -39,15 +37,14 @@ func UpdateCmd(p utils.Prompter) *cli.Command {
 			}
 
 			configurationFilePath := args.Get(0)
-			var operatorCfg types.OperatorConfig
-			err := eigensdkUtils.ReadYamlConfig(configurationFilePath, &operatorCfg)
+			operatorCfg, err := validateAndMigrateConfigFile(configurationFilePath)
 			if err != nil {
 				return err
 			}
 			fmt.Printf(
-				"Operator configuration file read successfully %s %s\n",
-				operatorCfg.Operator.Address,
+				"%s Operator configuration file read successfully %s\n",
 				utils.EmojiCheckMark,
+				operatorCfg.Operator.Address,
 			)
 
 			logger, err := eigensdkLogger.NewZapLogger(eigensdkLogger.Development)
@@ -66,7 +63,7 @@ func UpdateCmd(p utils.Prompter) *cli.Command {
 				},
 			)
 			if err != nil {
-				fmt.Println("Error while reading ecdsa key password")
+				fmt.Printf("%s Error while reading ecdsa key password\n", utils.EmojiCrossMark)
 				return err
 			}
 
@@ -83,8 +80,7 @@ func UpdateCmd(p utils.Prompter) *cli.Command {
 			noopMetrics := metrics.NewNoopMetrics()
 
 			elWriter, err := elContracts.BuildELChainWriter(
-				common.HexToAddress(operatorCfg.ELSlasherAddress),
-				common.HexToAddress(operatorCfg.BlsPublicKeyCompendiumAddress),
+				common.HexToAddress(operatorCfg.ELDelegationManagerAddress),
 				ethClient,
 				logger,
 				noopMetrics,
@@ -96,16 +92,16 @@ func UpdateCmd(p utils.Prompter) *cli.Command {
 
 			receipt, err := elWriter.UpdateOperatorDetails(context.Background(), operatorCfg.Operator)
 			if err != nil {
-				logger.Errorf("Error while updating operator details: %s", utils.EmojiCrossMark)
+				fmt.Printf("%s Error while updating operator details\n", utils.EmojiCrossMark)
 				return err
 			}
-			logger.Infof(
-				"Operator details updated at: %s %s",
-				getTransactionLink(receipt.TxHash.String(), &operatorCfg.ChainId),
+			fmt.Printf(
+				"%s Operator details updated at: %s\n",
 				utils.EmojiCheckMark,
+				getTransactionLink(receipt.TxHash.String(), &operatorCfg.ChainId),
 			)
 
-			logger.Infof("Operator updated successfully %s", utils.EmojiCheckMark)
+			fmt.Printf("%s Operator updated successfully\n", utils.EmojiCheckMark)
 			return nil
 		},
 	}
