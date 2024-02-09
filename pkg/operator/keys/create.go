@@ -196,6 +196,7 @@ func saveEcdsaKey(keyName string, p utils.Prompter, privateKey *ecdsa.PrivateKey
 
 	return displayWithLess(fileLoc, privateKeyHex, fileLoc, publicKeyHex, address, KeyTypeECDSA)
 }
+
 func displayWithLess(filePath, privateKeyHex, fileLoc, publicKeyHex, address, keyType string) error {
     var message, border, keyLine string
     tabSpace := "    " 
