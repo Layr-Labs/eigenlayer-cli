@@ -132,17 +132,15 @@ func saveBlsKey(keyName string, p utils.Prompter, keyPair *bls.KeyPair, insecure
 		return err
 	}
 
-	err = keyPair.SaveToFile(fileLoc, password)
-	if err != nil {
-		return err
-	}
-	// TODO: display it using `less` of `vi` so that it is not saved in terminal history
-	fmt.Println("BLS Private Key: " + keyPair.PrivKey.String())
-	fmt.Println("Please backup the above private key in safe place.")
-	fmt.Println()
-	fmt.Println("BLS Pub key: " + keyPair.PubKey.String())
-	fmt.Println("Key location: " + fileLoc)
-	return nil
+    err = keyPair.SaveToFile(fileLoc, password)
+    if err != nil {
+        return err
+    }
+
+    privateKeyHex := keyPair.PrivKey.String()
+    publicKeyHex := keyPair.PubKey.String()
+
+    return displayWithLess(fileLoc, privateKeyHex, fileLoc, publicKeyHex, "", KeyTypeBLS)
 }
 
 func saveEcdsaKey(keyName string, p utils.Prompter, privateKey *ecdsa.PrivateKey, insecure bool) error {
