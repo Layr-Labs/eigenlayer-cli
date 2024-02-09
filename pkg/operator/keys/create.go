@@ -185,20 +185,17 @@ func saveEcdsaKey(keyName string, p utils.Prompter, privateKey *ecdsa.PrivateKey
 	}
 
 	privateKeyHex := hex.EncodeToString(privateKey.D.Bytes())
-	// TODO: display it using `less` of `vi` so that it is not saved in terminal history
-	fmt.Println("ECDSA Private Key (Hex): ", privateKeyHex)
-	fmt.Println("\033[1;32m🔐 Please backup the above private key hex in a safe place 🔒\033[0m")
-	fmt.Println("Key location: " + fileLoc)
 	publicKey := privateKey.Public()
 	publicKeyECDSA, ok := publicKey.(*ecdsa.PublicKey)
 	if !ok {
-		return err
+		return errors.New("error casting public key to ECDSA public key")
 	}
 	publicKeyBytes := crypto.FromECDSAPub(publicKeyECDSA)
-	fmt.Println("Public Key hex: ", hexutil.Encode(publicKeyBytes)[4:])
+	publicKeyHex := hexutil.Encode(publicKeyBytes)[4:]
 	address := crypto.PubkeyToAddress(*publicKeyECDSA).Hex()
-	fmt.Println("Ethereum Address", address)
-	return nil
+
+	return displayWithLess(fileLoc, privateKeyHex, fileLoc, publicKeyHex, address, KeyTypeECDSA)
+}
 }
 
 func checkIfKeyExists(fileLoc string) bool {
