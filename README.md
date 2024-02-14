@@ -49,7 +49,10 @@ curl -sSfL https://raw.githubusercontent.com/layr-labs/eigenlayer-cli/master/scr
 ## Install `eigenlayer` CLI using Go
 
 First, install the Go programming language following the [official instructions](https://go.dev/doc/install). You need at least the `1.21` version.
-
+## Check Go Version
+```bash
+go version
+```
 > Eigenlayer is only supported on **Linux**. Make sure you install Go for Linux in a Linux environment (e.g. WSL2, Docker, etc.)
 
 This command will install the `eigenlayer` executable along with the library and its dependencies in your system:
