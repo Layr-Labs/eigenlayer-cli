@@ -26,6 +26,10 @@ EigenLayer CLI is used to manage core operator functionalities like local key ma
 
 
 ## Install `eigenlayer` CLI using a binary
+```bash
+sudo apt update && sudo apt upgrade -y
+```
+
 To download a binary for the latest release, run:
 ```bash
 curl -sSfL https://raw.githubusercontent.com/layr-labs/eigenlayer-cli/master/scripts/install.sh | sh -s
@@ -55,6 +59,9 @@ This command will install the `eigenlayer` executable along with the library and
 
 ```bash
 go install github.com/Layr-Labs/eigenlayer-cli/cmd/eigenlayer@latest
+```
+```bash
+go version
 ```
 
 The executable will be in your `$GOBIN` (`$GOPATH/bin`).
