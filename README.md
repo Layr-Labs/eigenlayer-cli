@@ -103,7 +103,7 @@ sudo cp eigenlayer-cli/build/eigenlayer /usr/local/bin/
 ## Documentation
 Please refer to the full documentation [here](https://docs.eigenlayer.xyz/operator-guides/operator-installation).
 
-Links to specific sections are provided below.
+Links to specific sections are provided below : 
 * [Create Keys](https://docs.eigenlayer.xyz/operator-guides/operator-installation#create-keys)
 * [Import Keys](https://docs.eigenlayer.xyz/operator-guides/operator-installation#import-keys)
 * [List Keys](https://docs.eigenlayer.xyz/operator-guides/operator-installation#list-keys)
