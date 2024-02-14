@@ -37,7 +37,7 @@ To add the binary to your path, run:
 export PATH=$PATH:~/bin
 ```
 
-### Installing in a custom location
+## Installing in a custom location
 To download the binary in a custom location, run:
 ```bash
 curl -sSfL https://raw.githubusercontent.com/layr-labs/eigenlayer-cli/master/scripts/install.sh | sh -s -- -b <custom_location>
