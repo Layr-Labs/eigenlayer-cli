@@ -2,7 +2,7 @@
 ![Linter](https://github.com/Layr-Labs/eigenlayer-cli/actions/workflows/golangci-lint.yml/badge.svg)
 ![Build](https://github.com/Layr-Labs/eigenlayer-cli/actions/workflows/build.yml/badge.svg)
 
-# EigenLayer CLI
+## EigenLayer CLI
 
 EigenLayer CLI is used to manage core operator functionalities like local key management, operator registration and updates.
 
@@ -24,7 +24,10 @@ EigenLayer CLI is used to manage core operator functionalities like local key ma
 | Darwin           | amd64        |
 | Darwin           | arm64        |
 
-
+## Update Your Machine
+```bash
+sudo apt update && sudo apt upgrade -y
+```
 ## Install `eigenlayer` CLI using a binary
 To download a binary for the latest release, run:
 ```bash
