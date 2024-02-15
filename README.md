@@ -49,18 +49,19 @@ curl -sSfL https://raw.githubusercontent.com/layr-labs/eigenlayer-cli/master/scr
 ## Install `eigenlayer` CLI using Go
 
 First, install the Go programming language following the [official instructions](https://go.dev/doc/install). You need at least the `1.21` version.
-## Check Go Version
+
+> Eigenlayer is only supported on **Linux**. Make sure you install Go for Linux in a Linux environment (e.g. WSL2, Docker, etc.)
+ ## Check Go Version
 ```bash
 go version
 ```
-> Eigenlayer is only supported on **Linux**. Make sure you install Go for Linux in a Linux environment (e.g. WSL2, Docker, etc.)
 
 This command will install the `eigenlayer` executable along with the library and its dependencies in your system:
 
 > As the repository is private, you need to set the `GOPRIVATE` variable properly by running the following command: `export GOPRIVATE=github.com/Layr-Labs/eigenlayer-cli,$GOPRIVATE`. Git will automatically resolve the private access if your Git user has all the required permissions over the repository.
 
 ```bash
-go install github.com/Layr-Labs/eigenlayer-cli/cmd/eigenlayer@latest
+git clone https://github.com/Layr-Labs/eigenlayer-cli.git && mv eigenlayer-cli eigenlayer
 ```
 
 The executable will be in your `$GOBIN` (`$GOPATH/bin`).
