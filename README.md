@@ -24,10 +24,8 @@ EigenLayer CLI is used to manage core operator functionalities like local key ma
 | Darwin           | amd64        |
 | Darwin           | arm64        |
 
-## Update Your Machine
-```bash
-sudo apt update && sudo apt upgrade -y
-```
+
+
 ## Install `eigenlayer` CLI using a binary
 To download a binary for the latest release, run:
 ```bash
