@@ -29,6 +29,9 @@ use --key-type ecdsa/bls to import ecdsa/bls key.
 It will prompt for password to encrypt the key, which is optional but highly recommended.
 If you want to import a key with weak/no password, use --insecure flag. Do NOT use those keys in production
 
+This command also support piping the password from stdin.
+For example: echo "password" | eigenlayer keys import --key-type ecdsa keyname privateKey
+
 This command will import keys in $HOME/.eigenlayer/operator_keys/ location
 		`,
 		Flags: []cli.Flag{

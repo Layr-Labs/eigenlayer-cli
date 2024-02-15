@@ -43,6 +43,9 @@ use --key-type ecdsa/bls to create ecdsa/bls key.
 It will prompt for password to encrypt the key, which is optional but highly recommended.
 If you want to create a key with weak/no password, use --insecure flag. Do NOT use those keys in production
 
+This command also support piping the password from stdin.
+For example: echo "password" | eigenlayer keys create --key-type ecdsa keyname
+
 This command will create keys in $HOME/.eigenlayer/operator_keys/ location
 		`,
 		Flags: []cli.Flag{
