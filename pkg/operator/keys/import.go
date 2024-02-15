@@ -52,6 +52,9 @@ This command will import keys in $HOME/.eigenlayer/operator_keys/ location
 				return err
 			}
 
+			// Check if input is available in the pipe and read the password from it
+			stdInPassword := getStdInPassword()
+
 			keyType := ctx.String(KeyTypeFlag.Name)
 			insecure := ctx.Bool(InsecureFlag.Name)
 
@@ -62,7 +65,7 @@ This command will import keys in $HOME/.eigenlayer/operator_keys/ location
 				if err != nil {
 					return err
 				}
-				return saveEcdsaKey(keyName, p, privateKeyPair, insecure)
+				return saveEcdsaKey(keyName, p, privateKeyPair, insecure, stdInPassword)
 			case KeyTypeBLS:
 				privateKeyBigInt := new(big.Int)
 				_, ok := privateKeyBigInt.SetString(privateKey, 10)
@@ -88,7 +91,7 @@ This command will import keys in $HOME/.eigenlayer/operator_keys/ location
 						return err
 					}
 				}
-				return saveBlsKey(keyName, p, blsKeyPair, insecure)
+				return saveBlsKey(keyName, p, blsKeyPair, insecure, stdInPassword)
 			default:
 				return ErrInvalidKeyType
 			}

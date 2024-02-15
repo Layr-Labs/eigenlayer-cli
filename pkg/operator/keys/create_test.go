@@ -31,7 +31,7 @@ func TestCreateCmd(t *testing.T) {
 		{
 			name: "key-name flag not set",
 			args: []string{},
-			err:  errors.New("Required flag \"key-type\" not set"),
+			err:  errors.New("required flag \"key-type\" not set"),
 		},
 		{
 			name: "more than one argument",

@@ -1,6 +1,7 @@
 package keys
 
 import (
+	"bufio"
 	"crypto/ecdsa"
 	"encoding/hex"
 	"errors"
@@ -60,6 +61,9 @@ This command will create keys in $HOME/.eigenlayer/operator_keys/ location
 				return err
 			}
 
+			// Check if input is available in the pipe and read the password from it
+			stdInPassword := getStdInPassword()
+
 			keyType := ctx.String(KeyTypeFlag.Name)
 			insecure := ctx.Bool(InsecureFlag.Name)
 
@@ -69,13 +73,13 @@ This command will create keys in $HOME/.eigenlayer/operator_keys/ location
 				if err != nil {
 					return err
 				}
-				return saveEcdsaKey(keyName, p, privateKey, insecure)
+				return saveEcdsaKey(keyName, p, privateKey, insecure, stdInPassword)
 			case KeyTypeBLS:
 				blsKeyPair, err := bls.GenRandomBlsKeys()
 				if err != nil {
 					return err
 				}
-				return saveBlsKey(keyName, p, blsKeyPair, insecure)
+				return saveBlsKey(keyName, p, blsKeyPair, insecure, stdInPassword)
 			default:
 				return ErrInvalidKeyType
 			}
@@ -96,7 +100,7 @@ func validateKeyName(keyName string) error {
 	return nil
 }
 
-func saveBlsKey(keyName string, p utils.Prompter, keyPair *bls.KeyPair, insecure bool) error {
+func saveBlsKey(keyName string, p utils.Prompter, keyPair *bls.KeyPair, insecure bool, stdInPassword string) error {
 	homePath, err := os.UserHomeDir()
 	if err != nil {
 		return err
@@ -106,28 +110,21 @@ func saveBlsKey(keyName string, p utils.Prompter, keyPair *bls.KeyPair, insecure
 	if checkIfKeyExists(fileLoc) {
 		return errors.New("key name already exists. Please choose a different name")
 	}
-	password, err := p.InputHiddenString("Enter password to encrypt the bls private key:", "",
-		func(s string) error {
-			if insecure {
-				return nil
-			}
-			return validatePassword(s)
-		},
-	)
-	if err != nil {
-		return err
-	}
 
-	_, err = p.InputHiddenString("Please confirm your password:", "",
-		func(s string) error {
-			if s != password {
-				return errors.New("passwords are not matched")
+	var password string
+	if len(stdInPassword) == 0 {
+		password, err = getPasswordFromPrompt(p, insecure, "Enter password to encrypt the bls private key:")
+		if err != nil {
+			return err
+		}
+	} else {
+		password = stdInPassword
+		if !insecure {
+			err = validatePassword(password)
+			if err != nil {
+				return err
 			}
-			return nil
-		},
-	)
-	if err != nil {
-		return err
+		}
 	}
 
 	err = keyPair.SaveToFile(fileLoc, password)
@@ -136,14 +133,20 @@ func saveBlsKey(keyName string, p utils.Prompter, keyPair *bls.KeyPair, insecure
 	}
 	// TODO: display it using `less` of `vi` so that it is not saved in terminal history
 	fmt.Println("BLS Private Key: " + keyPair.PrivKey.String())
-	fmt.Println("Please backup the above private key in safe place.")
+	fmt.Println("\033[1;32m🔐 Please backup the above private key hex in a safe place 🔒\033[0m")
 	fmt.Println()
-	fmt.Println("BLS Pub key: " + keyPair.PubKey.String())
 	fmt.Println("Key location: " + fileLoc)
+	fmt.Println("BLS Pub key: " + keyPair.PubKey.String())
 	return nil
 }
 
-func saveEcdsaKey(keyName string, p utils.Prompter, privateKey *ecdsa.PrivateKey, insecure bool) error {
+func saveEcdsaKey(
+	keyName string,
+	p utils.Prompter,
+	privateKey *ecdsa.PrivateKey,
+	insecure bool,
+	stdInPassword string,
+) error {
 	homePath, err := os.UserHomeDir()
 	if err != nil {
 		return err
@@ -154,29 +157,20 @@ func saveEcdsaKey(keyName string, p utils.Prompter, privateKey *ecdsa.PrivateKey
 		return errors.New("key name already exists. Please choose a different name")
 	}
 
-	password, err := p.InputHiddenString("Enter password to encrypt the ecdsa private key:", "",
-		func(s string) error {
-			if insecure {
-				return nil
+	var password string
+	if len(stdInPassword) == 0 {
+		password, err = getPasswordFromPrompt(p, insecure, "Enter password to encrypt the ecdsa private key:")
+		if err != nil {
+			return err
+		}
+	} else {
+		password = stdInPassword
+		if !insecure {
+			err = validatePassword(password)
+			if err != nil {
+				return err
 			}
-			return validatePassword(s)
-		},
-	)
-	if err != nil {
-		return err
-	}
-
-	_, err = p.InputHiddenString("Please confirm your password:", "",
-
-		func(s string) error {
-			if s != password {
-				return errors.New("passwords are not matched")
-			}
-			return nil
-		},
-	)
-	if err != nil {
-		return err
+		}
 	}
 
 	err = sdkEcdsa.WriteKey(fileLoc, privateKey, password)
@@ -188,6 +182,7 @@ func saveEcdsaKey(keyName string, p utils.Prompter, privateKey *ecdsa.PrivateKey
 	// TODO: display it using `less` of `vi` so that it is not saved in terminal history
 	fmt.Println("ECDSA Private Key (Hex): ", privateKeyHex)
 	fmt.Println("\033[1;32m🔐 Please backup the above private key hex in a safe place 🔒\033[0m")
+	fmt.Println()
 	fmt.Println("Key location: " + fileLoc)
 	publicKey := privateKey.Public()
 	publicKeyECDSA, ok := publicKey.(*ecdsa.PublicKey)
@@ -199,6 +194,44 @@ func saveEcdsaKey(keyName string, p utils.Prompter, privateKey *ecdsa.PrivateKey
 	address := crypto.PubkeyToAddress(*publicKeyECDSA).Hex()
 	fmt.Println("Ethereum Address", address)
 	return nil
+}
+
+func getStdInPassword() string {
+	stat, _ := os.Stdin.Stat()
+	if (stat.Mode() & os.ModeCharDevice) == 0 {
+		// Input is available in the pipe, read from it
+		scanner := bufio.NewScanner(os.Stdin)
+		if scanner.Scan() {
+			return scanner.Text()
+		}
+	}
+	return ""
+}
+
+func getPasswordFromPrompt(p utils.Prompter, insecure bool, prompt string) (string, error) {
+	password, err := p.InputHiddenString(prompt, "",
+		func(s string) error {
+			if insecure {
+				return nil
+			}
+			return validatePassword(s)
+		},
+	)
+	if err != nil {
+		return "", err
+	}
+	_, err = p.InputHiddenString("Please confirm your password:", "",
+		func(s string) error {
+			if s != password {
+				return errors.New("passwords are not matched")
+			}
+			return nil
+		},
+	)
+	if err != nil {
+		return "", err
+	}
+	return password, nil
 }
 
 func checkIfKeyExists(fileLoc string) bool {
