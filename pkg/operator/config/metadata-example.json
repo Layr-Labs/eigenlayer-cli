@@ -1,7 +1,7 @@
 {
   "name": "Some operator",
-  "website": "https://www.example.com",
+  "website": "https://www.example.com (Optionally)",
   "description": "I operate on some data",
-  "logo": "https://www.example.com/logo.png",
+  "logo": "https://www.example.com/logo.png (Must have .png extension)",
   "twitter": "https://x.com/example"
 }
