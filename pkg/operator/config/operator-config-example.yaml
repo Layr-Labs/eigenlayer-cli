@@ -22,7 +22,7 @@ operator:
 
 # EigenLayer Delegation manager contract address
 # This will be provided by EigenLayer team
-el_delegation_manager_address:
+el_delegation_manager_address: 0x1b7b8F6b258f95Cf9596EabB9aa18B62940Eb0a8
 
 # ETH RPC URL to the ethereum node you are using for on-chain operations
 eth_rpc_url: http://localhost:8545
