@@ -140,7 +140,8 @@ func saveBlsKey(keyName string, p utils.Prompter, keyPair *bls.KeyPair, insecure
     privateKeyHex := keyPair.PrivKey.String()
     publicKeyHex := keyPair.PubKey.String()
 
-    return displayWithLess(fileLoc, privateKeyHex, fileLoc, publicKeyHex, "", KeyTypeBLS)
+    fmt.Printf("\nKey location: %s\nPublic Key: %s\n\n", fileLoc, publicKeyHex)
+    return displayWithLess(privateKeyHex, KeyTypeBLS)
 }
 
 func saveEcdsaKey(keyName string, p utils.Prompter, privateKey *ecdsa.PrivateKey, insecure bool) error {
