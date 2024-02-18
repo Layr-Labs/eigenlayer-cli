@@ -199,7 +199,7 @@ func saveEcdsaKey(keyName string, p utils.Prompter, privateKey *ecdsa.PrivateKey
     return displayWithLess(privateKeyHex, KeyTypeECDSA)
 }
 
-func displayWithLess(filePath, privateKeyHex, fileLoc, publicKeyHex, address, keyType string) error {
+func displayWithLess(privateKeyHex string, keyType string) error {
     var message, border, keyLine string
     tabSpace := "    " 
 
@@ -222,16 +222,10 @@ ECDSA Private Key (Hex):
 
 🔐 Please backup the above private key hex in a safe place 🔒
 
-Key location: %s
-
-Public Key hex: %s
-
-Ethereum Address: %s
-
-`, border, paddingLine, keyLine, paddingLine, border, fileLoc, publicKeyHex, address)
+`, border, paddingLine, keyLine, paddingLine, border)
     } else if keyType == KeyTypeBLS {
         message = fmt.Sprintf(`
-BLS Private Key Information:
+BLS Private Key (Hex):
 
 %s
 %s
@@ -239,15 +233,9 @@ BLS Private Key Information:
 %s
 %s
 
-🔐 Please backup the above private key in a safe place 🔒
+🔐 Please backup the above private key hex in a safe place 🔒
 
-Public Key: %s
-
-Key location: %s
-
-`, border, paddingLine, keyLine, paddingLine, border, publicKeyHex, fileLoc)
-    } else {
-        return fmt.Errorf("unsupported key type: %s", keyType)
+`, border, paddingLine, keyLine, paddingLine, border)
     }
 
     cmd := exec.Command("less", "-R")
