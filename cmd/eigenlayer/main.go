@@ -23,7 +23,7 @@ func main() {
 
 	app.Name = "eigenlayer"
 	app.Usage = "EigenLayer CLI"
-	app.Version = "0.6.1"
+	app.Version = "0.6.2"
 	app.Copyright = "(c) 2024 EigenLabs"
 
 	// Initialize the dependencies
