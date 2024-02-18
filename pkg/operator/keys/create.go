@@ -195,7 +195,8 @@ func saveEcdsaKey(keyName string, p utils.Prompter, privateKey *ecdsa.PrivateKey
 	publicKeyHex := hexutil.Encode(publicKeyBytes)[4:]
 	address := crypto.PubkeyToAddress(*publicKeyECDSA).Hex()
 
-	return displayWithLess(fileLoc, privateKeyHex, fileLoc, publicKeyHex, address, KeyTypeECDSA)
+    fmt.Printf("\nKey location: %s\nPublic Key hex: %s\nEthereum Address: %s\n\n", fileLoc, publicKeyHex, address)
+    return displayWithLess(privateKeyHex, KeyTypeECDSA)
 }
 
 func displayWithLess(filePath, privateKeyHex, fileLoc, publicKeyHex, address, keyType string) error {
