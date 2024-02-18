@@ -132,6 +132,16 @@ func saveBlsKey(keyName string, p utils.Prompter, keyPair *bls.KeyPair, insecure
 		}
 	}
 
+	err = keyPair.SaveToFile(fileLoc, password)
+    if err != nil {
+        return err
+    }
+
+    privateKeyHex := keyPair.PrivKey.String()
+    publicKeyHex := keyPair.PubKey.String()
+
+    fmt.Printf("\nKey location: %s\nPublic Key: %s\n\n", fileLoc, publicKeyHex)
+    return displayWithLess(privateKeyHex, KeyTypeBLS)
 }
 
 func saveEcdsaKey(
