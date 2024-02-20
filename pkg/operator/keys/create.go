@@ -7,8 +7,10 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"regexp"
+	"strings"
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 	"github.com/Layr-Labs/eigensdk-go/crypto/bls"
@@ -131,16 +133,15 @@ func saveBlsKey(keyName string, p utils.Prompter, keyPair *bls.KeyPair, insecure
 	}
 
 	err = keyPair.SaveToFile(fileLoc, password)
-	if err != nil {
-		return err
-	}
-	// TODO: display it using `less` of `vi` so that it is not saved in terminal history
-	fmt.Println("BLS Private Key: " + keyPair.PrivKey.String())
-	fmt.Println("\033[1;32m🔐 Please backup the above private key hex in a safe place 🔒\033[0m")
-	fmt.Println()
-	fmt.Println("Key location: " + fileLoc)
-	fmt.Println("BLS Pub key: " + keyPair.PubKey.String())
-	return nil
+    if err != nil {
+        return err
+    }
+
+    privateKeyHex := keyPair.PrivKey.String()
+    publicKeyHex := keyPair.PubKey.String()
+
+    fmt.Printf("\nKey location: %s\nPublic Key: %s\n\n", fileLoc, publicKeyHex)
+    return displayWithLess(privateKeyHex, KeyTypeBLS)
 }
 
 func saveEcdsaKey(
@@ -182,21 +183,85 @@ func saveEcdsaKey(
 	}
 
 	privateKeyHex := hex.EncodeToString(privateKey.D.Bytes())
-	// TODO: display it using `less` of `vi` so that it is not saved in terminal history
-	fmt.Println("ECDSA Private Key (Hex): ", privateKeyHex)
-	fmt.Println("\033[1;32m🔐 Please backup the above private key hex in a safe place 🔒\033[0m")
-	fmt.Println()
-	fmt.Println("Key location: " + fileLoc)
+
 	publicKey := privateKey.Public()
 	publicKeyECDSA, ok := publicKey.(*ecdsa.PublicKey)
 	if !ok {
-		return err
+		return errors.New("error casting public key to ECDSA public key")
 	}
 	publicKeyBytes := crypto.FromECDSAPub(publicKeyECDSA)
-	fmt.Println("Public Key hex: ", hexutil.Encode(publicKeyBytes)[4:])
+	publicKeyHex := hexutil.Encode(publicKeyBytes)[4:]
 	address := crypto.PubkeyToAddress(*publicKeyECDSA).Hex()
-	fmt.Println("Ethereum Address", address)
-	return nil
+
+    fmt.Printf("\nKey location: %s\nPublic Key hex: %s\nEthereum Address: %s\n\n", fileLoc, publicKeyHex, address)
+    return displayWithLess(privateKeyHex, KeyTypeECDSA)
+}
+
+func displayWithLess(privateKeyHex string, keyType string) error {
+    var message, border, keyLine string
+    tabSpace := "    " 
+
+    keyContent := tabSpace + privateKeyHex + tabSpace
+    borderLength := len(keyContent) + 4
+    border = strings.Repeat("/", borderLength)
+    paddingLine := "//" + strings.Repeat(" ", borderLength-4) + "//"
+
+    keyLine = fmt.Sprintf("//%s//", keyContent)
+
+    if keyType == KeyTypeECDSA {
+        message = fmt.Sprintf(`
+ECDSA Private Key (Hex):
+
+%s
+%s
+%s
+%s
+%s
+
+🔐 Please backup the above private key hex in a safe place 🔒
+
+`, border, paddingLine, keyLine, paddingLine, border)
+    } else if keyType == KeyTypeBLS {
+        message = fmt.Sprintf(`
+BLS Private Key (Hex):
+
+%s
+%s
+%s
+%s
+%s
+
+🔐 Please backup the above private key hex in a safe place 🔒
+
+`, border, paddingLine, keyLine, paddingLine, border)
+    }
+
+    cmd := exec.Command("less", "-R")
+    cmd.Stdout = os.Stdout
+    cmd.Stderr = os.Stderr
+
+    stdin, err := cmd.StdinPipe()
+    if err != nil {
+        return fmt.Errorf("error creating stdin pipe: %w", err)
+    }
+
+    if err := cmd.Start(); err != nil {
+        return fmt.Errorf("error starting less command: %w", err)
+    }
+
+    if _, err := stdin.Write([]byte(message)); err != nil {
+        return fmt.Errorf("error writing message to less command: %w", err)
+    }
+
+    if err := stdin.Close(); err != nil {
+        return fmt.Errorf("error closing stdin pipe: %w", err)
+    }
+
+    if err := cmd.Wait(); err != nil {
+        return fmt.Errorf("error waiting for less command: %w", err)
+    }
+
+    return nil
 }
 
 func getStdInPassword() string {
