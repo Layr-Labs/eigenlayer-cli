@@ -150,7 +150,7 @@ func validateAndMigrateConfigFile(path string) (*types.OperatorConfigNew, error)
 	var operatorCfgOld types.OperatorConfig
 	err := utils.ReadYamlConfig(path, &operatorCfgOld)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to read or parse the YAML configuration file at '%s': %w", path, err)
 	}
 	if operatorCfgOld.ELSlasherAddress != "" || operatorCfgOld.BlsPublicKeyCompendiumAddress != "" {
 		fmt.Printf("%s Old config detected, migrating to new config\n", utils.EmojiCheckMark)

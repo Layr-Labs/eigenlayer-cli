@@ -99,6 +99,29 @@ sudo cp $GOPATH/bin/eigenlayer /usr/local/bin/
 # Build from source
 sudo cp eigenlayer-cli/build/eigenlayer /usr/local/bin/
 ```
+## Update `eigenlayer` CLI from source
+To update your eigenlayer CLI, go to its local repository, pull updates, and rebuild
+```bash
+cd eigenlayer-cli  
+git pull origin master
+```
+Rebuild the eigenlayer binary with the latest changes:
+```bash
+# If using Go directly
+go build -o build/eigenlayer cmd/eigenlayer/main.go
+```
+```bash
+# Or if you're using make
+make build
+```
+Replace the existing binary in your system with the newly built one:
+```bash
+sudo cp build/eigenlayer /usr/local/bin/eigenlayer
+```
+Verify the update by checking the version of eigenlayer:
+```bash
+eigenlayer --version
+```
 
 ## Documentation
 Please refer to the full documentation [here](https://docs.eigenlayer.xyz/operator-guides/operator-installation).
