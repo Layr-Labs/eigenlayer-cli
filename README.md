@@ -14,6 +14,7 @@ EigenLayer CLI is used to manage core operator functionalities like local key ma
   * [Install `eigenlayer` CLI using Go](#install-eigenlayer-cli-using-go)
   * [Install `eigenlayer` CLI from source](#install-eigenlayer-cli-from-source)
   * [Documentation](#documentation)
+  * [Release Process](#release-process)
 <!-- TOC -->
 
 ## Supported Operating Systems
