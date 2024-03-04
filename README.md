@@ -116,3 +116,20 @@ Links to specific sections are provided below.
 * [Troubleshooting](https://docs.eigenlayer.xyz/operator-guides/troubleshooting)
 
 If you see any issues in documentation please create an issue or PR [here](https://github.com/Layr-Labs/eigenlayer-docs)
+
+## Release Process
+To release a new version of the CLI, follow the steps below:
+> Note: You need to have write permission to this repo to release new version
+
+1. Make sure the release version is updated [here](https://github.com/Layr-Labs/eigenlayer-cli/blob/master/cmd/eigenlayer/main.go#L26)
+2. In your local clone, create a new release tag using the following command:```bash
+    ```bash
+     git tag v<version> -m "Release v<version>"
+    ```
+3. Push the tag to the repository using the following command:
+    ```bash
+    git push origin v<version>
+    ```
+   
+4. This will automatically start the release process in the [GitHub Actions](https://github.com/Layr-Labs/eigenlayer-cli/actions/workflows/release.yml) and will create a draft release to the [GitHub Releases](https://github.com/Layr-Labs/eigenlayer-cli/releases) with all the required binaries and assets
+5. Check the release notes and add any notable changes and publish the release
