@@ -22,7 +22,8 @@ EOF
   exit 2
 }
 
-RUN_COMPLETIONS=true
+# Don't run completion setup by default
+RUN_COMPLETIONS=false
 
 parse_args() {
   #BINDIR is ./bin unless set be ENV
