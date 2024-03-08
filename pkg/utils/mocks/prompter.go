@@ -5,6 +5,7 @@
 //
 //	mockgen -destination=mocks/prompter.go -package=mocks github.com/Layr-Labs/eigenlayer-cli/pkg/utils Prompter
 //
+
 // Package mocks is a generated GoMock package.
 package mocks
 

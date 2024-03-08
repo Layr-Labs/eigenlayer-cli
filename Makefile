@@ -14,7 +14,7 @@ build: ## Compile the binary
 	@go build -o bin/$(APP_NAME) cmd/$(APP_NAME)/main.go
 
 mocks: ## generates mocks
-	go install go.uber.org/mock/mockgen@v0.3.0
+	go install go.uber.org/mock/mockgen@v0.4.0
 	go generate ./...
 
 tests: ## runs all tests

@@ -49,10 +49,11 @@ func (config OperatorConfig) MarshalYAML() (interface{}, error) {
 type OperatorConfigNew struct {
 	Operator                   eigensdkTypes.Operator `yaml:"operator"`
 	ELDelegationManagerAddress string                 `yaml:"el_delegation_manager_address"`
-	EthRPCUrl                  string                 `yaml:"eth_rpc_url"`
-	PrivateKeyStorePath        string                 `yaml:"private_key_store_path"`
-	SignerType                 SignerType             `yaml:"signer_type"`
-	ChainId                    big.Int                `yaml:"chain_id"`
+	ELAVSDirectoryAddress      string
+	EthRPCUrl                  string     `yaml:"eth_rpc_url"`
+	PrivateKeyStorePath        string     `yaml:"private_key_store_path"`
+	SignerType                 SignerType `yaml:"signer_type"`
+	ChainId                    big.Int    `yaml:"chain_id"`
 }
 
 func (config OperatorConfigNew) MarshalYAML() (interface{}, error) {
