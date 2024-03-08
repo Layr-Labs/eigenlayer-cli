@@ -192,17 +192,21 @@ func validateAndMigrateConfigFile(path string) (*types.OperatorConfigNew, error)
 			return nil, err
 		}
 	}
-	operatorCfg.ELAVSDirectoryAddress = getAVSDirectoryAddress(operatorCfg.ChainId)
+	elAVSDirectoryAddress, err := getAVSDirectoryAddress(operatorCfg.ChainId)
+	if err != nil {
+		return nil, err
+	}
+	operatorCfg.ELAVSDirectoryAddress = elAVSDirectoryAddress
 	return &operatorCfg, nil
 }
 
-func getAVSDirectoryAddress(chainID big.Int) string {
+func getAVSDirectoryAddress(chainID big.Int) (string, error) {
 	chainIDInt := chainID.Int64()
 	chainMetadata, ok := utils.ChainMetadataMap[chainIDInt]
 	if !ok {
-		return ""
+		return "", fmt.Errorf("chain ID %d not supported", chainIDInt)
 	} else {
-		return chainMetadata.ELAVSDirectoryAddress
+		return chainMetadata.ELAVSDirectoryAddress, nil
 	}
 }
 
