@@ -81,6 +81,7 @@ func UpdateCmd(p utils.Prompter) *cli.Command {
 
 			elWriter, err := elContracts.BuildELChainWriter(
 				common.HexToAddress(operatorCfg.ELDelegationManagerAddress),
+				common.HexToAddress(operatorCfg.ELAVSDirectoryAddress),
 				ethClient,
 				logger,
 				noopMetrics,

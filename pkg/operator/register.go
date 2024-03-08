@@ -97,6 +97,7 @@ func RegisterCmd(p utils.Prompter) *cli.Command {
 
 			elWriter, err := elContracts.BuildELChainWriter(
 				common.HexToAddress(operatorCfg.ELDelegationManagerAddress),
+				common.HexToAddress(operatorCfg.ELAVSDirectoryAddress),
 				ethClient,
 				logger,
 				noopMetrics,
@@ -108,6 +109,7 @@ func RegisterCmd(p utils.Prompter) *cli.Command {
 
 			reader, err := elContracts.BuildELChainReader(
 				common.HexToAddress(operatorCfg.ELDelegationManagerAddress),
+				common.HexToAddress(operatorCfg.ELAVSDirectoryAddress),
 				ethClient,
 				logger,
 			)
@@ -190,7 +192,18 @@ func validateAndMigrateConfigFile(path string) (*types.OperatorConfigNew, error)
 			return nil, err
 		}
 	}
+	operatorCfg.ELAVSDirectoryAddress = getAVSDirectoryAddress(operatorCfg.ChainId)
 	return &operatorCfg, nil
+}
+
+func getAVSDirectoryAddress(chainID big.Int) string {
+	chainIDInt := chainID.Int64()
+	chainMetadata, ok := utils.ChainMetadataMap[chainIDInt]
+	if !ok {
+		return ""
+	} else {
+		return chainMetadata.ELAVSDirectoryAddress
+	}
 }
 
 func getTransactionLink(txHash string, chainId *big.Int) string {
