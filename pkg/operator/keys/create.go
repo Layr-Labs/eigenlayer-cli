@@ -67,7 +67,7 @@ This command will create keys in $HOME/.eigenlayer/operator_keys/ location
 			}
 
 			// Check if input is available in the pipe and read the password from it
-			stdInPassword := getStdInPassword()
+			stdInPassword, readFromPipe := getStdInPassword()
 
 			keyType := ctx.String(KeyTypeFlag.Name)
 			insecure := ctx.Bool(InsecureFlag.Name)
@@ -78,13 +78,13 @@ This command will create keys in $HOME/.eigenlayer/operator_keys/ location
 				if err != nil {
 					return err
 				}
-				return saveEcdsaKey(keyName, p, privateKey, insecure, stdInPassword)
+				return saveEcdsaKey(keyName, p, privateKey, insecure, stdInPassword, readFromPipe)
 			case KeyTypeBLS:
 				blsKeyPair, err := bls.GenRandomBlsKeys()
 				if err != nil {
 					return err
 				}
-				return saveBlsKey(keyName, p, blsKeyPair, insecure, stdInPassword)
+				return saveBlsKey(keyName, p, blsKeyPair, insecure, stdInPassword, readFromPipe)
 			default:
 				return ErrInvalidKeyType
 			}
@@ -105,7 +105,14 @@ func validateKeyName(keyName string) error {
 	return nil
 }
 
-func saveBlsKey(keyName string, p utils.Prompter, keyPair *bls.KeyPair, insecure bool, stdInPassword string) error {
+func saveBlsKey(
+	keyName string,
+	p utils.Prompter,
+	keyPair *bls.KeyPair,
+	insecure bool,
+	stdInPassword string,
+	readFromPipe bool,
+) error {
 	homePath, err := os.UserHomeDir()
 	if err != nil {
 		return err
@@ -117,7 +124,7 @@ func saveBlsKey(keyName string, p utils.Prompter, keyPair *bls.KeyPair, insecure
 	}
 
 	var password string
-	if len(stdInPassword) == 0 {
+	if !readFromPipe {
 		password, err = getPasswordFromPrompt(p, insecure, "Enter password to encrypt the bls private key:")
 		if err != nil {
 			return err
@@ -150,6 +157,7 @@ func saveEcdsaKey(
 	privateKey *ecdsa.PrivateKey,
 	insecure bool,
 	stdInPassword string,
+	readFromPipe bool,
 ) error {
 	homePath, err := os.UserHomeDir()
 	if err != nil {
@@ -162,7 +170,7 @@ func saveEcdsaKey(
 	}
 
 	var password string
-	if len(stdInPassword) == 0 {
+	if !readFromPipe {
 		password, err = getPasswordFromPrompt(p, insecure, "Enter password to encrypt the ecdsa private key:")
 		if err != nil {
 			return err
@@ -264,16 +272,16 @@ BLS Private Key (Hex):
 	return nil
 }
 
-func getStdInPassword() string {
+func getStdInPassword() (string, bool) {
 	stat, _ := os.Stdin.Stat()
 	if (stat.Mode() & os.ModeCharDevice) == 0 {
 		// Input is available in the pipe, read from it
 		scanner := bufio.NewScanner(os.Stdin)
 		if scanner.Scan() {
-			return scanner.Text()
+			return scanner.Text(), true
 		}
 	}
-	return ""
+	return "", false
 }
 
 func getPasswordFromPrompt(p utils.Prompter, insecure bool, prompt string) (string, error) {
