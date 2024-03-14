@@ -1,0 +1,11 @@
+operator:
+  address: 0xcaB1b44dd1f1C265405878Ac1179cd94D0dBA634
+  earnings_receiver_address: 0xcaB1b44dd1f1C265405878Ac1179cd94D0dBA634
+  delegation_approver_address: "0x0000000000000000000000000000000000000000"
+  staker_opt_out_window_blocks: 0
+  metadata_url: https://madhur-test-public.s3.us-east-2.amazonaws.com/metadata.json
+el_delegation_manager_address: 0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9
+eth_rpc_url: http://localhost:8545
+private_key_store_path: /root/.eigenlayer/operator_keys/opr0.ecdsa.key.json
+signer_type: local_keystore
+chain_id: 31337
