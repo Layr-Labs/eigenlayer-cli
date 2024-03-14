@@ -1,7 +1,6 @@
 package keys
 
 import (
-	"bufio"
 	"crypto/ecdsa"
 	"encoding/hex"
 	"errors"
@@ -67,7 +66,7 @@ This command will create keys in $HOME/.eigenlayer/operator_keys/ location
 			}
 
 			// Check if input is available in the pipe and read the password from it
-			stdInPassword, readFromPipe := getStdInPassword()
+			stdInPassword, readFromPipe := utils.GetStdInPassword()
 
 			keyType := ctx.String(KeyTypeFlag.Name)
 			insecure := ctx.Bool(InsecureFlag.Name)
@@ -270,18 +269,6 @@ BLS Private Key (Hex):
 	}
 
 	return nil
-}
-
-func getStdInPassword() (string, bool) {
-	stat, _ := os.Stdin.Stat()
-	if (stat.Mode() & os.ModeCharDevice) == 0 {
-		// Input is available in the pipe, read from it
-		scanner := bufio.NewScanner(os.Stdin)
-		if scanner.Scan() {
-			return scanner.Text(), true
-		}
-	}
-	return "", false
 }
 
 func getPasswordFromPrompt(p utils.Prompter, insecure bool, prompt string) (string, error) {

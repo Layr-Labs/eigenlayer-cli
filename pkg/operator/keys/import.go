@@ -56,7 +56,7 @@ This command will import keys in $HOME/.eigenlayer/operator_keys/ location
 			}
 
 			// Check if input is available in the pipe and read the password from it
-			stdInPassword, readFromPipe := getStdInPassword()
+			stdInPassword, readFromPipe := utils.GetStdInPassword()
 
 			keyType := ctx.String(KeyTypeFlag.Name)
 			insecure := ctx.Bool(InsecureFlag.Name)

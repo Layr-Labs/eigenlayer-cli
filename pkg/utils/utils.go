@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"bufio"
 	"errors"
 	"log"
 	"os"
@@ -41,4 +42,16 @@ func ReadYamlConfig(path string, o interface{}) error {
 	}
 
 	return yaml.Unmarshal(b, o)
+}
+
+func GetStdInPassword() (string, bool) {
+	stat, _ := os.Stdin.Stat()
+	if (stat.Mode() & os.ModeCharDevice) == 0 {
+		// Input is available in the pipe, read from it
+		scanner := bufio.NewScanner(os.Stdin)
+		if scanner.Scan() {
+			return scanner.Text(), true
+		}
+	}
+	return "", false
 }
