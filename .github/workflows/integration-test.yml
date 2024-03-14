@@ -52,3 +52,8 @@ jobs:
         run: |
           cd eigenlayer-cli
           echo "" | ./bin/eigenlayer operator register operator-ci.yaml
+
+      - name: Check operator status
+        run: |
+          cd eigenlayer-cli
+          ./bin/eigenlayer operator status operator-ci.yaml
