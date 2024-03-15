@@ -1,0 +1,59 @@
+name: integration-test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  Test:
+    name: Integration Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+      - name: Checkout incredible squaring
+        uses: actions/checkout@v4
+        with:
+            repository: layr-labs/incredible-squaring-avs
+            token: ${{ github.token }}
+            ref: master
+      - name: Run anvil chain
+        run: |
+          nohup make start-anvil-chain-with-el-and-avs-deployed > nohup.out 2>&1 &
+          sleep 5
+      - name: Install EigenLayer CLI
+        uses: actions/checkout@v4
+        with:
+            path: eigenlayer-cli
+      - name: Install less
+        run: |
+          sudo apt update
+          sudo apt-get install less
+      - name: Install EigenLayer CLI
+        run: |
+          cd eigenlayer-cli
+          make build
+          ./bin/eigenlayer --version
+
+      - name: Import Operator Keys and send funds
+        run: |
+          cd eigenlayer-cli
+          echo "" | ./bin/eigenlayer operator keys import --key-type ecdsa --insecure opr0 ea25637d76e7ddae9dab9bfac7467d76a1e3bf2d67941b267edc60f2b80d9413 | cat
+          cast send 0xcaB1b44dd1f1C265405878Ac1179cd94D0dBA634 --value 10ether --private-key 0x2a871d0798f97d79848a013d4936a73bf4cc922c825d33c1cf7073dff6d409c6
+
+      - name: Register Operator
+        run: |
+          cd eigenlayer-cli
+          echo "" | ./bin/eigenlayer operator register operator-ci.yaml
+
+      - name: Check operator status
+        run: |
+          cd eigenlayer-cli
+          ./bin/eigenlayer operator status operator-ci.yaml

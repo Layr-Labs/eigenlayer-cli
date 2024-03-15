@@ -73,14 +73,18 @@ func RegisterCmd(p utils.Prompter) *cli.Command {
 				return err
 			}
 
-			ecdsaPassword, err := p.InputHiddenString("Enter password to decrypt the ecdsa private key:", "",
-				func(password string) error {
-					return nil
-				},
-			)
-			if err != nil {
-				fmt.Println("Error while reading ecdsa key password")
-				return err
+			// Check if input is available in the pipe and read the password from it
+			ecdsaPassword, readFromPipe := utils.GetStdInPassword()
+			if !readFromPipe {
+				ecdsaPassword, err = p.InputHiddenString("Enter password to decrypt the ecdsa private key:", "",
+					func(password string) error {
+						return nil
+					},
+				)
+				if err != nil {
+					fmt.Println("Error while reading ecdsa key password")
+					return err
+				}
 			}
 
 			signerCfg := signerv2.Config{

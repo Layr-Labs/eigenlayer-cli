@@ -5,7 +5,7 @@ go 1.21
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
 	github.com/Layr-Labs/eigensdk-go v0.1.1
-	github.com/ethereum/go-ethereum v1.13.12
+	github.com/ethereum/go-ethereum v1.13.14
 	github.com/stretchr/testify v1.9.0
 	github.com/urfave/cli/v2 v2.27.1
 	github.com/wagslane/go-password-validator v0.3.0
@@ -37,13 +37,12 @@ require (
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.18 // indirect
-	github.com/matttproud/golang_protobuf_extensions/v2 v2.0.0 // indirect
 	github.com/mgutz/ansi v0.0.0-20170206155736-9520e82c474b // indirect
 	github.com/mmcloughlin/addchain v0.4.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/prometheus/client_golang v1.18.0 // indirect
+	github.com/prometheus/client_golang v1.19.0 // indirect
 	github.com/prometheus/client_model v0.5.0 // indirect
-	github.com/prometheus/common v0.45.0 // indirect
+	github.com/prometheus/common v0.48.0 // indirect
 	github.com/prometheus/procfs v0.12.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/shirou/gopsutil v3.21.4-0.20210419000835-c7a38de76ee5+incompatible // indirect
@@ -52,15 +51,15 @@ require (
 	github.com/tklauser/numcpus v0.6.1 // indirect
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	go.uber.org/zap v1.26.0 // indirect
-	golang.org/x/crypto v0.17.0 // indirect
+	go.uber.org/zap v1.27.0 // indirect
+	golang.org/x/crypto v0.18.0 // indirect
 	golang.org/x/exp v0.0.0-20231110203233-9a3e6036ecaa // indirect
-	golang.org/x/mod v0.14.0 // indirect
+	golang.org/x/mod v0.16.0 // indirect
 	golang.org/x/sync v0.5.0 // indirect
 	golang.org/x/sys v0.16.0 // indirect
-	golang.org/x/term v0.15.0 // indirect
+	golang.org/x/term v0.16.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/tools v0.15.0 // indirect
-	google.golang.org/protobuf v1.31.0 // indirect
+	google.golang.org/protobuf v1.32.0 // indirect
 	rsc.io/tmplfunc v0.0.3 // indirect
 )
