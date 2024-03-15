@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
-	github.com/Layr-Labs/eigensdk-go v0.1.1
+	github.com/Layr-Labs/eigensdk-go v0.1.2
 	github.com/ethereum/go-ethereum v1.13.14
 	github.com/stretchr/testify v1.9.0
 	github.com/urfave/cli/v2 v2.27.1
@@ -31,6 +31,7 @@ require (
 	github.com/ethereum/c-kzg-4844 v0.4.0 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
+	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/holiman/uint256 v1.2.4 // indirect
