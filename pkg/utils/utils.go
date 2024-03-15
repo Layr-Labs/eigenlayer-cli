@@ -15,7 +15,8 @@ import (
 var ChainMetadataMap = map[int64]types.ChainMetadata{
 	MainnetChainId: {
 		BlockExplorerUrl:           "https://etherscan.io/tx",
-		ELDelegationManagerAddress: "",
+		ELDelegationManagerAddress: "0x39053D51B77DC0d36036Fc1fCc8Cb819df8Ef37A",
+		ELAVSDirectoryAddress:      "",
 	},
 	GoerliChainId: {
 		BlockExplorerUrl:           "https://goerli.etherscan.io/tx",
@@ -25,10 +26,12 @@ var ChainMetadataMap = map[int64]types.ChainMetadata{
 	HoleskyChainId: {
 		BlockExplorerUrl:           "https://holesky.etherscan.io/tx",
 		ELDelegationManagerAddress: "",
+		ELAVSDirectoryAddress:      "",
 	},
 	LocalChainId: {
 		BlockExplorerUrl:           "",
 		ELDelegationManagerAddress: "",
+		ELAVSDirectoryAddress:      "",
 	},
 }
 
