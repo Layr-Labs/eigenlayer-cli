@@ -25,8 +25,8 @@ var ChainMetadataMap = map[int64]types.ChainMetadata{
 	},
 	HoleskyChainId: {
 		BlockExplorerUrl:           "https://holesky.etherscan.io/tx",
-		ELDelegationManagerAddress: "",
-		ELAVSDirectoryAddress:      "",
+		ELDelegationManagerAddress: "0xA44151489861Fe9e3055d95adC98FbD462B948e7",
+		ELAVSDirectoryAddress:      "0x055733000064333CaDDbC92763c58BF0192fFeBf",
 	},
 	LocalChainId: {
 		BlockExplorerUrl:           "",
