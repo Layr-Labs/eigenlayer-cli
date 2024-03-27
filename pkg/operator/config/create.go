@@ -27,22 +27,28 @@ func CreateCmd(p utils.Prompter) *cli.Command {
 
 		Both of these are needed for operator registration
 		`,
+		Flags: []cli.Flag{
+			&YesFlag,
+		},
 		Action: func(ctx *cli.Context) error {
+			skipPrompt := ctx.Bool(YesFlag.Name)
+
 			op := types.OperatorConfigNew{}
 
-			// Prompt user to generate empty or non-empty files
-			populate, err := p.Confirm("Would you like to populate the operator config file?")
-			if err != nil {
-				return err
-			}
-
-			if populate {
-				op, err = promptOperatorInfo(&op, p)
+			if !skipPrompt {
+				// Prompt user to generate empty or non-empty files
+				populate, err := p.Confirm("Would you like to populate the operator config file?")
 				if err != nil {
 					return err
 				}
-			}
 
+				if populate {
+					op, err = promptOperatorInfo(&op, p)
+					if err != nil {
+						return err
+					}
+				}
+			}
 			yamlData, err := yaml.Marshal(&op)
 			if err != nil {
 				return err
