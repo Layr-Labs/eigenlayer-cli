@@ -56,6 +56,10 @@ func RegisterCmd(p utils.Prompter) *cli.Command {
 				return fmt.Errorf("%w: with error %s", ErrInvalidYamlFile, err)
 			}
 
+			if operatorCfg.ELDelegationManagerAddress == "" {
+				return fmt.Errorf("\n%w: ELDelegationManagerAddress is not set", ErrInvalidYamlFile)
+			}
+
 			fmt.Printf(
 				"\r%s Operator configuration file validated successfully %s\n",
 				utils.EmojiCheckMark,
