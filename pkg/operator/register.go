@@ -53,6 +53,17 @@ func RegisterCmd(p utils.Prompter) *cli.Command {
 			if err != nil {
 				return err
 			}
+			fmt.Printf(
+				"%s Operator configuration file read successfully %s\n",
+				utils.EmojiCheckMark,
+				operatorCfg.Operator.Address,
+			)
+			fmt.Printf("%s validating operator config: %s ... ", utils.EmojiWait, operatorCfg.Operator.Address)
+
+			err = operatorCfg.Operator.Validate()
+			if err != nil {
+				return fmt.Errorf("%w: %s", ErrInvalidYamlFile, err.Error())
+			}
 
 			fmt.Printf(
 				"\r%s Operator configuration file validated successfully %s\n",
