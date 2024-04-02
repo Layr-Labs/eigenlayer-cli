@@ -129,11 +129,11 @@ func RegisterCmd(p utils.Prompter) *cli.Command {
 			if !status {
 				receipt, err := elWriter.RegisterAsOperator(ctx, operatorCfg.Operator)
 				if err != nil {
-					fmt.Printf("%s Error while registering operator", utils.EmojiCrossMark)
+					fmt.Printf("%s Error while registering operator\n", utils.EmojiCrossMark)
 					return err
 				}
 				fmt.Printf(
-					"%s Operator registration transaction at: %s",
+					"%s Operator registration transaction at: %s\n",
 					utils.EmojiCheckMark,
 					getTransactionLink(receipt.TxHash.String(), &operatorCfg.ChainId),
 				)
