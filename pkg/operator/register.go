@@ -3,6 +3,7 @@ package operator
 import (
 	"context"
 	"fmt"
+	wallet "github.com/Layr-Labs/eigensdk-go/chainio/clients/wallet"
 	"math/big"
 	"os"
 
@@ -95,7 +96,11 @@ func RegisterCmd(p utils.Prompter) *cli.Command {
 			if err != nil {
 				return err
 			}
-			txMgr := txmgr.NewSimpleTxManager(ethClient, logger, sgn, sender)
+			privateKeyWallet, err := wallet.NewPrivateKeyWallet(ethClient, sgn, sender, logger)
+			if err != nil {
+				return err
+			}
+			txMgr := txmgr.NewSimpleTxManager(privateKeyWallet, ethClient, logger, sender)
 
 			noopMetrics := metrics.NewNoopMetrics()
 
