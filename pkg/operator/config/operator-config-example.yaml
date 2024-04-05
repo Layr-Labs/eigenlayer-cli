@@ -18,7 +18,7 @@ operator:
   # Please refer to this link for more details on this field https://github.com/Layr-Labs/eigenlayer-contracts/blob/92ccacc868785350973afc15e90a18dcd39fbc0b/src/contracts/interfaces/IDelegationManager.sol#L33:
   # Please keep this field to 0, and it can be updated later using EigenLayer CLI
   staker_opt_out_window_blocks: 0
-  metadata_url: https://example.com/metadata.json
+  metadata_url: https://raw.githubusercontent.com/Layr-Labs/eigenlayer-cli/master/pkg/operator/config/metadata-example.json
 
 # EigenLayer Delegation manager contract address
 # This will be provided by EigenLayer team
