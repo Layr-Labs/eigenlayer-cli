@@ -2,10 +2,13 @@ package operator
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
-	wallet "github.com/Layr-Labs/eigensdk-go/chainio/clients/wallet"
 	"math/big"
 	"os"
+
+	eigensdkTypes "github.com/Layr-Labs/eigensdk-go/types"
+	eigenSdkUtils "github.com/Layr-Labs/eigensdk-go/utils"
 
 	"gopkg.in/yaml.v2"
 
@@ -15,8 +18,10 @@ import (
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/types"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
+
 	elContracts "github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/eth"
+	"github.com/Layr-Labs/eigensdk-go/chainio/clients/wallet"
 	eigensdkLogger "github.com/Layr-Labs/eigensdk-go/logging"
 	"github.com/Layr-Labs/eigensdk-go/metrics"
 	"github.com/ethereum/go-ethereum/common"
@@ -54,7 +59,12 @@ func RegisterCmd(p utils.Prompter) *cli.Command {
 
 			err = operatorCfg.Operator.Validate()
 			if err != nil {
-				return fmt.Errorf("%w: with error %s", ErrInvalidYamlFile, err)
+				return fmt.Errorf("%w: with error %s", ErrInvalidYamlFile, err.Error())
+			}
+
+			err = validateMetadata(operatorCfg)
+			if err != nil {
+				return err
 			}
 
 			if operatorCfg.ELDelegationManagerAddress == "" {
@@ -231,4 +241,31 @@ func getTransactionLink(txHash string, chainId *big.Int) string {
 	} else {
 		return fmt.Sprintf("%s/%s", chainMetadata.BlockExplorerUrl, txHash)
 	}
+}
+
+func validateMetadata(operatorCfg *types.OperatorConfigNew) error {
+	// Raw GitHub URL validation is only for mainnet
+	if operatorCfg.ChainId.Cmp(big.NewInt(utils.MainnetChainId)) == 0 {
+		err := eigenSdkUtils.ValidateRawGithubUrl(operatorCfg.Operator.MetadataUrl)
+		if err != nil {
+			return fmt.Errorf("%w: with error %s", ErrInvalidMetadata, err.Error())
+		}
+
+		metadataBytes, err := eigenSdkUtils.ReadPublicURL(operatorCfg.Operator.MetadataUrl)
+		if err != nil {
+			return err
+		}
+
+		var metadata *eigensdkTypes.OperatorMetadata
+		err = json.Unmarshal(metadataBytes, &metadata)
+		if err != nil {
+			return fmt.Errorf("%w: unable to parse metadata with error %s", ErrInvalidMetadata, err.Error())
+		}
+
+		err = eigenSdkUtils.ValidateRawGithubUrl(metadata.Logo)
+		if err != nil {
+			return fmt.Errorf("%w: logo url should be valid github raw url, error %s", ErrInvalidMetadata, err.Error())
+		}
+	}
+	return nil
 }
