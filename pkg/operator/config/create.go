@@ -163,7 +163,7 @@ func promptOperatorInfo(config *types.OperatorConfigNew, p utils.Prompter) (type
 	config.PrivateKeyStorePath = ecdsaKeyPath
 
 	// Prompt for network & set chainId
-	chainId, err := p.Select("Select your network:", []string{"mainnet", "goerli", "holesky", "local"})
+	chainId, err := p.Select("Select your network:", []string{"mainnet", "holesky", "local"})
 	if err != nil {
 		return types.OperatorConfigNew{}, err
 	}
