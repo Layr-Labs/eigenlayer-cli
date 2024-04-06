@@ -204,10 +204,21 @@ func saveEcdsaKey(
 	return displayWithLess(privateKeyHex, KeyTypeECDSA)
 }
 
+func padLeft(str string, length int) string {
+	for len(str) < length {
+		str = "0" + str
+	}
+	return str
+}
+
 func displayWithLess(privateKeyHex string, keyType string) error {
 	var message, border, keyLine string
 	tabSpace := "    "
 
+	// Pad with 0 to match size of 64 bytes
+	if keyType == KeyTypeECDSA {
+		privateKeyHex = padLeft(privateKeyHex, 64)
+	}
 	keyContent := tabSpace + privateKeyHex + tabSpace
 	borderLength := len(keyContent) + 4
 	border = strings.Repeat("/", borderLength)
