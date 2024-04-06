@@ -3,8 +3,8 @@ package operator
 import (
 	"context"
 	"fmt"
-	"github.com/Layr-Labs/eigensdk-go/chainio/clients/wallet"
 
+	"github.com/Layr-Labs/eigensdk-go/chainio/clients/wallet"
 	"github.com/Layr-Labs/eigensdk-go/chainio/txmgr"
 	"github.com/Layr-Labs/eigensdk-go/signerv2"
 
@@ -47,6 +47,16 @@ func UpdateCmd(p utils.Prompter) *cli.Command {
 				utils.EmojiCheckMark,
 				operatorCfg.Operator.Address,
 			)
+
+			err = operatorCfg.Operator.Validate()
+			if err != nil {
+				return fmt.Errorf("%w: with error %s", ErrInvalidYamlFile, err)
+			}
+
+			err = validateMetadata(operatorCfg)
+			if err != nil {
+				return err
+			}
 
 			logger, err := eigensdkLogger.NewZapLogger(eigensdkLogger.Development)
 			if err != nil {
