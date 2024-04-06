@@ -57,3 +57,8 @@ jobs:
         run: |
           cd eigenlayer-cli
           ./bin/eigenlayer operator status operator-ci.yaml
+
+      - name: Update operator details
+        run: |
+          cd eigenlayer-cli
+          echo "" | ./bin/eigenlayer operator update operator-ci.yaml
