@@ -16,7 +16,7 @@ var ChainMetadataMap = map[int64]types.ChainMetadata{
 	MainnetChainId: {
 		BlockExplorerUrl:           "https://etherscan.io/tx",
 		ELDelegationManagerAddress: "0x39053D51B77DC0d36036Fc1fCc8Cb819df8Ef37A",
-		ELAVSDirectoryAddress:      "",
+		ELAVSDirectoryAddress:      "0x135dda560e946695d6f155dacafc6f1f25c1f5af",
 	},
 	GoerliChainId: {
 		BlockExplorerUrl:           "https://goerli.etherscan.io/tx",
