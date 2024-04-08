@@ -2,8 +2,6 @@ github.com/AlecAivazis/survey/v2 v2.3.7 h1:6I/u8FvytdGsgonrYsVn2t8t4QiRnh6QSTqkk
 github.com/AlecAivazis/survey/v2 v2.3.7/go.mod h1:xUTIdE4KCOIjsBAE1JYsUPoCqYdZ1reCfTwbto0Fduo=
 github.com/DataDog/zstd v1.4.5 h1:EndNeuB0l9syBZhut0wns3gV1hL8zX8LIu6ZiVHWLIQ=
 github.com/DataDog/zstd v1.4.5/go.mod h1:1jcaCB/ufaK+sKp1NBhlGmpz41jOoPQ35bpF36t7BBo=
-github.com/Layr-Labs/eigensdk-go v0.1.4-0.20240408182241-f565191ce258 h1:nwdicn2rwjOmMaFY+66s8yzpGYc88M4S7yDNixi5WGU=
-github.com/Layr-Labs/eigensdk-go v0.1.4-0.20240408182241-f565191ce258/go.mod h1:HOSNuZcwaKbP4cnNk9c1hK2B2RitcMQ36Xj2msBBBpE=
 github.com/Layr-Labs/eigensdk-go v0.1.4-0.20240408193328-33241d37ea3a h1:ij62mP2EuzE9PE7Sx8gbjeZ8C+tZPYhymsN0gEyWkiA=
 github.com/Layr-Labs/eigensdk-go v0.1.4-0.20240408193328-33241d37ea3a/go.mod h1:HOSNuZcwaKbP4cnNk9c1hK2B2RitcMQ36Xj2msBBBpE=
 github.com/Microsoft/go-winio v0.6.1 h1:9/kr64B9VUZrLm5YYwbGtUJnMgqWVOdUAXu6Migciow=
