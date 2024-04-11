@@ -1,3 +1,58 @@
+<div align="center">
+<p style="font-size:24px; font-weight: bold;">EigenLayer CLI with YubiHSM2 Support</p>
+<p>
+      <img alt="Tessellated Logo" src="media/tessellated-logo.png" />
+<small>Software by <a href="https://app.eigenlayer.xyz/operator/0x81594b712dd407f03b6e7c18851007fe12924f3d" target="_blank"> Tessellated // tessellated.io</a></small>
+</p>
+</div>
+
+This repository contains a modified version of the [Eigenlayer CLI](https://github.com/Layr-Labs/eigenlayer-cli), but which signs with a [YubiHSM2](https://www.yubico.com/products/hardware-security-module/).
+
+## Commands
+
+### Operator Registration
+Usage:
+```shell
+eigenlayer operator register \
+  <path to operator yaml> \
+  <yubihsm http connector> \
+  <password file for yubihsm auth key> \
+  <auth key id> \
+  <operator key id>
+```
+
+Example: Registering key in slot 1, using auth key in slot 0:
+```shell
+eigenlayer operator register /home/eigenlayer/operator.yaml localhost:12345 /secrets/yubihsm-password 0 1 
+```
+
+### Operator Update:
+Usage:
+```shell
+eigenlayer operator update \
+    <path to operator yaml> \
+    <yubihsm http connector> \
+    <password file for yubihsm auth key> \
+    <auth key id> \
+    <operator key id>
+```
+
+Example: Updating key in slot 1, using auth key in slot 0:
+```shell
+eigenlayer operator update /home/eigenlayer/operator.yaml localhost:12345 /secrets/yubihsm-password 0 1 
+```
+
+## Changelog
+
+The only modifications in this repo are to change the `operator register` and `operator update` commands to use the YubiHSM2. You can easily verify these changes by [comparing the repository branches](https://github.com/Layr-Labs/eigenlayer-cli/compare/master...tessellated-io:eigenlayer-cli:master).
+
+--- 
+_Found this helpful? Consider delegating to [Tessellated on Eigenlayer](https://app.eigenlayer.xyz/operator/0x81594b712dd407f03b6e7c18851007fe12924f3d)!_
+
+Original README below.
+
+---
+
 ![Tests](https://github.com/Layr-Labs/eigenlayer-cli/actions/workflows/tests.yml/badge.svg)
 ![Linter](https://github.com/Layr-Labs/eigenlayer-cli/actions/workflows/golangci-lint.yml/badge.svg)
 ![Build](https://github.com/Layr-Labs/eigenlayer-cli/actions/workflows/build.yml/badge.svg)

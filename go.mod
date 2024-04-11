@@ -5,6 +5,7 @@ go 1.21
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
 	github.com/Layr-Labs/eigensdk-go v0.1.4-0.20240408193328-33241d37ea3a
+	github.com/certusone/yubihsm-go v0.3.0
 	github.com/ethereum/go-ethereum v1.13.14
 	github.com/stretchr/testify v1.9.0
 	github.com/urfave/cli/v2 v2.27.1
@@ -28,6 +29,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/deckarep/golang-set/v2 v2.1.0 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.0.1 // indirect
+	github.com/enceve/crypto v0.0.0-20160707101852-34d48bb93815 // indirect
 	github.com/ethereum/c-kzg-4844 v0.4.0 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
