@@ -172,16 +172,12 @@ func promptOperatorInfo(config *types.OperatorConfigNew, p utils.Prompter) (type
 	case "mainnet":
 		config.ChainId = *big.NewInt(utils.MainnetChainId)
 		config.ELDelegationManagerAddress = utils.ChainMetadataMap[utils.MainnetChainId].ELDelegationManagerAddress
-	case "goerli":
-		config.ChainId = *big.NewInt(utils.GoerliChainId)
-		config.ELDelegationManagerAddress = utils.ChainMetadataMap[utils.GoerliChainId].ELDelegationManagerAddress
 	case "holesky":
 		config.ChainId = *big.NewInt(utils.HoleskyChainId)
 		config.ELDelegationManagerAddress = utils.ChainMetadataMap[utils.HoleskyChainId].ELDelegationManagerAddress
 	case "local":
 		config.ChainId = *big.NewInt(utils.LocalChainId)
 		config.ELDelegationManagerAddress = utils.ChainMetadataMap[utils.LocalChainId].ELDelegationManagerAddress
-
 	}
 
 	config.SignerType = types.LocalKeystoreSigner

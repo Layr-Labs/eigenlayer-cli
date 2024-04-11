@@ -20,12 +20,6 @@ func TestGetTransactionLink(t *testing.T) {
 		expectedTxLink string
 	}{
 		{
-			name:           "Valid goerli tx hash",
-			chainID:        big.NewInt(5),
-			txHash:         "0x123",
-			expectedTxLink: fmt.Sprintf("%s/%s", "https://goerli.etherscan.io/tx", "0x123"),
-		},
-		{
 			name:           "valid mainnet tx hash",
 			chainID:        big.NewInt(1),
 			txHash:         "0x123",

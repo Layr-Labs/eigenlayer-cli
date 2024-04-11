@@ -18,11 +18,6 @@ var ChainMetadataMap = map[int64]types.ChainMetadata{
 		ELDelegationManagerAddress: "0x39053D51B77DC0d36036Fc1fCc8Cb819df8Ef37A",
 		ELAVSDirectoryAddress:      "0x135dda560e946695d6f155dacafc6f1f25c1f5af",
 	},
-	GoerliChainId: {
-		BlockExplorerUrl:           "https://goerli.etherscan.io/tx",
-		ELDelegationManagerAddress: "0x1b7b8F6b258f95Cf9596EabB9aa18B62940Eb0a8",
-		ELAVSDirectoryAddress:      "0x0AC9694c271eFbA6059e9783769e515E8731f935",
-	},
 	HoleskyChainId: {
 		BlockExplorerUrl:           "https://holesky.etherscan.io/tx",
 		ELDelegationManagerAddress: "0xA44151489861Fe9e3055d95adC98FbD462B948e7",
