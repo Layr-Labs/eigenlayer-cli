@@ -35,4 +35,4 @@ signer_type: local_keystore
 private_key_store_path: <path-to>/test.ecdsa.key.json
 
 # Chain ID: 1 for mainnet, 17000 for holesky, 31337 for local
-chain_id: 5
+chain_id: 17000
