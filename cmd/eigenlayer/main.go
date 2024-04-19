@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	Version = "development"
+	version = "development"
 )
 
 func main() {
@@ -27,7 +27,7 @@ func main() {
 
 	app.Name = "eigenlayer"
 	app.Usage = "EigenLayer CLI"
-	app.Version = Version
+	app.Version = version
 	app.Copyright = "(c) 2024 EigenLabs"
 
 	// Initialize the dependencies
