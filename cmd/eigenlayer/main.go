@@ -9,6 +9,10 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
+var (
+	version = "development"
+)
+
 func main() {
 	cli.AppHelpTemplate = fmt.Sprintf(`        
      _______ _                   _                              
@@ -23,7 +27,7 @@ func main() {
 
 	app.Name = "eigenlayer"
 	app.Usage = "EigenLayer CLI"
-	app.Version = "0.7.3"
+	app.Version = version
 	app.Copyright = "(c) 2024 EigenLabs"
 
 	// Initialize the dependencies
