@@ -80,9 +80,14 @@ func CreateCmd(p utils.Prompter) *cli.Command {
 				"|| Please fill in the metadata.json file and upload it to a public url. Then update the operator.yaml file with the url (metadata_url).",
 			)
 			fmt.Printf(
-				"|| %s    Make sure to read and adhere to our webapp content policy here %s before registering your operator. Any violation will be taken seriously and could lead to removal of your operator from our UI %s\n",
+				"|| %s  Make sure to read and adhere to our webapp content policy here %s before registering your operator. Any violation will be taken seriously and could lead to removal of your operator from our UI %s\n",
 				utils.EmojiWarning,
 				"https://docs.eigenlayer.xyz/eigenlayer/operator-guides/operator-content-guidelines",
+				utils.EmojiWarning,
+			)
+			fmt.Printf(
+				"|| %s  Do Not use any EigenLayer brand and logo for your operator. This will result into violation of our content policy  %s\n",
+				utils.EmojiWarning,
 				utils.EmojiWarning,
 			)
 			fmt.Println()
