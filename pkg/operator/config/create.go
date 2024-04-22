@@ -71,14 +71,23 @@ func CreateCmd(p utils.Prompter) *cli.Command {
 				return err
 			}
 
-			fmt.Println(
-				"Created operator.yaml and metadata.json files. Please make sure configuration details(el_delegation_manager_address) is correct based on network by checking our docs.",
+			fmt.Printf(
+				"|| %s Created operator.yaml and metadata.json files. Please make sure configuration details(el_delegation_manager_address) is correct based on network by checking our docs.\n",
+				utils.EmojiCheckMark,
 			)
+			fmt.Println()
 			fmt.Println(
-				"Please fill in the metadata.json file and upload it to a public url. Then update the operator.yaml file with the url (metadata_url).",
+				"|| Please fill in the metadata.json file and upload it to a public url. Then update the operator.yaml file with the url (metadata_url).",
 			)
+			fmt.Printf(
+				"|| %s    Make sure to read and adhere to our webapp content policy here %s before registering your operator. Any violation will be taken seriously and could lead to removal of your operator from our UI %s\n",
+				utils.EmojiWarning,
+				"https://docs.eigenlayer.xyz/eigenlayer/operator-guides/operator-content-guidelines",
+				utils.EmojiWarning,
+			)
+			fmt.Println()
 			fmt.Println(
-				"Once you have filled in the operator.yaml file, you can register your operator using the configuration file.",
+				"|| Once you have filled in the operator.yaml file, you can register your operator using the configuration file.",
 			)
 			return nil
 		},
