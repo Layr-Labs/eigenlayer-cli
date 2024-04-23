@@ -67,6 +67,14 @@ func UpdateCmd(p utils.Prompter) *cli.Command {
 				}
 			}
 
+			// This is to expand the tilde in the path to the home directory
+			// This is not supported by Go's standard library
+			keyFullPath, err := expandTilde(operatorCfg.PrivateKeyStorePath)
+			if err != nil {
+				return err
+			}
+			operatorCfg.PrivateKeyStorePath = keyFullPath
+
 			signerCfg := signerv2.Config{
 				KeystorePath: operatorCfg.PrivateKeyStorePath,
 				Password:     ecdsaPassword,
