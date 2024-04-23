@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"math/big"
 	"os"
+	"os/user"
+	"strings"
 
 	eigensdkTypes "github.com/Layr-Labs/eigensdk-go/types"
 	eigenSdkUtils "github.com/Layr-Labs/eigensdk-go/utils"
@@ -82,6 +84,14 @@ func RegisterCmd(p utils.Prompter) *cli.Command {
 				}
 			}
 
+			// This is to expand the tilde in the path to the home directory
+			// This is not supported by Go's standard library
+			keyFullPath, err := expandTilde(operatorCfg.PrivateKeyStorePath)
+			if err != nil {
+				return err
+			}
+			operatorCfg.PrivateKeyStorePath = keyFullPath
+
 			signerCfg := signerv2.Config{
 				KeystorePath: operatorCfg.PrivateKeyStorePath,
 				Password:     ecdsaPassword,
@@ -148,6 +158,20 @@ func RegisterCmd(p utils.Prompter) *cli.Command {
 	}
 
 	return registerCmd
+}
+
+// expandTilde replaces the tilde (~) in the path with the home directory.
+func expandTilde(path string) (string, error) {
+	if strings.HasPrefix(path, "~") {
+		usr, err := user.Current()
+		if err != nil {
+			return "", err
+		}
+		homeDir := usr.HomeDir
+		// Replace the first instance of ~ with the home directory
+		path = strings.Replace(path, "~", homeDir, 1)
+	}
+	return path, nil
 }
 
 func validateAndReturnConfig(configurationFilePath string) (*types.OperatorConfigNew, error) {
