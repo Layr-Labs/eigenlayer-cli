@@ -46,29 +46,9 @@ func RegisterCmd(p utils.Prompter) *cli.Command {
 			}
 
 			configurationFilePath := args.Get(0)
-			operatorCfg, err := validateAndMigrateConfigFile(configurationFilePath)
+			operatorCfg, err := validateAndReturnConfig(configurationFilePath)
 			if err != nil {
 				return err
-			}
-			fmt.Printf(
-				"%s Operator configuration file read successfully %s\n",
-				utils.EmojiCheckMark,
-				operatorCfg.Operator.Address,
-			)
-			fmt.Printf("%s validating operator config: %s", utils.EmojiWait, operatorCfg.Operator.Address)
-
-			err = operatorCfg.Operator.Validate()
-			if err != nil {
-				return fmt.Errorf("%w: with error %s", ErrInvalidYamlFile, err.Error())
-			}
-
-			err = validateMetadata(operatorCfg)
-			if err != nil {
-				return err
-			}
-
-			if operatorCfg.ELDelegationManagerAddress == "" {
-				return fmt.Errorf("\n%w: ELDelegationManagerAddress is not set", ErrInvalidYamlFile)
 			}
 
 			fmt.Printf(
@@ -168,6 +148,55 @@ func RegisterCmd(p utils.Prompter) *cli.Command {
 	}
 
 	return registerCmd
+}
+
+func validateAndReturnConfig(configurationFilePath string) (*types.OperatorConfigNew, error) {
+	operatorCfg, err := validateAndMigrateConfigFile(configurationFilePath)
+	if err != nil {
+		return nil, err
+	}
+	fmt.Printf(
+		"%s Operator configuration file read successfully %s\n",
+		utils.EmojiCheckMark,
+		operatorCfg.Operator.Address,
+	)
+	fmt.Printf("%s validating operator config: %s", utils.EmojiWait, operatorCfg.Operator.Address)
+
+	err = operatorCfg.Operator.Validate()
+	if err != nil {
+		return nil, fmt.Errorf("%w: with error %s", ErrInvalidYamlFile, err.Error())
+	}
+
+	err = validateMetadata(operatorCfg)
+	if err != nil {
+		return nil, err
+	}
+
+	if operatorCfg.ELDelegationManagerAddress == "" {
+		return nil, fmt.Errorf("\n%w: ELDelegationManagerAddress is not set", ErrInvalidYamlFile)
+	}
+
+	ethClient, err := eth.NewClient(operatorCfg.EthRPCUrl)
+	if err != nil {
+		return nil, err
+	}
+
+	id, err := ethClient.ChainID(context.Background())
+	if err != nil {
+		return nil, err
+	}
+
+	if id.Cmp(&operatorCfg.ChainId) != 0 {
+		return nil, fmt.Errorf(
+			"\r%s %w: chain ID in config file %d does not match the chain ID of the network %d",
+			utils.EmojiCrossMark,
+			ErrInvalidYamlFile,
+			&operatorCfg.ChainId,
+			id,
+		)
+	}
+
+	return operatorCfg, nil
 }
 
 func validateAndMigrateConfigFile(path string) (*types.OperatorConfigNew, error) {

@@ -169,8 +169,15 @@ func promptOperatorInfo(config *types.OperatorConfigNew, p utils.Prompter) (type
 
 	// Prompt for ecdsa key path
 	ecdsaKeyPath, err := p.InputString("Enter your ecdsa key path:", "", "",
-		func(s string) error { return nil },
+		func(s string) error {
+			_, err := os.Stat(s)
+			if os.IsNotExist(err) {
+				return err
+			}
+			return nil
+		},
 	)
+
 	if err != nil {
 		return types.OperatorConfigNew{}, err
 	}
