@@ -48,6 +48,24 @@ func StatusCmd(p utils.Prompter) *cli.Command {
 				return fmt.Errorf("%w: with error %s", ErrInvalidYamlFile, err)
 			}
 
+			ethClient, err := eth.NewClient(operatorCfg.EthRPCUrl)
+			if err != nil {
+				return err
+			}
+			id, err := ethClient.ChainID(context.Background())
+			if err != nil {
+				return err
+			}
+
+			if id.Cmp(&operatorCfg.ChainId) != 0 {
+				return fmt.Errorf(
+					"%w: chain ID in config file %d does not match the chain ID of the network %d",
+					ErrInvalidYamlFile,
+					&operatorCfg.ChainId,
+					id,
+				)
+			}
+
 			fmt.Printf(
 				"\r%s Operator configuration file validated successfully %s\n",
 				utils.EmojiCheckMark,
@@ -55,11 +73,6 @@ func StatusCmd(p utils.Prompter) *cli.Command {
 			)
 
 			logger, err := eigensdkLogger.NewZapLogger(eigensdkLogger.Development)
-			if err != nil {
-				return err
-			}
-
-			ethClient, err := eth.NewClient(operatorCfg.EthRPCUrl)
 			if err != nil {
 				return err
 			}

@@ -38,22 +38,7 @@ func UpdateCmd(p utils.Prompter) *cli.Command {
 			}
 
 			configurationFilePath := args.Get(0)
-			operatorCfg, err := validateAndMigrateConfigFile(configurationFilePath)
-			if err != nil {
-				return err
-			}
-			fmt.Printf(
-				"%s Operator configuration file read successfully %s\n",
-				utils.EmojiCheckMark,
-				operatorCfg.Operator.Address,
-			)
-
-			err = operatorCfg.Operator.Validate()
-			if err != nil {
-				return fmt.Errorf("%w: with error %s", ErrInvalidYamlFile, err)
-			}
-
-			err = validateMetadata(operatorCfg)
+			operatorCfg, err := validateAndReturnConfig(configurationFilePath)
 			if err != nil {
 				return err
 			}
