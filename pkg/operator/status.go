@@ -32,7 +32,7 @@ func StatusCmd(p utils.Prompter) *cli.Command {
 			}
 
 			configurationFilePath := args.Get(0)
-			operatorCfg, err := validateAndMigrateConfigFile(configurationFilePath)
+			operatorCfg, err := readConfigFile(configurationFilePath)
 			if err != nil {
 				return err
 			}

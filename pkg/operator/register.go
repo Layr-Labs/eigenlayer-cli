@@ -5,14 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/big"
-	"os"
 	"os/user"
 	"strings"
 
 	eigensdkTypes "github.com/Layr-Labs/eigensdk-go/types"
 	eigenSdkUtils "github.com/Layr-Labs/eigensdk-go/utils"
-
-	"gopkg.in/yaml.v2"
 
 	"github.com/Layr-Labs/eigensdk-go/chainio/txmgr"
 	"github.com/Layr-Labs/eigensdk-go/signerv2"
@@ -175,7 +172,7 @@ func expandTilde(path string) (string, error) {
 }
 
 func validateAndReturnConfig(configurationFilePath string) (*types.OperatorConfigNew, error) {
-	operatorCfg, err := validateAndMigrateConfigFile(configurationFilePath)
+	operatorCfg, err := readConfigFile(configurationFilePath)
 	if err != nil {
 		return nil, err
 	}
@@ -223,51 +220,13 @@ func validateAndReturnConfig(configurationFilePath string) (*types.OperatorConfi
 	return operatorCfg, nil
 }
 
-func validateAndMigrateConfigFile(path string) (*types.OperatorConfigNew, error) {
-	operatorCfg := types.OperatorConfigNew{}
-	var operatorCfgOld types.OperatorConfig
-	err := utils.ReadYamlConfig(path, &operatorCfgOld)
+func readConfigFile(path string) (*types.OperatorConfigNew, error) {
+	var operatorCfg types.OperatorConfigNew
+	err := utils.ReadYamlConfig(path, &operatorCfg)
 	if err != nil {
 		return nil, err
 	}
-	if operatorCfgOld.ELSlasherAddress != "" || operatorCfgOld.BlsPublicKeyCompendiumAddress != "" {
-		fmt.Printf("%s Old config detected, migrating to new config\n", utils.EmojiCheckMark)
-		chainIDInt := operatorCfgOld.ChainId.Int64()
-		chainMetadata, ok := utils.ChainMetadataMap[chainIDInt]
-		if !ok {
-			return nil, fmt.Errorf("chain ID %d not supported", chainIDInt)
-		}
-		operatorCfg = types.OperatorConfigNew{
-			Operator:                   operatorCfgOld.Operator,
-			ELDelegationManagerAddress: chainMetadata.ELDelegationManagerAddress,
-			EthRPCUrl:                  operatorCfgOld.EthRPCUrl,
-			PrivateKeyStorePath:        operatorCfgOld.PrivateKeyStorePath,
-			SignerType:                 operatorCfgOld.SignerType,
-			ChainId:                    operatorCfgOld.ChainId,
-		}
 
-		fmt.Printf("%s Backing up old config file to %s", utils.EmojiWait, path+".old")
-		err := os.Rename(path, path+".old")
-		if err != nil {
-			return nil, err
-		}
-		fmt.Printf("\r%s Old Config file backed up at %s\n", utils.EmojiCheckMark, path+".old")
-		fmt.Printf("Writing new config to %s", path)
-		yamlData, err := yaml.Marshal(&operatorCfg)
-		if err != nil {
-			return nil, err
-		}
-		err = os.WriteFile(path, yamlData, 0o644)
-		if err != nil {
-			return nil, err
-		}
-		fmt.Printf("\r%s New config file written to %s\n", utils.EmojiCheckMark, path)
-	} else {
-		err = utils.ReadYamlConfig(path, &operatorCfg)
-		if err != nil {
-			return nil, err
-		}
-	}
 	elAVSDirectoryAddress, err := getAVSDirectoryAddress(operatorCfg.ChainId)
 	if err != nil {
 		return nil, err
