@@ -40,6 +40,12 @@ func UpdateCmd(p utils.Prompter) *cli.Command {
 				return err
 			}
 
+			fmt.Printf(
+				"\r%s Operator configuration file validated successfully %s\n",
+				utils.EmojiCheckMark,
+				operatorCfg.Operator.Address,
+			)
+
 			logger, err := eigensdkLogger.NewZapLogger(eigensdkLogger.Development)
 			if err != nil {
 				return err
@@ -51,6 +57,7 @@ func UpdateCmd(p utils.Prompter) *cli.Command {
 			}
 
 			keyWallet, sender, err := getWallet(operatorCfg, ethClient, p, logger)
+			fmt.Println("sender: ", sender)
 			if err != nil {
 				return err
 			}
