@@ -192,6 +192,9 @@ func getWallet(
 			cfg.FireblocksConfig.VaultAccountName,
 			logger,
 		)
+		if err != nil {
+			return nil, common.Address{}, err
+		}
 		sender, err = keyWallet.SenderAddress(context.Background())
 		if err != nil {
 			return nil, common.Address{}, err
