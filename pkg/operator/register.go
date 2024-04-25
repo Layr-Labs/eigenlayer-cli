@@ -7,9 +7,12 @@ import (
 	"math/big"
 	"os/user"
 	"strings"
+	"time"
 
 	eigensdkTypes "github.com/Layr-Labs/eigensdk-go/types"
 	eigenSdkUtils "github.com/Layr-Labs/eigensdk-go/utils"
+
+	"github.com/Layr-Labs/eigensdk-go/chainio/clients/fireblocks"
 
 	"github.com/Layr-Labs/eigensdk-go/chainio/txmgr"
 	"github.com/Layr-Labs/eigensdk-go/signerv2"
@@ -67,41 +70,12 @@ func RegisterCmd(p utils.Prompter) *cli.Command {
 				return err
 			}
 
-			// Check if input is available in the pipe and read the password from it
-			ecdsaPassword, readFromPipe := utils.GetStdInPassword()
-			if !readFromPipe {
-				ecdsaPassword, err = p.InputHiddenString("Enter password to decrypt the ecdsa private key:", "",
-					func(password string) error {
-						return nil
-					},
-				)
-				if err != nil {
-					fmt.Println("Error while reading ecdsa key password")
-					return err
-				}
+			keyWallet, sender, err := getWallet(operatorCfg, ethClient, p, logger)
+			if err != nil {
+				return err
 			}
 
-			// This is to expand the tilde in the path to the home directory
-			// This is not supported by Go's standard library
-			keyFullPath, err := expandTilde(operatorCfg.PrivateKeyStorePath)
-			if err != nil {
-				return err
-			}
-			operatorCfg.PrivateKeyStorePath = keyFullPath
-
-			signerCfg := signerv2.Config{
-				KeystorePath: operatorCfg.PrivateKeyStorePath,
-				Password:     ecdsaPassword,
-			}
-			sgn, sender, err := signerv2.SignerFromConfig(signerCfg, &operatorCfg.ChainId)
-			if err != nil {
-				return err
-			}
-			privateKeyWallet, err := wallet.NewPrivateKeyWallet(ethClient, sgn, sender, logger)
-			if err != nil {
-				return err
-			}
-			txMgr := txmgr.NewSimpleTxManager(privateKeyWallet, ethClient, logger, sender)
+			txMgr := txmgr.NewSimpleTxManager(keyWallet, ethClient, logger, sender)
 
 			noopMetrics := metrics.NewNoopMetrics()
 
@@ -155,6 +129,78 @@ func RegisterCmd(p utils.Prompter) *cli.Command {
 	}
 
 	return registerCmd
+}
+
+func getWallet(
+	cfg *types.OperatorConfigNew,
+	ethClient eth.Client,
+	p utils.Prompter,
+	logger eigensdkLogger.Logger,
+) (wallet.Wallet, common.Address, error) {
+	var keyWallet wallet.Wallet
+	var sender common.Address
+	if cfg.SignerType == types.LocalKeystoreSigner {
+		// Check if input is available in the pipe and read the password from it
+		ecdsaPassword, readFromPipe := utils.GetStdInPassword()
+		var err error
+		if !readFromPipe {
+			ecdsaPassword, err = p.InputHiddenString("Enter password to decrypt the ecdsa private key:", "",
+				func(password string) error {
+					return nil
+				},
+			)
+			if err != nil {
+				fmt.Println("Error while reading ecdsa key password")
+				return nil, common.Address{}, err
+			}
+		}
+
+		// This is to expand the tilde in the path to the home directory
+		// This is not supported by Go's standard library
+		keyFullPath, err := expandTilde(cfg.PrivateKeyStorePath)
+		if err != nil {
+			return nil, common.Address{}, err
+		}
+		cfg.PrivateKeyStorePath = keyFullPath
+
+		signerCfg := signerv2.Config{
+			KeystorePath: cfg.PrivateKeyStorePath,
+			Password:     ecdsaPassword,
+		}
+		sgn, sender, err := signerv2.SignerFromConfig(signerCfg, &cfg.ChainId)
+		if err != nil {
+			return nil, common.Address{}, err
+		}
+		keyWallet, err = wallet.NewPrivateKeyWallet(ethClient, sgn, sender, logger)
+		if err != nil {
+			return nil, common.Address{}, err
+		}
+	} else if cfg.SignerType == types.FireBlocksSigner {
+		fireblocksClient, err := fireblocks.NewClient(
+			cfg.FireblocksConfig.APIKey,
+			[]byte(cfg.FireblocksConfig.SecretKey),
+			cfg.FireblocksConfig.BaseUrl,
+			3*time.Second,
+			logger,
+		)
+		if err != nil {
+			return nil, common.Address{}, err
+		}
+		keyWallet, err = wallet.NewFireblocksWallet(
+			fireblocksClient,
+			ethClient,
+			cfg.FireblocksConfig.VaultAccountName,
+			logger,
+		)
+		sender, err = keyWallet.SenderAddress(context.Background())
+		if err != nil {
+			return nil, common.Address{}, err
+		}
+	} else {
+		return nil, common.Address{}, fmt.Errorf("%s signer is not supported", cfg.SignerType)
+	}
+
+	return keyWallet, sender, nil
 }
 
 // expandTilde replaces the tilde (~) in the path with the home directory.

@@ -4,13 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Layr-Labs/eigensdk-go/chainio/clients/wallet"
-	"github.com/Layr-Labs/eigensdk-go/chainio/txmgr"
-	"github.com/Layr-Labs/eigensdk-go/signerv2"
-
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 	elContracts "github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/eth"
+	"github.com/Layr-Labs/eigensdk-go/chainio/txmgr"
 	eigensdkLogger "github.com/Layr-Labs/eigensdk-go/logging"
 	"github.com/Layr-Labs/eigensdk-go/metrics"
 	"github.com/ethereum/go-ethereum/common"
@@ -53,42 +50,12 @@ func UpdateCmd(p utils.Prompter) *cli.Command {
 				return err
 			}
 
-			// Check if input is available in the pipe and read the password from it
-			ecdsaPassword, readFromPipe := utils.GetStdInPassword()
-			if !readFromPipe {
-				ecdsaPassword, err = p.InputHiddenString("Enter password to decrypt the ecdsa private key:", "",
-					func(password string) error {
-						return nil
-					},
-				)
-				if err != nil {
-					fmt.Println("Error while reading ecdsa key password")
-					return err
-				}
-			}
-
-			// This is to expand the tilde in the path to the home directory
-			// This is not supported by Go's standard library
-			keyFullPath, err := expandTilde(operatorCfg.PrivateKeyStorePath)
-			if err != nil {
-				return err
-			}
-			operatorCfg.PrivateKeyStorePath = keyFullPath
-
-			signerCfg := signerv2.Config{
-				KeystorePath: operatorCfg.PrivateKeyStorePath,
-				Password:     ecdsaPassword,
-			}
-			sgn, sender, err := signerv2.SignerFromConfig(signerCfg, &operatorCfg.ChainId)
+			keyWallet, sender, err := getWallet(operatorCfg, ethClient, p, logger)
 			if err != nil {
 				return err
 			}
 
-			privateKeyWallet, err := wallet.NewPrivateKeyWallet(ethClient, sgn, sender, logger)
-			if err != nil {
-				return err
-			}
-			txMgr := txmgr.NewSimpleTxManager(privateKeyWallet, ethClient, logger, sender)
+			txMgr := txmgr.NewSimpleTxManager(keyWallet, ethClient, logger, sender)
 
 			noopMetrics := metrics.NewNoopMetrics()
 
