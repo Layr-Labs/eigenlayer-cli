@@ -71,7 +71,6 @@ func RegisterCmd(p utils.Prompter) *cli.Command {
 			}
 
 			keyWallet, sender, err := getWallet(operatorCfg, ethClient, p, logger)
-			fmt.Println("sender: ", sender)
 			if err != nil {
 				return err
 			}
