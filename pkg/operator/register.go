@@ -139,7 +139,6 @@ func getWallet(
 	logger eigensdkLogger.Logger,
 ) (wallet.Wallet, common.Address, error) {
 	var keyWallet wallet.Wallet
-	var sender common.Address
 	if cfg.SignerType == types.LocalKeystoreSigner {
 		// Check if input is available in the pipe and read the password from it
 		ecdsaPassword, readFromPipe := utils.GetStdInPassword()
@@ -176,6 +175,7 @@ func getWallet(
 		if err != nil {
 			return nil, common.Address{}, err
 		}
+		return keyWallet, sender, nil
 	} else if cfg.SignerType == types.FireBlocksSigner {
 		fireblocksClient, err := fireblocks.NewClient(
 			cfg.FireblocksConfig.APIKey,
@@ -196,15 +196,14 @@ func getWallet(
 		if err != nil {
 			return nil, common.Address{}, err
 		}
-		sender, err = keyWallet.SenderAddress(context.Background())
+		sender, err := keyWallet.SenderAddress(context.Background())
 		if err != nil {
 			return nil, common.Address{}, err
 		}
+		return keyWallet, sender, nil
 	} else {
 		return nil, common.Address{}, fmt.Errorf("%s signer is not supported", cfg.SignerType)
 	}
-
-	return keyWallet, sender, nil
 }
 
 // expandTilde replaces the tilde (~) in the path with the home directory.
