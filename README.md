@@ -113,7 +113,7 @@ Links to specific sections are provided below.
 * [Register Operator](https://docs.eigenlayer.xyz/operator-guides/operator-installation#registration)
 * [Operator Status](https://docs.eigenlayer.xyz/operator-guides/operator-installation#checking-status-of-registration)
 * [Metadata Updates](https://docs.eigenlayer.xyz/operator-guides/operator-installation#metadata-updates)
-* [Frequently Asked Questions](https://docs.eigenlayer.xyz/operator-guides/faq)
+* [Frequently Asked Questions](https://docs.eigenlayer.xyz/operator-guides/operator-faq)
 * [Troubleshooting](https://docs.eigenlayer.xyz/operator-guides/troubleshooting)
 
 If you see any issues in documentation please create an issue or PR [here](https://github.com/Layr-Labs/eigenlayer-docs)
