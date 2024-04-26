@@ -43,6 +43,7 @@ func (config OperatorConfigNew) MarshalYAML() (interface{}, error) {
 		PrivateKeyStorePath        string                 `yaml:"private_key_store_path"`
 		SignerType                 SignerType             `yaml:"signer_type"`
 		ChainID                    int64                  `yaml:"chain_id"`
+		FireblocksConfig           FireblocksConfig       `yaml:"fireblocks"`
 	}{
 		Operator:                   config.Operator,
 		ELDelegationManagerAddress: config.ELDelegationManagerAddress,
@@ -50,5 +51,6 @@ func (config OperatorConfigNew) MarshalYAML() (interface{}, error) {
 		PrivateKeyStorePath:        config.PrivateKeyStorePath,
 		SignerType:                 config.SignerType,
 		ChainID:                    config.ChainId.Int64(),
+		FireblocksConfig:           config.FireblocksConfig,
 	}, nil
 }
