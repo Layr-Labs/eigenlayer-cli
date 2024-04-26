@@ -5,12 +5,15 @@ import (
 	"fmt"
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
+
 	elContracts "github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/eth"
 	"github.com/Layr-Labs/eigensdk-go/chainio/txmgr"
 	eigensdkLogger "github.com/Layr-Labs/eigensdk-go/logging"
 	"github.com/Layr-Labs/eigensdk-go/metrics"
+
 	"github.com/ethereum/go-ethereum/common"
+	
 	"github.com/urfave/cli/v2"
 )
 
