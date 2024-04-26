@@ -13,7 +13,7 @@ import (
 	"github.com/Layr-Labs/eigensdk-go/metrics"
 
 	"github.com/ethereum/go-ethereum/common"
-	
+
 	"github.com/urfave/cli/v2"
 )
 
