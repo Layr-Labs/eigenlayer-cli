@@ -19,6 +19,9 @@ type FireblocksConfig struct {
 	SecretKey        string `yaml:"secret_key"`
 	BaseUrl          string `yaml:"base_url"`
 	VaultAccountName string `yaml:"vault_account_name"`
+
+	// Timeout for API in seconds
+	Timeout int64 `yaml:"timeout"`
 }
 
 type OperatorConfigNew struct {

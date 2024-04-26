@@ -179,7 +179,7 @@ func getWallet(
 			cfg.FireblocksConfig.APIKey,
 			[]byte(cfg.FireblocksConfig.SecretKey),
 			cfg.FireblocksConfig.BaseUrl,
-			3*time.Second,
+			time.Duration(cfg.FireblocksConfig.Timeout)*time.Second,
 			logger,
 		)
 		if err != nil {
