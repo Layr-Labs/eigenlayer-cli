@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"math/big"
 	"os"
-	"strconv"
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/types"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
@@ -254,15 +253,11 @@ func promptOperatorInfo(config *types.OperatorConfigNew, p utils.Prompter) (type
 		}
 		config.FireblocksConfig.VaultAccountName = vaultAccountName
 
-		// Prompt for fireblocks base url
-		timeout, err := p.InputString("Enter the timeout for fireblocks API (in seconds):", "3", "",
-			func(s string) error {
-				if len(s) == 0 {
-					return errors.New("timeout should not be empty")
-				}
-				_, err := strconv.Atoi(s)
-				if err != nil {
-					return err
+		// Prompt for fireblocks API timeout
+		timeout, err := p.InputInteger("Enter the timeout for fireblocks API (in seconds):", "3", "",
+			func(i int64) error {
+				if i <= 0 {
+					return errors.New("timeout should be greater than 0")
 				}
 				return nil
 			},
@@ -270,9 +265,7 @@ func promptOperatorInfo(config *types.OperatorConfigNew, p utils.Prompter) (type
 		if err != nil {
 			return types.OperatorConfigNew{}, err
 		}
-		// Ignore the error since we already validated above
-		timeoutInt, _ := strconv.Atoi(timeout)
-		config.FireblocksConfig.Timeout = int64(timeoutInt)
+		config.FireblocksConfig.Timeout = timeout
 
 		// ask to fill in secret key
 		config.FireblocksConfig.SecretKey = "<FILL-ME>"
