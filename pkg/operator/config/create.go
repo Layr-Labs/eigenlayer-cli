@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math/big"
 	"os"
+	"strconv"
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/types"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
@@ -167,22 +168,6 @@ func promptOperatorInfo(config *types.OperatorConfigNew, p utils.Prompter) (type
 	}
 	config.EthRPCUrl = rpcUrl
 
-	// Prompt for ecdsa key path
-	ecdsaKeyPath, err := p.InputString("Enter your ecdsa key path:", "", "",
-		func(s string) error {
-			_, err := os.Stat(s)
-			if os.IsNotExist(err) {
-				return err
-			}
-			return nil
-		},
-	)
-
-	if err != nil {
-		return types.OperatorConfigNew{}, err
-	}
-	config.PrivateKeyStorePath = ecdsaKeyPath
-
 	// Prompt for network & set chainId
 	chainId, err := p.Select("Select your network:", []string{"mainnet", "holesky", "local"})
 	if err != nil {
@@ -201,7 +186,97 @@ func promptOperatorInfo(config *types.OperatorConfigNew, p utils.Prompter) (type
 		config.ELDelegationManagerAddress = utils.ChainMetadataMap[utils.LocalChainId].ELDelegationManagerAddress
 	}
 
-	config.SignerType = types.LocalKeystoreSigner
+	// Prompt for network & set chainId
+	signerType, err := p.Select("Select your signer type:", []string{"local_keystore", "fireblocks"})
+	if err != nil {
+		return types.OperatorConfigNew{}, err
+	}
+
+	switch signerType {
+	case "local_keystore":
+		config.SignerType = types.LocalKeystoreSigner
+		// Prompt for ecdsa key path
+		ecdsaKeyPath, err := p.InputString("Enter your ecdsa key path:", "", "",
+			func(s string) error {
+				_, err := os.Stat(s)
+				if os.IsNotExist(err) {
+					return err
+				}
+				return nil
+			},
+		)
+
+		if err != nil {
+			return types.OperatorConfigNew{}, err
+		}
+		config.PrivateKeyStorePath = ecdsaKeyPath
+	case "fireblocks":
+		config.SignerType = types.FireBlocksSigner
+		// Prompt for fireblocks API key
+		apiKey, err := p.InputString("Enter your fireblocks api key:", "", "",
+			func(s string) error {
+				if len(s) == 0 {
+					return errors.New("fireblocks API key should not be empty")
+				}
+				return nil
+			},
+		)
+		if err != nil {
+			return types.OperatorConfigNew{}, err
+		}
+		config.FireblocksConfig.APIKey = apiKey
+
+		// Prompt for fireblocks base url
+		baseUrl, err := p.InputString("Enter your fireblocks base url:", "https://api.fireblocks.io/", "",
+			func(s string) error {
+				if len(s) == 0 {
+					return errors.New("base url should not be empty")
+				}
+				return nil
+			},
+		)
+		if err != nil {
+			return types.OperatorConfigNew{}, err
+		}
+		config.FireblocksConfig.BaseUrl = baseUrl
+
+		// Prompt for fireblocks base url
+		vaultAccountName, err := p.InputString("Enter the name of fireblocks vault:", "", "",
+			func(s string) error {
+				if len(s) == 0 {
+					return errors.New("vault account name should not be empty")
+				}
+				return nil
+			},
+		)
+		if err != nil {
+			return types.OperatorConfigNew{}, err
+		}
+		config.FireblocksConfig.VaultAccountName = vaultAccountName
+
+		// Prompt for fireblocks base url
+		timeout, err := p.InputString("Enter the timeout for fireblocks API (in seconds):", "3", "",
+			func(s string) error {
+				if len(s) == 0 {
+					return errors.New("timeout should not be empty")
+				}
+				_, err := strconv.Atoi(s)
+				if err != nil {
+					return err
+				}
+				return nil
+			},
+		)
+		if err != nil {
+			return types.OperatorConfigNew{}, err
+		}
+		// Ignore the error since we already validated above
+		timeoutInt, _ := strconv.Atoi(timeout)
+		config.FireblocksConfig.Timeout = int64(timeoutInt)
+
+		// ask to fill in secret key
+		config.FireblocksConfig.SecretKey = "<FILL-ME>"
+	}
 
 	return *config, nil
 }
