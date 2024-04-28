@@ -239,7 +239,7 @@ func promptOperatorInfo(config *types.OperatorConfigNew, p utils.Prompter) (type
 		}
 		config.FireblocksConfig.BaseUrl = baseUrl
 
-		// Prompt for fireblocks base url
+		// Prompt for fireblocks vault account name
 		vaultAccountName, err := p.InputString("Enter the name of fireblocks vault:", "", "",
 			func(s string) error {
 				if len(s) == 0 {
