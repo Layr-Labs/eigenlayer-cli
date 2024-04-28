@@ -68,6 +68,21 @@ func (mr *MockPrompterMockRecorder) InputHiddenString(arg0, arg1, arg2 any) *gom
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InputHiddenString", reflect.TypeOf((*MockPrompter)(nil).InputHiddenString), arg0, arg1, arg2)
 }
 
+// InputInteger mocks base method.
+func (m *MockPrompter) InputInteger(arg0, arg1, arg2 string, arg3 func(int64) error) (int64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "InputInteger", arg0, arg1, arg2, arg3)
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// InputInteger indicates an expected call of InputInteger.
+func (mr *MockPrompterMockRecorder) InputInteger(arg0, arg1, arg2, arg3 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InputInteger", reflect.TypeOf((*MockPrompter)(nil).InputInteger), arg0, arg1, arg2, arg3)
+}
+
 // InputString mocks base method.
 func (m *MockPrompter) InputString(arg0, arg1, arg2 string, arg3 func(string) error) (string, error) {
 	m.ctrl.T.Helper()

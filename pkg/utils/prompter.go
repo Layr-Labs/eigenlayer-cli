@@ -1,11 +1,17 @@
 package utils
 
-import "github.com/AlecAivazis/survey/v2"
+import (
+	"fmt"
+	"strconv"
+
+	"github.com/AlecAivazis/survey/v2"
+)
 
 // Prompter is an interface for prompting the user for input.
 type Prompter interface {
 	Select(prompt string, options []string) (string, error)
 	InputString(prompt, defValue, help string, validator func(string) error) (string, error)
+	InputInteger(prompt, defValue, help string, validator func(int64) error) (int64, error)
 	Confirm(prompt string) (bool, error)
 	InputHiddenString(prompt, help string, validator func(string) error) (string, error)
 }
@@ -39,6 +45,27 @@ func (p *prompter) InputString(prompt, defValue, help string, validator func(str
 	}
 	err := survey.AskOne(i, &result, survey.WithValidator(func(ans interface{}) error {
 		if err := validator(ans.(string)); err != nil {
+			return err
+		}
+		return nil
+	}))
+	return result, err
+}
+
+func (p *prompter) InputInteger(prompt, defValue, help string, validator func(int64) error) (int64, error) {
+	var result int64
+	i := &survey.Input{
+		Message: prompt,
+		Default: defValue,
+		Help:    help,
+	}
+
+	err := survey.AskOne(i, &result, survey.WithValidator(func(ans interface{}) error {
+		atoi, err := strconv.Atoi(ans.(string))
+		if err != nil {
+			return fmt.Errorf("invalid integer with err: %s", err.Error())
+		}
+		if err := validator(int64(atoi)); err != nil {
 			return err
 		}
 		return nil
