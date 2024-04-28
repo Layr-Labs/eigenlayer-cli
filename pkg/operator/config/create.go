@@ -185,7 +185,7 @@ func promptOperatorInfo(config *types.OperatorConfigNew, p utils.Prompter) (type
 		config.ELDelegationManagerAddress = utils.ChainMetadataMap[utils.LocalChainId].ELDelegationManagerAddress
 	}
 
-	// Prompt for network & set chainId
+	// Prompt for signer type
 	signerType, err := p.Select("Select your signer type:", []string{"local_keystore", "fireblocks"})
 	if err != nil {
 		return types.OperatorConfigNew{}, err
@@ -269,6 +269,8 @@ func promptOperatorInfo(config *types.OperatorConfigNew, p utils.Prompter) (type
 
 		// ask to fill in secret key
 		config.FireblocksConfig.SecretKey = "<FILL-ME>"
+	default:
+		return types.OperatorConfigNew{}, fmt.Errorf("unknown signer type %s", signerType)
 	}
 
 	return *config, nil
