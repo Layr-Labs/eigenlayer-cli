@@ -267,8 +267,49 @@ func promptOperatorInfo(config *types.OperatorConfigNew, p utils.Prompter) (type
 		}
 		config.FireblocksConfig.Timeout = timeout
 
-		// ask to fill in secret key
-		config.FireblocksConfig.SecretKey = "<FILL-ME>"
+		// Prompt for fireblocks vault account name
+		secretStorageType, err := p.Select(
+			"Select your fireblocks secret storage type:",
+			[]string{"Plain Text", "AWS Secret Manager"},
+		)
+		switch secretStorageType {
+		case "Plain Text":
+			config.FireblocksConfig.SecretStorageType = types.PlainText
+			config.FireblocksConfig.SecretKey = "<FILL-ME>"
+			fmt.Println()
+			fmt.Println("Please fill in the secret key in the operator.yaml file")
+			fmt.Println()
+		case "AWS Secret Manager":
+			config.FireblocksConfig.SecretStorageType = types.AWSSecretManager
+			keyName, err := p.InputString("Enter the name of the secret in AWS Secret Manager:", "", "",
+				func(s string) error {
+					if len(s) == 0 {
+						return errors.New("key name should not be empty")
+					}
+					return nil
+				},
+			)
+			if err != nil {
+				return types.OperatorConfigNew{}, err
+			}
+			config.FireblocksConfig.SecretKey = keyName
+			awsRegion, err := p.InputString("Enter the AWS region where the secret is stored:", "us-east-1", "",
+				func(s string) error {
+					if len(s) == 0 {
+						return errors.New("AWS region should not be empty")
+					}
+					return nil
+				},
+			)
+			if err != nil {
+				return types.OperatorConfigNew{}, err
+			}
+			config.FireblocksConfig.AWSRegion = awsRegion
+
+		}
+		if err != nil {
+			return types.OperatorConfigNew{}, err
+		}
 	default:
 		return types.OperatorConfigNew{}, fmt.Errorf("unknown signer type %s", signerType)
 	}

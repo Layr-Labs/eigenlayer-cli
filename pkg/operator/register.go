@@ -9,6 +9,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Layr-Labs/eigensdk-go/aws/secretmanager"
+
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/types"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 
@@ -175,9 +177,34 @@ func getWallet(
 		}
 		return keyWallet, sender, nil
 	} else if cfg.SignerType == types.FireBlocksSigner {
+		var secretKey string
+		var err error
+		switch cfg.FireblocksConfig.SecretStorageType {
+		case types.PlainText:
+			logger.Info("Using plain text secret storage")
+			secretKey = cfg.FireblocksConfig.SecretKey
+		case types.AWSSecretManager:
+			logger.Info("Using AWS secret manager to get fireblocks secret key")
+			secretKey, err = secretmanager.ReadStringFromSecretManager(
+				context.Background(),
+				cfg.FireblocksConfig.SecretKey,
+				cfg.FireblocksConfig.AWSRegion,
+			)
+			if err != nil {
+				return nil, common.Address{}, err
+			}
+			logger.Infof("Secret key with name %s from region %s read from AWS secret manager",
+				cfg.FireblocksConfig.SecretKey,
+				cfg.FireblocksConfig.AWSRegion,
+			)
+		default:
+			return nil, common.Address{}, fmt.Errorf("secret storage type %s is not supported",
+				cfg.FireblocksConfig.SecretStorageType,
+			)
+		}
 		fireblocksClient, err := fireblocks.NewClient(
 			cfg.FireblocksConfig.APIKey,
-			[]byte(cfg.FireblocksConfig.SecretKey),
+			[]byte(secretKey),
 			cfg.FireblocksConfig.BaseUrl,
 			time.Duration(cfg.FireblocksConfig.Timeout)*time.Second,
 			logger,

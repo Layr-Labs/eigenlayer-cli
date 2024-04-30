@@ -8,10 +8,15 @@ import (
 
 type SignerType string
 
+type SecretStorageType string
+
 const (
 	PrivateKeySigner    SignerType = "private_key"
 	LocalKeystoreSigner SignerType = "local_keystore"
 	FireBlocksSigner    SignerType = "fireblocks"
+
+	AWSSecretManager SecretStorageType = "aws_secret_manager"
+	PlainText        SecretStorageType = "plaintext"
 )
 
 type FireblocksConfig struct {
@@ -19,6 +24,11 @@ type FireblocksConfig struct {
 	SecretKey        string `yaml:"secret_key"`
 	BaseUrl          string `yaml:"base_url"`
 	VaultAccountName string `yaml:"vault_account_name"`
+
+	SecretStorageType SecretStorageType `yaml:"secret_storage_type"`
+
+	// AWSRegion is the region where the secret is stored in AWS Secret Manager
+	AWSRegion string `yaml:"aws_region"`
 
 	// Timeout for API in seconds
 	Timeout int64 `yaml:"timeout"`

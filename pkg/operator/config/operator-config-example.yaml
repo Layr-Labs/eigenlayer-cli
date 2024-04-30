@@ -28,7 +28,7 @@ el_delegation_manager_address:
 eth_rpc_url: http://localhost:8545
 
 # Signer Type to use
-# Supported values: local_keystore
+# Supported values: local_keystore, fireblocks
 signer_type: local_keystore
 
 # Full path to local ecdsa private key store file
@@ -36,3 +36,28 @@ private_key_store_path: <path-to>/test.ecdsa.key.json
 
 # Chain ID: 1 for mainnet, 17000 for holesky, 31337 for local
 chain_id: 17000
+
+# If you are using Fireblocks as your signer, please provide the following details
+fireblocks:
+    # Fireblocks API Key
+    api_key:
+
+    # Fireblocks Secret Key storage type: plain_text, aws_secret_manager
+    secret_storage_type:
+
+    # Fireblocks Secret Key
+    # If secret_storage_type is plain_text, this should be the secret key
+    # If secret_storage_type is aws_secret_manager, this should be the secret key name in AWS Secret Manager
+    secret_key:
+
+    # Fireblocks Base URL
+    base_url: https://api.fireblocks.io/
+
+    # Fireblocks Vault Account Name
+    vault_account_name:
+
+    # Fireblocks AWS Region (if secret_storage_type is aws_secret_manager)
+    aws_region:
+
+    # Fireblocks API Timeout
+    timeout: 3
