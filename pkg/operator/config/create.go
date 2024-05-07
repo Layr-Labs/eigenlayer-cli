@@ -186,7 +186,7 @@ func promptOperatorInfo(config *types.OperatorConfigNew, p utils.Prompter) (type
 	}
 
 	// Prompt for signer type
-	signerType, err := p.Select("Select your signer type:", []string{"local_keystore", "fireblocks"})
+	signerType, err := p.Select("Select your signer type:", []string{"local_keystore", "fireblocks", "web3"})
 	if err != nil {
 		return types.OperatorConfigNew{}, err
 	}
@@ -310,6 +310,21 @@ func promptOperatorInfo(config *types.OperatorConfigNew, p utils.Prompter) (type
 		if err != nil {
 			return types.OperatorConfigNew{}, err
 		}
+	case "web3":
+		config.SignerType = types.Web3Signer
+		// Prompt for fireblocks API key
+		web3SignerUrl, err := p.InputString("Enter your web3 signer url:", "", "",
+			func(s string) error {
+				if len(s) == 0 {
+					return errors.New("web3 signer should not be empty")
+				}
+				return nil
+			},
+		)
+		if err != nil {
+			return types.OperatorConfigNew{}, err
+		}
+		config.Web3SignerConfig.Url = web3SignerUrl
 	default:
 		return types.OperatorConfigNew{}, fmt.Errorf("unknown signer type %s", signerType)
 	}

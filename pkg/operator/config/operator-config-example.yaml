@@ -28,7 +28,7 @@ el_delegation_manager_address:
 eth_rpc_url: http://localhost:8545
 
 # Signer Type to use
-# Supported values: local_keystore, fireblocks
+# Supported values: local_keystore, fireblocks, web3
 signer_type: local_keystore
 
 # Full path to local ecdsa private key store file
@@ -61,3 +61,9 @@ fireblocks:
 
     # Fireblocks API Timeout
     timeout: 3
+
+# If you are using web3 as your signer, please provide the following details
+# https://docs.web3signer.consensys.io/
+web3:
+  # Web3 Signer URL
+  url:

@@ -48,7 +48,7 @@ type OperatorConfigNew struct {
 	SignerType                 SignerType       `yaml:"signer_type"`
 	ChainId                    big.Int          `yaml:"chain_id"`
 	FireblocksConfig           FireblocksConfig `yaml:"fireblocks"`
-	Web3SignerConfig           Web3SignerConfig `yaml:"web3_signer"`
+	Web3SignerConfig           Web3SignerConfig `yaml:"web3"`
 }
 
 func (config OperatorConfigNew) MarshalYAML() (interface{}, error) {
@@ -60,6 +60,7 @@ func (config OperatorConfigNew) MarshalYAML() (interface{}, error) {
 		SignerType                 SignerType             `yaml:"signer_type"`
 		ChainID                    int64                  `yaml:"chain_id"`
 		FireblocksConfig           FireblocksConfig       `yaml:"fireblocks"`
+		Web3SignerConfig           Web3SignerConfig       `yaml:"web3"`
 	}{
 		Operator:                   config.Operator,
 		ELDelegationManagerAddress: config.ELDelegationManagerAddress,
@@ -68,5 +69,6 @@ func (config OperatorConfigNew) MarshalYAML() (interface{}, error) {
 		SignerType:                 config.SignerType,
 		ChainID:                    config.ChainId.Int64(),
 		FireblocksConfig:           config.FireblocksConfig,
+		Web3SignerConfig:           config.Web3SignerConfig,
 	}, nil
 }
