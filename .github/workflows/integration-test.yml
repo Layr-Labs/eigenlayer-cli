@@ -23,7 +23,7 @@ jobs:
         with:
             repository: layr-labs/incredible-squaring-avs
             token: ${{ github.token }}
-            ref: d4dea7b84e26732c2d3828f8c6f9cb16c7947864
+            ref: master
       - name: Run anvil chain
         run: |
           nohup make start-anvil-chain-with-el-and-avs-deployed > nohup.out 2>&1 &
