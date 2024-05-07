@@ -259,7 +259,7 @@ func validateAndReturnConfig(configurationFilePath string) (*types.OperatorConfi
 
 	err = operatorCfg.Operator.Validate()
 	if err != nil {
-		return nil, fmt.Errorf("%w: with error %s", ErrInvalidYamlFile, err.Error())
+		return nil, fmt.Errorf("\r%w: with error %s", ErrInvalidYamlFile, err.Error())
 	}
 
 	err = validateMetadata(operatorCfg)
