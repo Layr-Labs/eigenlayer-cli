@@ -14,6 +14,7 @@ const (
 	PrivateKeySigner    SignerType = "private_key"
 	LocalKeystoreSigner SignerType = "local_keystore"
 	FireBlocksSigner    SignerType = "fireblocks"
+	Web3Signer          SignerType = "web3"
 
 	AWSSecretManager SecretStorageType = "aws_secret_manager"
 	PlainText        SecretStorageType = "plaintext"
@@ -34,6 +35,10 @@ type FireblocksConfig struct {
 	Timeout int64 `yaml:"timeout"`
 }
 
+type Web3SignerConfig struct {
+	Url string `yaml:"url"`
+}
+
 type OperatorConfigNew struct {
 	Operator                   eigensdkTypes.Operator `yaml:"operator"`
 	ELDelegationManagerAddress string                 `yaml:"el_delegation_manager_address"`
@@ -43,6 +48,7 @@ type OperatorConfigNew struct {
 	SignerType                 SignerType       `yaml:"signer_type"`
 	ChainId                    big.Int          `yaml:"chain_id"`
 	FireblocksConfig           FireblocksConfig `yaml:"fireblocks"`
+	Web3SignerConfig           Web3SignerConfig `yaml:"web3"`
 }
 
 func (config OperatorConfigNew) MarshalYAML() (interface{}, error) {
@@ -54,6 +60,7 @@ func (config OperatorConfigNew) MarshalYAML() (interface{}, error) {
 		SignerType                 SignerType             `yaml:"signer_type"`
 		ChainID                    int64                  `yaml:"chain_id"`
 		FireblocksConfig           FireblocksConfig       `yaml:"fireblocks"`
+		Web3SignerConfig           Web3SignerConfig       `yaml:"web3"`
 	}{
 		Operator:                   config.Operator,
 		ELDelegationManagerAddress: config.ELDelegationManagerAddress,
@@ -62,5 +69,6 @@ func (config OperatorConfigNew) MarshalYAML() (interface{}, error) {
 		SignerType:                 config.SignerType,
 		ChainID:                    config.ChainId.Int64(),
 		FireblocksConfig:           config.FireblocksConfig,
+		Web3SignerConfig:           config.Web3SignerConfig,
 	}, nil
 }

@@ -226,6 +226,20 @@ func getWallet(
 			return nil, common.Address{}, err
 		}
 		return keyWallet, sender, nil
+	} else if cfg.SignerType == types.Web3Signer {
+		signerCfg := signerv2.Config{
+			Endpoint: cfg.Web3SignerConfig.Url,
+			Address:  cfg.Operator.Address,
+		}
+		sgn, sender, err := signerv2.SignerFromConfig(signerCfg, &cfg.ChainId)
+		if err != nil {
+			return nil, common.Address{}, err
+		}
+		keyWallet, err = wallet.NewPrivateKeyWallet(ethClient, sgn, sender, logger)
+		if err != nil {
+			return nil, common.Address{}, err
+		}
+		return keyWallet, sender, nil
 	} else {
 		return nil, common.Address{}, fmt.Errorf("%s signer is not supported", cfg.SignerType)
 	}

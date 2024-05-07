@@ -16,18 +16,16 @@ jobs:
           go-version: '1.21'
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
-        with:
-          version: nightly
       - name: Checkout incredible squaring
         uses: actions/checkout@v4
         with:
             repository: layr-labs/incredible-squaring-avs
             token: ${{ github.token }}
             ref: master
+
       - name: Run anvil chain
         run: |
           nohup make start-anvil-chain-with-el-and-avs-deployed > nohup.out 2>&1 &
-          sleep 5
       - name: Install EigenLayer CLI
         uses: actions/checkout@v4
         with:
