@@ -78,11 +78,6 @@ jobs:
       - name: Run anvil chain
         run: |
           nohup make start-anvil-chain-with-el-and-avs-deployed > nohup.out 2>&1 &
-      - name: Run Web3 Signer
-        run: |
-          ls -al
-          cd tests/web3signer
-          docker-compose up -d
       - name: Install EigenLayer CLI
         uses: actions/checkout@v4
         with:
@@ -91,11 +86,17 @@ jobs:
         run: |
           sudo apt update
           sudo apt-get install less
+
       - name: Install EigenLayer CLI
         run: |
           cd eigenlayer-cli
           make build
           ./bin/eigenlayer --version
+
+      - name: Run Web3 Signer
+        run: |
+          cd eigenlayer-cli/tests/web3signer
+          docker-compose up -d
 
       - name: Send funds
         run: |
