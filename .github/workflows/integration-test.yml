@@ -101,11 +101,14 @@ jobs:
       - name: Send funds
         run: |
           cd eigenlayer-cli
+          sleep 5
           cast send 0x7dbc809c1ec153d45ffb0c75fb4fded68e34699e --value 10ether --private-key 0x2a871d0798f97d79848a013d4936a73bf4cc922c825d33c1cf7073dff6d409c6
 
       - name: Register Operator
         run: |
           cd eigenlayer-cli
+          sleep 5
+          docker ps
           echo "HhzcmbpkHCQpvBlXrvLB" | ./bin/eigenlayer operator register tests/web3signer/operator-ci.yaml
 
       - name: Check operator status
