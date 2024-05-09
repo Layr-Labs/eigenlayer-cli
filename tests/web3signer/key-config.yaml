@@ -1,0 +1,4 @@
+type: "file-keystore"
+keyType: "SECP256K1"
+keystoreFile: "/data/keystore/opr.ecdsa.key.json"
+keystorePasswordFile: "/data/password/opr.ecdsa.key.txt"
