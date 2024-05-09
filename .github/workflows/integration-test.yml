@@ -49,17 +49,17 @@ jobs:
       - name: Register Operator
         run: |
           cd eigenlayer-cli
-          echo "" | ./bin/eigenlayer operator register operator-ci.yaml
+          echo "" | ./bin/eigenlayer operator register tests/keystore/operator-ci.yaml
 
       - name: Check operator status
         run: |
           cd eigenlayer-cli
-          ./bin/eigenlayer operator status operator-ci.yaml
+          ./bin/eigenlayer operator status tests/keystore/operator-ci.yaml
 
       - name: Update operator details
         run: |
           cd eigenlayer-cli
-          echo "" | ./bin/eigenlayer operator update operator-ci.yaml
+          echo "" | ./bin/eigenlayer operator update tests/keystore/operator-ci.yaml
   Web3Signer:
     name: Integration Test - Web3 Signer
     runs-on: ubuntu-latest
