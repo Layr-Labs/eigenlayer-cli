@@ -96,7 +96,7 @@ jobs:
       - name: Run Web3 Signer
         run: |
           cd eigenlayer-cli/tests/web3signer
-          docker-compose up -d
+          docker compose up -d
 
       - name: Send funds
         run: |
