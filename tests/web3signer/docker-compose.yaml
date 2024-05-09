@@ -12,7 +12,7 @@ services:
       - '--swagger-ui-enabled=true'
       - '--logging=ALL'
       - 'eth1'
-      - '--chain-id=17000'
+      - '--chain-id=31337'
     volumes:
       - "./key-config.yaml:/data/config.yaml"
       - "./operator_keys:/data/keystore"
