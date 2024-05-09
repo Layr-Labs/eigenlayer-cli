@@ -1,0 +1,19 @@
+services:
+  web3signer:
+    image: consensys/web3signer:develop
+    ports:
+      - "9001:9001"
+    command:
+      - '--key-config-path=/data'
+      - '--http-cors-origins=*'
+      - '--http-listen-host=0.0.0.0'
+      - '--http-listen-port=9001'
+      - '--http-host-allowlist=*'
+      - '--swagger-ui-enabled=true'
+      - '--logging=ALL'
+      - 'eth1'
+      - '--chain-id=17000'
+    volumes:
+      - "key-config.yaml:/data/config.yaml"
+      - "./operator_keys:/data/keystore"
+      - "./passwords:/data/password"
