@@ -108,7 +108,6 @@ jobs:
         run: |
           cd eigenlayer-cli
           sleep 5
-          docker ps
           echo "HhzcmbpkHCQpvBlXrvLB" | ./bin/eigenlayer operator register tests/web3signer/operator-ci.yaml
 
       - name: Check operator status
