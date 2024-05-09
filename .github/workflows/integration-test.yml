@@ -80,6 +80,7 @@ jobs:
           nohup make start-anvil-chain-with-el-and-avs-deployed > nohup.out 2>&1 &
       - name: Run Web3 Signer
         run: |
+          ls -al
           cd tests/web3signer
           docker-compose up -d
       - name: Install EigenLayer CLI
