@@ -13,7 +13,7 @@ jobs:
       - uses: actions/setup-go@v3
         with:
           go-version: "1.21"
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v3
         with:
@@ -27,7 +27,7 @@ jobs:
         go: ["1.21"]
         os: [ubuntu-22.04]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-go@v3
         with:
           go-version: ${{ matrix.go }}
@@ -39,7 +39,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Git checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           path: eigenlayer-cli
@@ -52,7 +52,7 @@ jobs:
           sudo apt-get -y update
           sudo apt-get -y install gcc-aarch64-linux-gnu
       - name: Checkout osxcross
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: tpoechtrager/osxcross
           path: osxcross
