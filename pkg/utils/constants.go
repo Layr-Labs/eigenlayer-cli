@@ -6,6 +6,8 @@ const (
 	EmojiWarning   = "⚠️"
 	EmojiInfo      = "ℹ️"
 	EmojiWait      = "⏳"
+	EmojiLink      = "🔗"
+	EmojiInternet  = "🌐"
 
 	MainnetChainId = 1
 	HoleskyChainId = 17000

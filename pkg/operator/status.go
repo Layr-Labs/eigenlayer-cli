@@ -101,6 +101,7 @@ func StatusCmd(p utils.Prompter) *cli.Command {
 					return err
 				}
 				printOperatorDetails(operatorDetails)
+				printRegistrationInfo("", common.HexToAddress(operatorCfg.Operator.Address), &operatorCfg.ChainId)
 			} else {
 				fmt.Printf("%s Operator is not registered to EigenLayer\n", utils.EmojiCrossMark)
 			}

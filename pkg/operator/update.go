@@ -90,6 +90,7 @@ func UpdateCmd(p utils.Prompter) *cli.Command {
 				utils.EmojiCheckMark,
 				getTransactionLink(receipt.TxHash.String(), &operatorCfg.ChainId),
 			)
+			printRegistrationInfo("", common.HexToAddress(operatorCfg.Operator.Address), &operatorCfg.ChainId)
 
 			fmt.Printf("%s Operator updated successfully\n", utils.EmojiCheckMark)
 			return nil
