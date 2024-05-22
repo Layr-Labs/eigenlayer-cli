@@ -9,6 +9,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/fatih/color"
+
 	"github.com/Layr-Labs/eigensdk-go/aws/secretmanager"
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/types"
@@ -113,12 +115,11 @@ func RegisterCmd(p utils.Prompter) *cli.Command {
 					fmt.Printf("%s Error while registering operator\n", utils.EmojiCrossMark)
 					return err
 				}
-				fmt.Printf(
-					"%s Operator registration transaction at: %s\n",
-					utils.EmojiCheckMark,
-					getTransactionLink(receipt.TxHash.String(), &operatorCfg.ChainId),
+				printRegistrationInfo(
+					receipt.TxHash.String(),
+					common.HexToAddress(operatorCfg.Operator.Address),
+					&operatorCfg.ChainId,
 				)
-
 			} else {
 				fmt.Printf("%s Operator is already registered on EigenLayer\n", utils.EmojiCheckMark)
 				return nil
@@ -130,6 +131,17 @@ func RegisterCmd(p utils.Prompter) *cli.Command {
 	}
 
 	return registerCmd
+}
+
+func printRegistrationInfo(txHash string, operatorAddress common.Address, chainId *big.Int) {
+	fmt.Println(strings.Repeat("-", 100))
+	fmt.Printf("%s Chain ID: %s\n", utils.EmojiLink, chainId.String())
+	if len(txHash) > 0 {
+		fmt.Printf("%s Transaction Link: %s\n", utils.EmojiLink, getTransactionLink(txHash, chainId))
+	}
+
+	color.Blue("%s Operator Web App Link: %s\n", utils.EmojiInternet, getWebAppLink(operatorAddress, chainId))
+	fmt.Println(strings.Repeat("-", 100))
 }
 
 func getWallet(
@@ -340,6 +352,16 @@ func getTransactionLink(txHash string, chainId *big.Int) string {
 		return txHash
 	} else {
 		return fmt.Sprintf("%s/%s", chainMetadata.BlockExplorerUrl, txHash)
+	}
+}
+
+func getWebAppLink(operatorAddress common.Address, chainId *big.Int) string {
+	chainIDInt := chainId.Int64()
+	chainMetadata, ok := utils.ChainMetadataMap[chainIDInt]
+	if !ok {
+		return ""
+	} else {
+		return fmt.Sprintf("%s/%s", chainMetadata.WebAppUrl, operatorAddress.Hex())
 	}
 }
 
