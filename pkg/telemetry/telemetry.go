@@ -18,6 +18,7 @@ const (
 )
 
 // telemetryToken value is set at build and install scripts using ldflags
+// version value is set at build scripts using ldflags
 var (
 	telemetryToken    = ""
 	telemetryInstance = "https://us.i.posthog.com"
