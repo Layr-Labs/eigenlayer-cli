@@ -4,9 +4,10 @@ go 1.21
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
-	github.com/Layr-Labs/eigensdk-go v0.1.7-0.20240506234104-06805a99d717
-	github.com/ethereum/go-ethereum v1.14.0
-	github.com/fatih/color v1.13.0
+	github.com/Layr-Labs/eigensdk-go v0.1.7
+	github.com/ethereum/go-ethereum v1.14.3
+	github.com/fatih/color v1.17.0
+	github.com/posthog/posthog-go v0.0.0-20240327112532-87b23fe11103
 	github.com/stretchr/testify v1.9.0
 	github.com/urfave/cli/v2 v2.27.2
 	github.com/wagslane/go-password-validator v0.3.0
@@ -54,7 +55,7 @@ require (
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
 	github.com/lmittmann/tint v1.0.4 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
-	github.com/mattn/go-isatty v0.0.18 // indirect
+	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mgutz/ansi v0.0.0-20170206155736-9520e82c474b // indirect
 	github.com/mmcloughlin/addchain v0.4.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect

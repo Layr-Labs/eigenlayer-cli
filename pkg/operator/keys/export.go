@@ -7,6 +7,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
+
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 	"github.com/Layr-Labs/eigensdk-go/crypto/bls"
 	"github.com/Layr-Labs/eigensdk-go/crypto/ecdsa"
@@ -40,6 +42,7 @@ But if you want it to export from a different location, use --key-path flag`,
 			&KeyTypeFlag,
 			&KeyPathFlag,
 		},
+		After: telemetry.AfterRunAction(),
 		Action: func(c *cli.Context) error {
 			keyType := c.String(KeyTypeFlag.Name)
 

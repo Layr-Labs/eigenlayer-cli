@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
+
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/urfave/cli/v2"
 )
@@ -22,6 +24,7 @@ This command will list both ecdsa and bls key created using create command
 
 It will only list keys created in the default folder (./operator_keys/)
 		`,
+		After: telemetry.AfterRunAction(),
 		Action: func(context *cli.Context) error {
 			homePath, err := os.UserHomeDir()
 			if err != nil {

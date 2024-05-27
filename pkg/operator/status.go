@@ -4,14 +4,17 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
+
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/common"
+
 	elContracts "github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/eth"
 	eigensdkLogger "github.com/Layr-Labs/eigensdk-go/logging"
 	eigensdkTypes "github.com/Layr-Labs/eigensdk-go/types"
-	"github.com/ethereum/go-ethereum/common"
+
 	"github.com/urfave/cli/v2"
 )
 
@@ -21,10 +24,11 @@ func StatusCmd(p utils.Prompter) *cli.Command {
 		Usage:     "Check if the operator is registered and get the operator details",
 		UsageText: "status <configuration-file>",
 		Description: `
-		Check the registration status of operator to Eigenlayer.
+		Check the registration status of operator to EigenLayer.
 
 		It expects the same configuration yaml file as argument to register command	
 		`,
+		After: telemetry.AfterRunAction(),
 		Action: func(cCtx *cli.Context) error {
 			args := cCtx.Args()
 			if args.Len() != 1 {

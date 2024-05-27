@@ -7,6 +7,8 @@ import (
 	"math/big"
 	"os"
 
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
+
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/types"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 	eigensdkTypes "github.com/Layr-Labs/eigensdk-go/types"
@@ -30,6 +32,7 @@ func CreateCmd(p utils.Prompter) *cli.Command {
 		Flags: []cli.Flag{
 			&YesFlag,
 		},
+		After: telemetry.AfterRunAction(),
 		Action: func(ctx *cli.Context) error {
 			skipPrompt := ctx.Bool(YesFlag.Name)
 
