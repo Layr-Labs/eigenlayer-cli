@@ -16,6 +16,7 @@ import (
 var (
 	telemetryToken    = ""
 	telemetryInstance = "https://us.i.posthog.com"
+	version           = "development"
 )
 
 func AfterRunAction() cli.AfterFunc {
@@ -25,10 +26,6 @@ func AfterRunAction() cli.AfterFunc {
 		HandleTacking(c.Command.HelpName)
 		return nil
 	}
-}
-
-func GetCLIVersion() string {
-	return "development"
 }
 
 func HandleTacking(commandPath string) {
@@ -43,7 +40,7 @@ func HandleTacking(commandPath string) {
 	userID := base64.StdEncoding.EncodeToString(hash[:])
 	telemetryProperties := make(map[string]interface{})
 	telemetryProperties["command"] = commandPath
-	telemetryProperties["version"] = GetCLIVersion()
+	telemetryProperties["version"] = version
 	telemetryProperties["os"] = runtime.GOOS
 	_ = client.Enqueue(posthog.Capture{
 		DistinctId: userID,
