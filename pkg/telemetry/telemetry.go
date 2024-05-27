@@ -4,12 +4,17 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"fmt"
+	"os"
 	"os/user"
 	"runtime"
 
 	"github.com/posthog/posthog-go"
 
 	"github.com/urfave/cli/v2"
+)
+
+const (
+	cliTelemetryEnabledKey = "EIGENLAYER_CLI_TELEMETRY_ENABLED"
 )
 
 // telemetryToken value is set at build and install scripts using ldflags
@@ -23,9 +28,16 @@ func AfterRunAction() cli.AfterFunc {
 	return func(c *cli.Context) error {
 		// In v3, c.Command.FullName() can be used to get the full command name
 		// TODO(madhur): to update once v3 is released
-		HandleTacking(c.Command.HelpName)
+		if IsTelemetryEnabled() {
+			HandleTacking(c.Command.HelpName)
+		}
 		return nil
 	}
+}
+
+func IsTelemetryEnabled() bool {
+	telemetryEnabled := os.Getenv(cliTelemetryEnabledKey)
+	return len(telemetryEnabled) == 0 || telemetryEnabled == "true"
 }
 
 func HandleTacking(commandPath string) {
@@ -44,7 +56,7 @@ func HandleTacking(commandPath string) {
 	telemetryProperties["os"] = runtime.GOOS
 	_ = client.Enqueue(posthog.Capture{
 		DistinctId: userID,
-		Event:      "cli-command",
+		Event:      "eigenlayer-cli",
 		Properties: telemetryProperties,
 	})
 }
