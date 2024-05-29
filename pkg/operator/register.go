@@ -13,6 +13,7 @@ import (
 
 	"github.com/Layr-Labs/eigensdk-go/aws/secretmanager"
 
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/types"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 
@@ -22,7 +23,7 @@ import (
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/wallet"
 	"github.com/Layr-Labs/eigensdk-go/chainio/txmgr"
 	eigensdkLogger "github.com/Layr-Labs/eigensdk-go/logging"
-	"github.com/Layr-Labs/eigensdk-go/metrics"
+	eigenMetrics "github.com/Layr-Labs/eigensdk-go/metrics"
 	"github.com/Layr-Labs/eigensdk-go/signerv2"
 	eigensdkTypes "github.com/Layr-Labs/eigensdk-go/types"
 	eigenSdkUtils "github.com/Layr-Labs/eigensdk-go/utils"
@@ -44,6 +45,7 @@ func RegisterCmd(p utils.Prompter) *cli.Command {
 
 		This will register operator to DelegationManager
 		`,
+		After: telemetry.AfterRunAction(),
 		Action: func(cCtx *cli.Context) error {
 			args := cCtx.Args()
 			if args.Len() != 1 {
@@ -80,7 +82,7 @@ func RegisterCmd(p utils.Prompter) *cli.Command {
 
 			txMgr := txmgr.NewSimpleTxManager(keyWallet, ethClient, logger, sender)
 
-			noopMetrics := metrics.NewNoopMetrics()
+			noopMetrics := eigenMetrics.NewNoopMetrics()
 
 			elWriter, err := elContracts.BuildELChainWriter(
 				common.HexToAddress(operatorCfg.ELDelegationManagerAddress),

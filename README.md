@@ -43,6 +43,7 @@ To download the binary in a custom location, run:
 ```bash
 curl -sSfL https://raw.githubusercontent.com/layr-labs/eigenlayer-cli/master/scripts/install.sh | sh -s -- -b <custom_location>
 ```
+We collect anonymous usage data to improve the CLI. To disable telemetry, set the environment variable `EIGENLAYER_CLI_TELEMETRY_ENABLED` to `false`.
 
 ## Install `eigenlayer` CLI using Go
 

@@ -4,13 +4,14 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 
 	elContracts "github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/eth"
 	"github.com/Layr-Labs/eigensdk-go/chainio/txmgr"
 	eigensdkLogger "github.com/Layr-Labs/eigensdk-go/logging"
-	"github.com/Layr-Labs/eigensdk-go/metrics"
+	eigenMetrics "github.com/Layr-Labs/eigensdk-go/metrics"
 
 	"github.com/ethereum/go-ethereum/common"
 
@@ -31,6 +32,7 @@ func UpdateCmd(p utils.Prompter) *cli.Command {
 
 		Requires the same file used for registration as argument
 		`,
+		After: telemetry.AfterRunAction(),
 		Action: func(cCtx *cli.Context) error {
 			args := cCtx.Args()
 			if args.Len() != 1 {
@@ -66,7 +68,7 @@ func UpdateCmd(p utils.Prompter) *cli.Command {
 
 			txMgr := txmgr.NewSimpleTxManager(keyWallet, ethClient, logger, sender)
 
-			noopMetrics := metrics.NewNoopMetrics()
+			noopMetrics := eigenMetrics.NewNoopMetrics()
 
 			elWriter, err := elContracts.BuildELChainWriter(
 				common.HexToAddress(operatorCfg.ELDelegationManagerAddress),

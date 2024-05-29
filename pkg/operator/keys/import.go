@@ -6,6 +6,8 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
+
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 	"github.com/Layr-Labs/eigensdk-go/crypto/bls"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -38,7 +40,7 @@ This command will import keys in $HOME/.eigenlayer/operator_keys/ location
 			&KeyTypeFlag,
 			&InsecureFlag,
 		},
-
+		After: telemetry.AfterRunAction(),
 		Action: func(ctx *cli.Context) error {
 			args := ctx.Args()
 			if args.Len() != 2 {

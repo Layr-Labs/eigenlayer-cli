@@ -61,6 +61,7 @@ execute() {
     fi
     install "${tmpdir}/${binexe}" "${BINDIR}/"
     log_info "installed ${BINDIR}/${binexe}"
+    log_info "Telemetry is enabled by default. To disable it, set the EIGENLAYER_CLI_TELEMETRY_ENABLED environment variable to false."
   done
   rm -rf "${tmpdir}"
 }
