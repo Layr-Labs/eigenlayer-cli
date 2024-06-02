@@ -276,7 +276,7 @@ func expandTilde(path string) (string, error) {
 func validateAndReturnConfig(configurationFilePath string) (*types.OperatorConfigNew, error) {
 	operatorCfg, err := readConfigFile(configurationFilePath)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to read or parse the YAML configuration file at '%s': %w", path, err)
 	}
 	fmt.Printf(
 		"%s Operator configuration file read successfully %s\n",
