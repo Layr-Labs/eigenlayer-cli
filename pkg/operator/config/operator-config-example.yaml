@@ -21,7 +21,8 @@ operator:
   metadata_url: https://raw.githubusercontent.com/Layr-Labs/eigenlayer-cli/master/pkg/operator/config/metadata-example.json
 
 # EigenLayer Delegation manager contract address
-# This will be provided by EigenLayer team
+# For the testnet address, refer to here: https://github.com/layr-labs/eigenlayer-contracts/?tab=readme-ov-file#current-testnet-deployment
+# For the mainnet address, refer to here: https://github.com/layr-labs/eigenlayer-contracts/?tab=readme-ov-file#current-mainnet-deployment
 el_delegation_manager_address:
 
 # ETH RPC URL to the ethereum node you are using for on-chain operations
