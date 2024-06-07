@@ -44,6 +44,7 @@ func UpdateCmd(p utils.Prompter) *cli.Command {
 			if err != nil {
 				return err
 			}
+			cCtx.App.Metadata["network"] = operatorCfg.ChainId.String()
 
 			fmt.Printf(
 				"\r%s Operator configuration file validated successfully %s\n",

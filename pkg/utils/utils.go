@@ -33,6 +33,19 @@ var ChainMetadataMap = map[int64]types.ChainMetadata{
 	},
 }
 
+func ChainIdToNetworkName(chainId int64) string {
+	switch chainId {
+	case MainnetChainId:
+		return "mainnet"
+	case HoleskyChainId:
+		return "holesky"
+	case LocalChainId:
+		return "local"
+	default:
+		return "unknown"
+	}
+}
+
 func ReadYamlConfig(path string, o interface{}) error {
 	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
 		log.Fatal("Path ", path, " does not exist")
