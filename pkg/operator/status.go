@@ -40,6 +40,8 @@ func StatusCmd(p utils.Prompter) *cli.Command {
 			if err != nil {
 				return err
 			}
+			cCtx.App.Metadata["network"] = operatorCfg.ChainId.String()
+
 			fmt.Printf(
 				"%s Operator configuration file read successfully %s\n",
 				utils.EmojiCheckMark,
