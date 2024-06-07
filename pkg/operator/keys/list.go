@@ -8,7 +8,12 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/consensys/gnark-crypto/ecc/bn254"
+	"github.com/consensys/gnark-crypto/ecc/bn254/fp"
+
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
+	"github.com/Layr-Labs/eigensdk-go/crypto/bls"
+	"github.com/Layr-Labs/eigensdk-go/types"
 
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/urfave/cli/v2"
@@ -61,6 +66,11 @@ It will only list keys created in the default folder (./operator_keys/)
 						return err
 					}
 					fmt.Println("Public Key: " + pubKey)
+					operatorIdStr, err := GetOperatorIdFromBLSPubKey(pubKey)
+					if err != nil {
+						return err
+					}
+					fmt.Println("Operator Id: 0x" + operatorIdStr)
 					fmt.Println("Key location: " + keyFilePath)
 					fmt.Println("====================================================================================")
 					fmt.Println()
@@ -89,6 +99,56 @@ func GetPubKey(keyStoreFile string) (string, error) {
 	} else {
 		return pubKey, nil
 	}
+}
+
+func GetOperatorIdFromBLSPubKey(pubKey string) (string, error) {
+	// The pubkey 's string is generated from this code:
+	// ```go
+	// func (p *G1Affine) String() string {
+	// 	if p.IsInfinity() {
+	// 		return "O"
+	//	}
+	//	return "E([" + p.X.String() + "," + p.Y.String() + "])"
+	// }
+	// ```
+	//
+	// This code just parser this string:
+	//  E([498211989701534593628498974128726712526336918939770789545660245177948853517,19434346619705907282579203143605058653932187676054178921788041096426532277474])
+
+	if pubKey == "O" {
+		return "", fmt.Errorf("pubKey is Infinity")
+	}
+
+	if pubKey[:3] != "E([" && pubKey[len(pubKey)-2:] != "])" {
+		return "", fmt.Errorf("pubKey format failed by not E([x,y])")
+	}
+
+	pubKeyStr := pubKey[3 : len(pubKey)-2]
+	strs := strings.Split(pubKeyStr, ",")
+	if len(strs) != 2 {
+		return "", fmt.Errorf("pubkey format failed by not x,y")
+	}
+
+	xe, err := new(fp.Element).SetString(strs[0])
+	if err != nil {
+		return "", err
+	}
+
+	ye, err := new(fp.Element).SetString(strs[1])
+	if err != nil {
+		return "", err
+	}
+
+	point := &bls.G1Point{
+		G1Affine: &bn254.G1Affine{
+			X: *xe,
+			Y: *ye,
+		},
+	}
+
+	operatorId := types.OperatorIdFromG1Pubkey(point)
+
+	return operatorId.LogValue().String(), nil
 }
 
 func GetAddress(keyStoreFile string) (string, error) {
