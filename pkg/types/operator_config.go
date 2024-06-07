@@ -39,7 +39,7 @@ type Web3SignerConfig struct {
 	Url string `yaml:"url"`
 }
 
-type OperatorConfigNew struct {
+type OperatorConfig struct {
 	Operator                   eigensdkTypes.Operator `yaml:"operator"`
 	ELDelegationManagerAddress string                 `yaml:"el_delegation_manager_address"`
 	ELAVSDirectoryAddress      string
@@ -51,7 +51,7 @@ type OperatorConfigNew struct {
 	Web3SignerConfig           Web3SignerConfig `yaml:"web3"`
 }
 
-func (config OperatorConfigNew) MarshalYAML() (interface{}, error) {
+func (config OperatorConfig) MarshalYAML() (interface{}, error) {
 	return struct {
 		Operator                   eigensdkTypes.Operator `yaml:"operator"`
 		ELDelegationManagerAddress string                 `yaml:"el_delegation_manager_address"`

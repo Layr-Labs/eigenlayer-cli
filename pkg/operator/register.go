@@ -147,7 +147,7 @@ func printRegistrationInfo(txHash string, operatorAddress common.Address, chainI
 }
 
 func getWallet(
-	cfg *types.OperatorConfigNew,
+	cfg *types.OperatorConfig,
 	ethClient eth.Client,
 	p utils.Prompter,
 	logger eigensdkLogger.Logger,
@@ -273,7 +273,7 @@ func expandTilde(path string) (string, error) {
 	return path, nil
 }
 
-func validateAndReturnConfig(configurationFilePath string) (*types.OperatorConfigNew, error) {
+func validateAndReturnConfig(configurationFilePath string) (*types.OperatorConfig, error) {
 	operatorCfg, err := readConfigFile(configurationFilePath)
 	if err != nil {
 		return nil, err
@@ -322,8 +322,8 @@ func validateAndReturnConfig(configurationFilePath string) (*types.OperatorConfi
 	return operatorCfg, nil
 }
 
-func readConfigFile(path string) (*types.OperatorConfigNew, error) {
-	var operatorCfg types.OperatorConfigNew
+func readConfigFile(path string) (*types.OperatorConfig, error) {
+	var operatorCfg types.OperatorConfig
 	err := utils.ReadYamlConfig(path, &operatorCfg)
 	if err != nil {
 		return nil, err
@@ -367,7 +367,7 @@ func getWebAppLink(operatorAddress common.Address, chainId *big.Int) string {
 	}
 }
 
-func validateMetadata(operatorCfg *types.OperatorConfigNew) error {
+func validateMetadata(operatorCfg *types.OperatorConfig) error {
 	// Raw GitHub URL validation is only for mainnet
 	if operatorCfg.ChainId.Cmp(big.NewInt(utils.MainnetChainId)) == 0 {
 		err := eigenSdkUtils.ValidateRawGithubUrl(operatorCfg.Operator.MetadataUrl)
