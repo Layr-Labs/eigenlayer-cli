@@ -22,7 +22,7 @@ func TestGetOperatorIdFromPubKey(t *testing.T) {
 	}
 
 	for i, key := range keys {
-		id, err := GetOperatorIdFromPubKey(key)
+		id, err := GetOperatorIdFromBLSPubKey(key)
 		assert.NoError(t, err, "get operator id from pubkey for %s", key)
 		assert.Equal(t, operatorIds[i], id, "operator id from pubkey for %s should eq", key)
 	}

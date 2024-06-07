@@ -66,7 +66,7 @@ It will only list keys created in the default folder (./operator_keys/)
 						return err
 					}
 					fmt.Println("Public Key: " + pubKey)
-					operatorIdStr, err := GetOperatorIdFromPubKey(pubKey)
+					operatorIdStr, err := GetOperatorIdFromBLSPubKey(pubKey)
 					if err != nil {
 						return err
 					}
@@ -101,8 +101,8 @@ func GetPubKey(keyStoreFile string) (string, error) {
 	}
 }
 
-func GetOperatorIdFromPubKey(pubKey string) (string, error) {
-	// From:
+func GetOperatorIdFromBLSPubKey(pubKey string) (string, error) {
+	// The pubkey 's string is generated from this code:
 	// ```go
 	// func (p *G1Affine) String() string {
 	// 	if p.IsInfinity() {
@@ -110,7 +110,10 @@ func GetOperatorIdFromPubKey(pubKey string) (string, error) {
 	//	}
 	//	return "E([" + p.X.String() + "," + p.Y.String() + "])"
 	// }
-	// ````
+	// ```
+	//
+	// This code just parser this string:
+	//  E([498211989701534593628498974128726712526336918939770789545660245177948853517,19434346619705907282579203143605058653932187676054178921788041096426532277474])
 
 	if pubKey == "O" {
 		return "", fmt.Errorf("pubKey is Infinity")
