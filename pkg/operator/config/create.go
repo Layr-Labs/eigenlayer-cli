@@ -36,7 +36,7 @@ func CreateCmd(p utils.Prompter) *cli.Command {
 		Action: func(ctx *cli.Context) error {
 			skipPrompt := ctx.Bool(YesFlag.Name)
 
-			op := types.OperatorConfigNew{}
+			op := types.OperatorConfig{}
 
 			if !skipPrompt {
 				// Prompt user to generate empty or non-empty files
@@ -104,7 +104,7 @@ func CreateCmd(p utils.Prompter) *cli.Command {
 	return createCmd
 }
 
-func promptOperatorInfo(config *types.OperatorConfigNew, p utils.Prompter) (types.OperatorConfigNew, error) {
+func promptOperatorInfo(config *types.OperatorConfig, p utils.Prompter) (types.OperatorConfig, error) {
 	// Prompt and set operator address
 	operatorAddress, err := p.InputString("Enter your operator address:", "", "",
 		func(s string) error {
@@ -112,7 +112,7 @@ func promptOperatorInfo(config *types.OperatorConfigNew, p utils.Prompter) (type
 		},
 	)
 	if err != nil {
-		return types.OperatorConfigNew{}, err
+		return types.OperatorConfig{}, err
 	}
 	config.Operator.Address = operatorAddress
 
@@ -157,7 +157,7 @@ func promptOperatorInfo(config *types.OperatorConfigNew, p utils.Prompter) (type
 		},
 	)
 	if err != nil {
-		return types.OperatorConfigNew{}, err
+		return types.OperatorConfig{}, err
 	}
 	config.Operator.EarningsReceiverAddress = earningsAddress
 
@@ -166,14 +166,14 @@ func promptOperatorInfo(config *types.OperatorConfigNew, p utils.Prompter) (type
 		func(s string) error { return nil },
 	)
 	if err != nil {
-		return types.OperatorConfigNew{}, err
+		return types.OperatorConfig{}, err
 	}
 	config.EthRPCUrl = rpcUrl
 
 	// Prompt for network & set chainId
 	chainId, err := p.Select("Select your network:", []string{"mainnet", "holesky", "local"})
 	if err != nil {
-		return types.OperatorConfigNew{}, err
+		return types.OperatorConfig{}, err
 	}
 
 	switch chainId {
@@ -191,7 +191,7 @@ func promptOperatorInfo(config *types.OperatorConfigNew, p utils.Prompter) (type
 	// Prompt for signer type
 	signerType, err := p.Select("Select your signer type:", []string{"local_keystore", "fireblocks", "web3"})
 	if err != nil {
-		return types.OperatorConfigNew{}, err
+		return types.OperatorConfig{}, err
 	}
 
 	switch signerType {
@@ -209,7 +209,7 @@ func promptOperatorInfo(config *types.OperatorConfigNew, p utils.Prompter) (type
 		)
 
 		if err != nil {
-			return types.OperatorConfigNew{}, err
+			return types.OperatorConfig{}, err
 		}
 		config.PrivateKeyStorePath = ecdsaKeyPath
 	case "fireblocks":
@@ -224,7 +224,7 @@ func promptOperatorInfo(config *types.OperatorConfigNew, p utils.Prompter) (type
 			},
 		)
 		if err != nil {
-			return types.OperatorConfigNew{}, err
+			return types.OperatorConfig{}, err
 		}
 		config.FireblocksConfig.APIKey = apiKey
 
@@ -238,7 +238,7 @@ func promptOperatorInfo(config *types.OperatorConfigNew, p utils.Prompter) (type
 			},
 		)
 		if err != nil {
-			return types.OperatorConfigNew{}, err
+			return types.OperatorConfig{}, err
 		}
 		config.FireblocksConfig.BaseUrl = baseUrl
 
@@ -252,7 +252,7 @@ func promptOperatorInfo(config *types.OperatorConfigNew, p utils.Prompter) (type
 			},
 		)
 		if err != nil {
-			return types.OperatorConfigNew{}, err
+			return types.OperatorConfig{}, err
 		}
 		config.FireblocksConfig.VaultAccountName = vaultAccountName
 
@@ -266,7 +266,7 @@ func promptOperatorInfo(config *types.OperatorConfigNew, p utils.Prompter) (type
 			},
 		)
 		if err != nil {
-			return types.OperatorConfigNew{}, err
+			return types.OperatorConfig{}, err
 		}
 		config.FireblocksConfig.Timeout = timeout
 
@@ -293,7 +293,7 @@ func promptOperatorInfo(config *types.OperatorConfigNew, p utils.Prompter) (type
 				},
 			)
 			if err != nil {
-				return types.OperatorConfigNew{}, err
+				return types.OperatorConfig{}, err
 			}
 			config.FireblocksConfig.SecretKey = keyName
 			awsRegion, err := p.InputString("Enter the AWS region where the secret is stored:", "us-east-1", "",
@@ -305,13 +305,13 @@ func promptOperatorInfo(config *types.OperatorConfigNew, p utils.Prompter) (type
 				},
 			)
 			if err != nil {
-				return types.OperatorConfigNew{}, err
+				return types.OperatorConfig{}, err
 			}
 			config.FireblocksConfig.AWSRegion = awsRegion
 
 		}
 		if err != nil {
-			return types.OperatorConfigNew{}, err
+			return types.OperatorConfig{}, err
 		}
 	case "web3":
 		config.SignerType = types.Web3Signer
@@ -325,11 +325,11 @@ func promptOperatorInfo(config *types.OperatorConfigNew, p utils.Prompter) (type
 			},
 		)
 		if err != nil {
-			return types.OperatorConfigNew{}, err
+			return types.OperatorConfig{}, err
 		}
 		config.Web3SignerConfig.Url = web3SignerUrl
 	default:
-		return types.OperatorConfigNew{}, fmt.Errorf("unknown signer type %s", signerType)
+		return types.OperatorConfig{}, fmt.Errorf("unknown signer type %s", signerType)
 	}
 
 	return *config, nil

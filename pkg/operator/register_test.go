@@ -50,12 +50,12 @@ func TestGetTransactionLink(t *testing.T) {
 func TestValidateMainnetMetadata(t *testing.T) {
 	var tests = []struct {
 		name        string
-		operatorCfg *types.OperatorConfigNew
+		operatorCfg *types.OperatorConfig
 		expectErr   bool
 	}{
 		{
 			name: "Valid metadata",
-			operatorCfg: &types.OperatorConfigNew{
+			operatorCfg: &types.OperatorConfig{
 				Operator: eigensdkTypes.Operator{
 					MetadataUrl: "https://raw.githubusercontent.com/Layr-Labs/eigendata/master/operators/eigenlabs/metadata.json",
 				},
@@ -64,7 +64,7 @@ func TestValidateMainnetMetadata(t *testing.T) {
 		},
 		{
 			name: "Invalid metadata - invalid logo url",
-			operatorCfg: &types.OperatorConfigNew{
+			operatorCfg: &types.OperatorConfig{
 				Operator: eigensdkTypes.Operator{
 					MetadataUrl: "https://raw.githubusercontent.com/shrimalmadhur/metadata/main/metadata1.json",
 				},
@@ -74,7 +74,7 @@ func TestValidateMainnetMetadata(t *testing.T) {
 		},
 		{
 			name: "Invalid metadata - Invalid metadata url",
-			operatorCfg: &types.OperatorConfigNew{
+			operatorCfg: &types.OperatorConfig{
 				Operator: eigensdkTypes.Operator{
 					MetadataUrl: "https://goerli-operator-metadata.s3.amazonaws.com/metadata.json",
 				},
@@ -84,7 +84,7 @@ func TestValidateMainnetMetadata(t *testing.T) {
 		},
 		{
 			name: "Valid metadata for holesky",
-			operatorCfg: &types.OperatorConfigNew{
+			operatorCfg: &types.OperatorConfig{
 				Operator: eigensdkTypes.Operator{
 					MetadataUrl: "https://goerli-operator-metadata.s3.amazonaws.com/metadata.json",
 				},
