@@ -1,6 +1,6 @@
 module github.com/Layr-Labs/eigenlayer-cli
 
-go 1.21
+go 1.21.11
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
