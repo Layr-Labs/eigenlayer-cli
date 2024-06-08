@@ -28,6 +28,7 @@ func UpdateCmd(p utils.Prompter) *cli.Command {
 			&flags.BroadcastFlag,
 			&flags.AllocationPercentageFlag,
 			&flags.StakeSourceFlag,
+			&flags.ShowMagnitudesFlag,
 		},
 	}
 }

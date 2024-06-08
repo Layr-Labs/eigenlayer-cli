@@ -66,4 +66,20 @@ var (
 		Required: true,
 		Aliases:  []string{"s"},
 	}
+
+	ShowMagnitudesFlag = cli.StringFlag{
+		Name:     "show-magnitudes",
+		Usage:    "Show magnitudes of stake share",
+		Required: true,
+		Aliases:  []string{"m"},
+	}
+
+	RebalanceFilePathFlag = cli.PathFlag{
+		Name: "rebalance-file-path",
+		Usage: `Path to the CSV file. 
+	The CSV file should have the following columns: operator set,allocation percentage.
+	This file must have all the operator sets and their allocation percentages for a strategy.`,
+		Required: true,
+		Aliases:  []string{"r"},
+	}
 )

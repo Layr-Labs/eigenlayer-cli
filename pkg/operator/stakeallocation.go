@@ -15,6 +15,7 @@ func StakeAllocationCmd(p utils.Prompter) *cli.Command {
 		Subcommands: []*cli.Command{
 			stakeallocation.ShowCmd(p),
 			stakeallocation.UpdateCmd(p),
+			stakeallocation.RebalanceCmd(p),
 		},
 	}
 }

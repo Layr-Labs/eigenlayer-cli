@@ -6,7 +6,7 @@ import (
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/flags"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
-	
+
 	"github.com/urfave/cli/v2"
 )
 
