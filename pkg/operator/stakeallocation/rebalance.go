@@ -17,19 +17,21 @@ func RebalanceCmd(p utils.Prompter) *cli.Command {
 		Description: `
 Rebalance the stake allocation for the operator for a particular strategy.
 This CSV file requires the following columns for only one stragegy:
-operator_set,allocation percentage
-Example
-1,10
-2,15
+avs address,operator set,allocation bips
+Example:
+0xabcd,1,10
+0x1234,2,15
 		`,
 		Action: rebalanceStakeAllocation,
 		After:  telemetry.AfterRunAction(),
 		Flags: []cli.Flag{
 			&flags.ConfigurationFileFlag,
-			&flags.DryRunFlag,
-			&flags.BroadcastFlag,
+			&flags.StrategyAddressFlag,
 			&flags.ShowMagnitudesFlag,
 			&flags.RebalanceFilePathFlag,
+			&flags.DryRunFlag,
+			&flags.BroadcastFlag,
+			&flags.OutputFilePathFlag,
 		},
 	}
 }

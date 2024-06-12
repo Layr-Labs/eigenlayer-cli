@@ -23,12 +23,15 @@ func UpdateCmd(p utils.Prompter) *cli.Command {
 		After: telemetry.AfterRunAction(),
 		Flags: []cli.Flag{
 			&flags.ConfigurationFileFlag,
+			&flags.AvsAddressFlag,
 			&flags.OperatorSetFlag,
-			&flags.DryRunFlag,
-			&flags.BroadcastFlag,
-			&flags.AllocationPercentageFlag,
+			&flags.StrategyAddressFlag,
+			&flags.AllocationBipsFlag,
 			&flags.StakeSourceFlag,
 			&flags.ShowMagnitudesFlag,
+			&flags.DryRunFlag,
+			&flags.BroadcastFlag,
+			&flags.OutputFilePathFlag,
 		},
 	}
 }

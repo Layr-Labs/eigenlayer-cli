@@ -14,6 +14,13 @@ var (
 		Name:     "avs-addresses",
 		Usage:    "Comma separated list of AVS addresses",
 		Required: false,
+		Aliases:  []string{"as"},
+	}
+
+	AvsAddressFlag = cli.StringSliceFlag{
+		Name:     "avs-address",
+		Usage:    "an AVS address",
+		Required: true,
 		Aliases:  []string{"a"},
 	}
 
@@ -21,14 +28,14 @@ var (
 		Name:     "operator-sets",
 		Usage:    "Comma separated list of operator sets",
 		Required: false,
-		Aliases:  []string{"os"},
+		Aliases:  []string{"ops"},
 	}
 
 	OperatorSetFlag = cli.StringFlag{
 		Name:     "operator-set",
 		Usage:    "Operator set identifier",
 		Required: true,
-		Aliases:  []string{"o"},
+		Aliases:  []string{"op"},
 	}
 
 	NumberOfDaysFlag = cli.IntFlag{
@@ -53,11 +60,11 @@ var (
 		Aliases:  []string{"b"},
 	}
 
-	AllocationPercentageFlag = cli.StringFlag{
-		Name:     "allocation-percentage",
+	AllocationBipsFlag = cli.StringFlag{
+		Name:     "allocation-bips",
 		Usage:    "Allocation to update",
 		Required: true,
-		Aliases:  []string{"a"},
+		Aliases:  []string{"ap"},
 	}
 
 	StakeSourceFlag = cli.StringFlag{
@@ -81,5 +88,19 @@ var (
 	This file must have all the operator sets and their allocation percentages for a strategy.`,
 		Required: true,
 		Aliases:  []string{"r"},
+	}
+
+	StrategyAddressFlag = cli.StringFlag{
+		Name:     "strategy-address",
+		Usage:    "Address of the strategy contract",
+		Required: true,
+		Aliases:  []string{"sa"},
+	}
+
+	OutputFilePathFlag = cli.StringFlag{
+		Name:     "output-file-path",
+		Usage:    "Path to the output file. It will be in a CSV format",
+		Required: false,
+		Aliases:  []string{"o"},
 	}
 )

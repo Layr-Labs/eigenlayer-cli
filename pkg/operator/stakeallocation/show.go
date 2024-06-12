@@ -24,6 +24,7 @@ func ShowCmd(p utils.Prompter) *cli.Command {
 			&flags.ConfigurationFileFlag,
 			&flags.AvsAddressesFlag,
 			&flags.OperatorSetsFlag,
+			&flags.OutputFilePathFlag,
 		},
 	}
 }
