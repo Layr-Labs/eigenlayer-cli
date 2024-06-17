@@ -95,7 +95,7 @@ func UpdateCmd(p utils.Prompter) *cli.Command {
 			)
 			printRegistrationInfo("", common.HexToAddress(operatorCfg.Operator.Address), &operatorCfg.ChainId)
 
-			fmt.Printf("%s Operator updated successfully\n", utils.EmojiCheckMark)
+			fmt.Printf("%s Operator updated successfully. There is a 30 minute delay between update and operators details being shown in our webapp\n", utils.EmojiCheckMark)
 			return nil
 		},
 	}

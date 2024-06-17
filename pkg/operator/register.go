@@ -128,7 +128,7 @@ func RegisterCmd(p utils.Prompter) *cli.Command {
 				return nil
 			}
 
-			fmt.Printf("%s Operator is registered successfully to EigenLayer\n", utils.EmojiCheckMark)
+			fmt.Printf("%s Operator is registered successfully to EigenLayer. There is a 30 minute delay between registration and operators details being shown in our webapp\n", utils.EmojiCheckMark)
 			return nil
 		},
 	}
