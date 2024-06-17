@@ -26,14 +26,14 @@ var (
 
 	OperatorSetsFlag = cli.StringSliceFlag{
 		Name:     "operator-sets",
-		Usage:    "Comma separated list of operator sets",
+		Usage:    "Comma separated list of operator sets AVSAddress#OperatorSetId",
 		Required: false,
 		Aliases:  []string{"ops"},
 	}
 
 	OperatorSetFlag = cli.StringFlag{
 		Name:     "operator-set",
-		Usage:    "Operator set identifier",
+		Usage:    "Operator set identifier AVSAddress#OperatorSetId",
 		Required: true,
 		Aliases:  []string{"op"},
 	}
