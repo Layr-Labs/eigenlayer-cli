@@ -123,7 +123,11 @@ If you see any issues in documentation please create an issue or PR [here](https
 To release a new version of the CLI, follow the steps below:
 > Note: You need to have write permission to this repo to release new version
 
-1. Make sure the release version is updated [here](https://github.com/Layr-Labs/eigenlayer-cli/blob/master/cmd/eigenlayer/main.go#L26)
+1. Checkout the master branch and pull the latest changes:
+    ```bash
+    git checkout master
+    git pull origin master
+    ```
 2. In your local clone, create a new release tag using the following command:
     ```bash
      git tag v<version> -m "Release v<version>"
