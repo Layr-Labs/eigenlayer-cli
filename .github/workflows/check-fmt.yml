@@ -1,4 +1,4 @@
-name: check that make fmt was run
+name: Check make fmt
 on:
   push:
     branches:
@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   check-make-fmt:
-    name: check make fmt
+    name: Check make fmt
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
