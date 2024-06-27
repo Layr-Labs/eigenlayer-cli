@@ -14,22 +14,25 @@ import (
 
 var ChainMetadataMap = map[int64]types.ChainMetadata{
 	MainnetChainId: {
-		BlockExplorerUrl:           "https://etherscan.io/tx",
-		ELDelegationManagerAddress: "0x39053D51B77DC0d36036Fc1fCc8Cb819df8Ef37A",
-		ELAVSDirectoryAddress:      "0x135dda560e946695d6f155dacafc6f1f25c1f5af",
-		WebAppUrl:                  "https://app.eigenlayer.xyz/operator",
+		BlockExplorerUrl:            "https://etherscan.io/tx",
+		ELDelegationManagerAddress:  "0x39053D51B77DC0d36036Fc1fCc8Cb819df8Ef37A",
+		ELAVSDirectoryAddress:       "0x135dda560e946695d6f155dacafc6f1f25c1f5af",
+		ELRewardsCoordinatorAddress: "",
+		WebAppUrl:                   "https://app.eigenlayer.xyz/operator",
 	},
 	HoleskyChainId: {
-		BlockExplorerUrl:           "https://holesky.etherscan.io/tx",
-		ELDelegationManagerAddress: "0xA44151489861Fe9e3055d95adC98FbD462B948e7",
-		ELAVSDirectoryAddress:      "0x055733000064333CaDDbC92763c58BF0192fFeBf",
-		WebAppUrl:                  "https://holesky.eigenlayer.xyz/operator",
+		BlockExplorerUrl:            "https://holesky.etherscan.io/tx",
+		ELDelegationManagerAddress:  "0xA44151489861Fe9e3055d95adC98FbD462B948e7",
+		ELAVSDirectoryAddress:       "0x055733000064333CaDDbC92763c58BF0192fFeBf",
+		ELRewardsCoordinatorAddress: "0xb22Ef643e1E067c994019A4C19e403253C05c2B0",
+		WebAppUrl:                   "https://holesky.eigenlayer.xyz/operator",
 	},
 	LocalChainId: {
-		BlockExplorerUrl:           "",
-		ELDelegationManagerAddress: "",
-		ELAVSDirectoryAddress:      "",
-		WebAppUrl:                  "",
+		BlockExplorerUrl:            "",
+		ELDelegationManagerAddress:  "",
+		ELAVSDirectoryAddress:       "",
+		ELRewardsCoordinatorAddress: "",
+		WebAppUrl:                   "",
 	},
 }
 

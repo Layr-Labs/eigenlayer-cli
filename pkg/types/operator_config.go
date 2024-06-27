@@ -40,15 +40,16 @@ type Web3SignerConfig struct {
 }
 
 type OperatorConfig struct {
-	Operator                   eigensdkTypes.Operator `yaml:"operator"`
-	ELDelegationManagerAddress string                 `yaml:"el_delegation_manager_address"`
-	ELAVSDirectoryAddress      string
-	EthRPCUrl                  string           `yaml:"eth_rpc_url"`
-	PrivateKeyStorePath        string           `yaml:"private_key_store_path"`
-	SignerType                 SignerType       `yaml:"signer_type"`
-	ChainId                    big.Int          `yaml:"chain_id"`
-	FireblocksConfig           FireblocksConfig `yaml:"fireblocks"`
-	Web3SignerConfig           Web3SignerConfig `yaml:"web3"`
+	Operator                    eigensdkTypes.Operator `yaml:"operator"`
+	ELDelegationManagerAddress  string                 `yaml:"el_delegation_manager_address"`
+	ELAVSDirectoryAddress       string
+	ELRewardsCoordinatorAddress string
+	EthRPCUrl                   string           `yaml:"eth_rpc_url"`
+	PrivateKeyStorePath         string           `yaml:"private_key_store_path"`
+	SignerType                  SignerType       `yaml:"signer_type"`
+	ChainId                     big.Int          `yaml:"chain_id"`
+	FireblocksConfig            FireblocksConfig `yaml:"fireblocks"`
+	Web3SignerConfig            Web3SignerConfig `yaml:"web3"`
 }
 
 func (config OperatorConfig) MarshalYAML() (interface{}, error) {
