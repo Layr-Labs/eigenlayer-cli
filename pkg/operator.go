@@ -3,6 +3,7 @@ package pkg
 import (
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/operator"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
+
 	"github.com/urfave/cli/v2"
 )
 
@@ -16,6 +17,8 @@ func OperatorCmd(p utils.Prompter) *cli.Command {
 			operator.RegisterCmd(p),
 			operator.StatusCmd(p),
 			operator.UpdateCmd(p),
+			operator.StakeAllocationCmd(p),
+			operator.RewardsCmd(p),
 		},
 	}
 
