@@ -338,6 +338,12 @@ func readConfigFile(path string) (*types.OperatorConfig, error) {
 		return nil, err
 	}
 	operatorCfg.ELAVSDirectoryAddress = elAVSDirectoryAddress
+
+	elRewardsCoordinatorAddress, err := getRewardCoordinatorAddress(operatorCfg.ChainId)
+	if err != nil {
+		return nil, err
+	}
+	operatorCfg.ELRewardsCoordinatorAddress = elRewardsCoordinatorAddress
 	return &operatorCfg, nil
 }
 
@@ -348,6 +354,16 @@ func getAVSDirectoryAddress(chainID big.Int) (string, error) {
 		return "", fmt.Errorf("chain ID %d not supported", chainIDInt)
 	} else {
 		return chainMetadata.ELAVSDirectoryAddress, nil
+	}
+}
+
+func getRewardCoordinatorAddress(chainID big.Int) (string, error) {
+	chainIDInt := chainID.Int64()
+	chainMetadata, ok := utils.ChainMetadataMap[chainIDInt]
+	if !ok {
+		return "", fmt.Errorf("chain ID %d not supported", chainIDInt)
+	} else {
+		return chainMetadata.ELRewardsCoordinatorAddress, nil
 	}
 }
 
