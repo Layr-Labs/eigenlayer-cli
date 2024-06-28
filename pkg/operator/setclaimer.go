@@ -40,6 +40,9 @@ func SetClaimerCmd(p utils.Prompter) *cli.Command {
 				return err
 			}
 			cCtx.App.Metadata["network"] = operatorCfg.ChainId.String()
+			if operatorCfg.ChainId.Int64() == utils.MainnetChainId {
+				return fmt.Errorf("set claimer currently unsupported on mainnet")
+			}
 
 			logger, err := eigensdkLogger.NewZapLogger(eigensdkLogger.Development)
 			if err != nil {
