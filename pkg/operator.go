@@ -21,5 +21,4 @@ func OperatorCmd(p utils.Prompter) *cli.Command {
 	}
 
 	return operatorCmd
-
 }

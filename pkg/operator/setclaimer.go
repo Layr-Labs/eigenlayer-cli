@@ -24,7 +24,7 @@ func SetClaimerCmd(p utils.Prompter) *cli.Command {
 		Usage:     "Set the claimer address for the operator",
 		UsageText: "set-claimer",
 		Description: `
-		Set the rewards claimer address for the operator.
+Set the rewards claimer address for the operator.
 		`,
 		After: telemetry.AfterRunAction(),
 		Flags: []cli.Flag{
