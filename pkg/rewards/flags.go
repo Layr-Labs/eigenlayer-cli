@@ -54,4 +54,27 @@ var (
 		Required: true,
 		EnvVars:  []string{"NODE_OPERATOR_CLAIMER_ADDRESS"},
 	}
+
+	EarnerAddressFlag = cli.StringFlag{
+		Name:     "earner-address",
+		Aliases:  []string{"a"},
+		Usage:    "Address of the earner",
+		Required: true,
+		EnvVars:  []string{"REWARDS_EARNER_ADDRESS"},
+	}
+
+	NumberOfDaysFlag = cli.IntFlag{
+		Name:        "number-of-days",
+		Aliases:     []string{"nd"},
+		Usage:       "Number of days to show rewards for",
+		DefaultText: "21",
+		EnvVars:     []string{"REWARDS_NUMBER_OF_DAYS"},
+	}
+
+	AVSAddressesFlag = cli.StringFlag{
+		Name:    "avs-addresses",
+		Aliases: []string{"a"},
+		Usage:   "Comma seperated addresses of the AVS",
+		EnvVars: []string{"AVS_ADDRESSES"},
+	}
 )
