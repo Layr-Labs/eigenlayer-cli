@@ -35,7 +35,7 @@ func (o *OperatorConfig) MarshalYAML() (interface{}, error) {
 		Operator                   eigensdkTypes.Operator `yaml:"operator"`
 		ELDelegationManagerAddress string                 `yaml:"el_delegation_manager_address"`
 		EthRPCUrl                  string                 `yaml:"eth_rpc_url"`
-		ChainId                    string                 `yaml:"chain_id"`
+		ChainId                    int64                  `yaml:"chain_id"`
 		PrivateKeyStorePath        string                 `yaml:"private_key_store_path"`
 		SignerType                 SignerType             `yaml:"signer_type"`
 		Fireblocks                 FireblocksConfig       `yaml:"fireblocks"`
@@ -44,7 +44,7 @@ func (o *OperatorConfig) MarshalYAML() (interface{}, error) {
 		Operator:                   o.Operator,
 		ELDelegationManagerAddress: o.ELDelegationManagerAddress,
 		EthRPCUrl:                  o.EthRPCUrl,
-		ChainId:                    o.ChainId.String(),
+		ChainId:                    o.ChainId.Int64(),
 		PrivateKeyStorePath:        o.SignerConfig.PrivateKeyStorePath,
 		SignerType:                 o.SignerConfig.SignerType,
 		Fireblocks:                 o.SignerConfig.FireblocksConfig,
@@ -59,7 +59,7 @@ func (o *OperatorConfig) UnmarshalYAML(unmarshal func(interface{}) error) error 
 		ELAVSDirectoryAddress       string                 `yaml:"el_avs_directory_address"`
 		ELRewardsCoordinatorAddress string                 `yaml:"el_rewards_coordinator_address"`
 		EthRPCUrl                   string                 `yaml:"eth_rpc_url"`
-		ChainId                     string                 `yaml:"chain_id"`
+		ChainId                     int64                  `yaml:"chain_id"`
 		PrivateKeyStorePath         string                 `yaml:"private_key_store_path"`
 		SignerType                  SignerType             `yaml:"signer_type"`
 		Fireblocks                  FireblocksConfig       `yaml:"fireblocks"`
@@ -75,7 +75,7 @@ func (o *OperatorConfig) UnmarshalYAML(unmarshal func(interface{}) error) error 
 	o.EthRPCUrl = aux.EthRPCUrl
 
 	chainId := new(big.Int)
-	chainId.SetString(aux.ChainId, 10)
+	chainId.SetInt64(aux.ChainId)
 	o.ChainId = *chainId
 
 	o.SignerConfig.PrivateKeyStorePath = aux.PrivateKeyStorePath
