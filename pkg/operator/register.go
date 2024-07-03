@@ -38,7 +38,6 @@ func RegisterCmd(p utils.Prompter) *cli.Command {
 
 			configurationFilePath := args.Get(0)
 			operatorCfg, err := validateAndReturnConfig(configurationFilePath)
-			fmt.Println(operatorCfg)
 			if err != nil {
 				return err
 			}
