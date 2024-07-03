@@ -196,7 +196,7 @@ func promptOperatorInfo(config *types.OperatorConfig, p utils.Prompter) (types.O
 
 	switch signerType {
 	case "local_keystore":
-		config.SignerType = types.LocalKeystoreSigner
+		config.SignerConfig.SignerType = types.LocalKeystoreSigner
 		// Prompt for ecdsa key path
 		ecdsaKeyPath, err := p.InputString("Enter your ecdsa key path:", "", "",
 			func(s string) error {
@@ -211,9 +211,9 @@ func promptOperatorInfo(config *types.OperatorConfig, p utils.Prompter) (types.O
 		if err != nil {
 			return types.OperatorConfig{}, err
 		}
-		config.PrivateKeyStorePath = ecdsaKeyPath
+		config.SignerConfig.PrivateKeyStorePath = ecdsaKeyPath
 	case "fireblocks":
-		config.SignerType = types.FireBlocksSigner
+		config.SignerConfig.SignerType = types.FireBlocksSigner
 		// Prompt for fireblocks API key
 		apiKey, err := p.InputString("Enter your fireblocks api key:", "", "",
 			func(s string) error {
@@ -226,7 +226,7 @@ func promptOperatorInfo(config *types.OperatorConfig, p utils.Prompter) (types.O
 		if err != nil {
 			return types.OperatorConfig{}, err
 		}
-		config.FireblocksConfig.APIKey = apiKey
+		config.SignerConfig.FireblocksConfig.APIKey = apiKey
 
 		// Prompt for fireblocks base url
 		baseUrl, err := p.InputString("Enter your fireblocks base url:", "https://api.fireblocks.io/", "",
@@ -240,7 +240,7 @@ func promptOperatorInfo(config *types.OperatorConfig, p utils.Prompter) (types.O
 		if err != nil {
 			return types.OperatorConfig{}, err
 		}
-		config.FireblocksConfig.BaseUrl = baseUrl
+		config.SignerConfig.FireblocksConfig.BaseUrl = baseUrl
 
 		// Prompt for fireblocks vault account name
 		vaultAccountName, err := p.InputString("Enter the name of fireblocks vault:", "", "",
@@ -254,7 +254,7 @@ func promptOperatorInfo(config *types.OperatorConfig, p utils.Prompter) (types.O
 		if err != nil {
 			return types.OperatorConfig{}, err
 		}
-		config.FireblocksConfig.VaultAccountName = vaultAccountName
+		config.SignerConfig.FireblocksConfig.VaultAccountName = vaultAccountName
 
 		// Prompt for fireblocks API timeout
 		timeout, err := p.InputInteger("Enter the timeout for fireblocks API (in seconds):", "3", "",
@@ -268,7 +268,7 @@ func promptOperatorInfo(config *types.OperatorConfig, p utils.Prompter) (types.O
 		if err != nil {
 			return types.OperatorConfig{}, err
 		}
-		config.FireblocksConfig.Timeout = timeout
+		config.SignerConfig.FireblocksConfig.Timeout = timeout
 
 		// Prompt for fireblocks vault account name
 		secretStorageType, err := p.Select(
@@ -277,13 +277,13 @@ func promptOperatorInfo(config *types.OperatorConfig, p utils.Prompter) (types.O
 		)
 		switch secretStorageType {
 		case "Plain Text":
-			config.FireblocksConfig.SecretStorageType = types.PlainText
-			config.FireblocksConfig.SecretKey = "<FILL-ME>"
+			config.SignerConfig.FireblocksConfig.SecretStorageType = types.PlainText
+			config.SignerConfig.FireblocksConfig.SecretKey = "<FILL-ME>"
 			fmt.Println()
 			fmt.Println("Please fill in the secret key in the operator.yaml file")
 			fmt.Println()
 		case "AWS Secret Manager":
-			config.FireblocksConfig.SecretStorageType = types.AWSSecretManager
+			config.SignerConfig.FireblocksConfig.SecretStorageType = types.AWSSecretManager
 			keyName, err := p.InputString("Enter the name of the secret in AWS Secret Manager:", "", "",
 				func(s string) error {
 					if len(s) == 0 {
@@ -295,7 +295,7 @@ func promptOperatorInfo(config *types.OperatorConfig, p utils.Prompter) (types.O
 			if err != nil {
 				return types.OperatorConfig{}, err
 			}
-			config.FireblocksConfig.SecretKey = keyName
+			config.SignerConfig.FireblocksConfig.SecretKey = keyName
 			awsRegion, err := p.InputString("Enter the AWS region where the secret is stored:", "us-east-1", "",
 				func(s string) error {
 					if len(s) == 0 {
@@ -307,14 +307,14 @@ func promptOperatorInfo(config *types.OperatorConfig, p utils.Prompter) (types.O
 			if err != nil {
 				return types.OperatorConfig{}, err
 			}
-			config.FireblocksConfig.AWSRegion = awsRegion
+			config.SignerConfig.FireblocksConfig.AWSRegion = awsRegion
 
 		}
 		if err != nil {
 			return types.OperatorConfig{}, err
 		}
 	case "web3":
-		config.SignerType = types.Web3Signer
+		config.SignerConfig.SignerType = types.Web3Signer
 		// Prompt for fireblocks API key
 		web3SignerUrl, err := p.InputString("Enter your web3 signer url:", "", "",
 			func(s string) error {
@@ -327,7 +327,7 @@ func promptOperatorInfo(config *types.OperatorConfig, p utils.Prompter) (types.O
 		if err != nil {
 			return types.OperatorConfig{}, err
 		}
-		config.Web3SignerConfig.Url = web3SignerUrl
+		config.SignerConfig.Web3SignerConfig.Url = web3SignerUrl
 	default:
 		return types.OperatorConfig{}, fmt.Errorf("unknown signer type %s", signerType)
 	}
