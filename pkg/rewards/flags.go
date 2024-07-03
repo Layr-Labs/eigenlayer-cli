@@ -3,13 +3,6 @@ package rewards
 import "github.com/urfave/cli/v2"
 
 var (
-	SubmitClaimFlag = cli.BoolFlag{
-		Name:    "submit-claim",
-		Aliases: []string{"s"},
-		Usage:   "Use this flag to submit the claim",
-		EnvVars: []string{"SUBMIT_CLAIM"},
-	}
-
 	TokenAddressesFlag = cli.StringFlag{
 		Name:     "token-addresses",
 		Aliases:  []string{"t"},

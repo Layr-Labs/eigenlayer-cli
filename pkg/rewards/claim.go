@@ -2,21 +2,22 @@ package rewards
 
 import (
 	"errors"
+	"fmt"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/common/flags"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
+	contractrewardscoordinator "github.com/Layr-Labs/eigenlayer-contracts/pkg/bindings/IRewardsCoordinator"
 	"github.com/Layr-Labs/eigenlayer-rewards-proofs/pkg/claimgen"
-	"github.com/Layr-Labs/eigenlayer-rewards-updater/pkg/proofDataFetcher/httpProofDataFetcher"
+	"github.com/Layr-Labs/eigenlayer-rewards-proofs/pkg/proofDataFetcher/httpProofDataFetcher"
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/eth"
+	rewardscoordinator "github.com/Layr-Labs/eigensdk-go/contracts/bindings/IRewardsCoordinator"
 	"github.com/Layr-Labs/eigensdk-go/logging"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
-	"go.uber.org/zap"
 	"net/http"
 	"strings"
 	"time"
 
-	rConfig "github.com/Layr-Labs/eigenlayer-rewards-updater/pkg/config"
 	"github.com/urfave/cli/v2"
 )
 
@@ -45,7 +46,7 @@ type ClaimConfig struct {
 	EarnerAddress             common.Address
 	Output                    string
 	PathToKeyStore            string
-	SubmitClaim               bool
+	Broadcast                 bool
 	TokenAddresses            []common.Address
 	RewardsCoordinatorAddress common.Address
 	ClaimTimestamp            string
@@ -64,7 +65,7 @@ func ClaimCmd(p utils.Prompter) cli.Command {
 			&flags.EarnerAddressFlag,
 			&flags.OutputFileFlag,
 			&flags.PathToKeyStoreFlag,
-			&SubmitClaimFlag,
+			&flags.BroadcastFlag,
 			&TokenAddressesFlag,
 			&RewardsCoordinatorAddressFlag,
 			&ClaimTimestampFlag,
@@ -83,10 +84,6 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 
 	ethClient, err := eth.NewClient(config.RPCUrl)
 	logger, err := logging.NewZapLogger(logging.Development)
-	zapLogger, err := zap.NewDevelopment()
-	if err != nil {
-		return err
-	}
 
 	elReader, err := elcontracts.NewReaderFromConfig(
 		elcontracts.Config{
@@ -99,13 +96,7 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 	}
 
 	// TODO(shrimalmadhur): to change this from config/network
-	env := rConfig.Environment_PRE_PROD
-	e, err := rConfig.StringEnvironmentFromEnum(env)
-	if err != nil {
-		return err
-	}
-	// TODO: data fetcher after Sean implements it
-	df := httpProofDataFetcher.NewHttpProofDataFetcher("", e, config.Network, http.DefaultClient, zapLogger)
+	df := httpProofDataFetcher.NewHttpProofDataFetcher("", "preprod", config.Network, http.DefaultClient)
 
 	latestSubmittedTimestamp, err := elReader.CurrRewardsCalculationEndTimestamp(&bind.CallOpts{})
 	if err != nil {
@@ -137,18 +128,57 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 
 	solidityClaim := claimgen.FormatProofForSolidity(accounts.Root(), claim)
 
-	if config.SubmitClaim {
+	if config.Broadcast {
+		eLWriter, err := elcontracts.NewWriterFromConfig(elcontracts.Config{
+			RewardsCoordinatorAddress: config.RewardsCoordinatorAddress,
+		},
+			ethClient,
+			logger,
+		)
+		if err != nil {
+			return err
+		}
 
+		elClaim := rewardscoordinator.IRewardsCoordinatorRewardsMerkleClaim{
+			RootIndex:       claim.RootIndex,
+			EarnerIndex:     claim.EarnerIndex,
+			EarnerTreeProof: claim.EarnerTreeProof,
+			EarnerLeaf: rewardscoordinator.IRewardsCoordinatorEarnerTreeMerkleLeaf{
+				Earner:          claim.EarnerLeaf.Earner,
+				EarnerTokenRoot: claim.EarnerLeaf.EarnerTokenRoot,
+			},
+			TokenIndices:    claim.TokenIndices,
+			TokenTreeProofs: claim.TokenTreeProofs,
+			TokenLeaves:     convertClaimTokenLeaves(claim.TokenLeaves),
+		}
+		_, err = eLWriter.ProcessClaim(ctx, elClaim, config.EarnerAddress)
+	} else {
+		// Write to file
+		//err = utils.WriteToFile(config.Output, solidityClaim)
+		fmt.Println(solidityClaim)
 	}
+
+	return nil
 }
 
+func convertClaimTokenLeaves(claimTokenLeaves []contractrewardscoordinator.IRewardsCoordinatorTokenTreeMerkleLeaf) []rewardscoordinator.IRewardsCoordinatorTokenTreeMerkleLeaf {
+	var tokenLeaves []rewardscoordinator.IRewardsCoordinatorTokenTreeMerkleLeaf
+	for _, claimTokenLeaf := range claimTokenLeaves {
+		tokenLeaves = append(tokenLeaves, rewardscoordinator.IRewardsCoordinatorTokenTreeMerkleLeaf{
+			Token:              claimTokenLeaf.Token,
+			CumulativeEarnings: claimTokenLeaf.CumulativeEarnings,
+		})
+	}
+	return tokenLeaves
+
+}
 func readAndValidateClaimConfig(cCtx *cli.Context) (*ClaimConfig, error) {
 	network := cCtx.String(flags.NetworkFlag.Name)
 	rpcUrl := cCtx.String(flags.ETHRpcUrlFlag.Name)
 	earnerAddress := common.HexToAddress(cCtx.String(flags.EarnerAddressFlag.Name))
 	output := cCtx.String(flags.OutputFileFlag.Name)
 	pathToKeyStore := cCtx.String(flags.PathToKeyStoreFlag.Name)
-	submitClaim := cCtx.Bool(SubmitClaimFlag.Name)
+	broadcast := cCtx.Bool(flags.BroadcastFlag.Name)
 	tokenAddresses := cCtx.String(TokenAddressesFlag.Name)
 	tokenAddressArray := stringToAddressArray(strings.Split(tokenAddresses, ","))
 	rewardsCoordinatorAddress := cCtx.String(RewardsCoordinatorAddressFlag.Name)
@@ -171,7 +201,7 @@ func readAndValidateClaimConfig(cCtx *cli.Context) (*ClaimConfig, error) {
 		EarnerAddress:             earnerAddress,
 		Output:                    output,
 		PathToKeyStore:            pathToKeyStore,
-		SubmitClaim:               submitClaim,
+		Broadcast:                 broadcast,
 		TokenAddresses:            tokenAddressArray,
 		RewardsCoordinatorAddress: common.HexToAddress(rewardsCoordinatorAddress),
 	}, nil

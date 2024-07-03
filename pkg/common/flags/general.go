@@ -40,4 +40,18 @@ var (
 		Usage:   "Path to the key store",
 		EnvVars: []string{"PATH_TO_KEY_STORE"},
 	}
+
+	BroadcastFlag = cli.BoolFlag{
+		Name:    "broadcast",
+		Aliases: []string{"b"},
+		Usage:   "Use this flag to broadcast the transaction",
+		EnvVars: []string{"BROADCAST"},
+	}
+
+	DryRunFlag = cli.BoolFlag{
+		Name:    "dry-run",
+		Aliases: []string{"d"},
+		Usage:   "Use this flag to perform a dry run. This takes precedence over the broadcast flag",
+		EnvVars: []string{"DRY_RUN"},
+	}
 )
