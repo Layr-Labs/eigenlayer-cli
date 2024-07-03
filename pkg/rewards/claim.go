@@ -4,16 +4,20 @@ import (
 	"errors"
 	"fmt"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/common/flags"
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/types"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 	contractrewardscoordinator "github.com/Layr-Labs/eigenlayer-contracts/pkg/bindings/IRewardsCoordinator"
 	"github.com/Layr-Labs/eigenlayer-rewards-proofs/pkg/claimgen"
 	"github.com/Layr-Labs/eigenlayer-rewards-proofs/pkg/proofDataFetcher/httpProofDataFetcher"
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/eth"
+	"github.com/Layr-Labs/eigensdk-go/chainio/txmgr"
 	rewardscoordinator "github.com/Layr-Labs/eigensdk-go/contracts/bindings/IRewardsCoordinator"
 	"github.com/Layr-Labs/eigensdk-go/logging"
+	eigenMetrics "github.com/Layr-Labs/eigensdk-go/metrics"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
+	"math/big"
 	"net/http"
 	"strings"
 	"time"
@@ -44,12 +48,14 @@ type ClaimConfig struct {
 	Network                   string
 	RPCUrl                    string
 	EarnerAddress             common.Address
+	RecipientAddress          common.Address
 	Output                    string
 	PathToKeyStore            string
 	Broadcast                 bool
 	TokenAddresses            []common.Address
 	RewardsCoordinatorAddress common.Address
 	ClaimTimestamp            string
+	ChainID                   *big.Int
 }
 
 func ClaimCmd(p utils.Prompter) cli.Command {
@@ -129,9 +135,26 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 	solidityClaim := claimgen.FormatProofForSolidity(accounts.Root(), claim)
 
 	if config.Broadcast {
-		eLWriter, err := elcontracts.NewWriterFromConfig(elcontracts.Config{
-			RewardsCoordinatorAddress: config.RewardsCoordinatorAddress,
-		},
+		signerSfg := types.SignerConfig{PrivateKeyStorePath: config.PathToKeyStore}
+		keyWallet, sender, err := getWallet(
+			signerSfg,
+			config.EarnerAddress,
+			ethClient,
+			p,
+			config.ChainID,
+			logger,
+		)
+		if err != nil {
+			return err
+		}
+
+		txMgr := txmgr.NewSimpleTxManager(keyWallet, ethClient, logger, sender)
+
+		noopMetrics := eigenMetrics.NewNoopMetrics()
+		eLWriter, err := elcontracts.NewWriterFromConfig(
+			elcontracts.Config{
+				RewardsCoordinatorAddress: config.RewardsCoordinatorAddress,
+			},
 			ethClient,
 			logger,
 		)
@@ -195,6 +218,14 @@ func readAndValidateClaimConfig(cCtx *cli.Context) (*ClaimConfig, error) {
 		return nil, errors.New("claim-timestamp must be 'latest'")
 	}
 
+	recipientAddress := common.HexToAddress(cCtx.String(RecipientAddressFlag.Name))
+	if recipientAddress == utils.ZeroAddress {
+		fmt.Println("Recipient address not provided, using earner address as recipient address")
+		recipientAddress = earnerAddress
+	}
+
+	chainID := utils.NetworkNameToChainId(network)
+
 	return &ClaimConfig{
 		Network:                   network,
 		RPCUrl:                    rpcUrl,
@@ -204,6 +235,7 @@ func readAndValidateClaimConfig(cCtx *cli.Context) (*ClaimConfig, error) {
 		Broadcast:                 broadcast,
 		TokenAddresses:            tokenAddressArray,
 		RewardsCoordinatorAddress: common.HexToAddress(rewardsCoordinatorAddress),
+		ChainID:                   chainID,
 	}, nil
 }
 

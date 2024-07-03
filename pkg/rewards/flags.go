@@ -25,4 +25,11 @@ var (
 		DefaultText: "latest",
 		EnvVars:     []string{"CLAIM_TIMESTAMP"},
 	}
+
+	RecipientAddressFlag = cli.StringFlag{
+		Name:    "recipient-address",
+		Aliases: []string{"ra"},
+		Usage:   "Use this flag to specify the address of the recipient. If this is not provided, the earner address will be used",
+		EnvVars: []string{"RECIPIENT_ADDRESS"},
+	}
 )

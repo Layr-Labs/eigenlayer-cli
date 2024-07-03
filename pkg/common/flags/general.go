@@ -15,7 +15,7 @@ var (
 		Name:     "earner-address",
 		Aliases:  []string{"e"},
 		Required: true,
-		Usage:    "Address of the earner",
+		Usage:    "Address of the earner (this is your staker/operator address)",
 		EnvVars:  []string{"EARNER_ADDRESS"},
 	}
 
