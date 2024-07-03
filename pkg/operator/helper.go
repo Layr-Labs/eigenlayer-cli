@@ -38,13 +38,15 @@ func printRegistrationInfo(txHash string, operatorAddress common.Address, chainI
 }
 
 func getWallet(
-	cfg *types.OperatorConfig,
+	cfg types.SignerConfig,
+	signerAddress string,
 	ethClient eth.Client,
 	p utils.Prompter,
+	chainID big.Int,
 	logger eigensdkLogger.Logger,
 ) (wallet.Wallet, common.Address, error) {
 	var keyWallet wallet.Wallet
-	if cfg.SignerConfig.SignerType == types.LocalKeystoreSigner {
+	if cfg.SignerType == types.LocalKeystoreSigner {
 		// Check if input is available in the pipe and read the password from it
 		ecdsaPassword, readFromPipe := utils.GetStdInPassword()
 		var err error
@@ -62,17 +64,17 @@ func getWallet(
 
 		// This is to expand the tilde in the path to the home directory
 		// This is not supported by Go's standard library
-		keyFullPath, err := expandTilde(cfg.SignerConfig.PrivateKeyStorePath)
+		keyFullPath, err := expandTilde(cfg.PrivateKeyStorePath)
 		if err != nil {
 			return nil, common.Address{}, err
 		}
-		cfg.SignerConfig.PrivateKeyStorePath = keyFullPath
+		cfg.PrivateKeyStorePath = keyFullPath
 
 		signerCfg := signerv2.Config{
-			KeystorePath: cfg.SignerConfig.PrivateKeyStorePath,
+			KeystorePath: cfg.PrivateKeyStorePath,
 			Password:     ecdsaPassword,
 		}
-		sgn, sender, err := signerv2.SignerFromConfig(signerCfg, &cfg.ChainId)
+		sgn, sender, err := signerv2.SignerFromConfig(signerCfg, &chainID)
 		if err != nil {
 			return nil, common.Address{}, err
 		}
@@ -81,37 +83,37 @@ func getWallet(
 			return nil, common.Address{}, err
 		}
 		return keyWallet, sender, nil
-	} else if cfg.SignerConfig.SignerType == types.FireBlocksSigner {
+	} else if cfg.SignerType == types.FireBlocksSigner {
 		var secretKey string
 		var err error
-		switch cfg.SignerConfig.FireblocksConfig.SecretStorageType {
+		switch cfg.FireblocksConfig.SecretStorageType {
 		case types.PlainText:
 			logger.Info("Using plain text secret storage")
-			secretKey = cfg.SignerConfig.FireblocksConfig.SecretKey
+			secretKey = cfg.FireblocksConfig.SecretKey
 		case types.AWSSecretManager:
 			logger.Info("Using AWS secret manager to get fireblocks secret key")
 			secretKey, err = secretmanager.ReadStringFromSecretManager(
 				context.Background(),
-				cfg.SignerConfig.FireblocksConfig.SecretKey,
-				cfg.SignerConfig.FireblocksConfig.AWSRegion,
+				cfg.FireblocksConfig.SecretKey,
+				cfg.FireblocksConfig.AWSRegion,
 			)
 			if err != nil {
 				return nil, common.Address{}, err
 			}
 			logger.Infof("Secret key with name %s from region %s read from AWS secret manager",
-				cfg.SignerConfig.FireblocksConfig.SecretKey,
-				cfg.SignerConfig.FireblocksConfig.AWSRegion,
+				cfg.FireblocksConfig.SecretKey,
+				cfg.FireblocksConfig.AWSRegion,
 			)
 		default:
 			return nil, common.Address{}, fmt.Errorf("secret storage type %s is not supported",
-				cfg.SignerConfig.FireblocksConfig.SecretStorageType,
+				cfg.FireblocksConfig.SecretStorageType,
 			)
 		}
 		fireblocksClient, err := fireblocks.NewClient(
-			cfg.SignerConfig.FireblocksConfig.APIKey,
+			cfg.FireblocksConfig.APIKey,
 			[]byte(secretKey),
-			cfg.SignerConfig.FireblocksConfig.BaseUrl,
-			time.Duration(cfg.SignerConfig.FireblocksConfig.Timeout)*time.Second,
+			cfg.FireblocksConfig.BaseUrl,
+			time.Duration(cfg.FireblocksConfig.Timeout)*time.Second,
 			logger,
 		)
 		if err != nil {
@@ -120,7 +122,7 @@ func getWallet(
 		keyWallet, err = wallet.NewFireblocksWallet(
 			fireblocksClient,
 			ethClient,
-			cfg.SignerConfig.FireblocksConfig.VaultAccountName,
+			cfg.FireblocksConfig.VaultAccountName,
 			logger,
 		)
 		if err != nil {
@@ -131,12 +133,12 @@ func getWallet(
 			return nil, common.Address{}, err
 		}
 		return keyWallet, sender, nil
-	} else if cfg.SignerConfig.SignerType == types.Web3Signer {
+	} else if cfg.SignerType == types.Web3Signer {
 		signerCfg := signerv2.Config{
-			Endpoint: cfg.SignerConfig.Web3SignerConfig.Url,
-			Address:  cfg.Operator.Address,
+			Endpoint: cfg.Web3SignerConfig.Url,
+			Address:  signerAddress,
 		}
-		sgn, sender, err := signerv2.SignerFromConfig(signerCfg, &cfg.ChainId)
+		sgn, sender, err := signerv2.SignerFromConfig(signerCfg, &chainID)
 		if err != nil {
 			return nil, common.Address{}, err
 		}
@@ -146,7 +148,7 @@ func getWallet(
 		}
 		return keyWallet, sender, nil
 	} else {
-		return nil, common.Address{}, fmt.Errorf("%s signer is not supported", cfg.SignerConfig.SignerType)
+		return nil, common.Address{}, fmt.Errorf("%s signer is not supported", cfg.SignerType)
 	}
 }
 
@@ -231,6 +233,7 @@ func readConfigFile(path string) (*types.OperatorConfig, error) {
 		return nil, err
 	}
 	operatorCfg.ELRewardsCoordinatorAddress = elRewardsCoordinatorAddress
+
 	return &operatorCfg, nil
 }
 
