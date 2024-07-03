@@ -3,6 +3,7 @@ package operator
 import (
 	"context"
 	"fmt"
+
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 

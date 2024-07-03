@@ -44,12 +44,16 @@ type OperatorConfig struct {
 	ELDelegationManagerAddress  string                 `yaml:"el_delegation_manager_address"`
 	ELAVSDirectoryAddress       string
 	ELRewardsCoordinatorAddress string
-	EthRPCUrl                   string           `yaml:"eth_rpc_url"`
-	PrivateKeyStorePath         string           `yaml:"private_key_store_path"`
-	SignerType                  SignerType       `yaml:"signer_type"`
-	ChainId                     big.Int          `yaml:"chain_id"`
-	FireblocksConfig            FireblocksConfig `yaml:"fireblocks"`
-	Web3SignerConfig            Web3SignerConfig `yaml:"web3"`
+	EthRPCUrl                   string  `yaml:"eth_rpc_url"`
+	ChainId                     big.Int `yaml:"chain_id"`
+	SignerConfig                SignerConfig
+}
+
+type SignerConfig struct {
+	PrivateKeyStorePath string           `yaml:"private_key_store_path"`
+	SignerType          SignerType       `yaml:"signer_type"`
+	FireblocksConfig    FireblocksConfig `yaml:"fireblocks"`
+	Web3SignerConfig    Web3SignerConfig `yaml:"web3"`
 }
 
 func (config OperatorConfig) MarshalYAML() (interface{}, error) {
@@ -66,10 +70,10 @@ func (config OperatorConfig) MarshalYAML() (interface{}, error) {
 		Operator:                   config.Operator,
 		ELDelegationManagerAddress: config.ELDelegationManagerAddress,
 		EthRPCUrl:                  config.EthRPCUrl,
-		PrivateKeyStorePath:        config.PrivateKeyStorePath,
-		SignerType:                 config.SignerType,
+		PrivateKeyStorePath:        config.SignerConfig.PrivateKeyStorePath,
+		SignerType:                 config.SignerConfig.SignerType,
 		ChainID:                    config.ChainId.Int64(),
-		FireblocksConfig:           config.FireblocksConfig,
-		Web3SignerConfig:           config.Web3SignerConfig,
+		FireblocksConfig:           config.SignerConfig.FireblocksConfig,
+		Web3SignerConfig:           config.SignerConfig.Web3SignerConfig,
 	}, nil
 }
