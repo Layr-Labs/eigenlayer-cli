@@ -68,7 +68,6 @@ Set the rewards claimer address for the operator.
 				AvsDirectoryAddress:       common.HexToAddress(operatorCfg.ELAVSDirectoryAddress),
 				RewardsCoordinatorAddress: common.HexToAddress(operatorCfg.ELRewardsCoordinatorAddress),
 			}
-			fmt.Println(operatorCfg)
 
 			elWriter, err := elcontracts.NewWriterFromConfig(contractCfg, ethClient, logger, noopMetrics, txMgr)
 			if err != nil {

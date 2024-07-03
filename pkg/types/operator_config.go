@@ -20,56 +20,67 @@ const (
 	PlainText        SecretStorageType = "plaintext"
 )
 
-type FireblocksConfig struct {
-	APIKey           string `yaml:"api_key"`
-	SecretKey        string `yaml:"secret_key"`
-	BaseUrl          string `yaml:"base_url"`
-	VaultAccountName string `yaml:"vault_account_name"`
-
-	SecretStorageType SecretStorageType `yaml:"secret_storage_type"`
-
-	// AWSRegion is the region where the secret is stored in AWS Secret Manager
-	AWSRegion string `yaml:"aws_region"`
-
-	// Timeout for API in seconds
-	Timeout int64 `yaml:"timeout"`
-}
-
-type Web3SignerConfig struct {
-	Url string `yaml:"url"`
-}
-
 type OperatorConfig struct {
 	Operator                    eigensdkTypes.Operator `yaml:"operator"`
 	ELDelegationManagerAddress  string                 `yaml:"el_delegation_manager_address"`
 	ELAVSDirectoryAddress       string
 	ELRewardsCoordinatorAddress string
-	EthRPCUrl                   string           `yaml:"eth_rpc_url"`
-	PrivateKeyStorePath         string           `yaml:"private_key_store_path"`
-	SignerType                  SignerType       `yaml:"signer_type"`
-	ChainId                     big.Int          `yaml:"chain_id"`
-	FireblocksConfig            FireblocksConfig `yaml:"fireblocks"`
-	Web3SignerConfig            Web3SignerConfig `yaml:"web3"`
+	EthRPCUrl                   string  `yaml:"eth_rpc_url"`
+	ChainId                     big.Int `yaml:"chain_id"`
+	SignerConfig                SignerConfig
 }
 
-func (config OperatorConfig) MarshalYAML() (interface{}, error) {
+func (o *OperatorConfig) MarshalYAML() (interface{}, error) {
 	return struct {
 		Operator                   eigensdkTypes.Operator `yaml:"operator"`
 		ELDelegationManagerAddress string                 `yaml:"el_delegation_manager_address"`
 		EthRPCUrl                  string                 `yaml:"eth_rpc_url"`
+		ChainId                    int64                  `yaml:"chain_id"`
 		PrivateKeyStorePath        string                 `yaml:"private_key_store_path"`
 		SignerType                 SignerType             `yaml:"signer_type"`
-		ChainID                    int64                  `yaml:"chain_id"`
-		FireblocksConfig           FireblocksConfig       `yaml:"fireblocks"`
-		Web3SignerConfig           Web3SignerConfig       `yaml:"web3"`
+		Fireblocks                 FireblocksConfig       `yaml:"fireblocks"`
+		Web3                       Web3SignerConfig       `yaml:"web3"`
 	}{
-		Operator:                   config.Operator,
-		ELDelegationManagerAddress: config.ELDelegationManagerAddress,
-		EthRPCUrl:                  config.EthRPCUrl,
-		PrivateKeyStorePath:        config.PrivateKeyStorePath,
-		SignerType:                 config.SignerType,
-		ChainID:                    config.ChainId.Int64(),
-		FireblocksConfig:           config.FireblocksConfig,
-		Web3SignerConfig:           config.Web3SignerConfig,
+		Operator:                   o.Operator,
+		ELDelegationManagerAddress: o.ELDelegationManagerAddress,
+		EthRPCUrl:                  o.EthRPCUrl,
+		ChainId:                    o.ChainId.Int64(),
+		PrivateKeyStorePath:        o.SignerConfig.PrivateKeyStorePath,
+		SignerType:                 o.SignerConfig.SignerType,
+		Fireblocks:                 o.SignerConfig.FireblocksConfig,
+		Web3:                       o.SignerConfig.Web3SignerConfig,
 	}, nil
+}
+
+func (o *OperatorConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var aux struct {
+		Operator                    eigensdkTypes.Operator `yaml:"operator"`
+		ELDelegationManagerAddress  string                 `yaml:"el_delegation_manager_address"`
+		ELAVSDirectoryAddress       string                 `yaml:"el_avs_directory_address"`
+		ELRewardsCoordinatorAddress string                 `yaml:"el_rewards_coordinator_address"`
+		EthRPCUrl                   string                 `yaml:"eth_rpc_url"`
+		ChainId                     int64                  `yaml:"chain_id"`
+		PrivateKeyStorePath         string                 `yaml:"private_key_store_path"`
+		SignerType                  SignerType             `yaml:"signer_type"`
+		Fireblocks                  FireblocksConfig       `yaml:"fireblocks"`
+		Web3                        Web3SignerConfig       `yaml:"web3"`
+	}
+	if err := unmarshal(&aux); err != nil {
+		return err
+	}
+	o.Operator = aux.Operator
+	o.ELDelegationManagerAddress = aux.ELDelegationManagerAddress
+	o.ELAVSDirectoryAddress = aux.ELAVSDirectoryAddress
+	o.ELRewardsCoordinatorAddress = aux.ELRewardsCoordinatorAddress
+	o.EthRPCUrl = aux.EthRPCUrl
+
+	chainId := new(big.Int)
+	chainId.SetInt64(aux.ChainId)
+	o.ChainId = *chainId
+
+	o.SignerConfig.PrivateKeyStorePath = aux.PrivateKeyStorePath
+	o.SignerConfig.SignerType = aux.SignerType
+	o.SignerConfig.FireblocksConfig = aux.Fireblocks
+	o.SignerConfig.Web3SignerConfig = aux.Web3
+	return nil
 }
