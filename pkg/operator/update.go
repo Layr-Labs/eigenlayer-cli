@@ -62,7 +62,14 @@ func UpdateCmd(p utils.Prompter) *cli.Command {
 				return err
 			}
 
-			keyWallet, sender, err := getWallet(operatorCfg, ethClient, p, logger)
+			keyWallet, sender, err := getWallet(
+				operatorCfg.SignerConfig,
+				operatorCfg.Operator.Address,
+				ethClient,
+				p,
+				operatorCfg.ChainId,
+				logger,
+			)
 			if err != nil {
 				return err
 			}
