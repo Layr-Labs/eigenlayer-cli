@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/common"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 
@@ -13,7 +14,7 @@ import (
 	eigensdkLogger "github.com/Layr-Labs/eigensdk-go/logging"
 	eigenMetrics "github.com/Layr-Labs/eigensdk-go/metrics"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/common"
+	gethcommon "github.com/ethereum/go-ethereum/common"
 
 	"github.com/urfave/cli/v2"
 )
@@ -37,7 +38,7 @@ func RegisterCmd(p utils.Prompter) *cli.Command {
 			}
 
 			configurationFilePath := args.Get(0)
-			operatorCfg, err := validateAndReturnConfig(configurationFilePath)
+			operatorCfg, err := common.ValidateAndReturnConfig(configurationFilePath)
 			if err != nil {
 				return err
 			}
@@ -60,7 +61,7 @@ func RegisterCmd(p utils.Prompter) *cli.Command {
 				return err
 			}
 
-			keyWallet, sender, err := getWallet(
+			keyWallet, sender, err := common.GetWallet(
 				operatorCfg.SignerConfig,
 				operatorCfg.Operator.Address,
 				ethClient,
@@ -77,8 +78,8 @@ func RegisterCmd(p utils.Prompter) *cli.Command {
 			noopMetrics := eigenMetrics.NewNoopMetrics()
 
 			elWriter, err := elContracts.BuildELChainWriter(
-				common.HexToAddress(operatorCfg.ELDelegationManagerAddress),
-				common.HexToAddress(operatorCfg.ELAVSDirectoryAddress),
+				gethcommon.HexToAddress(operatorCfg.ELDelegationManagerAddress),
+				gethcommon.HexToAddress(operatorCfg.ELAVSDirectoryAddress),
 				ethClient,
 				logger,
 				noopMetrics,
@@ -89,8 +90,8 @@ func RegisterCmd(p utils.Prompter) *cli.Command {
 			}
 
 			reader, err := elContracts.BuildELChainReader(
-				common.HexToAddress(operatorCfg.ELDelegationManagerAddress),
-				common.HexToAddress(operatorCfg.ELAVSDirectoryAddress),
+				gethcommon.HexToAddress(operatorCfg.ELDelegationManagerAddress),
+				gethcommon.HexToAddress(operatorCfg.ELAVSDirectoryAddress),
 				ethClient,
 				logger,
 			)
@@ -109,9 +110,9 @@ func RegisterCmd(p utils.Prompter) *cli.Command {
 					fmt.Printf("%s Error while registering operator\n", utils.EmojiCrossMark)
 					return err
 				}
-				printRegistrationInfo(
+				common.PrintRegistrationInfo(
 					receipt.TxHash.String(),
-					common.HexToAddress(operatorCfg.Operator.Address),
+					gethcommon.HexToAddress(operatorCfg.Operator.Address),
 					&operatorCfg.ChainId,
 				)
 			} else {

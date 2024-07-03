@@ -1,7 +1,8 @@
-package operator
+package common
 
 import (
 	"fmt"
+
 	"math/big"
 	"testing"
 
@@ -41,7 +42,7 @@ func TestGetTransactionLink(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			txLink := getTransactionLink(tt.txHash, tt.chainID)
+			txLink := GetTransactionLink(tt.txHash, tt.chainID)
 			assert.Equal(t, tt.expectedTxLink, txLink)
 		})
 	}

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/common"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 
@@ -13,7 +14,7 @@ import (
 	eigensdkLogger "github.com/Layr-Labs/eigensdk-go/logging"
 	eigenMetrics "github.com/Layr-Labs/eigensdk-go/metrics"
 
-	"github.com/ethereum/go-ethereum/common"
+	gethcommon "github.com/ethereum/go-ethereum/common"
 
 	"github.com/urfave/cli/v2"
 )
@@ -35,7 +36,7 @@ Set the rewards claimer address for the operator.
 			configurationFilePath := cCtx.String(ConfigurationFilePathFlag.Name)
 			claimerAddress := cCtx.String(ClaimerAddressFlag.Name)
 
-			operatorCfg, err := validateAndReturnConfig(configurationFilePath)
+			operatorCfg, err := common.ValidateAndReturnConfig(configurationFilePath)
 			if err != nil {
 				return err
 			}
@@ -54,7 +55,7 @@ Set the rewards claimer address for the operator.
 				return err
 			}
 
-			keyWallet, sender, err := getWallet(
+			keyWallet, sender, err := common.GetWallet(
 				operatorCfg.SignerConfig,
 				operatorCfg.Operator.Address,
 				ethClient,
@@ -71,9 +72,9 @@ Set the rewards claimer address for the operator.
 			noopMetrics := eigenMetrics.NewNoopMetrics()
 
 			contractCfg := elcontracts.Config{
-				DelegationManagerAddress:  common.HexToAddress(operatorCfg.ELDelegationManagerAddress),
-				AvsDirectoryAddress:       common.HexToAddress(operatorCfg.ELAVSDirectoryAddress),
-				RewardsCoordinatorAddress: common.HexToAddress(operatorCfg.ELRewardsCoordinatorAddress),
+				DelegationManagerAddress:  gethcommon.HexToAddress(operatorCfg.ELDelegationManagerAddress),
+				AvsDirectoryAddress:       gethcommon.HexToAddress(operatorCfg.ELAVSDirectoryAddress),
+				RewardsCoordinatorAddress: gethcommon.HexToAddress(operatorCfg.ELRewardsCoordinatorAddress),
 			}
 
 			elWriter, err := elcontracts.NewWriterFromConfig(contractCfg, ethClient, logger, noopMetrics, txMgr)
@@ -81,7 +82,7 @@ Set the rewards claimer address for the operator.
 				return err
 			}
 
-			receipt, err := elWriter.SetClaimerFor(context.Background(), common.HexToAddress(claimerAddress))
+			receipt, err := elWriter.SetClaimerFor(context.Background(), gethcommon.HexToAddress(claimerAddress))
 			if err != nil {
 				return err
 			}
@@ -93,9 +94,9 @@ Set the rewards claimer address for the operator.
 				operatorCfg.Operator.Address,
 			)
 
-			printRegistrationInfo(
+			common.PrintRegistrationInfo(
 				receipt.TxHash.String(),
-				common.HexToAddress(operatorCfg.Operator.Address),
+				gethcommon.HexToAddress(operatorCfg.Operator.Address),
 				&operatorCfg.ChainId,
 			)
 

@@ -1,4 +1,4 @@
-package operator
+package common
 
 import (
 	"context"
@@ -26,18 +26,18 @@ import (
 	"github.com/fatih/color"
 )
 
-func printRegistrationInfo(txHash string, operatorAddress common.Address, chainId *big.Int) {
+func PrintRegistrationInfo(txHash string, operatorAddress common.Address, chainId *big.Int) {
 	fmt.Println(strings.Repeat("-", 100))
 	fmt.Printf("%s Chain ID: %s\n", utils.EmojiLink, chainId.String())
 	if len(txHash) > 0 {
-		fmt.Printf("%s Transaction Link: %s\n", utils.EmojiLink, getTransactionLink(txHash, chainId))
+		fmt.Printf("%s Transaction Link: %s\n", utils.EmojiLink, GetTransactionLink(txHash, chainId))
 	}
 
 	color.Blue("%s Operator Web App Link: %s\n", utils.EmojiInternet, getWebAppLink(operatorAddress, chainId))
 	fmt.Println(strings.Repeat("-", 100))
 }
 
-func getWallet(
+func GetWallet(
 	cfg types.SignerConfig,
 	signerAddress string,
 	ethClient eth.Client,
@@ -166,8 +166,8 @@ func expandTilde(path string) (string, error) {
 	return path, nil
 }
 
-func validateAndReturnConfig(configurationFilePath string) (*types.OperatorConfig, error) {
-	operatorCfg, err := readConfigFile(configurationFilePath)
+func ValidateAndReturnConfig(configurationFilePath string) (*types.OperatorConfig, error) {
+	operatorCfg, err := ReadConfigFile(configurationFilePath)
 	if err != nil {
 		return nil, err
 	}
@@ -215,7 +215,7 @@ func validateAndReturnConfig(configurationFilePath string) (*types.OperatorConfi
 	return operatorCfg, nil
 }
 
-func readConfigFile(path string) (*types.OperatorConfig, error) {
+func ReadConfigFile(path string) (*types.OperatorConfig, error) {
 	var operatorCfg types.OperatorConfig
 	err := utils.ReadYamlConfig(path, &operatorCfg)
 	if err != nil {
@@ -257,7 +257,7 @@ func getRewardCoordinatorAddress(chainID big.Int) (string, error) {
 	}
 }
 
-func getTransactionLink(txHash string, chainId *big.Int) string {
+func GetTransactionLink(txHash string, chainId *big.Int) string {
 	chainIDInt := chainId.Int64()
 	chainMetadata, ok := utils.ChainMetadataMap[chainIDInt]
 	if !ok {
