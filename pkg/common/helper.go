@@ -260,6 +260,7 @@ func getAVSDirectoryAddress(chainID big.Int) (string, error) {
 	}
 }
 
+// TODO(shrimalmadhur): remove this and use the utils one in a separate PR
 func getRewardCoordinatorAddress(chainID big.Int) (string, error) {
 	chainIDInt := chainID.Int64()
 	chainMetadata, ok := utils.ChainMetadataMap[chainIDInt]

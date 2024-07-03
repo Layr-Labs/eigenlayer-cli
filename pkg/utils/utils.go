@@ -3,7 +3,9 @@ package utils
 import (
 	"bufio"
 	"errors"
+	"fmt"
 	"log"
+	"math/big"
 	"os"
 	"path/filepath"
 
@@ -36,6 +38,16 @@ var ChainMetadataMap = map[int64]types.ChainMetadata{
 	},
 }
 
+func GetRewardCoordinatorAddress(chainID *big.Int) (string, error) {
+	chainIDInt := chainID.Int64()
+	chainMetadata, ok := ChainMetadataMap[chainIDInt]
+	if !ok {
+		return "", fmt.Errorf("chain ID %d not supported", chainIDInt)
+	} else {
+		return chainMetadata.ELRewardsCoordinatorAddress, nil
+	}
+}
+
 func ChainIdToNetworkName(chainId int64) string {
 	switch chainId {
 	case MainnetChainId:
@@ -46,6 +58,19 @@ func ChainIdToNetworkName(chainId int64) string {
 		return "local"
 	default:
 		return "unknown"
+	}
+}
+
+func NetworkNameToChainId(networkName string) *big.Int {
+	switch networkName {
+	case "mainnet":
+		return big.NewInt(MainnetChainId)
+	case "holesky":
+		return big.NewInt(HoleskyChainId)
+	case "local":
+		return big.NewInt(LocalChainId)
+	default:
+		return big.NewInt(-1)
 	}
 }
 
