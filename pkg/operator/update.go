@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/common"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 
@@ -13,7 +14,7 @@ import (
 	eigensdkLogger "github.com/Layr-Labs/eigensdk-go/logging"
 	eigenMetrics "github.com/Layr-Labs/eigensdk-go/metrics"
 
-	"github.com/ethereum/go-ethereum/common"
+	gethcommon "github.com/ethereum/go-ethereum/common"
 
 	"github.com/urfave/cli/v2"
 )
@@ -40,7 +41,7 @@ func UpdateCmd(p utils.Prompter) *cli.Command {
 			}
 
 			configurationFilePath := args.Get(0)
-			operatorCfg, err := validateAndReturnConfig(configurationFilePath)
+			operatorCfg, err := common.ValidateAndReturnConfig(configurationFilePath)
 			if err != nil {
 				return err
 			}
@@ -62,7 +63,7 @@ func UpdateCmd(p utils.Prompter) *cli.Command {
 				return err
 			}
 
-			keyWallet, sender, err := getWallet(
+			keyWallet, sender, err := common.GetWallet(
 				operatorCfg.SignerConfig,
 				operatorCfg.Operator.Address,
 				ethClient,
@@ -79,8 +80,8 @@ func UpdateCmd(p utils.Prompter) *cli.Command {
 			noopMetrics := eigenMetrics.NewNoopMetrics()
 
 			elWriter, err := elContracts.BuildELChainWriter(
-				common.HexToAddress(operatorCfg.ELDelegationManagerAddress),
-				common.HexToAddress(operatorCfg.ELAVSDirectoryAddress),
+				gethcommon.HexToAddress(operatorCfg.ELDelegationManagerAddress),
+				gethcommon.HexToAddress(operatorCfg.ELAVSDirectoryAddress),
 				ethClient,
 				logger,
 				noopMetrics,
@@ -98,9 +99,13 @@ func UpdateCmd(p utils.Prompter) *cli.Command {
 			fmt.Printf(
 				"%s Operator details updated at: %s\n",
 				utils.EmojiCheckMark,
-				getTransactionLink(receipt.TxHash.String(), &operatorCfg.ChainId),
+				common.GetTransactionLink(receipt.TxHash.String(), &operatorCfg.ChainId),
 			)
-			printRegistrationInfo("", common.HexToAddress(operatorCfg.Operator.Address), &operatorCfg.ChainId)
+			common.PrintRegistrationInfo(
+				"",
+				gethcommon.HexToAddress(operatorCfg.Operator.Address),
+				&operatorCfg.ChainId,
+			)
 
 			fmt.Printf(
 				"%s Operator updated successfully. There is a 30 minute delay between update and operator details being shown in our webapp.\n",

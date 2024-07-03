@@ -4,16 +4,17 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/common"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
-
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/common"
 
 	elContracts "github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/eth"
 	eigensdkLogger "github.com/Layr-Labs/eigensdk-go/logging"
 	eigensdkTypes "github.com/Layr-Labs/eigensdk-go/types"
+
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	gethcommon "github.com/ethereum/go-ethereum/common"
 
 	"github.com/urfave/cli/v2"
 )
@@ -36,7 +37,7 @@ func StatusCmd(p utils.Prompter) *cli.Command {
 			}
 
 			configurationFilePath := args.Get(0)
-			operatorCfg, err := readConfigFile(configurationFilePath)
+			operatorCfg, err := common.ReadConfigFile(configurationFilePath)
 			if err != nil {
 				return err
 			}
@@ -84,8 +85,8 @@ func StatusCmd(p utils.Prompter) *cli.Command {
 			}
 
 			reader, err := elContracts.BuildELChainReader(
-				common.HexToAddress(operatorCfg.ELDelegationManagerAddress),
-				common.HexToAddress(operatorCfg.ELAVSDirectoryAddress),
+				gethcommon.HexToAddress(operatorCfg.ELDelegationManagerAddress),
+				gethcommon.HexToAddress(operatorCfg.ELAVSDirectoryAddress),
 				ethClient,
 				logger,
 			)
@@ -107,7 +108,11 @@ func StatusCmd(p utils.Prompter) *cli.Command {
 					return err
 				}
 				printOperatorDetails(operatorDetails)
-				printRegistrationInfo("", common.HexToAddress(operatorCfg.Operator.Address), &operatorCfg.ChainId)
+				common.PrintRegistrationInfo(
+					"",
+					gethcommon.HexToAddress(operatorCfg.Operator.Address),
+					&operatorCfg.ChainId,
+				)
 			} else {
 				fmt.Printf("%s Operator is not registered to EigenLayer\n", utils.EmojiCrossMark)
 			}
