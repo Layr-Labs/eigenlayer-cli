@@ -51,26 +51,47 @@ func GetRewardCoordinatorAddress(chainID *big.Int) (string, error) {
 func ChainIdToNetworkName(chainId int64) string {
 	switch chainId {
 	case MainnetChainId:
-		return "mainnet"
+		return MainnetNetworkName
 	case HoleskyChainId:
-		return "holesky"
+		return HoleskyNetworkName
 	case LocalChainId:
-		return "local"
+		return LocalNetworkName
 	default:
-		return "unknown"
+		return UnknownNetworkName
 	}
 }
 
 func NetworkNameToChainId(networkName string) *big.Int {
 	switch networkName {
-	case "mainnet":
+	case MainnetNetworkName:
 		return big.NewInt(MainnetChainId)
-	case "holesky":
+	case HoleskyNetworkName, PreprodNetworkName:
 		return big.NewInt(HoleskyChainId)
-	case "local":
+	case LocalNetworkName:
 		return big.NewInt(LocalChainId)
 	default:
 		return big.NewInt(-1)
+	}
+}
+
+func GetProofStoreBaseURL(network string) string {
+	chainId := NetworkNameToChainId(network)
+	chainMetadata, ok := ChainMetadataMap[chainId.Int64()]
+	if !ok {
+		return ""
+	} else {
+		return chainMetadata.ProofStoreBaseURL
+	}
+}
+
+func GetEnvironmentFromNetwork(network string) string {
+	switch network {
+	case MainnetNetworkName:
+		return "prod"
+	case HoleskyNetworkName:
+		return "testnet"
+	default:
+		return "preprod"
 	}
 }
 

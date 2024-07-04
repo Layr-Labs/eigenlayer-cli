@@ -14,6 +14,12 @@ const (
 	MainnetChainId = 1
 	HoleskyChainId = 17000
 	LocalChainId   = 31337
+
+	MainnetNetworkName = "mainnet"
+	HoleskyNetworkName = "holesky"
+	PreprodNetworkName = "preprod"
+	LocalNetworkName   = "local"
+	UnknownNetworkName = "unknown"
 )
 
 var (

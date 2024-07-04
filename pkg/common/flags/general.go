@@ -4,11 +4,11 @@ import "github.com/urfave/cli/v2"
 
 var (
 	NetworkFlag = cli.StringFlag{
-		Name:        "network",
-		Aliases:     []string{"n"},
-		Usage:       "Network to use. Currently supports 'preprod', 'holesky' and 'mainnet'",
-		DefaultText: "testnet",
-		EnvVars:     []string{"NETWORK"},
+		Name:    "network",
+		Aliases: []string{"n"},
+		Usage:   "Network to use. Currently supports 'preprod', 'holesky' and 'mainnet'",
+		Value:   "testnet",
+		EnvVars: []string{"NETWORK"},
 	}
 
 	EarnerAddressFlag = cli.StringFlag{
@@ -51,7 +51,7 @@ var (
 	DryRunFlag = cli.BoolFlag{
 		Name:    "dry-run",
 		Aliases: []string{"d"},
-		Usage:   "Use this flag to perform a dry run. This takes precedence over the broadcast flag",
+		Usage:   "Perform a dry run. This takes precedence over the broadcast flag",
 		EnvVars: []string{"DRY_RUN"},
 	}
 )
