@@ -10,11 +10,12 @@ USAGE:
    eigenlayer rewards claim [command options]
 
 OPTIONS:
-   --network value, -n value                        Network to use. Currently supports 'preprod', 'holesky' and 'mainnet' (default: "testnet") [$NETWORK]
+   --network value, -n value                        Network to use. Currently supports 'preprod', 'holesky' and 'mainnet' (default: "holesky") [$NETWORK]
    --eth-rpc-url value, -r value                    URL of the Ethereum RPC [$ETH_RPC_URL]
-   --earner-address value, -e value                 Address of the earner (this is your staker/operator address) [$EARNER_ADDRESS]
+   --earner-address value, --ea value               Address of the earner (this is your staker/operator address) [$EARNER_ADDRESS]
    --output-file value, -o value                    Output file to write the data [$OUTPUT_FILE]
    --path-to-key-store value, -k value              Path to the key store [$PATH_TO_KEY_STORE]
+   --ecdsa-private-key value, -e value              ECDSA private key hex to send transaction [$ECDSA_PRIVATE_KEY]
    --broadcast, -b                                  Use this flag to broadcast the transaction (default: false) [$BROADCAST]
    --recipient-address value, --ra value            Specify the address of the recipient. If this is not provided, the earner address will be used [$RECIPIENT_ADDRESS]
    --token-addresses value, -t value                Specify the addresses of the tokens to claim. Comma separated list of addresses [$TOKEN_ADDRESSES]
