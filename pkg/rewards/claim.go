@@ -84,6 +84,10 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 	}
 
 	ethClient, err := eth.NewClient(config.RPCUrl)
+	if err != nil {
+		return eigenSdkUtils.WrapError("failed to create new eth client", err)
+	}
+
 	logger := logging.NewTextSLogger(os.Stdout, &logging.SLoggerOptions{})
 
 	elReader, err := elcontracts.NewReaderFromConfig(
@@ -180,7 +184,7 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 			TokenTreeProofs: claim.TokenTreeProofs,
 			TokenLeaves:     convertClaimTokenLeaves(claim.TokenLeaves),
 		}
-		_, err = eLWriter.ProcessClaim(ctx, elClaim, config.EarnerAddress)
+		_, err = eLWriter.ProcessClaim(ctx, elClaim, config.RecipientAddress)
 		if err != nil {
 			return eigenSdkUtils.WrapError("failed to process claim", err)
 		}
@@ -264,6 +268,7 @@ func readAndValidateClaimConfig(cCtx *cli.Context) (*ClaimConfig, error) {
 		ChainID:                   chainID,
 		ProofStoreBaseURL:         proofStoreBaseURL,
 		Environment:               env,
+		RecipientAddress:          recipientAddress,
 	}, nil
 }
 
