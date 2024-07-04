@@ -120,8 +120,7 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 	}
 
 	rootIndex := uint32(rootCount.Uint64() - 1)
-
-	fmt.Println(claimDate)
+	
 	proofData, err := df.FetchClaimAmountsForDate(ctx, claimDate)
 	if err != nil {
 		return eigenSdkUtils.WrapError("failed to fetch claim amounts for date", err)
@@ -186,9 +185,10 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 			return eigenSdkUtils.WrapError("failed to process claim", err)
 		}
 	} else {
-		// Write to file
-		//err = utils.WriteToFile(config.Output, solidityClaim)
-		fmt.Println(solidityClaim)
+		fmt.Println("------- Claim generated -------")
+		common.PrettyPrintStruct(*solidityClaim)
+		fmt.Println("-------------------------------")
+		fmt.Println("To broadcast the claim, use the --broadcast flag")
 	}
 
 	return nil
