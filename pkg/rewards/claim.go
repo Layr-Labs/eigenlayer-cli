@@ -249,8 +249,7 @@ func readAndValidateClaimConfig(cCtx *cli.Context) (*ClaimConfig, error) {
 		}
 	}
 
-	env := utils.GetEnvironmentFromNetwork(network)
-	//env = "preprod"
+	env, network := getEnvAndNetwork(network)
 
 	// Get SignerConfig
 	signerConfig, err := common.GetSignerConfig(cCtx)
@@ -272,6 +271,19 @@ func readAndValidateClaimConfig(cCtx *cli.Context) (*ClaimConfig, error) {
 		RecipientAddress:          recipientAddress,
 		SignerConfig:              *signerConfig,
 	}, nil
+}
+
+func getEnvAndNetwork(network string) (string, string) {
+	switch network {
+	case "preprod":
+		return "preprod", "holesky"
+	case "holesky":
+		return "testnet", "holesky"
+	case "mainnet":
+		return "prod", "mainnet"
+	default:
+		return "dev", "local"
+	}
 }
 
 func stringToAddressArray(addresses []string) []gethcommon.Address {

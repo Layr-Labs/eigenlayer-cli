@@ -7,7 +7,7 @@ var (
 		Name:    "network",
 		Aliases: []string{"n"},
 		Usage:   "Network to use. Currently supports 'preprod', 'holesky' and 'mainnet'",
-		Value:   "testnet",
+		Value:   "holesky",
 		EnvVars: []string{"NETWORK"},
 	}
 

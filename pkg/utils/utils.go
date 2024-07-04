@@ -84,17 +84,6 @@ func GetProofStoreBaseURL(network string) string {
 	}
 }
 
-func GetEnvironmentFromNetwork(network string) string {
-	switch network {
-	case MainnetNetworkName:
-		return "prod"
-	case HoleskyNetworkName:
-		return "testnet"
-	default:
-		return "preprod"
-	}
-}
-
 func ReadYamlConfig(path string, o interface{}) error {
 	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
 		log.Fatal("Path ", path, " does not exist")
