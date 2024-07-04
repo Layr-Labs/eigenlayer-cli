@@ -3,6 +3,7 @@ package rewards
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"math/big"
 	"net/http"
 	"os"
@@ -79,7 +80,7 @@ func ClaimCmd(p utils.Prompter) *cli.Command {
 
 func Claim(cCtx *cli.Context, p utils.Prompter) error {
 	ctx := cCtx.Context
-	logger := logging.NewTextSLogger(os.Stdout, &logging.SLoggerOptions{})
+	logger := logging.NewTextSLogger(os.Stdout, &logging.SLoggerOptions{Level: slog.LevelInfo})
 	config, err := readAndValidateClaimConfig(cCtx, logger)
 	if err != nil {
 		return eigenSdkUtils.WrapError("failed to read and validate claim config", err)
@@ -99,8 +100,7 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 	if err != nil {
 		return eigenSdkUtils.WrapError("failed to create new reader from config", err)
 	}
-
-	//fmt.Println(config)
+	
 	df := httpProofDataFetcher.NewHttpProofDataFetcher(
 		config.ProofStoreBaseURL,
 		config.Environment,
@@ -136,9 +136,8 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 		return eigenSdkUtils.WrapError("failed to generate claim proof for earner", err)
 	}
 
-	solidityClaim := claimgen.FormatProofForSolidity(accounts.Root(), claim)
-
 	if config.Broadcast {
+		logger.Info("Broadcasting claim...")
 		keyWallet, sender, err := common.GetWallet(
 			config.SignerConfig,
 			config.EarnerAddress.String(),
@@ -152,7 +151,6 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 		}
 
 		txMgr := txmgr.NewSimpleTxManager(keyWallet, ethClient, logger, sender)
-
 		noopMetrics := eigenMetrics.NewNoopMetrics()
 		eLWriter, err := elcontracts.NewWriterFromConfig(
 			elcontracts.Config{
@@ -179,11 +177,15 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 			TokenTreeProofs: claim.TokenTreeProofs,
 			TokenLeaves:     convertClaimTokenLeaves(claim.TokenLeaves),
 		}
-		_, err = eLWriter.ProcessClaim(ctx, elClaim, config.RecipientAddress)
+		receipt, err := eLWriter.ProcessClaim(ctx, elClaim, config.RecipientAddress)
 		if err != nil {
 			return eigenSdkUtils.WrapError("failed to process claim", err)
 		}
+
+		txLink := common.GetTransactionLink(receipt.TxHash.String(), config.ChainID)
+		logger.Infof("Claim transaction submitted successfully: %s", txLink)
 	} else {
+		solidityClaim := claimgen.FormatProofForSolidity(accounts.Root(), claim)
 		fmt.Println("------- Claim generated -------")
 		common.PrettyPrintStruct(*solidityClaim)
 		fmt.Println("-------------------------------")
@@ -248,6 +250,7 @@ func readAndValidateClaimConfig(cCtx *cli.Context, logger logging.Logger) (*Clai
 	}
 
 	env, network := getEnvAndNetwork(network)
+	logger.Debugf("Environment: %s, Network: %s", env, network)
 
 	// Get SignerConfig
 	signerConfig, err := common.GetSignerConfig(cCtx)
