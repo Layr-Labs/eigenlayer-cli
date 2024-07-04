@@ -3,6 +3,7 @@ package operator
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/common"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
@@ -51,10 +52,7 @@ func RegisterCmd(p utils.Prompter) *cli.Command {
 			)
 
 			ctx := context.Background()
-			logger, err := eigensdkLogger.NewZapLogger(eigensdkLogger.Development)
-			if err != nil {
-				return err
-			}
+			logger := eigensdkLogger.NewTextSLogger(os.Stdout, &eigensdkLogger.SLoggerOptions{})
 
 			ethClient, err := eth.NewClient(operatorCfg.EthRPCUrl)
 			if err != nil {
