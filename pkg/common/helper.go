@@ -147,6 +147,19 @@ func GetWallet(
 			return nil, common.Address{}, err
 		}
 		return keyWallet, sender, nil
+	} else if cfg.SignerType == types.PrivateKeySigner {
+		signerCfg := signerv2.Config{
+			PrivateKey: cfg.PrivateKey,
+		}
+		sgn, sender, err := signerv2.SignerFromConfig(signerCfg, &chainID)
+		if err != nil {
+			return nil, common.Address{}, err
+		}
+		keyWallet, err = wallet.NewPrivateKeyWallet(ethClient, sgn, sender, logger)
+		if err != nil {
+			return nil, common.Address{}, err
+		}
+		return keyWallet, sender, nil
 	} else {
 		return nil, common.Address{}, fmt.Errorf("%s signer is not supported", cfg.SignerType)
 	}

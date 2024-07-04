@@ -3,6 +3,7 @@ package operator
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/common"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
@@ -45,10 +46,7 @@ Set the rewards claimer address for the operator.
 				return fmt.Errorf("set claimer currently unsupported on mainnet")
 			}
 
-			logger, err := eigensdkLogger.NewZapLogger(eigensdkLogger.Development)
-			if err != nil {
-				return err
-			}
+			logger := eigensdkLogger.NewTextSLogger(os.Stdout, &eigensdkLogger.SLoggerOptions{})
 
 			ethClient, err := eth.NewClient(operatorCfg.EthRPCUrl)
 			if err != nil {
