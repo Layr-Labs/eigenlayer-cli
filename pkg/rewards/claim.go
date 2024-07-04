@@ -41,7 +41,6 @@ type ClaimConfig struct {
 	EarnerAddress             gethcommon.Address
 	RecipientAddress          gethcommon.Address
 	Output                    string
-	PathToKeyStore            string
 	Broadcast                 bool
 	TokenAddresses            []gethcommon.Address
 	RewardsCoordinatorAddress gethcommon.Address
@@ -49,6 +48,7 @@ type ClaimConfig struct {
 	ChainID                   *big.Int
 	ProofStoreBaseURL         string
 	Environment               string
+	SignerConfig              types.SignerConfig
 }
 
 func ClaimCmd(p utils.Prompter) *cli.Command {
@@ -64,6 +64,7 @@ func ClaimCmd(p utils.Prompter) *cli.Command {
 			&flags.EarnerAddressFlag,
 			&flags.OutputFileFlag,
 			&flags.PathToKeyStoreFlag,
+			&flags.EcdsaPrivateKeyFlag,
 			&flags.BroadcastFlag,
 			&RecipientAddressFlag,
 			&TokenAddressesFlag,
@@ -140,12 +141,8 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 	solidityClaim := claimgen.FormatProofForSolidity(accounts.Root(), claim)
 
 	if config.Broadcast {
-		signerSfg := types.SignerConfig{
-			PrivateKeyStorePath: config.PathToKeyStore,
-			SignerType:          types.LocalKeystoreSigner,
-		}
 		keyWallet, sender, err := common.GetWallet(
-			signerSfg,
+			config.SignerConfig,
 			config.EarnerAddress.String(),
 			ethClient,
 			p,
@@ -215,7 +212,6 @@ func readAndValidateClaimConfig(cCtx *cli.Context) (*ClaimConfig, error) {
 	rpcUrl := cCtx.String(flags.ETHRpcUrlFlag.Name)
 	earnerAddress := gethcommon.HexToAddress(cCtx.String(flags.EarnerAddressFlag.Name))
 	output := cCtx.String(flags.OutputFileFlag.Name)
-	pathToKeyStore := cCtx.String(flags.PathToKeyStoreFlag.Name)
 	broadcast := cCtx.Bool(flags.BroadcastFlag.Name)
 	tokenAddresses := cCtx.String(TokenAddressesFlag.Name)
 	tokenAddressArray := stringToAddressArray(strings.Split(tokenAddresses, ","))
@@ -256,12 +252,17 @@ func readAndValidateClaimConfig(cCtx *cli.Context) (*ClaimConfig, error) {
 	env := utils.GetEnvironmentFromNetwork(network)
 	//env = "preprod"
 
+	// Get SignerConfig
+	signerConfig, err := common.GetSignerConfig(cCtx)
+	if err != nil {
+		return nil, err
+	}
+
 	return &ClaimConfig{
 		Network:                   network,
 		RPCUrl:                    rpcUrl,
 		EarnerAddress:             earnerAddress,
 		Output:                    output,
-		PathToKeyStore:            pathToKeyStore,
 		Broadcast:                 broadcast,
 		TokenAddresses:            tokenAddressArray,
 		RewardsCoordinatorAddress: gethcommon.HexToAddress(rewardsCoordinatorAddress),
@@ -269,6 +270,7 @@ func readAndValidateClaimConfig(cCtx *cli.Context) (*ClaimConfig, error) {
 		ProofStoreBaseURL:         proofStoreBaseURL,
 		Environment:               env,
 		RecipientAddress:          recipientAddress,
+		SignerConfig:              *signerConfig,
 	}, nil
 }
 

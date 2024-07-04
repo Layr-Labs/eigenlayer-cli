@@ -13,7 +13,7 @@ var (
 
 	EarnerAddressFlag = cli.StringFlag{
 		Name:     "earner-address",
-		Aliases:  []string{"e"},
+		Aliases:  []string{"ea"},
 		Required: true,
 		Usage:    "Address of the earner (this is your staker/operator address)",
 		EnvVars:  []string{"EARNER_ADDRESS"},
@@ -53,5 +53,12 @@ var (
 		Aliases: []string{"d"},
 		Usage:   "Perform a dry run. This takes precedence over the broadcast flag",
 		EnvVars: []string{"DRY_RUN"},
+	}
+
+	EcdsaPrivateKeyFlag = cli.StringFlag{
+		Name:    "ecdsa-private-key",
+		Aliases: []string{"e"},
+		Usage:   "ECDSA private key hex to send transaction",
+		EnvVars: []string{"ECDSA_PRIVATE_KEY"},
 	}
 )
