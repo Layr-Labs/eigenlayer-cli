@@ -79,17 +79,16 @@ func ClaimCmd(p utils.Prompter) *cli.Command {
 
 func Claim(cCtx *cli.Context, p utils.Prompter) error {
 	ctx := cCtx.Context
-	config, err := readAndValidateClaimConfig(cCtx)
+	logger := logging.NewTextSLogger(os.Stdout, &logging.SLoggerOptions{})
+	config, err := readAndValidateClaimConfig(cCtx, logger)
 	if err != nil {
-		return err
+		return eigenSdkUtils.WrapError("failed to read and validate claim config", err)
 	}
 
 	ethClient, err := eth.NewClient(config.RPCUrl)
 	if err != nil {
 		return eigenSdkUtils.WrapError("failed to create new eth client", err)
 	}
-
-	logger := logging.NewTextSLogger(os.Stdout, &logging.SLoggerOptions{})
 
 	elReader, err := elcontracts.NewReaderFromConfig(
 		elcontracts.Config{
@@ -98,7 +97,7 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 		ethClient, logger,
 	)
 	if err != nil {
-		return err
+		return eigenSdkUtils.WrapError("failed to create new reader from config", err)
 	}
 
 	//fmt.Println(config)
@@ -111,16 +110,16 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 
 	latestSubmittedTimestamp, err := elReader.CurrRewardsCalculationEndTimestamp(&bind.CallOpts{})
 	if err != nil {
-		return err
+		return eigenSdkUtils.WrapError("failed to get latest submitted timestamp", err)
 	}
 	claimDate := time.Unix(int64(latestSubmittedTimestamp), 0).UTC().Format(time.DateOnly)
 	rootCount, err := elReader.GetDistributionRootsLength(&bind.CallOpts{})
 	if err != nil {
-		return err
+		return eigenSdkUtils.WrapError("failed to get number of published roots", err)
 	}
 
 	rootIndex := uint32(rootCount.Uint64() - 1)
-	
+
 	proofData, err := df.FetchClaimAmountsForDate(ctx, claimDate)
 	if err != nil {
 		return eigenSdkUtils.WrapError("failed to fetch claim amounts for date", err)
@@ -134,7 +133,7 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 	)
 
 	if err != nil {
-		return err
+		return eigenSdkUtils.WrapError("failed to generate claim proof for earner", err)
 	}
 
 	solidityClaim := claimgen.FormatProofForSolidity(accounts.Root(), claim)
@@ -149,7 +148,7 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 			logger,
 		)
 		if err != nil {
-			return err
+			return eigenSdkUtils.WrapError("failed to get wallet", err)
 		}
 
 		txMgr := txmgr.NewSimpleTxManager(keyWallet, ethClient, logger, sender)
@@ -165,7 +164,7 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 			txMgr,
 		)
 		if err != nil {
-			return err
+			return eigenSdkUtils.WrapError("failed to create new writer from config", err)
 		}
 
 		elClaim := rewardscoordinator.IRewardsCoordinatorRewardsMerkleClaim{
@@ -207,7 +206,7 @@ func convertClaimTokenLeaves(
 	return tokenLeaves
 
 }
-func readAndValidateClaimConfig(cCtx *cli.Context) (*ClaimConfig, error) {
+func readAndValidateClaimConfig(cCtx *cli.Context, logger logging.Logger) (*ClaimConfig, error) {
 	network := cCtx.String(flags.NetworkFlag.Name)
 	rpcUrl := cCtx.String(flags.ETHRpcUrlFlag.Name)
 	earnerAddress := gethcommon.HexToAddress(cCtx.String(flags.EarnerAddressFlag.Name))
@@ -225,14 +224,13 @@ func readAndValidateClaimConfig(cCtx *cli.Context) (*ClaimConfig, error) {
 	}
 
 	claimTimestamp := cCtx.String(ClaimTimestampFlag.Name)
-	fmt.Println(claimTimestamp)
 	if claimTimestamp != LatestClaimTimestamp {
 		return nil, errors.New("claim-timestamp must be 'latest'")
 	}
 
 	recipientAddress := gethcommon.HexToAddress(cCtx.String(RecipientAddressFlag.Name))
 	if recipientAddress == utils.ZeroAddress {
-		fmt.Println("Recipient address not provided, using earner address as recipient address")
+		logger.Info("Recipient address not provided, using earner address as recipient address")
 		recipientAddress = earnerAddress
 	}
 	chainID := utils.NetworkNameToChainId(network)
