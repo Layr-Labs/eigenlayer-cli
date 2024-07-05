@@ -61,4 +61,11 @@ var (
 		Usage:   "ECDSA private key hex to send transaction",
 		EnvVars: []string{"ECDSA_PRIVATE_KEY"},
 	}
+
+	VerboseFlag = cli.BoolFlag{
+		Name:    "verbose",
+		Aliases: []string{"v"},
+		Usage:   "Enable verbose logging",
+		EnvVars: []string{"VERBOSE"},
+	}
 )

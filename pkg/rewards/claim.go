@@ -60,6 +60,7 @@ func ClaimCmd(p utils.Prompter) *cli.Command {
 			return Claim(cCtx, p)
 		},
 		Flags: []cli.Flag{
+			&flags.VerboseFlag,
 			&flags.NetworkFlag,
 			&flags.ETHRpcUrlFlag,
 			&flags.EarnerAddressFlag,
@@ -80,7 +81,14 @@ func ClaimCmd(p utils.Prompter) *cli.Command {
 
 func Claim(cCtx *cli.Context, p utils.Prompter) error {
 	ctx := cCtx.Context
-	logger := logging.NewTextSLogger(os.Stdout, &logging.SLoggerOptions{Level: slog.LevelInfo})
+
+	verbose := cCtx.Bool(flags.VerboseFlag.Name)
+	logLevel := slog.LevelInfo
+	if verbose {
+		logLevel = slog.LevelDebug
+	}
+	logger := logging.NewTextSLogger(os.Stdout, &logging.SLoggerOptions{Level: logLevel})
+
 	config, err := readAndValidateClaimConfig(cCtx, logger)
 	if err != nil {
 		return eigenSdkUtils.WrapError("failed to read and validate claim config", err)
@@ -100,7 +108,7 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 	if err != nil {
 		return eigenSdkUtils.WrapError("failed to create new reader from config", err)
 	}
-	
+
 	df := httpProofDataFetcher.NewHttpProofDataFetcher(
 		config.ProofStoreBaseURL,
 		config.Environment,
@@ -232,10 +240,11 @@ func readAndValidateClaimConfig(cCtx *cli.Context, logger logging.Logger) (*Clai
 
 	recipientAddress := gethcommon.HexToAddress(cCtx.String(RecipientAddressFlag.Name))
 	if recipientAddress == utils.ZeroAddress {
-		logger.Info("Recipient address not provided, using earner address as recipient address")
+		logger.Infof("Recipient address not provided, using earner address (%s) as recipient address", earnerAddress.String())
 		recipientAddress = earnerAddress
 	}
 	chainID := utils.NetworkNameToChainId(network)
+	logger.Debugf("Using chain ID: %s", chainID.String())
 
 	proofStoreBaseURL := cCtx.String(ProofStoreBaseURLFlag.Name)
 
@@ -248,6 +257,7 @@ func readAndValidateClaimConfig(cCtx *cli.Context, logger logging.Logger) (*Clai
 			return nil, errors.New("proof store base URL not provided")
 		}
 	}
+	logger.Debugf("Using Proof store base URL: %s", proofStoreBaseURL)
 
 	env, network := getEnvAndNetwork(network)
 	logger.Debugf("Environment: %s, Network: %s", env, network)

@@ -10,8 +10,8 @@ github.com/Layr-Labs/eigenlayer-contracts v0.3.0-rc3-holesky-preprod-rewards.0.2
 github.com/Layr-Labs/eigenlayer-contracts v0.3.0-rc3-holesky-preprod-rewards.0.20240618161038-04a0176562a0/go.mod h1:Ie8YE3EQkTHqG6/tnUS0He7/UPMkXPo/3OFXwSy0iRo=
 github.com/Layr-Labs/eigenlayer-rewards-proofs v0.2.3 h1:ZRJK1d1h9QywUlh2sCmnsM/STm7qgKhMnJRjyi+vymU=
 github.com/Layr-Labs/eigenlayer-rewards-proofs v0.2.3/go.mod h1:W2a9mERHznfIU+jD1FUaZjdUAfx+9lwbZ0tYQaF+Vhc=
-github.com/Layr-Labs/eigensdk-go v0.1.9-0.20240703004315-260313e3f61f h1:JQ1U8sAX9TKl4Q/RVO58gNBcVh9kdc7cWeYB6W8EPiY=
-github.com/Layr-Labs/eigensdk-go v0.1.9-0.20240703004315-260313e3f61f/go.mod h1:XcLVDtlB1vOPj63D236b451+SC75B8gwgkpNhYHSxNs=
+github.com/Layr-Labs/eigensdk-go v0.1.9-0.20240705173150-8f12390d1974 h1:/hQmIEK3Rli/W2RnPNQOh8uq4/Etchzk4rwXrL2GCqo=
+github.com/Layr-Labs/eigensdk-go v0.1.9-0.20240705173150-8f12390d1974/go.mod h1:XcLVDtlB1vOPj63D236b451+SC75B8gwgkpNhYHSxNs=
 github.com/Microsoft/go-winio v0.6.2 h1:F2VQgta7ecxGYO8k3ZZz3RS8fVIXVxONVUPlNERoyfY=
 github.com/Microsoft/go-winio v0.6.2/go.mod h1:yd8OoFMLzJbo9gZq8j5qaps8bJ9aShtEA8Ipt1oGCvU=
 github.com/Microsoft/hcsshim v0.11.4 h1:68vKo2VN8DE9AdN4tnkWnmdhqdbpUFM8OF3Airm7fz8=

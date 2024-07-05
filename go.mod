@@ -6,7 +6,7 @@ require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
 	github.com/Layr-Labs/eigenlayer-contracts v0.3.0-rc3-holesky-preprod-rewards.0.20240618161038-04a0176562a0
 	github.com/Layr-Labs/eigenlayer-rewards-proofs v0.2.3
-	github.com/Layr-Labs/eigensdk-go v0.1.9-0.20240703004315-260313e3f61f
+	github.com/Layr-Labs/eigensdk-go v0.1.9-0.20240705173150-8f12390d1974
 	github.com/consensys/gnark-crypto v0.12.1
 	github.com/ethereum/go-ethereum v1.14.5
 	github.com/fatih/color v1.17.0
