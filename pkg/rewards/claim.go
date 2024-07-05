@@ -121,6 +121,8 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 		return eigenSdkUtils.WrapError("failed to get latest submitted timestamp", err)
 	}
 	claimDate := time.Unix(int64(latestSubmittedTimestamp), 0).UTC().Format(time.DateOnly)
+	logger.Debugf("Latest submitted timestamp: %s", claimDate)
+
 	rootCount, err := elReader.GetDistributionRootsLength(&bind.CallOpts{})
 	if err != nil {
 		return eigenSdkUtils.WrapError("failed to get number of published roots", err)
@@ -232,6 +234,7 @@ func readAndValidateClaimConfig(cCtx *cli.Context, logger logging.Logger) (*Clai
 			return nil, err
 		}
 	}
+	logger.Debugf("Using Rewards Coordinator address: %s", rewardsCoordinatorAddress)
 
 	claimTimestamp := cCtx.String(ClaimTimestampFlag.Name)
 	if claimTimestamp != LatestClaimTimestamp {
