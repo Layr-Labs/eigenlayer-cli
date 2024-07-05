@@ -10,6 +10,7 @@ USAGE:
    eigenlayer rewards claim [command options]
 
 OPTIONS:
+   --verbose, -v                                    Enable verbose logging (default: false) [$VERBOSE]
    --network value, -n value                        Network to use. Currently supports 'preprod', 'holesky' and 'mainnet' (default: "holesky") [$NETWORK]
    --eth-rpc-url value, -r value                    URL of the Ethereum RPC [$ETH_RPC_URL]
    --earner-address value, --ea value               Address of the earner (this is your staker/operator address) [$EARNER_ADDRESS]
@@ -22,7 +23,7 @@ OPTIONS:
    --rewards-coordinator-address value, --rc value  Specify the address of the rewards coordinator. If not provided, the address will be used based on provided network [$REWARDS_COORDINATOR_ADDRESS]
    --claim-timestamp value, -c value                Specify the timestamp. Only 'latest' is supported (default: "latest") [$CLAIM_TIMESTAMP]
    --proof-store-base-url value, --psbu value       Specify the base URL of the proof store. If not provided, the value based on network will be used [$PROOF_STORE_BASE_URL]
-   --help, -h                                     show help
+   --help, -h                                       show help
 ```
 
 ### Example

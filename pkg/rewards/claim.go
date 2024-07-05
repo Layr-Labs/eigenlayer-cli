@@ -240,7 +240,10 @@ func readAndValidateClaimConfig(cCtx *cli.Context, logger logging.Logger) (*Clai
 
 	recipientAddress := gethcommon.HexToAddress(cCtx.String(RecipientAddressFlag.Name))
 	if recipientAddress == utils.ZeroAddress {
-		logger.Infof("Recipient address not provided, using earner address (%s) as recipient address", earnerAddress.String())
+		logger.Infof(
+			"Recipient address not provided, using earner address (%s) as recipient address",
+			earnerAddress.String(),
+		)
 		recipientAddress = earnerAddress
 	}
 	chainID := utils.NetworkNameToChainId(network)
