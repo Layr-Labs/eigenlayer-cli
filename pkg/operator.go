@@ -16,6 +16,7 @@ func OperatorCmd(p utils.Prompter) *cli.Command {
 			operator.RegisterCmd(p),
 			operator.StatusCmd(p),
 			operator.UpdateCmd(p),
+			operator.UpdateMetadataURICmd(p),
 			operator.SetClaimerCmd(p),
 		},
 	}

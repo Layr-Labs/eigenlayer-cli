@@ -60,6 +60,11 @@ jobs:
         run: |
           cd eigenlayer-cli
           echo "" | ./bin/eigenlayer operator update tests/keystore/operator-ci.yaml
+
+      - name: Update operator metadata uri
+        run: |
+          cd eigenlayer-cli
+          echo "" | ./bin/eigenlayer operator update-metadata-uri tests/keystore/operator-ci.yaml
   Web3Signer:
     name: Integration Test - Web3 Signer
     runs-on: ubuntu-latest
@@ -119,3 +124,8 @@ jobs:
         run: |
           cd eigenlayer-cli
           echo "HhzcmbpkHCQpvBlXrvLB" | ./bin/eigenlayer operator update tests/web3signer/operator-ci.yaml
+
+      - name: Update operator metadata uri
+        run: |
+          cd eigenlayer-cli
+          echo "HhzcmbpkHCQpvBlXrvLB" | ./bin/eigenlayer operator update-metadata-uri tests/web3signer/operator-ci.yaml

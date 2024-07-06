@@ -20,19 +20,15 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-func UpdateCmd(p utils.Prompter) *cli.Command {
-	updateCmd := &cli.Command{
-		Name:      "update",
-		Usage:     "Update the operator details onchain",
-		UsageText: "update <configuration-file>",
+func UpdateMetadataURICmd(p utils.Prompter) *cli.Command {
+	updateMetadataURICmd := &cli.Command{
+		Name:      "update-metadata-uri",
+		Usage:     "Update the operator metadata uri onchain",
+		UsageText: "update-metadata-uri <configuration-file>",
 		Description: `
-Updates the operator metadata onchain which includes
-	- delegation approver address
-	- earnings receiver address
-	- staker opt out window blocks
+Updates the operator metadata uri onchain
 
 Requires the same file used for registration as argument
-This command only updates above details. To update metadata URI, use eigenlayer operator update-metadata-uri command
 		`,
 		After: telemetry.AfterRunAction(),
 		Action: func(cCtx *cli.Context) error {
@@ -74,28 +70,29 @@ This command only updates above details. To update metadata URI, use eigenlayer 
 			}
 
 			txMgr := txmgr.NewSimpleTxManager(keyWallet, ethClient, logger, sender)
-
 			noopMetrics := eigenMetrics.NewNoopMetrics()
-
-			elWriter, err := elContracts.BuildELChainWriter(
-				gethcommon.HexToAddress(operatorCfg.ELDelegationManagerAddress),
-				gethcommon.HexToAddress(operatorCfg.ELAVSDirectoryAddress),
+			elWriter, err := elContracts.NewWriterFromConfig(
+				elContracts.Config{
+					DelegationManagerAddress: gethcommon.HexToAddress(operatorCfg.ELDelegationManagerAddress),
+					AvsDirectoryAddress:      gethcommon.HexToAddress(operatorCfg.ELAVSDirectoryAddress),
+				},
 				ethClient,
 				logger,
 				noopMetrics,
-				txMgr)
+				txMgr,
+			)
 
 			if err != nil {
 				return err
 			}
 
-			receipt, err := elWriter.UpdateOperatorDetails(context.Background(), operatorCfg.Operator)
+			receipt, err := elWriter.UpdateMetadataURI(context.Background(), operatorCfg.Operator.MetadataUrl)
 			if err != nil {
-				fmt.Printf("%s Error while updating operator details\n", utils.EmojiCrossMark)
+				fmt.Printf("%s Error while updating operator metadata uri\n", utils.EmojiCrossMark)
 				return err
 			}
 			fmt.Printf(
-				"%s Operator details updated at: %s\n",
+				"%s Operator metadata uri updated at: %s\n",
 				utils.EmojiCheckMark,
 				common.GetTransactionLink(receipt.TxHash.String(), &operatorCfg.ChainId),
 			)
@@ -106,12 +103,12 @@ This command only updates above details. To update metadata URI, use eigenlayer 
 			)
 
 			fmt.Printf(
-				"%s Operator details updated successfully. There is a 30 minute delay between update and operator details being shown in our webapp.\n",
+				"%s Operator metadata uri successfully. There is a 30 minute delay between update and operator metadata being shown in our webapp.\n",
 				utils.EmojiCheckMark,
 			)
 			return nil
 		},
 	}
 
-	return updateCmd
+	return updateMetadataURICmd
 }
