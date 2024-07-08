@@ -45,7 +45,7 @@ jobs:
       - name: Import Operator Keys and send funds
         run: |
           cd eigenlayer-cli
-          echo "" | ./bin/eigenlayer operator keys import --key-type ecdsa --insecure opr0 ea25637d76e7ddae9dab9bfac7467d76a1e3bf2d67941b267edc60f2b80d9413 | cat
+          echo "" | ./bin/eigenlayer keys import --key-type ecdsa --insecure opr0 ea25637d76e7ddae9dab9bfac7467d76a1e3bf2d67941b267edc60f2b80d9413 | cat
           cast send 0xcaB1b44dd1f1C265405878Ac1179cd94D0dBA634 --value 10ether --private-key 0x2a871d0798f97d79848a013d4936a73bf4cc922c825d33c1cf7073dff6d409c6
 
       - name: Register Operator
