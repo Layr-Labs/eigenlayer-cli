@@ -15,7 +15,7 @@ jobs:
         with:
           go-version: '1.21'
       - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@v1
+        uses: foundry-rs/foundry:nightly-c4a984fbf2c48b793c8cd53af84f56009dd1070c@sha256:4e914956a1a7f9c6e8d10f8bdd015cb798a357b7f237c6447880af0c097da1cf
       - name: Checkout incredible squaring
         uses: actions/checkout@v4
         with:
