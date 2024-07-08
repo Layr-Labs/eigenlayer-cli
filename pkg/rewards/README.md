@@ -27,13 +27,27 @@ OPTIONS:
 ```
 
 ### Example
+### Preprod
 ```bash
 eigenlayer rewards claim \
   --network holesky \
+  --env preprod \
   --eth-rpc-url https://rpc.ankr.com/eth_holesky/<> \
   --earner-address 0x2222AAC0C980Cc029624b7ff55B88Bc6F63C538f \
   --path-to-key-store /path/to/key \
   --token-addresses 0x554c393923c753d146aa34608523ad7946b61662 \
   --rewards-coordinator-address 0xb22Ef643e1E067c994019A4C19e403253C05c2B0 \
   --proof-store-base-url https://eigenlabs-rewards-preprod-holesky.s3.amazonaws.com
+  --broadcast
+```
+
+### Testnet
+```bash
+eigenlayer rewards claim \
+  --network holesky \
+  --eth-rpc-url https://rpc.ankr.com/eth_holesky/<> \
+  --earner-address 0x111116fe4f8c2f83e3eb2318f090557b7cd0bf76 \
+  --recipient-address 0x2222AAC0C980Cc029624b7ff55B88Bc6F63C538f \
+  --path-to-key-store /path/to/key/store \
+  --token-addresses 0xdeeeeE2b48C121e6728ed95c860e296177849932 --broadcast
 ```

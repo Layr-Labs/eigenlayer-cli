@@ -39,4 +39,11 @@ var (
 		Usage:   "Specify the base URL of the proof store. If not provided, the value based on network will be used",
 		EnvVars: []string{"PROOF_STORE_BASE_URL"},
 	}
+
+	EnvironmentFlag = cli.StringFlag{
+		Name:    "environment",
+		Aliases: []string{"env"},
+		Usage:   "Environment to use. Currently supports 'preprod' ,`testnet' and 'prod'. If not provided, it will be inferred based on network",
+		EnvVars: []string{"ENVIRONMENT"},
+	}
 )

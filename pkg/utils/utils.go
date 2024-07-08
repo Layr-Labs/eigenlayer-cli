@@ -26,8 +26,9 @@ var ChainMetadataMap = map[int64]types.ChainMetadata{
 		BlockExplorerUrl:            "https://holesky.etherscan.io/tx",
 		ELDelegationManagerAddress:  "0xA44151489861Fe9e3055d95adC98FbD462B948e7",
 		ELAVSDirectoryAddress:       "0x055733000064333CaDDbC92763c58BF0192fFeBf",
-		ELRewardsCoordinatorAddress: "0xb22Ef643e1E067c994019A4C19e403253C05c2B0",
+		ELRewardsCoordinatorAddress: "0xAcc1fb458a1317E886dB376Fc8141540537E68fE",
 		WebAppUrl:                   "https://holesky.eigenlayer.xyz/operator",
+		ProofStoreBaseURL:           "https://eigenlabs-rewards-testnet-holesky.s3.amazonaws.com",
 	},
 	LocalChainId: {
 		BlockExplorerUrl:            "",
@@ -65,7 +66,7 @@ func NetworkNameToChainId(networkName string) *big.Int {
 	switch networkName {
 	case MainnetNetworkName:
 		return big.NewInt(MainnetChainId)
-	case HoleskyNetworkName, PreprodNetworkName:
+	case HoleskyNetworkName:
 		return big.NewInt(HoleskyChainId)
 	case LocalNetworkName:
 		return big.NewInt(LocalChainId)

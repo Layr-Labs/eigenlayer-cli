@@ -68,6 +68,7 @@ func ClaimCmd(p utils.Prompter) *cli.Command {
 			&flags.PathToKeyStoreFlag,
 			&flags.EcdsaPrivateKeyFlag,
 			&flags.BroadcastFlag,
+			&EnvironmentFlag,
 			&RecipientAddressFlag,
 			&TokenAddressesFlag,
 			&RewardsCoordinatorAddressFlag,
@@ -220,6 +221,7 @@ func convertClaimTokenLeaves(
 }
 func readAndValidateClaimConfig(cCtx *cli.Context, logger logging.Logger) (*ClaimConfig, error) {
 	network := cCtx.String(flags.NetworkFlag.Name)
+	environment := cCtx.String(EnvironmentFlag.Name)
 	rpcUrl := cCtx.String(flags.ETHRpcUrlFlag.Name)
 	earnerAddress := gethcommon.HexToAddress(cCtx.String(flags.EarnerAddressFlag.Name))
 	output := cCtx.String(flags.OutputFileFlag.Name)
@@ -249,6 +251,8 @@ func readAndValidateClaimConfig(cCtx *cli.Context, logger logging.Logger) (*Clai
 		)
 		recipientAddress = earnerAddress
 	}
+	logger.Infof("Using rewards recipient address: %s", recipientAddress.String())
+
 	chainID := utils.NetworkNameToChainId(network)
 	logger.Debugf("Using chain ID: %s", chainID.String())
 
@@ -265,8 +269,10 @@ func readAndValidateClaimConfig(cCtx *cli.Context, logger logging.Logger) (*Clai
 	}
 	logger.Debugf("Using Proof store base URL: %s", proofStoreBaseURL)
 
-	env, network := getEnvAndNetwork(network)
-	logger.Debugf("Environment: %s, Network: %s", env, network)
+	if environment == "" {
+		environment = getEnvFromNetwork(network)
+	}
+	logger.Debugf("Using network %s and environment: %s", network, environment)
 
 	// Get SignerConfig
 	signerConfig, err := common.GetSignerConfig(cCtx)
@@ -284,22 +290,20 @@ func readAndValidateClaimConfig(cCtx *cli.Context, logger logging.Logger) (*Clai
 		RewardsCoordinatorAddress: gethcommon.HexToAddress(rewardsCoordinatorAddress),
 		ChainID:                   chainID,
 		ProofStoreBaseURL:         proofStoreBaseURL,
-		Environment:               env,
+		Environment:               environment,
 		RecipientAddress:          recipientAddress,
 		SignerConfig:              *signerConfig,
 	}, nil
 }
 
-func getEnvAndNetwork(network string) (string, string) {
+func getEnvFromNetwork(network string) string {
 	switch network {
-	case "preprod":
-		return "preprod", "holesky"
 	case "holesky":
-		return "testnet", "holesky"
+		return "testnet"
 	case "mainnet":
-		return "prod", "mainnet"
+		return "prod"
 	default:
-		return "dev", "local"
+		return "local"
 	}
 }
 

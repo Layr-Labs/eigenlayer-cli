@@ -6,7 +6,7 @@ var (
 	NetworkFlag = cli.StringFlag{
 		Name:    "network",
 		Aliases: []string{"n"},
-		Usage:   "Network to use. Currently supports 'preprod', 'holesky' and 'mainnet'",
+		Usage:   "Network to use. Currently supports 'holesky' and 'mainnet'",
 		Value:   "holesky",
 		EnvVars: []string{"NETWORK"},
 	}

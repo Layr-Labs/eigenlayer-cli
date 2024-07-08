@@ -17,7 +17,6 @@ const (
 
 	MainnetNetworkName = "mainnet"
 	HoleskyNetworkName = "holesky"
-	PreprodNetworkName = "preprod"
 	LocalNetworkName   = "local"
 	UnknownNetworkName = "unknown"
 )
