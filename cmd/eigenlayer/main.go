@@ -34,6 +34,7 @@ func main() {
 	prompter := utils.NewPrompter()
 
 	app.Commands = append(app.Commands, pkg.OperatorCmd(prompter))
+	app.Commands = append(app.Commands, pkg.RewardsCmd(prompter))
 
 	if err := app.Run(os.Args); err != nil {
 		_, err := fmt.Fprintln(os.Stderr, err)

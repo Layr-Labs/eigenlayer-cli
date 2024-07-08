@@ -9,6 +9,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/urfave/cli/v2"
+
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/common/flags"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/types"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 
@@ -22,6 +25,7 @@ import (
 	eigenSdkUtils "github.com/Layr-Labs/eigensdk-go/utils"
 
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
 
 	"github.com/fatih/color"
 )
@@ -260,6 +264,7 @@ func getAVSDirectoryAddress(chainID big.Int) (string, error) {
 	}
 }
 
+// TODO(shrimalmadhur): remove this and use the utils one in a separate PR
 func getRewardCoordinatorAddress(chainID big.Int) (string, error) {
 	chainIDInt := chainID.Int64()
 	chainMetadata, ok := utils.ChainMetadataMap[chainIDInt]
@@ -315,4 +320,28 @@ func validateMetadata(operatorCfg *types.OperatorConfig) error {
 		}
 	}
 	return nil
+}
+
+func GetSignerConfig(cCtx *cli.Context) (*types.SignerConfig, error) {
+	ecdsaPrivateKeyString := cCtx.String(flags.EcdsaPrivateKeyFlag.Name)
+	pathToKeyStore := cCtx.String(flags.PathToKeyStoreFlag.Name)
+	if len(ecdsaPrivateKeyString) != 0 {
+		pk, err := crypto.HexToECDSA(ecdsaPrivateKeyString)
+		if err != nil {
+			return nil, err
+		}
+		return &types.SignerConfig{
+			SignerType: types.PrivateKeySigner,
+			PrivateKey: pk,
+		}, nil
+	}
+
+	if len(pathToKeyStore) != 0 {
+		return &types.SignerConfig{
+			SignerType:          types.LocalKeystoreSigner,
+			PrivateKeyStorePath: pathToKeyStore,
+		}, nil
+	}
+
+	return nil, fmt.Errorf("either ecdsa private key hex or path to keystore is required")
 }

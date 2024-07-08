@@ -3,7 +3,9 @@ package utils
 import (
 	"bufio"
 	"errors"
+	"fmt"
 	"log"
+	"math/big"
 	"os"
 	"path/filepath"
 
@@ -24,8 +26,9 @@ var ChainMetadataMap = map[int64]types.ChainMetadata{
 		BlockExplorerUrl:            "https://holesky.etherscan.io/tx",
 		ELDelegationManagerAddress:  "0xA44151489861Fe9e3055d95adC98FbD462B948e7",
 		ELAVSDirectoryAddress:       "0x055733000064333CaDDbC92763c58BF0192fFeBf",
-		ELRewardsCoordinatorAddress: "0xb22Ef643e1E067c994019A4C19e403253C05c2B0",
+		ELRewardsCoordinatorAddress: "0xAcc1fb458a1317E886dB376Fc8141540537E68fE",
 		WebAppUrl:                   "https://holesky.eigenlayer.xyz/operator",
+		ProofStoreBaseURL:           "https://eigenlabs-rewards-testnet-holesky.s3.amazonaws.com",
 	},
 	LocalChainId: {
 		BlockExplorerUrl:            "",
@@ -36,16 +39,49 @@ var ChainMetadataMap = map[int64]types.ChainMetadata{
 	},
 }
 
+func GetRewardCoordinatorAddress(chainID *big.Int) (string, error) {
+	chainIDInt := chainID.Int64()
+	chainMetadata, ok := ChainMetadataMap[chainIDInt]
+	if !ok {
+		return "", fmt.Errorf("chain ID %d not supported", chainIDInt)
+	} else {
+		return chainMetadata.ELRewardsCoordinatorAddress, nil
+	}
+}
+
 func ChainIdToNetworkName(chainId int64) string {
 	switch chainId {
 	case MainnetChainId:
-		return "mainnet"
+		return MainnetNetworkName
 	case HoleskyChainId:
-		return "holesky"
+		return HoleskyNetworkName
 	case LocalChainId:
-		return "local"
+		return LocalNetworkName
 	default:
-		return "unknown"
+		return UnknownNetworkName
+	}
+}
+
+func NetworkNameToChainId(networkName string) *big.Int {
+	switch networkName {
+	case MainnetNetworkName:
+		return big.NewInt(MainnetChainId)
+	case HoleskyNetworkName:
+		return big.NewInt(HoleskyChainId)
+	case LocalNetworkName:
+		return big.NewInt(LocalChainId)
+	default:
+		return big.NewInt(-1)
+	}
+}
+
+func GetProofStoreBaseURL(network string) string {
+	chainId := NetworkNameToChainId(network)
+	chainMetadata, ok := ChainMetadataMap[chainId.Int64()]
+	if !ok {
+		return ""
+	} else {
+		return chainMetadata.ProofStoreBaseURL
 	}
 }
 
