@@ -32,13 +32,17 @@ import (
 
 func PrintRegistrationInfo(txHash string, operatorAddress common.Address, chainId *big.Int) {
 	fmt.Println(strings.Repeat("-", 100))
+	PrintTransactionInfo(txHash, chainId)
+
+	color.Blue("%s Operator Web App Link: %s\n", utils.EmojiInternet, getWebAppLink(operatorAddress, chainId))
+	fmt.Println(strings.Repeat("-", 100))
+}
+
+func PrintTransactionInfo(txHash string, chainId *big.Int) {
 	fmt.Printf("%s Chain ID: %s\n", utils.EmojiLink, chainId.String())
 	if len(txHash) > 0 {
 		fmt.Printf("%s Transaction Link: %s\n", utils.EmojiLink, GetTransactionLink(txHash, chainId))
 	}
-
-	color.Blue("%s Operator Web App Link: %s\n", utils.EmojiInternet, getWebAppLink(operatorAddress, chainId))
-	fmt.Println(strings.Repeat("-", 100))
 }
 
 func GetWallet(

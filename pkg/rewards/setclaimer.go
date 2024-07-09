@@ -139,9 +139,8 @@ func SetClaimer(cCtx *cli.Context, p utils.Prompter) error {
 		config.EarnerAddress.Hex(),
 	)
 
-	common.PrintRegistrationInfo(
+	common.PrintTransactionInfo(
 		receipt.TxHash.String(),
-		config.EarnerAddress,
 		config.ChainID,
 	)
 

@@ -194,8 +194,8 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 			return eigenSdkUtils.WrapError("failed to process claim", err)
 		}
 
-		txLink := common.GetTransactionLink(receipt.TxHash.String(), config.ChainID)
-		logger.Infof("Claim transaction submitted successfully: %s", txLink)
+		logger.Infof("Claim transaction submitted successfully")
+		common.PrintTransactionInfo(receipt.TxHash.String(), config.ChainID)
 	} else {
 		solidityClaim := claimgen.FormatProofForSolidity(accounts.Root(), claim)
 		fmt.Println("------- Claim generated -------")
