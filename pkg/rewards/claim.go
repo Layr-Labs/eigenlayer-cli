@@ -49,7 +49,7 @@ type ClaimConfig struct {
 	ChainID                   *big.Int
 	ProofStoreBaseURL         string
 	Environment               string
-	SignerConfig              types.SignerConfig
+	SignerConfig              *types.SignerConfig
 }
 
 func ClaimCmd(p utils.Prompter) *cli.Command {
@@ -94,6 +94,7 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 	if err != nil {
 		return eigenSdkUtils.WrapError("failed to read and validate claim config", err)
 	}
+	cCtx.App.Metadata["network"] = config.ChainID.String()
 
 	ethClient, err := eth.NewClient(config.RPCUrl)
 	if err != nil {
@@ -150,7 +151,7 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 	if config.Broadcast {
 		logger.Info("Broadcasting claim...")
 		keyWallet, sender, err := common.GetWallet(
-			config.SignerConfig,
+			*config.SignerConfig,
 			config.EarnerAddress.String(),
 			ethClient,
 			p,
@@ -292,7 +293,7 @@ func readAndValidateClaimConfig(cCtx *cli.Context, logger logging.Logger) (*Clai
 		ProofStoreBaseURL:         proofStoreBaseURL,
 		Environment:               environment,
 		RecipientAddress:          recipientAddress,
-		SignerConfig:              *signerConfig,
+		SignerConfig:              signerConfig,
 	}, nil
 }
 

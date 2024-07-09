@@ -1,6 +1,6 @@
 ## Rewards
 
-### Command
+### Claim Command
 ```bash
 eigenlayer rewards claim --help
 NAME:
@@ -26,8 +26,8 @@ OPTIONS:
    --help, -h                                       show help
 ```
 
-### Example
-### Preprod
+#### Example
+##### Preprod
 ```bash
 eigenlayer rewards claim \
   --network holesky \
@@ -41,7 +41,7 @@ eigenlayer rewards claim \
   --broadcast
 ```
 
-### Testnet
+##### Testnet
 ```bash
 eigenlayer rewards claim \
   --network holesky \
@@ -51,3 +51,5 @@ eigenlayer rewards claim \
   --path-to-key-store /path/to/key/store \
   --token-addresses 0xdeeeeE2b48C121e6728ed95c860e296177849932 --broadcast
 ```
+
+### Set Claimer Command

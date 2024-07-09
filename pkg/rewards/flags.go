@@ -46,4 +46,12 @@ var (
 		Usage:   "Environment to use. Currently supports 'preprod' ,`testnet' and 'prod'. If not provided, it will be inferred based on network",
 		EnvVars: []string{"ENVIRONMENT"},
 	}
+
+	ClaimerAddressFlag = cli.StringFlag{
+		Name:     "claimer-address",
+		Aliases:  []string{"a"},
+		Usage:    "Address of the claimer",
+		Required: true,
+		EnvVars:  []string{"NODE_OPERATOR_CLAIMER_ADDRESS"},
+	}
 )
