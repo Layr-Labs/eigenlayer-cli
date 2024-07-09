@@ -49,7 +49,7 @@ type ClaimConfig struct {
 	ChainID                   *big.Int
 	ProofStoreBaseURL         string
 	Environment               string
-	SignerConfig              types.SignerConfig
+	SignerConfig              *types.SignerConfig
 }
 
 func ClaimCmd(p utils.Prompter) *cli.Command {
@@ -94,6 +94,7 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 	if err != nil {
 		return eigenSdkUtils.WrapError("failed to read and validate claim config", err)
 	}
+	cCtx.App.Metadata["network"] = config.ChainID.String()
 
 	ethClient, err := eth.NewClient(config.RPCUrl)
 	if err != nil {
@@ -150,7 +151,7 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 	if config.Broadcast {
 		logger.Info("Broadcasting claim...")
 		keyWallet, sender, err := common.GetWallet(
-			config.SignerConfig,
+			*config.SignerConfig,
 			config.EarnerAddress.String(),
 			ethClient,
 			p,
@@ -193,8 +194,8 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 			return eigenSdkUtils.WrapError("failed to process claim", err)
 		}
 
-		txLink := common.GetTransactionLink(receipt.TxHash.String(), config.ChainID)
-		logger.Infof("Claim transaction submitted successfully: %s", txLink)
+		logger.Infof("Claim transaction submitted successfully")
+		common.PrintTransactionInfo(receipt.TxHash.String(), config.ChainID)
 	} else {
 		solidityClaim := claimgen.FormatProofForSolidity(accounts.Root(), claim)
 		fmt.Println("------- Claim generated -------")
@@ -275,7 +276,7 @@ func readAndValidateClaimConfig(cCtx *cli.Context, logger logging.Logger) (*Clai
 	logger.Debugf("Using network %s and environment: %s", network, environment)
 
 	// Get SignerConfig
-	signerConfig, err := common.GetSignerConfig(cCtx)
+	signerConfig, err := common.GetSignerConfig(cCtx, logger)
 	if err != nil {
 		return nil, err
 	}
@@ -292,7 +293,7 @@ func readAndValidateClaimConfig(cCtx *cli.Context, logger logging.Logger) (*Clai
 		ProofStoreBaseURL:         proofStoreBaseURL,
 		Environment:               environment,
 		RecipientAddress:          recipientAddress,
-		SignerConfig:              *signerConfig,
+		SignerConfig:              signerConfig,
 	}, nil
 }
 
