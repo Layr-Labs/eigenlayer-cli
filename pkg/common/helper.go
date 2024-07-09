@@ -326,10 +326,11 @@ func validateMetadata(operatorCfg *types.OperatorConfig) error {
 	return nil
 }
 
-func GetSignerConfig(cCtx *cli.Context) (*types.SignerConfig, error) {
+func GetSignerConfig(cCtx *cli.Context, logger eigensdkLogger.Logger) (*types.SignerConfig, error) {
 	ecdsaPrivateKeyString := cCtx.String(flags.EcdsaPrivateKeyFlag.Name)
 	pathToKeyStore := cCtx.String(flags.PathToKeyStoreFlag.Name)
 	if len(ecdsaPrivateKeyString) != 0 {
+		logger.Debug("Using private key signer")
 		pk, err := crypto.HexToECDSA(ecdsaPrivateKeyString)
 		if err != nil {
 			return nil, err
@@ -341,6 +342,7 @@ func GetSignerConfig(cCtx *cli.Context) (*types.SignerConfig, error) {
 	}
 
 	if len(pathToKeyStore) != 0 {
+		logger.Debug("Using local keystore signer")
 		return &types.SignerConfig{
 			SignerType:          types.LocalKeystoreSigner,
 			PrivateKeyStorePath: pathToKeyStore,

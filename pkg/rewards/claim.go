@@ -276,7 +276,7 @@ func readAndValidateClaimConfig(cCtx *cli.Context, logger logging.Logger) (*Clai
 	logger.Debugf("Using network %s and environment: %s", network, environment)
 
 	// Get SignerConfig
-	signerConfig, err := common.GetSignerConfig(cCtx)
+	signerConfig, err := common.GetSignerConfig(cCtx, logger)
 	if err != nil {
 		return nil, err
 	}

@@ -26,7 +26,7 @@ import (
 )
 
 type SetClaimerConfig struct {
-	ClaimerAddress            string
+	ClaimerAddress            gethcommon.Address
 	Network                   string
 	RPCUrl                    string
 	Broadcast                 bool
@@ -85,8 +85,8 @@ func SetClaimer(cCtx *cli.Context, p utils.Prompter) error {
 	if !config.Broadcast {
 		fmt.Printf(
 			"Claimer address %s will be set for earner %s\n",
-			config.ClaimerAddress,
-			config.EarnerAddress.Hex(),
+			config.ClaimerAddress.String(),
+			config.EarnerAddress.String(),
 		)
 		return nil
 	}
@@ -111,8 +111,8 @@ func SetClaimer(cCtx *cli.Context, p utils.Prompter) error {
 	if sender != config.EarnerAddress {
 		return fmt.Errorf(
 			"signer address(%s) and earner addresses(%s) do not match",
-			sender.Hex(),
-			config.EarnerAddress.Hex(),
+			sender.String(),
+			config.EarnerAddress.String(),
 		)
 	}
 
@@ -127,16 +127,16 @@ func SetClaimer(cCtx *cli.Context, p utils.Prompter) error {
 		return err
 	}
 
-	receipt, err := elWriter.SetClaimerFor(context.Background(), gethcommon.HexToAddress(config.ClaimerAddress))
+	receipt, err := elWriter.SetClaimerFor(context.Background(), config.ClaimerAddress)
 	if err != nil {
 		return err
 	}
 
-	fmt.Printf(
+	logger.Infof(
 		"%s Claimer address %s set successfully for operator %s\n",
 		utils.EmojiCheckMark,
 		config.ClaimerAddress,
-		config.EarnerAddress.Hex(),
+		config.EarnerAddress.String(),
 	)
 
 	common.PrintTransactionInfo(
@@ -173,13 +173,13 @@ func readAndValidateSetClaimerConfig(cCtx *cli.Context, logger logging.Logger) (
 	logger.Debugf("Using network %s and environment: %s", network, environment)
 
 	// Get SignerConfig
-	signerConfig, err := common.GetSignerConfig(cCtx)
+	signerConfig, err := common.GetSignerConfig(cCtx, logger)
 	if err != nil {
 		return nil, err
 	}
 
 	return &SetClaimerConfig{
-		ClaimerAddress:            claimerAddress,
+		ClaimerAddress:            gethcommon.HexToAddress(claimerAddress),
 		Network:                   network,
 		RPCUrl:                    rpcUrl,
 		Broadcast:                 broadcast,
