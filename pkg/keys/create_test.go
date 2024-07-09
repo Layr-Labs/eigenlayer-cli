@@ -16,7 +16,6 @@ import (
 )
 
 func TestCreateCmd(t *testing.T) {
-	t.Skip("Skip test")
 	homePath, err := os.UserHomeDir()
 	if err != nil {
 		t.Fatal(err)
