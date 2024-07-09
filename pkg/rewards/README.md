@@ -27,6 +27,17 @@ OPTIONS:
 ```
 
 #### Example
+##### Testnet
+```bash
+eigenlayer rewards claim \
+  --network holesky \
+  --eth-rpc-url https://rpc.ankr.com/eth_holesky/<> \
+  --earner-address 0x111116fe4f8c2f83e3eb2318f090557b7cd0bf76 \
+  --recipient-address 0x2222AAC0C980Cc029624b7ff55B88Bc6F63C538f \
+  --path-to-key-store /path/to/key/store \
+  --token-addresses 0xdeeeeE2b48C121e6728ed95c860e296177849932 --broadcast
+```
+
 ##### Preprod
 ```bash
 eigenlayer rewards claim \
@@ -41,15 +52,44 @@ eigenlayer rewards claim \
   --broadcast
 ```
 
-##### Testnet
+### Set Claimer Command
 ```bash
-eigenlayer rewards claim \
-  --network holesky \
-  --eth-rpc-url https://rpc.ankr.com/eth_holesky/<> \
-  --earner-address 0x111116fe4f8c2f83e3eb2318f090557b7cd0bf76 \
-  --recipient-address 0x2222AAC0C980Cc029624b7ff55B88Bc6F63C538f \
-  --path-to-key-store /path/to/key/store \
-  --token-addresses 0xdeeeeE2b48C121e6728ed95c860e296177849932 --broadcast
+eigenlayer rewards set-claimer --help
+NAME:
+   eigenlayer rewards set-claimer - Set the claimer address for the earner
+
+USAGE:
+   set-claimer
+
+DESCRIPTION:
+
+   Set the rewards claimer address for the earner.
+
+
+OPTIONS:
+   --verbose, -v                                    Enable verbose logging (default: false) [$VERBOSE]
+   --network value, -n value                        Network to use. Currently supports 'holesky' and 'mainnet' (default: "holesky") [$NETWORK]
+   --eth-rpc-url value, -r value                    URL of the Ethereum RPC [$ETH_RPC_URL]
+   --earner-address value, --ea value               Address of the earner (this is your staker/operator address) [$EARNER_ADDRESS]
+   --output-file value, -o value                    Output file to write the data [$OUTPUT_FILE]
+   --path-to-key-store value, -k value              Path to the key store [$PATH_TO_KEY_STORE]
+   --ecdsa-private-key value, -e value              ECDSA private key hex to send transaction [$ECDSA_PRIVATE_KEY]
+   --broadcast, -b                                  Use this flag to broadcast the transaction (default: false) [$BROADCAST]
+   --rewards-coordinator-address value, --rc value  Specify the address of the rewards coordinator. If not provided, the address will be used based on provided network [$REWARDS_COORDINATOR_ADDRESS]
+   --claimer-address value, -a value                Address of the claimer [$NODE_OPERATOR_CLAIMER_ADDRESS]
+   --help, -h
 ```
 
-### Set Claimer Command
+#### Example
+##### Preprod
+```bash
+eigenlayer rewards set-claimer \
+  --network holesky \
+  --eth-rpc-url https://rpc.ankr.com/eth_holesky/<> \
+  --earner-address 0x2222AAC0C980Cc029624b7ff55B88Bc6F63C538f \
+  --claimer-address 0x2222AAC0C980Cc029624b7ff55B88Bc6F63C538f \
+  --path-to-key-store /path/to/key/store \
+  --rewards-coordinator-address 0xb22Ef643e1E067c994019A4C19e403253C05c2B0
+  --broadcast
+```
+For testnet, remove the `--rewards-coordinator-address` flag and binary will automatically use the testnet rewards coordinator address.
