@@ -30,12 +30,13 @@ var ChainMetadataMap = map[int64]types.ChainMetadata{
 		WebAppUrl:                   "https://holesky.eigenlayer.xyz/operator",
 		ProofStoreBaseURL:           "https://eigenlabs-rewards-testnet-holesky.s3.amazonaws.com",
 	},
-	LocalChainId: {
+	AnvilChainId: {
 		BlockExplorerUrl:            "",
-		ELDelegationManagerAddress:  "",
-		ELAVSDirectoryAddress:       "",
-		ELRewardsCoordinatorAddress: "",
+		ELDelegationManagerAddress:  "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
+		ELAVSDirectoryAddress:       "0x0165878A594ca255338adfa4d48449f69242Eb8F",
+		ELRewardsCoordinatorAddress: "0x610178dA211FEF7D417bC0e6FeD39F05609AD788",
 		WebAppUrl:                   "",
+		ProofStoreBaseURL:           "",
 	},
 }
 
@@ -55,8 +56,8 @@ func ChainIdToNetworkName(chainId int64) string {
 		return MainnetNetworkName
 	case HoleskyChainId:
 		return HoleskyNetworkName
-	case LocalChainId:
-		return LocalNetworkName
+	case AnvilChainId:
+		return AnvilNetworkName
 	default:
 		return UnknownNetworkName
 	}
@@ -68,8 +69,8 @@ func NetworkNameToChainId(networkName string) *big.Int {
 		return big.NewInt(MainnetChainId)
 	case HoleskyNetworkName:
 		return big.NewInt(HoleskyChainId)
-	case LocalNetworkName:
-		return big.NewInt(LocalChainId)
+	case AnvilNetworkName:
+		return big.NewInt(AnvilChainId)
 	default:
 		return big.NewInt(-1)
 	}
