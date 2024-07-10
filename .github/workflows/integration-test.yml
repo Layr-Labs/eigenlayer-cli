@@ -76,7 +76,7 @@ jobs:
             --eth-rpc-url http://localhost:8545 \
             --earner-address 0xcaB1b44dd1f1C265405878Ac1179cd94D0dBA634 \
             --claimer-address 0x2222AAC0C980Cc029624b7ff55B88Bc6F63C538f \
-            --path-to-key-store /home/runner/.eigenlayer/operator_keys/opr0.ecdsa.key.json
+            --path-to-key-store /home/runner/.eigenlayer/operator_keys/opr0.ecdsa.key.json \
             --rewards-coordinator-address 0x3Aa5ebB10DC797CAC828524e59A333d0A371443c \
             --verbose \
             --broadcast
