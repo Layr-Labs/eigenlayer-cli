@@ -18,16 +18,16 @@ jobs:
         uses: foundry-rs/foundry-toolchain@v1
         with:
             version: nightly-c4a984fbf2c48b793c8cd53af84f56009dd1070c
-      - name: Checkout incredible squaring
+      - name: Checkout eigensdk-go
         uses: actions/checkout@v4
         with:
-            repository: layr-labs/incredible-squaring-avs
+            repository: layr-labs/eigensdk-go
             token: ${{ github.token }}
-            ref: master
+            ref: dev
 
       - name: Run anvil chain
         run: |
-          nohup make start-anvil-chain-with-el-and-avs-deployed > nohup.out 2>&1 &
+          nohup make start-anvil-with-contracts-deployed > nohup.out 2>&1 &
       - name: Install EigenLayer CLI
         uses: actions/checkout@v4
         with:
@@ -67,6 +67,19 @@ jobs:
         run: |
           cd eigenlayer-cli
           echo "" | ./bin/eigenlayer operator update-metadata-uri tests/keystore/operator-ci.yaml
+
+      - name: Set Claimer address
+        run: |
+          cd eigenlayer-cli
+          echo "" | ./bin/eigenlayer rewards set-claimer \
+            --network anvil \
+            --eth-rpc-url http://localhost:8545 \
+            --earner-address 0xcaB1b44dd1f1C265405878Ac1179cd94D0dBA634 \
+            --claimer-address 0x2222AAC0C980Cc029624b7ff55B88Bc6F63C538f \
+            --path-to-key-store /home/runner/.eigenlayer/operator_keys/opr0.ecdsa.key.json \
+            --verbose \
+            --broadcast
+
   Web3Signer:
     name: Integration Test - Web3 Signer
     runs-on: ubuntu-latest
@@ -78,15 +91,15 @@ jobs:
         uses: foundry-rs/foundry-toolchain@v1
         with:
           version: nightly-c4a984fbf2c48b793c8cd53af84f56009dd1070c
-      - name: Checkout incredible squaring
+      - name: Checkout eigensdk-go
         uses: actions/checkout@v4
         with:
-          repository: layr-labs/incredible-squaring-avs
+          repository: layr-labs/eigensdk-go
           token: ${{ github.token }}
-          ref: master
+          ref: dev
       - name: Run anvil chain
         run: |
-          nohup make start-anvil-chain-with-el-and-avs-deployed > nohup.out 2>&1 &
+          nohup make start-anvil-with-contracts-deployed > nohup.out 2>&1 &
       - name: Install EigenLayer CLI
         uses: actions/checkout@v4
         with:

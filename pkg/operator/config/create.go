@@ -177,15 +177,15 @@ func promptOperatorInfo(config *types.OperatorConfig, p utils.Prompter) (types.O
 	}
 
 	switch chainId {
-	case "mainnet":
+	case utils.MainnetNetworkName:
 		config.ChainId = *big.NewInt(utils.MainnetChainId)
 		config.ELDelegationManagerAddress = utils.ChainMetadataMap[utils.MainnetChainId].ELDelegationManagerAddress
-	case "holesky":
+	case utils.HoleskyNetworkName:
 		config.ChainId = *big.NewInt(utils.HoleskyChainId)
 		config.ELDelegationManagerAddress = utils.ChainMetadataMap[utils.HoleskyChainId].ELDelegationManagerAddress
-	case "local":
-		config.ChainId = *big.NewInt(utils.LocalChainId)
-		config.ELDelegationManagerAddress = utils.ChainMetadataMap[utils.LocalChainId].ELDelegationManagerAddress
+	case utils.AnvilNetworkName:
+		config.ChainId = *big.NewInt(utils.AnvilChainId)
+		config.ELDelegationManagerAddress = utils.ChainMetadataMap[utils.AnvilChainId].ELDelegationManagerAddress
 	}
 
 	// Prompt for signer type

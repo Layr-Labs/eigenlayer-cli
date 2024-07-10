@@ -13,11 +13,11 @@ const (
 
 	MainnetChainId = 1
 	HoleskyChainId = 17000
-	LocalChainId   = 31337
+	AnvilChainId   = 31337
 
 	MainnetNetworkName = "mainnet"
 	HoleskyNetworkName = "holesky"
-	LocalNetworkName   = "local"
+	AnvilNetworkName   = "anvil"
 	UnknownNetworkName = "unknown"
 )
 
