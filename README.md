@@ -4,10 +4,12 @@
 
 # EigenLayer CLI
 
-EigenLayer CLI is used to manage core operator functionalities like local key management, operator registration and updates.
+EigenLayer CLI is used to interact with EigenLayer core contracts.
 
 <!-- TOC -->
 * [EigenLayer CLI](#eigenlayer-cli)
+  * [Supported Features](#supported-features)
+  * [Supported Key Management Backends](#supported-key-management-backends)
   * [Supported Operating Systems](#supported-operating-systems)
   * [Install `eigenlayer` CLI using a binary](#install-eigenlayer-cli-using-a-binary)
     * [Installing in a custom location](#installing-in-a-custom-location)
@@ -16,6 +18,17 @@ EigenLayer CLI is used to manage core operator functionalities like local key ma
   * [Documentation](#documentation)
   * [Release Process](#release-process)
 <!-- TOC -->
+
+## Supported Features
+* Operator Keys Creation and Management via local keystore (ECDSA and BLS over bn254 curve) - `eigenlayer keys --help`
+* Operator Registration, Updates and Status check - `eigenlayer operator --help`
+* Reward Claiming and Setting Claimers - `eigenlayer rewards --help`
+
+## Supported Key Management Backends
+* Private Key Hex (not recommended for production use)
+* [Local Keystore](https://ethereum.org/en/developers/docs/data-structures-and-encoding/web3-secret-storage/)
+* [Fireblocks](https://www.fireblocks.com/) backed by AWS KMS for secret management
+* [Web3Signer](https://docs.web3signer.consensys.io/)
 
 ## Supported Operating Systems
 | Operating System | Architecture |
