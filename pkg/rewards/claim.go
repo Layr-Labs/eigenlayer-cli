@@ -3,6 +3,7 @@ package rewards
 import (
 	"errors"
 	"fmt"
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
 	"log/slog"
 	"math/big"
 	"net/http"
@@ -59,12 +60,13 @@ func ClaimCmd(p utils.Prompter) *cli.Command {
 		Action: func(cCtx *cli.Context) error {
 			return Claim(cCtx, p)
 		},
+		After: telemetry.AfterRunAction(),
 		Flags: []cli.Flag{
 			&flags.NetworkFlag,
 			&flags.ETHRpcUrlFlag,
-			&flags.EarnerAddressFlag,
 			&flags.OutputFileFlag,
 			&flags.BroadcastFlag,
+			&EarnerAddressFlag,
 			&EnvironmentFlag,
 			&RecipientAddressFlag,
 			&TokenAddressesFlag,
@@ -235,7 +237,7 @@ func readAndValidateClaimConfig(cCtx *cli.Context, logger logging.Logger) (*Clai
 	network := cCtx.String(flags.NetworkFlag.Name)
 	environment := cCtx.String(EnvironmentFlag.Name)
 	rpcUrl := cCtx.String(flags.ETHRpcUrlFlag.Name)
-	earnerAddress := gethcommon.HexToAddress(cCtx.String(flags.EarnerAddressFlag.Name))
+	earnerAddress := gethcommon.HexToAddress(cCtx.String(EarnerAddressFlag.Name))
 	output := cCtx.String(flags.OutputFileFlag.Name)
 	broadcast := cCtx.Bool(flags.BroadcastFlag.Name)
 	tokenAddresses := cCtx.String(TokenAddressesFlag.Name)

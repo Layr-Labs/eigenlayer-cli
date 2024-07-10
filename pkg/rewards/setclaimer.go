@@ -48,9 +48,9 @@ Set the rewards claimer address for the earner.
 		Flags: []cli.Flag{
 			&flags.NetworkFlag,
 			&flags.ETHRpcUrlFlag,
-			&flags.EarnerAddressFlag,
 			&flags.OutputFileFlag,
 			&flags.BroadcastFlag,
+			&EarnerAddressFlag,
 			&RewardsCoordinatorAddressFlag,
 			&ClaimerAddressFlag,
 			&flags.PathToKeyStoreFlag,
@@ -159,7 +159,7 @@ func readAndValidateSetClaimerConfig(cCtx *cli.Context, logger logging.Logger) (
 	network := cCtx.String(flags.NetworkFlag.Name)
 	environment := cCtx.String(EnvironmentFlag.Name)
 	rpcUrl := cCtx.String(flags.ETHRpcUrlFlag.Name)
-	earnerAddress := gethcommon.HexToAddress(cCtx.String(flags.EarnerAddressFlag.Name))
+	earnerAddress := gethcommon.HexToAddress(cCtx.String(EarnerAddressFlag.Name))
 	broadcast := cCtx.Bool(flags.BroadcastFlag.Name)
 	claimerAddress := cCtx.String(ClaimerAddressFlag.Name)
 	rewardsCoordinatorAddress := cCtx.String(RewardsCoordinatorAddressFlag.Name)

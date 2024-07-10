@@ -30,19 +30,19 @@ var (
 
 func AfterRunAction() cli.AfterFunc {
 	return func(c *cli.Context) error {
-		if IsTelemetryEnabled() {
-			HandleTacking(c)
+		if isEnabled() {
+			handleTacking(c)
 		}
 		return nil
 	}
 }
 
-func IsTelemetryEnabled() bool {
+func isEnabled() bool {
 	telemetryEnabled := os.Getenv(cliTelemetryEnabledKey)
 	return len(telemetryEnabled) == 0 || telemetryEnabled == "true"
 }
 
-func HandleTacking(cCtx *cli.Context) {
+func handleTacking(cCtx *cli.Context) {
 	if telemetryToken == "" {
 		return
 	}

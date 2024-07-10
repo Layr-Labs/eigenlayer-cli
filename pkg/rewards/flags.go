@@ -57,7 +57,7 @@ var (
 
 	EarnerAddressFlag = cli.StringFlag{
 		Name:     "earner-address",
-		Aliases:  []string{"a"},
+		Aliases:  []string{"ea"},
 		Usage:    "Address of the earner",
 		Required: true,
 		EnvVars:  []string{"REWARDS_EARNER_ADDRESS"},
@@ -66,8 +66,8 @@ var (
 	NumberOfDaysFlag = cli.IntFlag{
 		Name:        "number-of-days",
 		Aliases:     []string{"nd"},
-		Usage:       "Number of days to show rewards for",
-		DefaultText: "21",
+		Usage:       "Number of days to show rewards for. Negative means past days, positive means future days (future days is not supported yet)",
+		DefaultText: "-21",
 		EnvVars:     []string{"REWARDS_NUMBER_OF_DAYS"},
 	}
 
