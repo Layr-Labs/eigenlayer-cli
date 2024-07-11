@@ -155,6 +155,6 @@ jobs:
             --eth-rpc-url http://localhost:8545 \
             --earner-address 0x7dbc809c1ec153d45ffb0c75fb4fded68e34699e \
             --claimer-address 0x2222AAC0C980Cc029624b7ff55B88Bc6F63C538f \
-            --web3-signer-url http://127.0.0.1:9001 \
+            --web3signer-url http://127.0.0.1:9001 \
             --verbose \
             --broadcast
