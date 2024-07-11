@@ -3,6 +3,7 @@ package common
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math/big"
 	"os/user"
@@ -328,8 +329,7 @@ func validateMetadata(operatorCfg *types.OperatorConfig) error {
 
 func GetSignerConfig(cCtx *cli.Context, logger eigensdkLogger.Logger) (*types.SignerConfig, error) {
 	ecdsaPrivateKeyString := cCtx.String(flags.EcdsaPrivateKeyFlag.Name)
-	pathToKeyStore := cCtx.String(flags.PathToKeyStoreFlag.Name)
-	if len(ecdsaPrivateKeyString) != 0 {
+	if !IsEmptyString(ecdsaPrivateKeyString) {
 		logger.Debug("Using private key signer")
 		pk, err := crypto.HexToECDSA(ecdsaPrivateKeyString)
 		if err != nil {
@@ -341,7 +341,8 @@ func GetSignerConfig(cCtx *cli.Context, logger eigensdkLogger.Logger) (*types.Si
 		}, nil
 	}
 
-	if len(pathToKeyStore) != 0 {
+	pathToKeyStore := cCtx.String(flags.PathToKeyStoreFlag.Name)
+	if !IsEmptyString(pathToKeyStore) {
 		logger.Debug("Using local keystore signer")
 		return &types.SignerConfig{
 			SignerType:          types.LocalKeystoreSigner,
@@ -349,5 +350,58 @@ func GetSignerConfig(cCtx *cli.Context, logger eigensdkLogger.Logger) (*types.Si
 		}, nil
 	}
 
-	return nil, fmt.Errorf("either ecdsa private key hex or path to keystore is required")
+	fireblocksAPIKey := cCtx.String(flags.FireblocksAPIKeyFlag.Name)
+	if !IsEmptyString(fireblocksAPIKey) {
+		logger.Debug("Using fireblocks signer")
+		fireblocksSecretKey := cCtx.String(flags.FireblocksSecretKeyFlag.Name)
+		if IsEmptyString(fireblocksSecretKey) {
+			return nil, errors.New("fireblocks secret key is required")
+		}
+		fireblocksVaultAccountName := cCtx.String(flags.FireblocksVaultAccountNameFlag.Name)
+		if IsEmptyString(fireblocksVaultAccountName) {
+			return nil, errors.New("fireblocks vault account name is required")
+		}
+		fireblocksBaseUrl := cCtx.String(flags.FireblocksBaseUrlFlag.Name)
+		if IsEmptyString(fireblocksBaseUrl) {
+			return nil, errors.New("fireblocks base url is required")
+		}
+		fireblocksTimeout := int64(cCtx.Int(flags.FireblocksTimeoutFlag.Name))
+		if fireblocksTimeout <= 0 {
+			return nil, errors.New("fireblocks timeout should be greater than 0")
+		}
+		fireblocksSecretAWSRegion := cCtx.String(flags.FireblocksAWSRegionFlag.Name)
+		secretStorageType := cCtx.String(flags.FireblocksSecretStorageTypeFlag.Name)
+		if IsEmptyString(secretStorageType) {
+			return nil, errors.New("fireblocks secret storage type is required")
+		}
+		return &types.SignerConfig{
+			SignerType: types.FireBlocksSigner,
+			FireblocksConfig: types.FireblocksConfig{
+				APIKey:            fireblocksAPIKey,
+				SecretKey:         fireblocksSecretKey,
+				VaultAccountName:  fireblocksVaultAccountName,
+				BaseUrl:           fireblocksBaseUrl,
+				Timeout:           fireblocksTimeout,
+				AWSRegion:         fireblocksSecretAWSRegion,
+				SecretStorageType: types.SecretStorageType(secretStorageType),
+			},
+		}, nil
+	}
+
+	we3SignerUrl := cCtx.String(flags.Web3SignerUrlFlag.Name)
+	if !IsEmptyString(we3SignerUrl) {
+		logger.Debug("Using web3 signer")
+		return &types.SignerConfig{
+			SignerType: types.Web3Signer,
+			Web3SignerConfig: types.Web3SignerConfig{
+				Url: we3SignerUrl,
+			},
+		}, nil
+	}
+
+	return nil, fmt.Errorf("supported signer not found, please provide details for signers to use")
+}
+
+func IsEmptyString(s string) bool {
+	return len(strings.TrimSpace(s)) == 0
 }
