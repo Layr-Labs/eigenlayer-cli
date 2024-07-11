@@ -130,7 +130,7 @@ jobs:
         run: |
           cd eigenlayer-cli
           sleep 5
-          echo "HhzcmbpkHCQpvBlXrvLB" | ./bin/eigenlayer operator register tests/web3signer/operator-ci.yaml
+          ./bin/eigenlayer operator register tests/web3signer/operator-ci.yaml
 
       - name: Check operator status
         run: |
@@ -140,12 +140,12 @@ jobs:
       - name: Update operator details
         run: |
           cd eigenlayer-cli
-          echo "HhzcmbpkHCQpvBlXrvLB" | ./bin/eigenlayer operator update tests/web3signer/operator-ci.yaml
+          ./bin/eigenlayer operator update tests/web3signer/operator-ci.yaml
 
       - name: Update operator metadata uri
         run: |
           cd eigenlayer-cli
-          echo "HhzcmbpkHCQpvBlXrvLB" | ./bin/eigenlayer operator update-metadata-uri tests/web3signer/operator-ci.yaml
+          ./bin/eigenlayer operator update-metadata-uri tests/web3signer/operator-ci.yaml
 
       - name: Set Claimer address
         run: |
