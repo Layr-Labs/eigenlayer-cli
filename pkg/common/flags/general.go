@@ -37,7 +37,7 @@ var (
 	PathToKeyStoreFlag = cli.StringFlag{
 		Name:    "path-to-key-store",
 		Aliases: []string{"k"},
-		Usage:   "Path to the key store",
+		Usage:   "Path to the key store used to send transactions",
 		EnvVars: []string{"PATH_TO_KEY_STORE"},
 	}
 

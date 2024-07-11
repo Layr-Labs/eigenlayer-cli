@@ -60,13 +60,10 @@ func ClaimCmd(p utils.Prompter) *cli.Command {
 			return Claim(cCtx, p)
 		},
 		Flags: []cli.Flag{
-			&flags.VerboseFlag,
 			&flags.NetworkFlag,
 			&flags.ETHRpcUrlFlag,
 			&flags.EarnerAddressFlag,
 			&flags.OutputFileFlag,
-			&flags.PathToKeyStoreFlag,
-			&flags.EcdsaPrivateKeyFlag,
 			&flags.BroadcastFlag,
 			&EnvironmentFlag,
 			&RecipientAddressFlag,
@@ -74,6 +71,17 @@ func ClaimCmd(p utils.Prompter) *cli.Command {
 			&RewardsCoordinatorAddressFlag,
 			&ClaimTimestampFlag,
 			&ProofStoreBaseURLFlag,
+			&flags.PathToKeyStoreFlag,
+			&flags.EcdsaPrivateKeyFlag,
+			&flags.FireblocksAPIKeyFlag,
+			&flags.FireblocksSecretKeyFlag,
+			&flags.FireblocksBaseUrlFlag,
+			&flags.FireblocksVaultAccountNameFlag,
+			&flags.FireblocksTimeoutFlag,
+			&flags.FireblocksSecretStorageTypeFlag,
+			&flags.FireblocksAWSRegionFlag,
+			&flags.Web3SignerUrlFlag,
+			&flags.VerboseFlag,
 		},
 	}
 
