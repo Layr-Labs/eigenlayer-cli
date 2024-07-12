@@ -11,14 +11,6 @@ var (
 		EnvVars: []string{"NETWORK"},
 	}
 
-	EarnerAddressFlag = cli.StringFlag{
-		Name:     "earner-address",
-		Aliases:  []string{"ea"},
-		Required: true,
-		Usage:    "Address of the earner (this is your staker/operator address)",
-		EnvVars:  []string{"EARNER_ADDRESS"},
-	}
-
 	ETHRpcUrlFlag = cli.StringFlag{
 		Name:     "eth-rpc-url",
 		Aliases:  []string{"r"},

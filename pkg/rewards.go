@@ -13,6 +13,7 @@ func RewardsCmd(p utils.Prompter) *cli.Command {
 		Subcommands: []*cli.Command{
 			rewards.ClaimCmd(p),
 			rewards.SetClaimerCmd(p),
+			rewards.ShowCmd(p),
 		},
 	}
 

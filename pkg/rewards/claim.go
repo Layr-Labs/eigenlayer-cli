@@ -12,6 +12,7 @@ import (
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/common"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/common/flags"
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/types"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 
@@ -59,12 +60,13 @@ func ClaimCmd(p utils.Prompter) *cli.Command {
 		Action: func(cCtx *cli.Context) error {
 			return Claim(cCtx, p)
 		},
+		After: telemetry.AfterRunAction(),
 		Flags: []cli.Flag{
 			&flags.NetworkFlag,
 			&flags.ETHRpcUrlFlag,
-			&flags.EarnerAddressFlag,
 			&flags.OutputFileFlag,
 			&flags.BroadcastFlag,
+			&EarnerAddressFlag,
 			&EnvironmentFlag,
 			&RecipientAddressFlag,
 			&TokenAddressesFlag,
@@ -104,7 +106,7 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 	}
 	cCtx.App.Metadata["network"] = config.ChainID.String()
 	if config.ChainID.Int64() == utils.MainnetChainId {
-		return fmt.Errorf("claim currently unsupported on mainnet")
+		return fmt.Errorf("rewards currently unsupported on mainnet")
 	}
 
 	ethClient, err := eth.NewClient(config.RPCUrl)
@@ -160,6 +162,9 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 	}
 
 	if config.Broadcast {
+		if config.SignerConfig == nil {
+			return errors.New("signer is required for broadcasting")
+		}
 		logger.Info("Broadcasting claim...")
 		keyWallet, sender, err := common.GetWallet(
 			*config.SignerConfig,
@@ -235,7 +240,7 @@ func readAndValidateClaimConfig(cCtx *cli.Context, logger logging.Logger) (*Clai
 	network := cCtx.String(flags.NetworkFlag.Name)
 	environment := cCtx.String(EnvironmentFlag.Name)
 	rpcUrl := cCtx.String(flags.ETHRpcUrlFlag.Name)
-	earnerAddress := gethcommon.HexToAddress(cCtx.String(flags.EarnerAddressFlag.Name))
+	earnerAddress := gethcommon.HexToAddress(cCtx.String(EarnerAddressFlag.Name))
 	output := cCtx.String(flags.OutputFileFlag.Name)
 	broadcast := cCtx.Bool(flags.BroadcastFlag.Name)
 	tokenAddresses := cCtx.String(TokenAddressesFlag.Name)
@@ -312,9 +317,9 @@ func readAndValidateClaimConfig(cCtx *cli.Context, logger logging.Logger) (*Clai
 
 func getEnvFromNetwork(network string) string {
 	switch network {
-	case "holesky":
+	case utils.HoleskyNetworkName:
 		return "testnet"
-	case "mainnet":
+	case utils.MainnetNetworkName:
 		return "prod"
 	default:
 		return "local"
