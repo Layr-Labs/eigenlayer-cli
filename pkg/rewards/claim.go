@@ -289,7 +289,8 @@ func readAndValidateClaimConfig(cCtx *cli.Context, logger logging.Logger) (*Clai
 	// Get SignerConfig
 	signerConfig, err := common.GetSignerConfig(cCtx, logger)
 	if err != nil {
-		return nil, err
+		// We don't want to throw error since people can still use it to generate the claim
+		logger.Debugf("Failed to get signer config: %s", err)
 	}
 
 	return &ClaimConfig{
