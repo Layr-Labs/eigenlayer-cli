@@ -162,6 +162,9 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 	}
 
 	if config.Broadcast {
+		if config.SignerConfig == nil {
+			return errors.New("signer is required for broadcasting")
+		}
 		logger.Info("Broadcasting claim...")
 		keyWallet, sender, err := common.GetWallet(
 			*config.SignerConfig,
