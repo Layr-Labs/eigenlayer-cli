@@ -43,7 +43,7 @@ var (
 	EnvironmentFlag = cli.StringFlag{
 		Name:    "environment",
 		Aliases: []string{"env"},
-		Usage:   "Environment to use. Currently supports 'preprod' ,`testnet' and 'prod'. If not provided, it will be inferred based on network",
+		Usage:   "Environment to use. Currently supports 'preprod' ,'testnet' and 'prod'. If not provided, it will be inferred based on network",
 		EnvVars: []string{"ENVIRONMENT"},
 	}
 
@@ -64,11 +64,11 @@ var (
 	}
 
 	NumberOfDaysFlag = cli.IntFlag{
-		Name:        "number-of-days",
-		Aliases:     []string{"nd"},
-		Usage:       "Number of days to show rewards for. Negative means past days, positive means future days (future days is not supported yet)",
-		DefaultText: "-21",
-		EnvVars:     []string{"REWARDS_NUMBER_OF_DAYS"},
+		Name:    "number-of-days",
+		Aliases: []string{"nd"},
+		Usage:   "Number of days to show rewards for. Negative means past days, positive means future days (future days is not supported yet). Only used for 'all' claim type",
+		Value:   -21,
+		EnvVars: []string{"REWARDS_NUMBER_OF_DAYS"},
 	}
 
 	AVSAddressesFlag = cli.StringFlag{
@@ -76,5 +76,13 @@ var (
 		Aliases: []string{"a"},
 		Usage:   "Comma seperated addresses of the AVS",
 		EnvVars: []string{"AVS_ADDRESSES"},
+	}
+
+	ClaimTypeFlag = cli.StringFlag{
+		Name:    "claim-type",
+		Aliases: []string{"ct"},
+		Usage:   "Type of claim you want to see. Can be 'all', 'unclaimed', or 'claimed'",
+		Value:   "all",
+		EnvVars: []string{"REWARDS_CLAIM_TYPE"},
 	}
 )

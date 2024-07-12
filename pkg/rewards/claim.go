@@ -3,7 +3,6 @@ package rewards
 import (
 	"errors"
 	"fmt"
-	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
 	"log/slog"
 	"math/big"
 	"net/http"
@@ -13,6 +12,7 @@ import (
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/common"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/common/flags"
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/types"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 
@@ -106,7 +106,7 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 	}
 	cCtx.App.Metadata["network"] = config.ChainID.String()
 	if config.ChainID.Int64() == utils.MainnetChainId {
-		return fmt.Errorf("claim currently unsupported on mainnet")
+		return fmt.Errorf("rewards currently unsupported on mainnet")
 	}
 
 	ethClient, err := eth.NewClient(config.RPCUrl)
@@ -314,9 +314,9 @@ func readAndValidateClaimConfig(cCtx *cli.Context, logger logging.Logger) (*Clai
 
 func getEnvFromNetwork(network string) string {
 	switch network {
-	case "holesky":
+	case utils.HoleskyNetworkName:
 		return "testnet"
-	case "mainnet":
+	case utils.MainnetNetworkName:
 		return "prod"
 	default:
 		return "local"

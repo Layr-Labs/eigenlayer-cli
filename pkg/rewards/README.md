@@ -12,10 +12,10 @@ USAGE:
 OPTIONS:
    --network value, -n value                            Network to use. Currently supports 'holesky' and 'mainnet' (default: "holesky") [$NETWORK]
    --eth-rpc-url value, -r value                        URL of the Ethereum RPC [$ETH_RPC_URL]
-   --earner-address value, --ea value                   Address of the earner (this is your staker/operator address) [$EARNER_ADDRESS]
    --output-file value, -o value                        Output file to write the data [$OUTPUT_FILE]
    --broadcast, -b                                      Use this flag to broadcast the transaction (default: false) [$BROADCAST]
-   --environment value, --env value                     Environment to use. Currently supports 'preprod' ,`testnet' and 'prod'. If not provided, it will be inferred based on network [$ENVIRONMENT]
+   --earner-address value, --ea value                   Address of the earner [$REWARDS_EARNER_ADDRESS]
+   --environment value, --env value                     Environment to use. Currently supports 'preprod' ,'testnet' and 'prod'. If not provided, it will be inferred based on network [$ENVIRONMENT]
    --recipient-address value, --ra value                Specify the address of the recipient. If this is not provided, the earner address will be used [$RECIPIENT_ADDRESS]
    --token-addresses value, -t value                    Specify the addresses of the tokens to claim. Comma separated list of addresses [$TOKEN_ADDRESSES]
    --rewards-coordinator-address value, --rc value      Specify the address of the rewards coordinator. If not provided, the address will be used based on provided network [$REWARDS_COORDINATOR_ADDRESS]
@@ -78,9 +78,9 @@ DESCRIPTION:
 OPTIONS:
    --network value, -n value                            Network to use. Currently supports 'holesky' and 'mainnet' (default: "holesky") [$NETWORK]
    --eth-rpc-url value, -r value                        URL of the Ethereum RPC [$ETH_RPC_URL]
-   --earner-address value, --ea value                   Address of the earner (this is your staker/operator address) [$EARNER_ADDRESS]
    --output-file value, -o value                        Output file to write the data [$OUTPUT_FILE]
    --broadcast, -b                                      Use this flag to broadcast the transaction (default: false) [$BROADCAST]
+   --earner-address value, --ea value                   Address of the earner [$REWARDS_EARNER_ADDRESS]
    --rewards-coordinator-address value, --rc value      Specify the address of the rewards coordinator. If not provided, the address will be used based on provided network [$REWARDS_COORDINATOR_ADDRESS]
    --claimer-address value, -a value                    Address of the claimer [$NODE_OPERATOR_CLAIMER_ADDRESS]
    --path-to-key-store value, -k value                  Path to the key store used to send transactions [$PATH_TO_KEY_STORE]
@@ -110,3 +110,20 @@ eigenlayer rewards set-claimer \
   --broadcast
 ```
 For testnet, remove the `--rewards-coordinator-address` flag and binary will automatically use the testnet rewards coordinator address.
+
+### Show Rewards
+### Testnet
+Show all Rewards
+```bash
+./bin/eigenlayer rewards show \
+  --network holesky \
+  --earner-address 0x2222AAC0C980Cc029624b7ff55B88Bc6F63C538f \
+  --claim-type all --verbose
+```
+Show unclaimed Rewards
+```bash
+./bin/eigenlayer rewards show \
+  --network holesky \
+  --earner-address 0x2222AAC0C980Cc029624b7ff55B88Bc6F63C538f \
+  --claim-type unclaimed --verbose
+```
