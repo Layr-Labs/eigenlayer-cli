@@ -1,6 +1,7 @@
 package rewards
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -214,9 +215,24 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 		common.PrintTransactionInfo(receipt.TxHash.String(), config.ChainID)
 	} else {
 		solidityClaim := claimgen.FormatProofForSolidity(accounts.Root(), claim)
-		fmt.Println("------- Claim generated -------")
-		common.PrettyPrintStruct(*solidityClaim)
-		fmt.Println("-------------------------------")
+		if !common.IsEmptyString(config.Output) {
+			jsonData, err := json.MarshalIndent(solidityClaim, "", "  ")
+			if err != nil {
+				fmt.Println("Error marshaling JSON:", err)
+				return err
+			}
+
+			err = common.WriteToJSON(jsonData, config.Output)
+			if err != nil {
+				return err
+			}
+			logger.Infof("Claim written to file: %s", config.Output)
+		} else {
+			fmt.Println("------- Claim generated -------")
+			common.PrettyPrintStruct(*solidityClaim)
+			fmt.Println("-------------------------------")
+			fmt.Println("To write to a file, use the --output flag")
+		}
 		fmt.Println("To broadcast the claim, use the --broadcast flag")
 	}
 
