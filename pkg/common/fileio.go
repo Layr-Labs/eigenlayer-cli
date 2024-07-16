@@ -9,6 +9,13 @@ import (
 )
 
 func WriteToJSON(data []byte, filePath string) error {
+	dir := path.Dir(filePath)
+	// Ensure the directory exists
+	err := ensureDir(dir)
+	if err != nil {
+		return fmt.Errorf("error creating directory: %v", err)
+	}
+
 	file, err := os.Create(path.Clean(filePath))
 	if err != nil {
 		fmt.Println("Error creating file:", err)
@@ -26,6 +33,13 @@ func WriteToJSON(data []byte, filePath string) error {
 }
 
 func WriteToCSV(data interface{}, filePath string) error {
+	dir := path.Dir(filePath)
+	// Ensure the directory exists
+	err := ensureDir(dir)
+	if err != nil {
+		return fmt.Errorf("error creating directory: %v", err)
+	}
+
 	file, err := os.Create(path.Clean(filePath))
 	if err != nil {
 		fmt.Println("Error creating file:", err)
@@ -38,5 +52,14 @@ func WriteToCSV(data interface{}, filePath string) error {
 		return err
 	}
 
+	return nil
+}
+
+// Ensure that the directory exists, creating it if necessary
+func ensureDir(dirName string) error {
+	err := os.MkdirAll(dirName, os.ModePerm)
+	if err != nil {
+		return err
+	}
 	return nil
 }
