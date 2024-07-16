@@ -44,6 +44,7 @@ type ShowConfig struct {
 	Environment   string
 	ClaimType     ClaimType
 	ChainID       *big.Int
+	Output        string
 }
 
 func ShowCmd(p utils.Prompter) *cli.Command {
@@ -119,7 +120,16 @@ func ShowRewards(cCtx *cli.Context) error {
 			return err
 		}
 		normalizedRewards := normalizeRewardResponse(responseBody)
-		printNormalizedRewardsAsTable(normalizedRewards)
+		if common.IsEmptyString(config.Output) {
+			printNormalizedRewardsAsTable(normalizedRewards)
+		} else {
+			logger.Debugf("Writing total rewards to %s", config.Output)
+			err = common.WriteToCSV(normalizedRewards, config.Output)
+			if err != nil {
+				return err
+			}
+			logger.Infof("Total rewards written to %s", config.Output)
+		}
 	} else if config.ClaimType == Unclaimed {
 		requestBody := map[string]string{
 			"earnerAddress": config.EarnerAddress.String(),
@@ -136,7 +146,16 @@ func ShowRewards(cCtx *cli.Context) error {
 			return err
 		}
 		unclaimedNormalizedRewards := normalizeUnclaimedRewardResponse(response)
-		printUnclaimedNormalizedRewardsAsTable(unclaimedNormalizedRewards)
+		if common.IsEmptyString(config.Output) {
+			printUnclaimedNormalizedRewardsAsTable(unclaimedNormalizedRewards)
+		} else {
+			logger.Debugf("Writing unclaimed rewards to %s", config.Output)
+			err = common.WriteToCSV(unclaimedNormalizedRewards, config.Output)
+			if err != nil {
+				return err
+			}
+			logger.Infof("Unclaimed rewards written to %s", config.Output)
+		}
 	} else {
 		return fmt.Errorf("claim type %s not supported", config.ClaimType)
 	}
@@ -159,7 +178,6 @@ func normalizeUnclaimedRewardResponse(unclaimedRewardResponse UnclaimedRewardRes
 			amount := new(big.Int)
 			amount.SetString(token.WeiAmount, 10)
 			normalizedUnclaimedRewards = append(normalizedUnclaimedRewards, NormalizedUnclaimedReward{
-				AVSAddress:   rewardsPerAVS.AVSAddress,
 				TokenAddress: token.TokenAddress,
 				WeiAmount:    amount,
 			})
@@ -246,6 +264,7 @@ func formatColumns(columnName string, size int32) string {
 
 func readAndValidateConfig(cCtx *cli.Context, logger logging.Logger) (*ShowConfig, error) {
 	earnerAddress := gethcommon.HexToAddress(cCtx.String(EarnerAddressFlag.Name))
+	output := cCtx.String(flags.OutputFileFlag.Name)
 	numberOfDays := cCtx.Int64(NumberOfDaysFlag.Name)
 	if numberOfDays >= 0 {
 		return nil, errors.New(
@@ -274,6 +293,7 @@ func readAndValidateConfig(cCtx *cli.Context, logger logging.Logger) (*ShowConfi
 		Environment:   env,
 		ClaimType:     claimType,
 		ChainID:       chainID,
+		Output:        output,
 	}, nil
 }
 
