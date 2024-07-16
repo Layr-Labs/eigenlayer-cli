@@ -128,7 +128,7 @@ func ShowRewards(cCtx *cli.Context) error {
 			if err != nil {
 				return err
 			}
-			logger.Infof("Totla rewards written to %s", config.Output)
+			logger.Infof("Total rewards written to %s", config.Output)
 		}
 	} else if config.ClaimType == Unclaimed {
 		requestBody := map[string]string{
