@@ -22,10 +22,10 @@ type Token struct {
 }
 
 type NormalizedReward struct {
-	StrategyAddress string
-	AVSAddress      string
-	TokenAddress    string
-	WeiAmount       *big.Int
+	StrategyAddress string   `csv:"strategyAddress"`
+	AVSAddress      string   `csv:"avsAddress"`
+	TokenAddress    string   `csv:"tokenAddress"`
+	WeiAmount       *big.Int `csv:"weiAmount"`
 }
 
 type UnclaimedRewardResponse struct {
@@ -34,7 +34,6 @@ type UnclaimedRewardResponse struct {
 }
 
 type NormalizedUnclaimedReward struct {
-	AVSAddress   string
-	TokenAddress string
-	WeiAmount    *big.Int
+	TokenAddress string   `csv:"tokenAddress"`
+	WeiAmount    *big.Int `csv:"weiAmount"`
 }

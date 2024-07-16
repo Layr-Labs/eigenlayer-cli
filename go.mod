@@ -10,6 +10,7 @@ require (
 	github.com/consensys/gnark-crypto v0.12.1
 	github.com/ethereum/go-ethereum v1.14.5
 	github.com/fatih/color v1.17.0
+	github.com/gocarina/gocsv v0.0.0-20240520201108-78e41c74b4b1
 	github.com/posthog/posthog-go v0.0.0-20240327112532-87b23fe11103
 	github.com/stretchr/testify v1.9.0
 	github.com/urfave/cli/v2 v2.27.2
