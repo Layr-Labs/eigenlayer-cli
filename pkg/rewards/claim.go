@@ -4,10 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log/slog"
 	"math/big"
 	"net/http"
-	"os"
 	"strings"
 	"time"
 
@@ -93,13 +91,7 @@ func ClaimCmd(p utils.Prompter) *cli.Command {
 
 func Claim(cCtx *cli.Context, p utils.Prompter) error {
 	ctx := cCtx.Context
-
-	verbose := cCtx.Bool(flags.VerboseFlag.Name)
-	logLevel := slog.LevelInfo
-	if verbose {
-		logLevel = slog.LevelDebug
-	}
-	logger := logging.NewTextSLogger(os.Stdout, &logging.SLoggerOptions{Level: logLevel})
+	logger := common.GetLogger(cCtx)
 
 	config, err := readAndValidateClaimConfig(cCtx, logger)
 	if err != nil {

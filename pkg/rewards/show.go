@@ -5,10 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log/slog"
 	"math/big"
 	"net/http"
-	"os"
 	"strings"
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/common"
@@ -77,12 +75,7 @@ Currently supports past total rewards (claimed and unclaimed) and past unclaimed
 }
 
 func ShowRewards(cCtx *cli.Context) error {
-	verbose := cCtx.Bool(flags.VerboseFlag.Name)
-	logLevel := slog.LevelInfo
-	if verbose {
-		logLevel = slog.LevelDebug
-	}
-	logger := logging.NewTextSLogger(os.Stdout, &logging.SLoggerOptions{Level: logLevel})
+	logger := common.GetLogger(cCtx)
 
 	config, err := readAndValidateConfig(cCtx, logger)
 	if err != nil {

@@ -3,15 +3,14 @@ package operator
 import (
 	"context"
 	"fmt"
-	"os"
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/common"
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/common/flags"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 
 	elContracts "github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/eth"
-	eigensdkLogger "github.com/Layr-Labs/eigensdk-go/logging"
 	eigensdkTypes "github.com/Layr-Labs/eigensdk-go/types"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -31,7 +30,11 @@ func StatusCmd(p utils.Prompter) *cli.Command {
 		It expects the same configuration yaml file as argument to register command	
 		`,
 		After: telemetry.AfterRunAction(),
+		Flags: []cli.Flag{
+			&flags.VerboseFlag,
+		},
 		Action: func(cCtx *cli.Context) error {
+			logger := common.GetLogger(cCtx)
 			args := cCtx.Args()
 			if args.Len() != 1 {
 				return fmt.Errorf("%w: accepts 1 arg, received %d", ErrInvalidNumberOfArgs, args.Len())
@@ -44,12 +47,12 @@ func StatusCmd(p utils.Prompter) *cli.Command {
 			}
 			cCtx.App.Metadata["network"] = operatorCfg.ChainId.String()
 
-			fmt.Printf(
-				"%s Operator configuration file read successfully %s\n",
+			logger.Infof(
+				"%s Operator configuration file read successfully %s",
 				utils.EmojiCheckMark,
 				operatorCfg.Operator.Address,
 			)
-			fmt.Printf("%s validating operator config:  %s", utils.EmojiWait, operatorCfg.Operator.Address)
+			logger.Info("%s validating operator config:  %s", utils.EmojiWait, operatorCfg.Operator.Address)
 
 			err = operatorCfg.Operator.Validate()
 			if err != nil {
@@ -74,13 +77,11 @@ func StatusCmd(p utils.Prompter) *cli.Command {
 				)
 			}
 
-			fmt.Printf(
-				"\r%s Operator configuration file validated successfully %s\n",
+			logger.Infof(
+				"%s Operator configuration file validated successfully %s",
 				utils.EmojiCheckMark,
 				operatorCfg.Operator.Address,
 			)
-
-			logger := eigensdkLogger.NewTextSLogger(os.Stdout, &eigensdkLogger.SLoggerOptions{})
 
 			reader, err := elContracts.BuildELChainReader(
 				gethcommon.HexToAddress(operatorCfg.ELDelegationManagerAddress),
@@ -100,6 +101,7 @@ func StatusCmd(p utils.Prompter) *cli.Command {
 			}
 
 			if status {
+				fmt.Println()
 				fmt.Printf("%s Operator is registered on EigenLayer\n", utils.EmojiCheckMark)
 				operatorDetails, err := reader.GetOperatorDetails(callOpts, operatorCfg.Operator)
 				if err != nil {
@@ -112,6 +114,7 @@ func StatusCmd(p utils.Prompter) *cli.Command {
 					&operatorCfg.ChainId,
 				)
 			} else {
+				fmt.Println()
 				fmt.Printf("%s Operator is not registered to EigenLayer\n", utils.EmojiCrossMark)
 			}
 			return nil
