@@ -5,7 +5,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log/slog"
 	"math/big"
+	"os"
 	"os/user"
 	"strings"
 	"time"
@@ -32,6 +34,7 @@ import (
 )
 
 func PrintRegistrationInfo(txHash string, operatorAddress common.Address, chainId *big.Int) {
+	fmt.Println()
 	fmt.Println(strings.Repeat("-", 100))
 	PrintTransactionInfo(txHash, chainId)
 
@@ -188,17 +191,20 @@ func expandTilde(path string) (string, error) {
 	return path, nil
 }
 
-func ValidateAndReturnConfig(configurationFilePath string) (*types.OperatorConfig, error) {
+func ValidateAndReturnConfig(
+	configurationFilePath string,
+	logger eigensdkLogger.Logger,
+) (*types.OperatorConfig, error) {
 	operatorCfg, err := ReadConfigFile(configurationFilePath)
 	if err != nil {
 		return nil, err
 	}
-	fmt.Printf(
-		"%s Operator configuration file read successfully %s\n",
+	logger.Infof(
+		"%s Operator configuration file read successfully %s",
 		utils.EmojiCheckMark,
 		operatorCfg.Operator.Address,
 	)
-	fmt.Printf("%s validating operator config: %s", utils.EmojiWait, operatorCfg.Operator.Address)
+	logger.Infof("%s Validating operator config: %s", utils.EmojiWait, operatorCfg.Operator.Address)
 
 	err = operatorCfg.Operator.Validate()
 	if err != nil {
@@ -213,6 +219,9 @@ func ValidateAndReturnConfig(configurationFilePath string) (*types.OperatorConfi
 	if operatorCfg.ELDelegationManagerAddress == "" {
 		return nil, fmt.Errorf("\n%w: ELDelegationManagerAddress is not set", ErrInvalidYamlFile)
 	}
+	logger.Debugf("ELDelegationManagerAddress: %s", operatorCfg.ELDelegationManagerAddress)
+	logger.Debugf("ELAVSDirectoryAddress: %s", operatorCfg.ELAVSDirectoryAddress)
+	logger.Debugf("ELRewardsCoordinatorAddress: %s", operatorCfg.ELRewardsCoordinatorAddress)
 
 	ethClient, err := eth.NewClient(operatorCfg.EthRPCUrl)
 	if err != nil {
@@ -404,4 +413,14 @@ func GetSignerConfig(cCtx *cli.Context, logger eigensdkLogger.Logger) (*types.Si
 
 func IsEmptyString(s string) bool {
 	return len(strings.TrimSpace(s)) == 0
+}
+
+func GetLogger(cCtx *cli.Context) eigensdkLogger.Logger {
+	verbose := cCtx.Bool(flags.VerboseFlag.Name)
+	logLevel := slog.LevelInfo
+	if verbose {
+		logLevel = slog.LevelDebug
+	}
+	logger := eigensdkLogger.NewTextSLogger(os.Stdout, &eigensdkLogger.SLoggerOptions{Level: logLevel})
+	return logger
 }

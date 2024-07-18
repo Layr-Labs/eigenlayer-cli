@@ -3,9 +3,7 @@ package rewards
 import (
 	"context"
 	"fmt"
-	"log/slog"
 	"math/big"
-	"os"
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/common"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/common/flags"
@@ -17,7 +15,6 @@ import (
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/eth"
 	"github.com/Layr-Labs/eigensdk-go/chainio/txmgr"
-	eigensdkLogger "github.com/Layr-Labs/eigensdk-go/logging"
 	eigenMetrics "github.com/Layr-Labs/eigensdk-go/metrics"
 
 	gethcommon "github.com/ethereum/go-ethereum/common"
@@ -74,12 +71,7 @@ Set the rewards claimer address for the earner.
 }
 
 func SetClaimer(cCtx *cli.Context, p utils.Prompter) error {
-	verbose := cCtx.Bool(flags.VerboseFlag.Name)
-	logLevel := slog.LevelInfo
-	if verbose {
-		logLevel = slog.LevelDebug
-	}
-	logger := logging.NewTextSLogger(os.Stdout, &eigensdkLogger.SLoggerOptions{Level: logLevel})
+	logger := common.GetLogger(cCtx)
 	config, err := readAndValidateSetClaimerConfig(cCtx, logger)
 	if err != nil {
 		return err
