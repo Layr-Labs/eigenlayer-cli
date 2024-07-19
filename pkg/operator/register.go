@@ -9,10 +9,12 @@ import (
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 
+	"github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
 	elContracts "github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/eth"
 	"github.com/Layr-Labs/eigensdk-go/chainio/txmgr"
 	eigenMetrics "github.com/Layr-Labs/eigensdk-go/metrics"
+
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	gethcommon "github.com/ethereum/go-ethereum/common"
 
@@ -75,24 +77,18 @@ func RegisterCmd(p utils.Prompter) *cli.Command {
 			}
 
 			txMgr := txmgr.NewSimpleTxManager(keyWallet, ethClient, logger, sender)
-
 			noopMetrics := eigenMetrics.NewNoopMetrics()
-
-			elWriter, err := elContracts.BuildELChainWriter(
-				gethcommon.HexToAddress(operatorCfg.ELDelegationManagerAddress),
-				gethcommon.HexToAddress(operatorCfg.ELAVSDirectoryAddress),
-				ethClient,
-				logger,
-				noopMetrics,
-				txMgr)
-
+			contractCfg := elcontracts.Config{
+				DelegationManagerAddress: gethcommon.HexToAddress(operatorCfg.ELDelegationManagerAddress),
+				AvsDirectoryAddress:      gethcommon.HexToAddress(operatorCfg.ELAVSDirectoryAddress),
+			}
+			elWriter, err := elcontracts.NewWriterFromConfig(contractCfg, ethClient, logger, noopMetrics, txMgr)
 			if err != nil {
 				return err
 			}
 
-			reader, err := elContracts.BuildELChainReader(
-				gethcommon.HexToAddress(operatorCfg.ELDelegationManagerAddress),
-				gethcommon.HexToAddress(operatorCfg.ELAVSDirectoryAddress),
+			elReader, err := elContracts.NewReaderFromConfig(
+				contractCfg,
 				ethClient,
 				logger,
 			)
@@ -100,7 +96,7 @@ func RegisterCmd(p utils.Prompter) *cli.Command {
 				return err
 			}
 
-			status, err := reader.IsOperatorRegistered(&bind.CallOpts{Context: ctx}, operatorCfg.Operator)
+			status, err := elReader.IsOperatorRegistered(&bind.CallOpts{Context: ctx}, operatorCfg.Operator)
 			if err != nil {
 				return err
 			}
