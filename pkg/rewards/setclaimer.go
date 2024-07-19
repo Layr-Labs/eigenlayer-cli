@@ -3,18 +3,19 @@ package rewards
 import (
 	"context"
 	"fmt"
+
 	"math/big"
 
-	"github.com/Layr-Labs/eigenlayer-cli/pkg/common"
-	"github.com/Layr-Labs/eigenlayer-cli/pkg/common/flags"
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/types"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
-	"github.com/Layr-Labs/eigensdk-go/logging"
 
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/eth"
 	"github.com/Layr-Labs/eigensdk-go/chainio/txmgr"
+	"github.com/Layr-Labs/eigensdk-go/logging"
 	eigenMetrics "github.com/Layr-Labs/eigensdk-go/metrics"
 
 	gethcommon "github.com/ethereum/go-ethereum/common"

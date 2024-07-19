@@ -8,11 +8,12 @@ import (
 	"os"
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
-
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/types"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
+
 	eigensdkTypes "github.com/Layr-Labs/eigensdk-go/types"
 	eigenSdkUtils "github.com/Layr-Labs/eigensdk-go/utils"
+
 	"github.com/urfave/cli/v2"
 	"gopkg.in/yaml.v3"
 )
