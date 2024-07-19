@@ -83,9 +83,6 @@ func ShowRewards(cCtx *cli.Context) error {
 		return fmt.Errorf("error reading and validating config: %s", err)
 	}
 	cCtx.App.Metadata["network"] = config.ChainID.String()
-	if config.ChainID.Int64() == utils.MainnetChainId {
-		return fmt.Errorf("rewards currently unsupported on mainnet")
-	}
 
 	url := testnetUrl
 	if config.Environment == "prod" {

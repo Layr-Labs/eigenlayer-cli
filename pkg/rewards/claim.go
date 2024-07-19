@@ -99,9 +99,6 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 		return eigenSdkUtils.WrapError("failed to read and validate claim config", err)
 	}
 	cCtx.App.Metadata["network"] = config.ChainID.String()
-	if config.ChainID.Int64() == utils.MainnetChainId {
-		return fmt.Errorf("rewards currently unsupported on mainnet")
-	}
 
 	ethClient, err := eth.NewClient(config.RPCUrl)
 	if err != nil {
