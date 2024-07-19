@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+
 	"log/slog"
 	"math/big"
 	"os"
@@ -14,7 +15,7 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"github.com/Layr-Labs/eigenlayer-cli/pkg/common/flags"
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/types"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 
