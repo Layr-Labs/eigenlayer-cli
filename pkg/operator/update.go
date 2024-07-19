@@ -9,7 +9,7 @@ import (
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 
-	elContracts "github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
+	"github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/eth"
 	"github.com/Layr-Labs/eigensdk-go/chainio/txmgr"
 	eigenMetrics "github.com/Layr-Labs/eigensdk-go/metrics"
@@ -76,17 +76,12 @@ This command only updates above details. To update metadata URI, use eigenlayer 
 			}
 
 			txMgr := txmgr.NewSimpleTxManager(keyWallet, ethClient, logger, sender)
-
 			noopMetrics := eigenMetrics.NewNoopMetrics()
-
-			elWriter, err := elContracts.BuildELChainWriter(
-				gethcommon.HexToAddress(operatorCfg.ELDelegationManagerAddress),
-				gethcommon.HexToAddress(operatorCfg.ELAVSDirectoryAddress),
-				ethClient,
-				logger,
-				noopMetrics,
-				txMgr)
-
+			contractCfg := elcontracts.Config{
+				DelegationManagerAddress: gethcommon.HexToAddress(operatorCfg.ELDelegationManagerAddress),
+				AvsDirectoryAddress:      gethcommon.HexToAddress(operatorCfg.ELAVSDirectoryAddress),
+			}
+			elWriter, err := elcontracts.NewWriterFromConfig(contractCfg, ethClient, logger, noopMetrics, txMgr)
 			if err != nil {
 				return err
 			}

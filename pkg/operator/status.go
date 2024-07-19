@@ -9,6 +9,7 @@ import (
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 
+	"github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
 	elContracts "github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/eth"
 	eigensdkTypes "github.com/Layr-Labs/eigensdk-go/types"
@@ -83,9 +84,12 @@ func StatusCmd(p utils.Prompter) *cli.Command {
 				operatorCfg.Operator.Address,
 			)
 
-			reader, err := elContracts.BuildELChainReader(
-				gethcommon.HexToAddress(operatorCfg.ELDelegationManagerAddress),
-				gethcommon.HexToAddress(operatorCfg.ELAVSDirectoryAddress),
+			contractCfg := elcontracts.Config{
+				DelegationManagerAddress: gethcommon.HexToAddress(operatorCfg.ELDelegationManagerAddress),
+				AvsDirectoryAddress:      gethcommon.HexToAddress(operatorCfg.ELAVSDirectoryAddress),
+			}
+			reader, err := elContracts.NewReaderFromConfig(
+				contractCfg,
 				ethClient,
 				logger,
 			)
