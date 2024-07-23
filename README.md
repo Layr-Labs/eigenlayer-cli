@@ -59,14 +59,11 @@ curl -sSfL https://raw.githubusercontent.com/layr-labs/eigenlayer-cli/master/scr
 We collect anonymous usage data to improve the CLI. To disable telemetry, set the environment variable `EIGENLAYER_CLI_TELEMETRY_ENABLED` to `false`.
 
 ## Install `eigenlayer` CLI using Go
+>Note: Some commands might not work as expected as we use some build time variables. We recommend using [binary installation](#install-eigenlayer-cli-using-a-binary) for best experience.
 
 First, install the Go programming language following the [official instructions](https://go.dev/doc/install). You need at least the `1.21` version.
 
-> Eigenlayer is only supported on **Linux**. Make sure you install Go for Linux in a Linux environment (e.g. WSL2, Docker, etc.)
-
 This command will install the `eigenlayer` executable along with the library and its dependencies in your system:
-
-> As the repository is private, you need to set the `GOPRIVATE` variable properly by running the following command: `export GOPRIVATE=github.com/Layr-Labs/eigenlayer-cli,$GOPRIVATE`. Git will automatically resolve the private access if your Git user has all the required permissions over the repository.
 
 ```bash
 go install github.com/Layr-Labs/eigenlayer-cli/cmd/eigenlayer@latest
@@ -84,6 +81,7 @@ export PATH=$GOBIN:$PATH
 > Changes made to a profile file may not apply until the next time you log into your computer. To apply the changes immediately, run the shell commands directly or execute them from the profile using a command such as `source $HOME/.profile`.
 
 ## Install `eigenlayer` CLI from source
+>Note: Some commands might not work as expected as we use some build time variables. We recommend using [binary installation](#install-eigenlayer-cli-using-a-binary) for best experience.
 
 With this method, you generate the binary manually (need Go installed), downloading and compiling the source code:
 
