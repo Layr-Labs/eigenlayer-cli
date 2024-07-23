@@ -50,6 +50,7 @@ func Check(currentVersion string) {
 		return
 	}
 
+	// GitHub API returns in vX.X.X format so remove v
 	latestVersion := data.TagName[1:]
 	latestSemVer, err := semver.Make(latestVersion)
 	if err != nil {
