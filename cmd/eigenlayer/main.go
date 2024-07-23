@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/Layr-Labs/eigenlayer-cli/internal/versionupdate"
+
 	"github.com/Layr-Labs/eigenlayer-cli/pkg"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 	"github.com/urfave/cli/v2"
@@ -32,6 +34,10 @@ func main() {
 
 	// Initialize the dependencies
 	prompter := utils.NewPrompter()
+	app.After = func(c *cli.Context) error {
+		versionupdate.Check(app.Version)
+		return nil
+	}
 
 	app.Commands = append(app.Commands, pkg.OperatorCmd(prompter))
 	app.Commands = append(app.Commands, pkg.RewardsCmd(prompter))
