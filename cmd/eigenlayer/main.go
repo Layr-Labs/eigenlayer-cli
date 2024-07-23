@@ -7,7 +7,7 @@ import (
 	"github.com/Layr-Labs/eigenlayer-cli/internal/versionupdate"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
-	
+
 	"github.com/urfave/cli/v2"
 )
 
