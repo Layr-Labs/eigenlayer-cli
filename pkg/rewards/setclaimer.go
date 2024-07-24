@@ -3,6 +3,7 @@ package rewards
 import (
 	"context"
 	"fmt"
+	"sort"
 
 	"math/big"
 
@@ -43,32 +44,30 @@ func SetClaimerCmd(p utils.Prompter) *cli.Command {
 Set the rewards claimer address for the earner.
 		`,
 		After: telemetry.AfterRunAction(),
-		Flags: []cli.Flag{
-			&flags.NetworkFlag,
-			&flags.ETHRpcUrlFlag,
-			&flags.OutputFileFlag,
-			&flags.BroadcastFlag,
-			&EarnerAddressFlag,
-			&RewardsCoordinatorAddressFlag,
-			&ClaimerAddressFlag,
-			&flags.PathToKeyStoreFlag,
-			&flags.EcdsaPrivateKeyFlag,
-			&flags.FireblocksAPIKeyFlag,
-			&flags.FireblocksSecretKeyFlag,
-			&flags.FireblocksBaseUrlFlag,
-			&flags.FireblocksVaultAccountNameFlag,
-			&flags.FireblocksTimeoutFlag,
-			&flags.FireblocksSecretStorageTypeFlag,
-			&flags.FireblocksAWSRegionFlag,
-			&flags.Web3SignerUrlFlag,
-			&flags.VerboseFlag,
-		},
+		Flags: getSetClaimerFlags(),
 		Action: func(cCtx *cli.Context) error {
 			return SetClaimer(cCtx, p)
 		},
 	}
 
 	return setClaimerCmd
+}
+
+func getSetClaimerFlags() []cli.Flag {
+	baseFlags := []cli.Flag{
+		&flags.NetworkFlag,
+		&flags.ETHRpcUrlFlag,
+		&flags.OutputFileFlag,
+		&flags.BroadcastFlag,
+		&EarnerAddressFlag,
+		&RewardsCoordinatorAddressFlag,
+		&ClaimerAddressFlag,
+		&flags.VerboseFlag,
+	}
+
+	allFlags := append(baseFlags, flags.GetSignerFlags()...)
+	sort.Sort(cli.FlagsByName(allFlags))
+	return allFlags
 }
 
 func SetClaimer(cCtx *cli.Context, p utils.Prompter) error {

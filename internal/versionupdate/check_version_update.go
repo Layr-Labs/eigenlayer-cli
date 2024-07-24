@@ -28,7 +28,6 @@ type release struct {
 // If anything fails in this, it will silently pass since this doesn't affect operations
 func Check(currentVersion string) {
 	if currentVersion == "development" {
-		fmt.Println("Running development version")
 		return
 	}
 

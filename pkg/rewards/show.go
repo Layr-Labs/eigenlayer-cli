@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"sort"
 
 	"math/big"
 	"net/http"
@@ -57,22 +58,29 @@ Command to show rewards for earners
 Currently supports past total rewards (claimed and unclaimed) and past unclaimed rewards
 		`,
 		After: telemetry.AfterRunAction(),
-		Flags: []cli.Flag{
-			&flags.NetworkFlag,
-			&flags.OutputFileFlag,
-			&flags.VerboseFlag,
-			&EarnerAddressFlag,
-			&NumberOfDaysFlag,
-			&AVSAddressesFlag,
-			&EnvironmentFlag,
-			&ClaimTypeFlag,
-		},
+		Flags: getShowFlags(),
 		Action: func(cCtx *cli.Context) error {
 			return ShowRewards(cCtx)
 		},
 	}
 
 	return showCmd
+}
+
+func getShowFlags() []cli.Flag {
+	baseFlags := []cli.Flag{
+		&flags.NetworkFlag,
+		&flags.OutputFileFlag,
+		&flags.VerboseFlag,
+		&EarnerAddressFlag,
+		&NumberOfDaysFlag,
+		&AVSAddressesFlag,
+		&EnvironmentFlag,
+		&ClaimTypeFlag,
+	}
+
+	sort.Sort(cli.FlagsByName(baseFlags))
+	return baseFlags
 }
 
 func ShowRewards(cCtx *cli.Context) error {
