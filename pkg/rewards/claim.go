@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"sort"
 
 	"math/big"
 	"net/http"
@@ -61,33 +62,31 @@ func ClaimCmd(p utils.Prompter) *cli.Command {
 			return Claim(cCtx, p)
 		},
 		After: telemetry.AfterRunAction(),
-		Flags: []cli.Flag{
-			&flags.NetworkFlag,
-			&flags.ETHRpcUrlFlag,
-			&flags.OutputFileFlag,
-			&flags.BroadcastFlag,
-			&EarnerAddressFlag,
-			&EnvironmentFlag,
-			&RecipientAddressFlag,
-			&TokenAddressesFlag,
-			&RewardsCoordinatorAddressFlag,
-			&ClaimTimestampFlag,
-			&ProofStoreBaseURLFlag,
-			&flags.PathToKeyStoreFlag,
-			&flags.EcdsaPrivateKeyFlag,
-			&flags.FireblocksAPIKeyFlag,
-			&flags.FireblocksSecretKeyFlag,
-			&flags.FireblocksBaseUrlFlag,
-			&flags.FireblocksVaultAccountNameFlag,
-			&flags.FireblocksTimeoutFlag,
-			&flags.FireblocksSecretStorageTypeFlag,
-			&flags.FireblocksAWSRegionFlag,
-			&flags.Web3SignerUrlFlag,
-			&flags.VerboseFlag,
-		},
+		Flags: getClaimFlags(),
 	}
 
 	return claimCmd
+}
+
+func getClaimFlags() []cli.Flag {
+	baseFlags := []cli.Flag{
+		&flags.NetworkFlag,
+		&flags.ETHRpcUrlFlag,
+		&flags.OutputFileFlag,
+		&flags.BroadcastFlag,
+		&EarnerAddressFlag,
+		&EnvironmentFlag,
+		&RecipientAddressFlag,
+		&TokenAddressesFlag,
+		&RewardsCoordinatorAddressFlag,
+		&ClaimTimestampFlag,
+		&ProofStoreBaseURLFlag,
+		&flags.VerboseFlag,
+	}
+
+	allFlags := append(baseFlags, flags.GetSignerFlags()...)
+	sort.Sort(cli.FlagsByName(allFlags))
+	return allFlags
 }
 
 func Claim(cCtx *cli.Context, p utils.Prompter) error {
