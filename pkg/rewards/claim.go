@@ -148,9 +148,21 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 		config.TokenAddresses,
 		rootIndex,
 	)
-
 	if err != nil {
 		return eigenSdkUtils.WrapError("failed to generate claim proof for earner", err)
+	}
+
+	elClaim := rewardscoordinator.IRewardsCoordinatorRewardsMerkleClaim{
+		RootIndex:       claim.RootIndex,
+		EarnerIndex:     claim.EarnerIndex,
+		EarnerTreeProof: claim.EarnerTreeProof,
+		EarnerLeaf: rewardscoordinator.IRewardsCoordinatorEarnerTreeMerkleLeaf{
+			Earner:          claim.EarnerLeaf.Earner,
+			EarnerTokenRoot: claim.EarnerLeaf.EarnerTokenRoot,
+		},
+		TokenIndices:    claim.TokenIndices,
+		TokenTreeProofs: claim.TokenTreeProofs,
+		TokenLeaves:     convertClaimTokenLeaves(claim.TokenLeaves),
 	}
 
 	if config.Broadcast {
@@ -185,18 +197,6 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 			return eigenSdkUtils.WrapError("failed to create new writer from config", err)
 		}
 
-		elClaim := rewardscoordinator.IRewardsCoordinatorRewardsMerkleClaim{
-			RootIndex:       claim.RootIndex,
-			EarnerIndex:     claim.EarnerIndex,
-			EarnerTreeProof: claim.EarnerTreeProof,
-			EarnerLeaf: rewardscoordinator.IRewardsCoordinatorEarnerTreeMerkleLeaf{
-				Earner:          claim.EarnerLeaf.Earner,
-				EarnerTokenRoot: claim.EarnerLeaf.EarnerTokenRoot,
-			},
-			TokenIndices:    claim.TokenIndices,
-			TokenTreeProofs: claim.TokenTreeProofs,
-			TokenLeaves:     convertClaimTokenLeaves(claim.TokenLeaves),
-		}
 		receipt, err := eLWriter.ProcessClaim(ctx, elClaim, config.RecipientAddress)
 		if err != nil {
 			return eigenSdkUtils.WrapError("failed to process claim", err)
@@ -205,6 +205,14 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 		logger.Infof("Claim transaction submitted successfully")
 		common.PrintTransactionInfo(receipt.TxHash.String(), config.ChainID)
 	} else {
+		_, _, contractBindings, err := elcontracts.BuildClients(elcontracts.Config{
+			RewardsCoordinatorAddress: config.RewardsCoordinatorAddress,
+		}, ethClient, nil, logger, nil)
+		if err != nil {
+			return err
+		}
+
+		contractBindings.RewardsCoordinator.ProcessClaim(&bind.TransactOpts{}, elClaim, config.RecipientAddress)
 		solidityClaim := claimgen.FormatProofForSolidity(accounts.Root(), claim)
 		if !common.IsEmptyString(config.Output) {
 			jsonData, err := json.MarshalIndent(solidityClaim, "", "  ")
