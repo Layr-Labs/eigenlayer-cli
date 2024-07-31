@@ -3,19 +3,23 @@ package eigenpod
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
-	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
-	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
-	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
-	"github.com/Layr-Labs/eigenpod-proofs-generation/cli/core"
-	"github.com/Layr-Labs/eigensdk-go/logging"
-	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/fatih/color"
-	"github.com/urfave/cli/v2"
 	"math"
 	"math/big"
 	"strings"
 	"time"
+
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
+
+	"github.com/Layr-Labs/eigenpod-proofs-generation/cli/core"
+
+	"github.com/Layr-Labs/eigensdk-go/logging"
+
+	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/fatih/color"
+	"github.com/urfave/cli/v2"
 )
 
 type statusConfig struct {

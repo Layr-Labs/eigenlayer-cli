@@ -4,11 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/ethereum/go-ethereum/ethclient"
-	"sort"
-
 	"math/big"
 	"net/http"
+	"sort"
 	"strings"
 	"time"
 
@@ -32,6 +30,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	gethcommon "github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/ethclient"
 
 	"github.com/urfave/cli/v2"
 )

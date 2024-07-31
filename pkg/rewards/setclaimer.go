@@ -3,10 +3,8 @@ package rewards
 import (
 	"context"
 	"fmt"
-	"github.com/ethereum/go-ethereum/ethclient"
-	"sort"
-
 	"math/big"
+	"sort"
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
@@ -20,6 +18,7 @@ import (
 	eigenMetrics "github.com/Layr-Labs/eigensdk-go/metrics"
 
 	gethcommon "github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/ethclient"
 
 	"github.com/urfave/cli/v2"
 )
