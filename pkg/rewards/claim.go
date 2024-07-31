@@ -4,10 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"sort"
-
 	"math/big"
 	"net/http"
+	"sort"
 	"strings"
 	"time"
 
@@ -23,7 +22,6 @@ import (
 	"github.com/Layr-Labs/eigenlayer-rewards-proofs/pkg/proofDataFetcher/httpProofDataFetcher"
 
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
-	"github.com/Layr-Labs/eigensdk-go/chainio/clients/eth"
 	"github.com/Layr-Labs/eigensdk-go/chainio/txmgr"
 	rewardscoordinator "github.com/Layr-Labs/eigensdk-go/contracts/bindings/IRewardsCoordinator"
 	"github.com/Layr-Labs/eigensdk-go/logging"
@@ -32,6 +30,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	gethcommon "github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/ethclient"
 
 	"github.com/urfave/cli/v2"
 )
@@ -102,7 +101,7 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 		return fmt.Errorf("rewards currently unsupported on mainnet")
 	}
 
-	ethClient, err := eth.NewClient(config.RPCUrl)
+	ethClient, err := ethclient.Dial(config.RPCUrl)
 	if err != nil {
 		return eigenSdkUtils.WrapError("failed to create new eth client", err)
 	}

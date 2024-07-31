@@ -19,11 +19,26 @@ var (
 		EnvVars:  []string{"ETH_RPC_URL"},
 	}
 
+	BeaconRpcUrlFlag = cli.StringFlag{
+		Name:    "beacon-rpc-url",
+		Aliases: []string{"b"},
+		Usage:   "URL of the ETH Beacon RPC",
+		EnvVars: []string{"BEACON_RPC_URL"},
+	}
+
 	OutputFileFlag = cli.StringFlag{
 		Name:    "output-file",
 		Aliases: []string{"o"},
 		Usage:   "Output file to write the data",
 		EnvVars: []string{"OUTPUT_FILE"},
+	}
+
+	OutputTypeFlag = cli.StringFlag{
+		Name:    "output-type",
+		Aliases: []string{"ot"},
+		Value:   "pretty",
+		Usage:   "Output type to for that respective command. One of 'pretty' or 'json'",
+		EnvVars: []string{"OUTPUT_TYPE"},
 	}
 
 	PathToKeyStoreFlag = cli.StringFlag{

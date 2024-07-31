@@ -3,9 +3,8 @@ package rewards
 import (
 	"context"
 	"fmt"
-	"sort"
-
 	"math/big"
+	"sort"
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
@@ -14,12 +13,12 @@ import (
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
-	"github.com/Layr-Labs/eigensdk-go/chainio/clients/eth"
 	"github.com/Layr-Labs/eigensdk-go/chainio/txmgr"
 	"github.com/Layr-Labs/eigensdk-go/logging"
 	eigenMetrics "github.com/Layr-Labs/eigensdk-go/metrics"
 
 	gethcommon "github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/ethclient"
 
 	"github.com/urfave/cli/v2"
 )
@@ -91,7 +90,7 @@ func SetClaimer(cCtx *cli.Context, p utils.Prompter) error {
 		return nil
 	}
 
-	ethClient, err := eth.NewClient(config.RPCUrl)
+	ethClient, err := ethclient.Dial(config.RPCUrl)
 	if err != nil {
 		return err
 	}
