@@ -3,6 +3,7 @@ package rewards
 import (
 	"context"
 	"fmt"
+	"github.com/ethereum/go-ethereum/ethclient"
 	"sort"
 
 	"math/big"
@@ -14,7 +15,6 @@ import (
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
-	"github.com/Layr-Labs/eigensdk-go/chainio/clients/eth"
 	"github.com/Layr-Labs/eigensdk-go/chainio/txmgr"
 	"github.com/Layr-Labs/eigensdk-go/logging"
 	eigenMetrics "github.com/Layr-Labs/eigensdk-go/metrics"
@@ -91,7 +91,7 @@ func SetClaimer(cCtx *cli.Context, p utils.Prompter) error {
 		return nil
 	}
 
-	ethClient, err := eth.NewClient(config.RPCUrl)
+	ethClient, err := ethclient.Dial(config.RPCUrl)
 	if err != nil {
 		return err
 	}

@@ -10,11 +10,11 @@ import (
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
-	"github.com/Layr-Labs/eigensdk-go/chainio/clients/eth"
 	"github.com/Layr-Labs/eigensdk-go/chainio/txmgr"
 	eigenMetrics "github.com/Layr-Labs/eigensdk-go/metrics"
 
 	gethcommon "github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/ethclient"
 
 	"github.com/urfave/cli/v2"
 )
@@ -58,7 +58,7 @@ This command only updates above details. To update metadata URI, use eigenlayer 
 				operatorCfg.Operator.Address,
 			)
 
-			ethClient, err := eth.NewClient(operatorCfg.EthRPCUrl)
+			ethClient, err := ethclient.Dial(operatorCfg.EthRPCUrl)
 			if err != nil {
 				return err
 			}

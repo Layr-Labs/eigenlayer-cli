@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+
 	"log/slog"
 	"math/big"
 	"os"
@@ -19,7 +20,6 @@ import (
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 
 	"github.com/Layr-Labs/eigensdk-go/aws/secretmanager"
-	"github.com/Layr-Labs/eigensdk-go/chainio/clients/eth"
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/fireblocks"
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/wallet"
 	eigensdkLogger "github.com/Layr-Labs/eigensdk-go/logging"
@@ -29,6 +29,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/ethclient"
 
 	"github.com/fatih/color"
 )
@@ -52,7 +53,7 @@ func PrintTransactionInfo(txHash string, chainId *big.Int) {
 func GetWallet(
 	cfg types.SignerConfig,
 	signerAddress string,
-	ethClient eth.Client,
+	ethClient *ethclient.Client,
 	p utils.Prompter,
 	chainID big.Int,
 	logger eigensdkLogger.Logger,
@@ -223,7 +224,7 @@ func ValidateAndReturnConfig(
 	logger.Debugf("ELAVSDirectoryAddress: %s", operatorCfg.ELAVSDirectoryAddress)
 	logger.Debugf("ELRewardsCoordinatorAddress: %s", operatorCfg.ELRewardsCoordinatorAddress)
 
-	ethClient, err := eth.NewClient(operatorCfg.EthRPCUrl)
+	ethClient, err := ethclient.Dial(operatorCfg.EthRPCUrl)
 	if err != nil {
 		return nil, err
 	}

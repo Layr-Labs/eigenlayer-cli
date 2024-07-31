@@ -11,11 +11,11 @@ import (
 
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
 	elContracts "github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
-	"github.com/Layr-Labs/eigensdk-go/chainio/clients/eth"
 	eigensdkTypes "github.com/Layr-Labs/eigensdk-go/types"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	gethcommon "github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/ethclient"
 
 	"github.com/urfave/cli/v2"
 )
@@ -60,7 +60,7 @@ func StatusCmd(p utils.Prompter) *cli.Command {
 				return fmt.Errorf("%w: with error %s", ErrInvalidYamlFile, err)
 			}
 
-			ethClient, err := eth.NewClient(operatorCfg.EthRPCUrl)
+			ethClient, err := ethclient.Dial(operatorCfg.EthRPCUrl)
 			if err != nil {
 				return err
 			}
