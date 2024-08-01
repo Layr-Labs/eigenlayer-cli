@@ -20,5 +20,4 @@ func KeysCmd(p utils.Prompter) *cli.Command {
 	}
 
 	return keysCmd
-
 }

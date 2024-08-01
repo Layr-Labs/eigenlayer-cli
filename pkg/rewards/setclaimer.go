@@ -113,6 +113,10 @@ func SetClaimer(cCtx *cli.Context, p utils.Prompter) error {
 				fmt.Println(calldataHex)
 			}
 		} else if config.OutputType == string(common.OutputType_Pretty) {
+			if !common.IsEmptyString(config.Output) {
+				fmt.Println("output file not supported for pretty output type")
+				fmt.Println()
+			}
 			fmt.Printf(
 				"Claimer address %s will be set for earner %s\n",
 				config.ClaimerAddress.String(),
@@ -187,7 +191,7 @@ func readAndValidateSetClaimerConfig(cCtx *cli.Context, logger logging.Logger) (
 	claimerAddress := cCtx.String(ClaimerAddressFlag.Name)
 	rewardsCoordinatorAddress := cCtx.String(RewardsCoordinatorAddressFlag.Name)
 	var err error
-	if rewardsCoordinatorAddress == "" {
+	if common.IsEmptyString(rewardsCoordinatorAddress) {
 		rewardsCoordinatorAddress, err = utils.GetRewardCoordinatorAddress(utils.NetworkNameToChainId(network))
 		if err != nil {
 			return nil, err
@@ -198,7 +202,7 @@ func readAndValidateSetClaimerConfig(cCtx *cli.Context, logger logging.Logger) (
 	chainID := utils.NetworkNameToChainId(network)
 	logger.Debugf("Using chain ID: %s", chainID.String())
 
-	if environment == "" {
+	if common.IsEmptyString(environment) {
 		environment = getEnvFromNetwork(network)
 	}
 	logger.Debugf("Using network %s and environment: %s", network, environment)

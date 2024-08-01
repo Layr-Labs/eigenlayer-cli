@@ -29,6 +29,7 @@ type statusConfig struct {
 	podAddress   string
 	outputType   string
 	outputFile   string
+	chainID      *big.Int
 }
 
 func StatusCmd(p utils.Prompter) *cli.Command {
@@ -58,6 +59,7 @@ func status(cCtx *cli.Context, p utils.Prompter) error {
 	if err != nil {
 		return err
 	}
+	cCtx.App.Metadata["network"] = cfg.chainID.String()
 	eigenPodStatus := core.GetStatus(ctx, cfg.podAddress, cfg.ethClient, cfg.beaconClient)
 	if cfg.outputType == "json" {
 		jsonData, err := json.MarshalIndent(eigenPodStatus, "", "  ")
@@ -165,6 +167,8 @@ func readAndValidateConfig(c *cli.Context, logger logging.Logger) (*statusConfig
 	network := c.String(flags.NetworkFlag.Name)
 	logger.Debugf("Using Network: %s", network)
 
+	chainID := utils.NetworkNameToChainId(network)
+
 	ethRpcUrl := c.String(flags.ETHRpcUrlFlag.Name)
 	ethRpcClient, err := ethclient.Dial(ethRpcUrl)
 	if err != nil {
@@ -190,6 +194,7 @@ func readAndValidateConfig(c *cli.Context, logger logging.Logger) (*statusConfig
 		podAddress:   podAddress,
 		outputType:   outputType,
 		outputFile:   outputFile,
+		chainID:      chainID,
 	}
 
 	return config, nil
