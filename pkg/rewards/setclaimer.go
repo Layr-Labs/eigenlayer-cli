@@ -32,6 +32,8 @@ type SetClaimerConfig struct {
 	ChainID                   *big.Int
 	SignerConfig              *types.SignerConfig
 	EarnerAddress             gethcommon.Address
+	Output                    string
+	OutputType                string
 }
 
 func SetClaimerCmd(p utils.Prompter) *cli.Command {
@@ -57,6 +59,7 @@ func getSetClaimerFlags() []cli.Flag {
 		&flags.NetworkFlag,
 		&flags.ETHRpcUrlFlag,
 		&flags.OutputFileFlag,
+		&flags.OutputTypeFlag,
 		&flags.BroadcastFlag,
 		&EarnerAddressFlag,
 		&RewardsCoordinatorAddressFlag,
@@ -81,18 +84,45 @@ func SetClaimer(cCtx *cli.Context, p utils.Prompter) error {
 		return fmt.Errorf("set claimer currently unsupported on mainnet")
 	}
 
-	if !config.Broadcast {
-		fmt.Printf(
-			"Claimer address %s will be set for earner %s\n",
-			config.ClaimerAddress.String(),
-			config.EarnerAddress.String(),
-		)
-		return nil
-	}
-
 	ethClient, err := ethclient.Dial(config.RPCUrl)
 	if err != nil {
 		return err
+	}
+
+	if !config.Broadcast {
+		if config.OutputType == string(common.OutputType_Calldata) {
+			_, _, contractBindings, err := elcontracts.BuildClients(elcontracts.Config{
+				RewardsCoordinatorAddress: config.RewardsCoordinatorAddress,
+			}, ethClient, nil, logger, nil)
+			if err != nil {
+				return err
+			}
+
+			noSendTxOpts := common.GetNoSendTxOpts(config.EarnerAddress)
+			unsignedTx, err := contractBindings.RewardsCoordinator.SetClaimerFor(noSendTxOpts, config.ClaimerAddress)
+			if err != nil {
+				return err
+			}
+			calldataHex := gethcommon.Bytes2Hex(unsignedTx.Data())
+			if !common.IsEmptyString(config.Output) {
+				err := common.WriteToFile([]byte(calldataHex), config.Output)
+				if err != nil {
+					return err
+				}
+			} else {
+				fmt.Println(calldataHex)
+			}
+		} else if config.OutputType == string(common.OutputType_Pretty) {
+			fmt.Printf(
+				"Claimer address %s will be set for earner %s\n",
+				config.ClaimerAddress.String(),
+				config.EarnerAddress.String(),
+			)
+		} else {
+			return fmt.Errorf("unsupported output type for this command %s", config.Output)
+		}
+
+		return nil
 	}
 
 	keyWallet, sender, err := common.GetWallet(
@@ -150,6 +180,8 @@ func readAndValidateSetClaimerConfig(cCtx *cli.Context, logger logging.Logger) (
 	network := cCtx.String(flags.NetworkFlag.Name)
 	environment := cCtx.String(EnvironmentFlag.Name)
 	rpcUrl := cCtx.String(flags.ETHRpcUrlFlag.Name)
+	output := cCtx.String(flags.OutputFileFlag.Name)
+	outputType := cCtx.String(flags.OutputTypeFlag.Name)
 	earnerAddress := gethcommon.HexToAddress(cCtx.String(EarnerAddressFlag.Name))
 	broadcast := cCtx.Bool(flags.BroadcastFlag.Name)
 	claimerAddress := cCtx.String(ClaimerAddressFlag.Name)
@@ -174,7 +206,9 @@ func readAndValidateSetClaimerConfig(cCtx *cli.Context, logger logging.Logger) (
 	// Get SignerConfig
 	signerConfig, err := common.GetSignerConfig(cCtx, logger)
 	if err != nil {
-		return nil, err
+		// We don't want to throw error since people can still use it to generate the
+		// set claimer calldata/output without broadcasting it
+		logger.Debugf("Failed to get signer config: %s", err)
 	}
 
 	return &SetClaimerConfig{
@@ -186,5 +220,7 @@ func readAndValidateSetClaimerConfig(cCtx *cli.Context, logger logging.Logger) (
 		ChainID:                   chainID,
 		SignerConfig:              signerConfig,
 		EarnerAddress:             earnerAddress,
+		Output:                    output,
+		OutputType:                outputType,
 	}, nil
 }

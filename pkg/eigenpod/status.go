@@ -66,7 +66,7 @@ func status(cCtx *cli.Context, p utils.Prompter) error {
 		}
 
 		if cfg.outputFile != "" {
-			err := common.WriteToJSON(jsonData, cfg.outputFile)
+			err := common.WriteToFile(jsonData, cfg.outputFile)
 			if err != nil {
 				return err
 			}

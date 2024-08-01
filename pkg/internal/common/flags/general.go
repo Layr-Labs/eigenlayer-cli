@@ -37,7 +37,7 @@ var (
 		Name:    "output-type",
 		Aliases: []string{"ot"},
 		Value:   "pretty",
-		Usage:   "Output type to for that respective command. One of 'pretty' or 'json'",
+		Usage:   "Output format of the command. One of 'pretty', 'json' or 'calldata'",
 		EnvVars: []string{"OUTPUT_TYPE"},
 	}
 

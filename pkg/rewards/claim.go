@@ -43,6 +43,7 @@ type ClaimConfig struct {
 	EarnerAddress             gethcommon.Address
 	RecipientAddress          gethcommon.Address
 	Output                    string
+	OutputType                string
 	Broadcast                 bool
 	TokenAddresses            []gethcommon.Address
 	RewardsCoordinatorAddress gethcommon.Address
@@ -72,6 +73,7 @@ func getClaimFlags() []cli.Flag {
 		&flags.NetworkFlag,
 		&flags.ETHRpcUrlFlag,
 		&flags.OutputFileFlag,
+		&flags.OutputTypeFlag,
 		&flags.BroadcastFlag,
 		&EarnerAddressFlag,
 		&EnvironmentFlag,
@@ -148,9 +150,21 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 		config.TokenAddresses,
 		rootIndex,
 	)
-
 	if err != nil {
 		return eigenSdkUtils.WrapError("failed to generate claim proof for earner", err)
+	}
+
+	elClaim := rewardscoordinator.IRewardsCoordinatorRewardsMerkleClaim{
+		RootIndex:       claim.RootIndex,
+		EarnerIndex:     claim.EarnerIndex,
+		EarnerTreeProof: claim.EarnerTreeProof,
+		EarnerLeaf: rewardscoordinator.IRewardsCoordinatorEarnerTreeMerkleLeaf{
+			Earner:          claim.EarnerLeaf.Earner,
+			EarnerTokenRoot: claim.EarnerLeaf.EarnerTokenRoot,
+		},
+		TokenIndices:    claim.TokenIndices,
+		TokenTreeProofs: claim.TokenTreeProofs,
+		TokenLeaves:     convertClaimTokenLeaves(claim.TokenLeaves),
 	}
 
 	if config.Broadcast {
@@ -185,18 +199,6 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 			return eigenSdkUtils.WrapError("failed to create new writer from config", err)
 		}
 
-		elClaim := rewardscoordinator.IRewardsCoordinatorRewardsMerkleClaim{
-			RootIndex:       claim.RootIndex,
-			EarnerIndex:     claim.EarnerIndex,
-			EarnerTreeProof: claim.EarnerTreeProof,
-			EarnerLeaf: rewardscoordinator.IRewardsCoordinatorEarnerTreeMerkleLeaf{
-				Earner:          claim.EarnerLeaf.Earner,
-				EarnerTokenRoot: claim.EarnerLeaf.EarnerTokenRoot,
-			},
-			TokenIndices:    claim.TokenIndices,
-			TokenTreeProofs: claim.TokenTreeProofs,
-			TokenLeaves:     convertClaimTokenLeaves(claim.TokenLeaves),
-		}
 		receipt, err := eLWriter.ProcessClaim(ctx, elClaim, config.RecipientAddress)
 		if err != nil {
 			return eigenSdkUtils.WrapError("failed to process claim", err)
@@ -205,20 +207,51 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 		logger.Infof("Claim transaction submitted successfully")
 		common.PrintTransactionInfo(receipt.TxHash.String(), config.ChainID)
 	} else {
-		solidityClaim := claimgen.FormatProofForSolidity(accounts.Root(), claim)
-		if !common.IsEmptyString(config.Output) {
+		if config.OutputType == string(common.OutputType_Calldata) {
+			noSendTxOpts := common.GetNoSendTxOpts(config.EarnerAddress)
+			_, _, contractBindings, err := elcontracts.BuildClients(elcontracts.Config{
+				RewardsCoordinatorAddress: config.RewardsCoordinatorAddress,
+			}, ethClient, nil, logger, nil)
+			if err != nil {
+				return err
+			}
+
+			unsignedTx, err := contractBindings.RewardsCoordinator.ProcessClaim(noSendTxOpts, elClaim, config.RecipientAddress)
+			if err != nil {
+				return err
+			}
+
+			calldataHex := gethcommon.Bytes2Hex(unsignedTx.Data())
+
+			if !common.IsEmptyString(config.Output) {
+				err = common.WriteToFile([]byte(calldataHex), config.Output)
+				if err != nil {
+					return err
+				}
+				logger.Infof("Call data written to file: %s", config.Output)
+			} else {
+				fmt.Println(calldataHex)
+			}
+		} else if config.OutputType == string(common.OutputType_Json) {
+			solidityClaim := claimgen.FormatProofForSolidity(accounts.Root(), claim)
 			jsonData, err := json.MarshalIndent(solidityClaim, "", "  ")
 			if err != nil {
 				fmt.Println("Error marshaling JSON:", err)
 				return err
 			}
-
-			err = common.WriteToJSON(jsonData, config.Output)
-			if err != nil {
-				return err
+			if !common.IsEmptyString(config.Output) {
+				err = common.WriteToFile(jsonData, config.Output)
+				if err != nil {
+					return err
+				}
+				logger.Infof("Claim written to file: %s", config.Output)
+			} else {
+				fmt.Println(string(jsonData))
+				fmt.Println()
+				fmt.Println("To write to a file, use the --output flag")
 			}
-			logger.Infof("Claim written to file: %s", config.Output)
 		} else {
+			solidityClaim := claimgen.FormatProofForSolidity(accounts.Root(), claim)
 			fmt.Println("------- Claim generated -------")
 			common.PrettyPrintStruct(*solidityClaim)
 			fmt.Println("-------------------------------")
@@ -249,6 +282,7 @@ func readAndValidateClaimConfig(cCtx *cli.Context, logger logging.Logger) (*Clai
 	rpcUrl := cCtx.String(flags.ETHRpcUrlFlag.Name)
 	earnerAddress := gethcommon.HexToAddress(cCtx.String(EarnerAddressFlag.Name))
 	output := cCtx.String(flags.OutputFileFlag.Name)
+	outputType := cCtx.String(flags.OutputTypeFlag.Name)
 	broadcast := cCtx.Bool(flags.BroadcastFlag.Name)
 	tokenAddresses := cCtx.String(TokenAddressesFlag.Name)
 	tokenAddressArray := stringToAddressArray(strings.Split(tokenAddresses, ","))
@@ -311,6 +345,7 @@ func readAndValidateClaimConfig(cCtx *cli.Context, logger logging.Logger) (*Clai
 		RPCUrl:                    rpcUrl,
 		EarnerAddress:             earnerAddress,
 		Output:                    output,
+		OutputType:                outputType,
 		Broadcast:                 broadcast,
 		TokenAddresses:            tokenAddressArray,
 		RewardsCoordinatorAddress: gethcommon.HexToAddress(rewardsCoordinatorAddress),
