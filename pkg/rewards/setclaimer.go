@@ -206,8 +206,8 @@ func readAndValidateSetClaimerConfig(cCtx *cli.Context, logger logging.Logger) (
 	// Get SignerConfig
 	signerConfig, err := common.GetSignerConfig(cCtx, logger)
 	if err != nil {
-		// We don't want to throw error since people can still use it to generate the claim
-		// without broadcasting it
+		// We don't want to throw error since people can still use it to generate the
+		// set claimer calldata/output without broadcasting it
 		logger.Debugf("Failed to get signer config: %s", err)
 	}
 

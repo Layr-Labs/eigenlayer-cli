@@ -427,14 +427,14 @@ func GetLogger(cCtx *cli.Context) eigensdkLogger.Logger {
 	return logger
 }
 
-func oopSigner(addr common.Address, tx *gethtypes.Transaction) (*gethtypes.Transaction, error) {
+func noopSigner(addr common.Address, tx *gethtypes.Transaction) (*gethtypes.Transaction, error) {
 	return tx, nil
 }
 
 func GetNoSendTxOpts(from common.Address) *bind.TransactOpts {
 	return &bind.TransactOpts{
 		From:   from,
-		Signer: oopSigner,
+		Signer: noopSigner,
 		NoSend: true,
 	}
 }
