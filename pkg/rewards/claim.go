@@ -251,6 +251,10 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 				fmt.Println("To write to a file, use the --output flag")
 			}
 		} else {
+			if !common.IsEmptyString(config.Output) {
+				fmt.Println("output file not supported for pretty output type")
+				fmt.Println()
+			}
 			solidityClaim := claimgen.FormatProofForSolidity(accounts.Root(), claim)
 			fmt.Println("------- Claim generated -------")
 			common.PrettyPrintStruct(*solidityClaim)
@@ -276,6 +280,7 @@ func convertClaimTokenLeaves(
 	return tokenLeaves
 
 }
+
 func readAndValidateClaimConfig(cCtx *cli.Context, logger logging.Logger) (*ClaimConfig, error) {
 	network := cCtx.String(flags.NetworkFlag.Name)
 	environment := cCtx.String(EnvironmentFlag.Name)
@@ -287,8 +292,9 @@ func readAndValidateClaimConfig(cCtx *cli.Context, logger logging.Logger) (*Clai
 	tokenAddresses := cCtx.String(TokenAddressesFlag.Name)
 	tokenAddressArray := stringToAddressArray(strings.Split(tokenAddresses, ","))
 	rewardsCoordinatorAddress := cCtx.String(RewardsCoordinatorAddressFlag.Name)
+
 	var err error
-	if rewardsCoordinatorAddress == "" {
+	if common.IsEmptyString(rewardsCoordinatorAddress) {
 		rewardsCoordinatorAddress, err = utils.GetRewardCoordinatorAddress(utils.NetworkNameToChainId(network))
 		if err != nil {
 			return nil, err
@@ -317,17 +323,17 @@ func readAndValidateClaimConfig(cCtx *cli.Context, logger logging.Logger) (*Clai
 	proofStoreBaseURL := cCtx.String(ProofStoreBaseURLFlag.Name)
 
 	// If empty get from utils
-	if proofStoreBaseURL == "" {
+	if common.IsEmptyString(proofStoreBaseURL) {
 		proofStoreBaseURL = utils.GetProofStoreBaseURL(network)
 
 		// If still empty return error
-		if proofStoreBaseURL == "" {
+		if common.IsEmptyString(proofStoreBaseURL) {
 			return nil, errors.New("proof store base URL not provided")
 		}
 	}
 	logger.Debugf("Using Proof store base URL: %s", proofStoreBaseURL)
 
-	if environment == "" {
+	if common.IsEmptyString(environment) {
 		environment = getEnvFromNetwork(network)
 	}
 	logger.Debugf("Using network %s and environment: %s", network, environment)
