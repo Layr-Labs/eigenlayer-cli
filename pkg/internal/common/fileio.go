@@ -8,7 +8,7 @@ import (
 	"github.com/gocarina/gocsv"
 )
 
-func WriteToJSON(data []byte, filePath string) error {
+func WriteToFile(data []byte, filePath string) error {
 	dir := path.Dir(filePath)
 	// Ensure the directory exists
 	err := ensureDir(dir)

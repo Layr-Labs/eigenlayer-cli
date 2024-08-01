@@ -6,6 +6,8 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+
 	"log/slog"
 	"math/big"
 	"os"
@@ -28,6 +30,7 @@ import (
 	eigenSdkUtils "github.com/Layr-Labs/eigensdk-go/utils"
 
 	"github.com/ethereum/go-ethereum/common"
+	gethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 
@@ -424,4 +427,16 @@ func GetLogger(cCtx *cli.Context) eigensdkLogger.Logger {
 	}
 	logger := eigensdkLogger.NewTextSLogger(os.Stdout, &eigensdkLogger.SLoggerOptions{Level: logLevel})
 	return logger
+}
+
+func oopSigner(addr common.Address, tx *gethtypes.Transaction) (*gethtypes.Transaction, error) {
+	return tx, nil
+}
+
+func GetNoSendTxOpts(from common.Address) *bind.TransactOpts {
+	return &bind.TransactOpts{
+		From:   from,
+		Signer: oopSigner,
+		NoSend: true,
+	}
 }
