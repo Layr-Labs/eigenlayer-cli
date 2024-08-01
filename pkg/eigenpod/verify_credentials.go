@@ -291,9 +291,9 @@ func readAndValidateVerifyCredsConfig(cCtx *cli.Context, logger logging.Logger) 
 		logger.Debugf("Failed to get signer config: %s", err)
 	}
 
-	proofSubmittedAddress := ""
+	proofSubmitterAddress := ""
 	if signerConfig != nil && signerConfig.SignerType == types.Web3Signer {
-		proofSubmittedAddress = cCtx.String(ProofSubmitterAddress.Name)
+		proofSubmitterAddress = cCtx.String(ProofSubmitterAddress.Name)
 	}
 
 	return &verifyCredentialsConfig{
@@ -307,6 +307,6 @@ func readAndValidateVerifyCredsConfig(cCtx *cli.Context, logger logging.Logger) 
 		broadcast:             broadcast,
 		chainID:               chainID,
 		signerCfg:             signerConfig,
-		proofSubmitterAddress: proofSubmittedAddress,
+		proofSubmitterAddress: proofSubmitterAddress,
 	}, nil
 }
