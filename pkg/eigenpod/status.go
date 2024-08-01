@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math"
 	"math/big"
+	"sort"
 	"strings"
 	"time"
 
@@ -40,15 +41,23 @@ func StatusCmd(p utils.Prompter) *cli.Command {
 			return status(c, p)
 		},
 		After: telemetry.AfterRunAction(),
-		Flags: []cli.Flag{
-			&flags.NetworkFlag,
-			&flags.ETHRpcUrlFlag,
-			&flags.BeaconRpcUrlFlag,
-			&flags.OutputFileFlag,
-			&flags.OutputTypeFlag,
-			&PodAddressFlag,
-		},
+		Flags: getStatusFlags(),
 	}
+}
+
+func getStatusFlags() []cli.Flag {
+	baseFlags := []cli.Flag{
+		&PodAddressFlag,
+		&flags.NetworkFlag,
+		&flags.ETHRpcUrlFlag,
+		&flags.BeaconRpcUrlFlag,
+		&flags.OutputFileFlag,
+		&flags.OutputTypeFlag,
+		&flags.VerboseFlag,
+	}
+
+	sort.Sort(cli.FlagsByName(baseFlags))
+	return baseFlags
 }
 
 func status(cCtx *cli.Context, p utils.Prompter) error {

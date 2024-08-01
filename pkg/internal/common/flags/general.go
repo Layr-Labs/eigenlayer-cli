@@ -21,7 +21,7 @@ var (
 
 	BeaconRpcUrlFlag = cli.StringFlag{
 		Name:    "beacon-rpc-url",
-		Aliases: []string{"b"},
+		Aliases: []string{"be"},
 		Usage:   "URL of the ETH Beacon RPC",
 		EnvVars: []string{"BEACON_RPC_URL"},
 	}
