@@ -13,6 +13,7 @@ func EigenPodCmd(p utils.Prompter) *cli.Command {
 		Usage: "Manage the EigenPods in EigenLayer ecosystem",
 		Subcommands: []*cli.Command{
 			eigenpod.StatusCmd(p),
+			eigenpod.VerifyCredentialsCmd(p),
 		},
 	}
 
