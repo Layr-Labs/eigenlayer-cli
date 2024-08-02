@@ -114,7 +114,7 @@ func verifyCredentials(cCtx *cli.Context, p utils.Prompter) error {
 		}
 
 		if cfg.outputFile != "" {
-			err = common.WriteToJSON(out, cfg.outputFile)
+			err = common.WriteToFile(out, cfg.outputFile)
 			if err != nil {
 				return eigenSdkUtils.WrapError("failed to write validator proofs to file", err)
 			}
