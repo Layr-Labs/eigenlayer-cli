@@ -6,9 +6,6 @@ operator:
   # This is the standard Ethereum address format (ex: 0x6a8c0D554a694899041E52a91B4EC3Ff23d8aBD5) of your operator
   # which is the ecdsa key you created or imported using EigenLayer CLI
   address:
-  # This is the standard Ethereum address format (ex: 0x6a8c0D554a694899041E52a91B4EC3Ff23d8aBD5)
-  # This is the address where your operator will receive earnings. This could be same as operator address
-  earnings_receiver_address:
   # This is the standard Ethereum address format (0x...)
   # This is the address which operator will use to approve delegation requests from stakers.
   # if set, this address must sign and approve new delegation from Stakers to this Operator

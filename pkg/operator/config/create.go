@@ -148,20 +148,6 @@ func promptOperatorInfo(config *types.OperatorConfig, p utils.Prompter) (types.O
 	// TODO(madhur): Remove this once we have the feature working and want to prompt users for this address
 	config.Operator.DelegationApproverAddress = eigensdkTypes.ZeroAddress
 
-	// Prompt and set earnings address
-	earningsAddress, err := p.InputString(
-		"Enter your earnings address (default to your operator address):",
-		config.Operator.Address,
-		"",
-		func(s string) error {
-			return validateAddressIsNonZeroAndValid(s)
-		},
-	)
-	if err != nil {
-		return types.OperatorConfig{}, err
-	}
-	config.Operator.EarningsReceiverAddress = earningsAddress
-
 	// Prompt for eth node
 	rpcUrl, err := p.InputString("Enter your ETH rpc url:", "http://localhost:8545", "",
 		func(s string) error { return nil },
