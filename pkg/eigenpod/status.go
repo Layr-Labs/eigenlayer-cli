@@ -120,8 +120,8 @@ func status(cCtx *cli.Context, p utils.Prompter) error {
 				color.Yellow("\tNote: pod does not have checkpointable native ETH. To checkpoint anyway, run `checkpoint` with the `--force` flag.\n")
 			}
 
-			color.Blue("Batching %d proofs per txn, this will require:\n\t", DEFAULT_BATCH_CHECKPOINT)
-			color.Blue("- 1x startCheckpoint() transaction, and \n\t- %dx EigenPod.verifyCheckpointProofs() transaction(s)\n\n", int(math.Ceil(float64(eigenPodStatus.NumberValidatorsToCheckpoint)/float64(DEFAULT_BATCH_CHECKPOINT))))
+			color.Blue("Batching %d proofs per txn, this will require:\n\t", DefaultBatchCheckpoint)
+			color.Blue("- 1x startCheckpoint() transaction, and \n\t- %dx EigenPod.verifyCheckpointProofs() transaction(s)\n\n", int(math.Ceil(float64(eigenPodStatus.NumberValidatorsToCheckpoint)/float64(DefaultBatchCheckpoint))))
 		}
 	}
 	return nil
