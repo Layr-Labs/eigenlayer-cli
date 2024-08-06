@@ -6,10 +6,10 @@ github.com/Azure/go-ansiterm v0.0.0-20210617225240-d185dfc1b5a1 h1:UQHMgLO+TxOEl
 github.com/Azure/go-ansiterm v0.0.0-20210617225240-d185dfc1b5a1/go.mod h1:xomTg63KZ2rFqZQzSB4Vz2SUXa1BpHTVz9L5PTmPC4E=
 github.com/DataDog/zstd v1.4.5 h1:EndNeuB0l9syBZhut0wns3gV1hL8zX8LIu6ZiVHWLIQ=
 github.com/DataDog/zstd v1.4.5/go.mod h1:1jcaCB/ufaK+sKp1NBhlGmpz41jOoPQ35bpF36t7BBo=
-github.com/Layr-Labs/eigenlayer-contracts v0.3.0-rc3-holesky-preprod-rewards.0.20240618161038-04a0176562a0 h1:lnG8PqYWtbjRg3duimXD8eyOcIJ7qGeo91kJLvn8r1A=
-github.com/Layr-Labs/eigenlayer-contracts v0.3.0-rc3-holesky-preprod-rewards.0.20240618161038-04a0176562a0/go.mod h1:Ie8YE3EQkTHqG6/tnUS0He7/UPMkXPo/3OFXwSy0iRo=
-github.com/Layr-Labs/eigenlayer-rewards-proofs v0.2.6 h1:HZY4i/FsRCuauZDv5TwnFohx9HZskwBQGuIUgRMr6NY=
-github.com/Layr-Labs/eigenlayer-rewards-proofs v0.2.6/go.mod h1:W2a9mERHznfIU+jD1FUaZjdUAfx+9lwbZ0tYQaF+Vhc=
+github.com/Layr-Labs/eigenlayer-contracts v0.3.0-holesky-rewards h1:j379y/Gi+Igc+Y+/fsHx33kjniIeNQQNYuuvmsqUjZo=
+github.com/Layr-Labs/eigenlayer-contracts v0.3.0-holesky-rewards/go.mod h1:Ie8YE3EQkTHqG6/tnUS0He7/UPMkXPo/3OFXwSy0iRo=
+github.com/Layr-Labs/eigenlayer-rewards-proofs v0.2.9 h1:ahO1P23KLLcBChXs/n5bqikT+qvlGFRvgb0MqeAzqFI=
+github.com/Layr-Labs/eigenlayer-rewards-proofs v0.2.9/go.mod h1:xqqlbOAuApoPi+NgnqJB5JtTY05V+8IpP/4JZEctUAw=
 github.com/Layr-Labs/eigenpod-proofs-generation v0.0.14-stable.0.20240730152248-5c11a259293e h1:DvW0/kWHV9mZsbH2KOjEHKTSIONNPUj6X05FJvUohy4=
 github.com/Layr-Labs/eigenpod-proofs-generation v0.0.14-stable.0.20240730152248-5c11a259293e/go.mod h1:T7tYN8bTdca2pkMnz9G2+ZwXYWw5gWqQUIu4KLgC/vM=
 github.com/Layr-Labs/eigensdk-go v0.1.10-0.20240730214828-67787e959b72 h1:krZ1dl1LG1+jQenIpHDg293epaomxPeQdKMTpcridSw=
