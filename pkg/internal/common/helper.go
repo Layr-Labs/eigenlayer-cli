@@ -255,7 +255,7 @@ func ReadConfigFile(path string) (*types.OperatorConfig, error) {
 		return nil, err
 	}
 
-	elAVSDirectoryAddress, err := getAVSDirectoryAddress(operatorCfg.ChainId)
+	elAVSDirectoryAddress, err := GetAVSDirectoryAddress(operatorCfg.ChainId)
 	if err != nil {
 		return nil, err
 	}
@@ -270,7 +270,7 @@ func ReadConfigFile(path string) (*types.OperatorConfig, error) {
 	return &operatorCfg, nil
 }
 
-func getAVSDirectoryAddress(chainID big.Int) (string, error) {
+func GetAVSDirectoryAddress(chainID big.Int) (string, error) {
 	chainIDInt := chainID.Int64()
 	chainMetadata, ok := utils.ChainMetadataMap[chainIDInt]
 	if !ok {
