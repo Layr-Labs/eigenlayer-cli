@@ -7,7 +7,7 @@ require (
 	github.com/Layr-Labs/eigenlayer-contracts v0.3.0-holesky-rewards
 	github.com/Layr-Labs/eigenlayer-rewards-proofs v0.2.9
 	github.com/Layr-Labs/eigenpod-proofs-generation v0.0.14-stable.0.20240730152248-5c11a259293e
-	github.com/Layr-Labs/eigensdk-go v0.1.10-0.20240730214828-67787e959b72
+	github.com/Layr-Labs/eigensdk-go v0.1.10-0.20240806213237-f9be5dc855c8
 	github.com/blang/semver/v4 v4.0.0
 	github.com/consensys/gnark-crypto v0.12.1
 	github.com/ethereum/go-ethereum v1.14.5
