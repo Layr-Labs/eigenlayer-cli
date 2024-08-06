@@ -10,14 +10,17 @@ import (
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/types"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
+
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
 	"github.com/Layr-Labs/eigensdk-go/chainio/txmgr"
 	contractIAVSDirectory "github.com/Layr-Labs/eigensdk-go/contracts/bindings/IAVSDirectory"
 	"github.com/Layr-Labs/eigensdk-go/logging"
 	eigenMetrics "github.com/Layr-Labs/eigensdk-go/metrics"
 	eigenSdkUtils "github.com/Layr-Labs/eigensdk-go/utils"
+
 	gethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
+	
 	"github.com/urfave/cli/v2"
 )
 
