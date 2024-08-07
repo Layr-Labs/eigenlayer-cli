@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/big"
 	"sort"
+	"strings"
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
@@ -20,7 +21,7 @@ import (
 
 	gethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
-	
+
 	"github.com/urfave/cli/v2"
 )
 
@@ -161,7 +162,12 @@ func deregisterOperatorSet(c *cli.Context, p utils.Prompter) error {
 			fmt.Println("Force Deregister Operator Set")
 			fmt.Println("Operator Address:", config.operatorAddress.String())
 			fmt.Println("AVS Address:", config.avsAddress.String())
-			fmt.Println("Operator Set IDs:", config.operatorSetIds)
+			// Convert uint32 to strings
+			stringSlice := make([]string, len(config.operatorSetIds))
+			for i, num := range config.operatorSetIds {
+				stringSlice[i] = fmt.Sprint(num)
+			}
+			fmt.Println("Operator Set IDs:", strings.Join(stringSlice, ","))
 			fmt.Println("To broadcast the force deregister, use the --broadcast flag")
 		} else {
 			return fmt.Errorf("output type %s not supported for this command", config.outputType)
