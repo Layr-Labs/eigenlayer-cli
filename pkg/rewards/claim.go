@@ -57,7 +57,7 @@ type ClaimConfig struct {
 func ClaimCmd(p utils.Prompter) *cli.Command {
 	var claimCmd = &cli.Command{
 		Name:  "claim",
-		Usage: "Claim rewards for the operator",
+		Usage: "Claim rewards for any earner",
 		Action: func(cCtx *cli.Context) error {
 			return Claim(cCtx, p)
 		},
