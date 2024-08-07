@@ -14,6 +14,8 @@ func OperatorSetCmd(p utils.Prompter) *cli.Command {
 		Subcommands: []*cli.Command{
 			operatorset.DeregisterCmd(p),
 		},
+		// TODO(shrimalmadhur): enable after testing
+		Hidden: true,
 	}
 
 	return operatorSetCmd
