@@ -1,6 +1,7 @@
 package rewards
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -19,6 +20,7 @@ import (
 	contractrewardscoordinator "github.com/Layr-Labs/eigenlayer-contracts/pkg/bindings/IRewardsCoordinator"
 
 	"github.com/Layr-Labs/eigenlayer-rewards-proofs/pkg/claimgen"
+	"github.com/Layr-Labs/eigenlayer-rewards-proofs/pkg/proofDataFetcher"
 	"github.com/Layr-Labs/eigenlayer-rewards-proofs/pkg/proofDataFetcher/httpProofDataFetcher"
 
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
@@ -34,8 +36,6 @@ import (
 
 	"github.com/urfave/cli/v2"
 )
-
-const LatestClaimTimestamp = "latest"
 
 type ClaimConfig struct {
 	Network                   string
@@ -122,19 +122,10 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 		http.DefaultClient,
 	)
 
-	latestSubmittedTimestamp, err := elReader.CurrRewardsCalculationEndTimestamp(&bind.CallOpts{})
+	claimDate, rootIndex, err := getClaimDistributionRoot(ctx, config.ClaimTimestamp, df, elReader, logger)
 	if err != nil {
-		return eigenSdkUtils.WrapError("failed to get latest submitted timestamp", err)
+		return eigenSdkUtils.WrapError("failed to get claim distribution root", err)
 	}
-	claimDate := time.Unix(int64(latestSubmittedTimestamp), 0).UTC().Format(time.DateOnly)
-	logger.Debugf("Latest submitted timestamp: %s", claimDate)
-
-	rootCount, err := elReader.GetDistributionRootsLength(&bind.CallOpts{})
-	if err != nil {
-		return eigenSdkUtils.WrapError("failed to get number of published roots", err)
-	}
-
-	rootIndex := uint32(rootCount.Uint64() - 1)
 
 	proofData, err := df.FetchClaimAmountsForDate(ctx, claimDate)
 	if err != nil {
@@ -264,6 +255,58 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 	return nil
 }
 
+func getClaimDistributionRoot(
+	ctx context.Context,
+	claimTimestamp string,
+	df *httpProofDataFetcher.HttpProofDataFetcher,
+	elReader *elcontracts.ChainReader,
+	logger logging.Logger,
+) (string, uint32, error) {
+	if claimTimestamp == "latest" {
+		latestSubmittedTimestamp, err := elReader.CurrRewardsCalculationEndTimestamp(&bind.CallOpts{})
+		if err != nil {
+			return "", 0, eigenSdkUtils.WrapError("failed to get latest submitted timestamp", err)
+		}
+		claimDate := time.Unix(int64(latestSubmittedTimestamp), 0).UTC().Format(time.DateOnly)
+		logger.Debugf("Latest submitted timestamp: %s", claimDate)
+
+		rootCount, err := elReader.GetDistributionRootsLength(&bind.CallOpts{})
+		if err != nil {
+			return "", 0, eigenSdkUtils.WrapError("failed to get number of published roots", err)
+		}
+
+		rootIndex := uint32(rootCount.Uint64() - 1)
+		return claimDate, rootIndex, nil
+	} else if claimTimestamp == "latest_active" {
+		// Get the latest 10 roots
+		postedRoots, err := df.FetchPostedRewards(ctx)
+		if err != nil {
+			return "", 0, eigenSdkUtils.WrapError("failed to fetch posted rewards", err)
+		}
+
+		return getLatestActivePostedRoot(postedRoots)
+	}
+	return "", 0, errors.New("invalid claim timestamp")
+}
+
+// getLatestActivePostedRoot returns the latest active posted root by sorting the roots by the latest calculated end timestamp
+// in descending order and checking the latest timestamp which activated before the current time
+func getLatestActivePostedRoot(postedRoots []*proofDataFetcher.SubmittedRewardRoot) (string, uint32, error) {
+	// sort by latest calculated end timestamp
+	sort.Slice(postedRoots, func(i, j int) bool {
+		return postedRoots[i].CalcEndTimestamp.After(postedRoots[j].CalcEndTimestamp)
+	})
+
+	currTime := time.Now()
+	for _, postedRoot := range postedRoots {
+		if postedRoot.ActivatedAt.Before(currTime) {
+			return postedRoot.GetActivatedAtDate(), postedRoot.RootIndex, nil
+		}
+		// There is no else here because on of last 10 root be
+	}
+	return "", 0, errors.New("no active posted roots found")
+}
+
 func convertClaimTokenLeaves(
 	claimTokenLeaves []contractrewardscoordinator.IRewardsCoordinatorTokenTreeMerkleLeaf,
 ) []rewardscoordinator.IRewardsCoordinatorTokenTreeMerkleLeaf {
@@ -300,9 +343,6 @@ func readAndValidateClaimConfig(cCtx *cli.Context, logger logging.Logger) (*Clai
 	logger.Debugf("Using Rewards Coordinator address: %s", rewardsCoordinatorAddress)
 
 	claimTimestamp := cCtx.String(ClaimTimestampFlag.Name)
-	if claimTimestamp != LatestClaimTimestamp {
-		return nil, errors.New("claim-timestamp must be 'latest'")
-	}
 
 	recipientAddress := gethcommon.HexToAddress(cCtx.String(RecipientAddressFlag.Name))
 	if recipientAddress == utils.ZeroAddress {
@@ -357,6 +397,7 @@ func readAndValidateClaimConfig(cCtx *cli.Context, logger logging.Logger) (*Clai
 		Environment:               environment,
 		RecipientAddress:          recipientAddress,
 		SignerConfig:              signerConfig,
+		ClaimTimestamp:            claimTimestamp,
 	}, nil
 }
 

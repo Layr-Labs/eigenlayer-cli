@@ -53,3 +53,5 @@ func TestReadAndValidateConfig_RecipientProvided(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, common.HexToAddress(recipientAddress), config.RecipientAddress)
 }
+
+func TestGetLatestActivePostedRoot
