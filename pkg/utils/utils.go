@@ -19,8 +19,9 @@ var ChainMetadataMap = map[int64]types.ChainMetadata{
 		BlockExplorerUrl:            "https://etherscan.io/tx",
 		ELDelegationManagerAddress:  "0x39053D51B77DC0d36036Fc1fCc8Cb819df8Ef37A",
 		ELAVSDirectoryAddress:       "0x135dda560e946695d6f155dacafc6f1f25c1f5af",
-		ELRewardsCoordinatorAddress: "",
+		ELRewardsCoordinatorAddress: "0x7750d328b314EfFa365A0402CcfD489B80B0adda",
 		WebAppUrl:                   "https://app.eigenlayer.xyz/operator",
+		ProofStoreBaseURL:           "https://eigenlabs-rewards-mainnet-ethereum.s3.amazonaws.com",
 	},
 	HoleskyChainId: {
 		BlockExplorerUrl:            "https://holesky.etherscan.io/tx",

@@ -80,9 +80,6 @@ func SetClaimer(cCtx *cli.Context, p utils.Prompter) error {
 	}
 
 	cCtx.App.Metadata["network"] = config.ChainID.String()
-	if config.ChainID.Int64() == utils.MainnetChainId {
-		return fmt.Errorf("set claimer currently unsupported on mainnet")
-	}
 
 	ethClient, err := ethclient.Dial(config.RPCUrl)
 	if err != nil {
