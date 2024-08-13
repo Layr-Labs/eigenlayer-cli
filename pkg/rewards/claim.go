@@ -296,8 +296,7 @@ func getClaimDistributionRoot(
 }
 
 // getLatestActivePostedRoot returns the latest active posted root by sorting the roots by the latest calculated end
-// timestamp
-// in descending order and checking the latest timestamp which activated before the current time
+// timestamp in descending order and checking the latest timestamp which activated before the current time
 func getLatestActivePostedRoot(postedRoots []*proofDataFetcher.SubmittedRewardRoot) (string, uint32, error) {
 	// sort by latest calculated end timestamp
 	sort.Slice(postedRoots, func(i, j int) bool {
