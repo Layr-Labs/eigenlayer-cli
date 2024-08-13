@@ -132,7 +132,7 @@ If you see any issues in documentation please create an issue or PR [here](https
 
 ## Release Process
 To release a new version of the CLI, follow the steps below:
-> Note: You need to have write permission to this repo to release new version
+> Note: You need to have write permission to this repo to release a new version
 
 1. Checkout the master branch and pull the latest changes:
     ```bash
