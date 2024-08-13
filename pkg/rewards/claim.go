@@ -284,12 +284,19 @@ func getClaimDistributionRoot(
 			return "", 0, eigenSdkUtils.WrapError("failed to fetch posted rewards", err)
 		}
 
-		return getLatestActivePostedRoot(postedRoots)
+		ts, rootIndex, err := getLatestActivePostedRoot(postedRoots)
+		if err != nil {
+			return "", 0, eigenSdkUtils.WrapError("failed to get latest active posted root", err)
+		}
+		logger.Debugf("Latest active posted root timestamp: %s, index: %d", ts, rootIndex)
+
+		return ts, rootIndex, nil
 	}
 	return "", 0, errors.New("invalid claim timestamp")
 }
 
-// getLatestActivePostedRoot returns the latest active posted root by sorting the roots by the latest calculated end timestamp
+// getLatestActivePostedRoot returns the latest active posted root by sorting the roots by the latest calculated end
+// timestamp
 // in descending order and checking the latest timestamp which activated before the current time
 func getLatestActivePostedRoot(postedRoots []*proofDataFetcher.SubmittedRewardRoot) (string, uint32, error) {
 	// sort by latest calculated end timestamp
@@ -300,7 +307,7 @@ func getLatestActivePostedRoot(postedRoots []*proofDataFetcher.SubmittedRewardRo
 	currTime := time.Now()
 	for _, postedRoot := range postedRoots {
 		if postedRoot.ActivatedAt.Before(currTime) {
-			return postedRoot.GetActivatedAtDate(), postedRoot.RootIndex, nil
+			return postedRoot.GetRewardDate(), postedRoot.RootIndex, nil
 		}
 		// There is no else here because on of last 10 root be
 	}
@@ -343,6 +350,7 @@ func readAndValidateClaimConfig(cCtx *cli.Context, logger logging.Logger) (*Clai
 	logger.Debugf("Using Rewards Coordinator address: %s", rewardsCoordinatorAddress)
 
 	claimTimestamp := cCtx.String(ClaimTimestampFlag.Name)
+	logger.Debugf("Using claim timestamp from user: %s", claimTimestamp)
 
 	recipientAddress := gethcommon.HexToAddress(cCtx.String(RecipientAddressFlag.Name))
 	if recipientAddress == utils.ZeroAddress {
