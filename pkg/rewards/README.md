@@ -4,14 +4,14 @@
 ```bash
 eigenlayer rewards claim --help
 NAME:
-   eigenlayer rewards claim - Claim rewards for the operator
+   eigenlayer rewards claim - Claim rewards for any earner
 
 USAGE:
    eigenlayer rewards claim [command options]
 
 OPTIONS:
    --broadcast, -b                                      Use this flag to broadcast the transaction (default: false) [$BROADCAST]
-   --claim-timestamp value, -c value                    Specify the timestamp. Only 'latest' is supported (default: "latest") [$CLAIM_TIMESTAMP]
+   --claim-timestamp value, -c value                    Specify the timestamp. Only 'latest' and 'latest_active' are supported (default: "latest") [$CLAIM_TIMESTAMP]
    --earner-address value, --ea value                   Address of the earner [$REWARDS_EARNER_ADDRESS]
    --ecdsa-private-key value, -e value                  ECDSA private key hex to send transaction [$ECDSA_PRIVATE_KEY]
    --environment value, --env value                     Environment to use. Currently supports 'preprod' ,'testnet' and 'prod'. If not provided, it will be inferred based on network [$ENVIRONMENT]
