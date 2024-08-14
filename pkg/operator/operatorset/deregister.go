@@ -41,7 +41,10 @@ type deregisterConfig struct {
 func DeregisterCmd(p utils.Prompter) *cli.Command {
 	return &cli.Command{
 		Name:  "deregister",
-		Usage: "Deregister an operator set",
+		Usage: "Force deregisters operator sets",
+		Description: `
+Force deregisters operator sets. This can be use to deregister from any operator set in the AVS if in case AVS does not provide a way to deregister. This does not require any signature from the AVS.
+`,
 		Flags: getDeregisterFlags(),
 		Action: func(c *cli.Context) error {
 			return deregisterOperatorSet(c, p)
@@ -112,8 +115,7 @@ func deregisterOperatorSet(c *cli.Context, p utils.Prompter) error {
 
 		// TODO(shrimalmadhur): contractIAVSDirectory.ISignatureUtilsSignatureWithSaltAndExpiry{} is a placeholder for
 		// the signature right now we are not using force deregister via signature but in future we will support it so
-		// that someone can
-		// force deregister on behalf of an operator
+		// that someone can force deregister on behalf of an operator
 		receipt, err := eLWriter.ForceDeregisterFromOperatorSets(
 			ctx,
 			config.operatorAddress,
