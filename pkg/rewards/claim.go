@@ -187,7 +187,7 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 			return eigenSdkUtils.WrapError("failed to create new writer from config", err)
 		}
 
-		receipt, err := eLWriter.ProcessClaim(ctx, elClaim, config.RecipientAddress)
+		receipt, err := eLWriter.ProcessClaim(ctx, elClaim, config.RecipientAddress, true)
 		if err != nil {
 			return eigenSdkUtils.WrapError("failed to process claim", err)
 		}
@@ -268,7 +268,6 @@ func getClaimDistributionRoot(
 			return "", 0, eigenSdkUtils.WrapError("failed to get latest submitted timestamp", err)
 		}
 		claimDate := time.Unix(int64(latestSubmittedTimestamp), 0).UTC().Format(time.DateOnly)
-		logger.Debugf("Latest submitted timestamp: %s", claimDate)
 
 		rootCount, err := elReader.GetDistributionRootsLength(&bind.CallOpts{})
 		if err != nil {
@@ -276,19 +275,21 @@ func getClaimDistributionRoot(
 		}
 
 		rootIndex := uint32(rootCount.Uint64() - 1)
+		logger.Debugf("Latest active rewards snapshot timestamp: %s, root index: %d", claimDate, rootIndex)
 		return claimDate, rootIndex, nil
 	} else if claimTimestamp == "latest_active" {
-		// Get the latest 10 roots
-		postedRoots, err := df.FetchPostedRewards(ctx)
+		latestClaimableRoot, err := elReader.GetCurrentClaimableDistributionRoot(&bind.CallOpts{})
 		if err != nil {
-			return "", 0, eigenSdkUtils.WrapError("failed to fetch posted rewards", err)
+			return "", 0, eigenSdkUtils.WrapError("failed to get latest claimable root", err)
 		}
 
-		ts, rootIndex, err := getLatestActivePostedRoot(postedRoots)
+		rootIndex, err := elReader.GetRootIndexFromHash(&bind.CallOpts{}, latestClaimableRoot.Root)
 		if err != nil {
-			return "", 0, eigenSdkUtils.WrapError("failed to get latest active posted root", err)
+			return "", 0, eigenSdkUtils.WrapError("failed to get root index from hash", err)
 		}
-		logger.Debugf("Latest active posted root timestamp: %s, index: %d", ts, rootIndex)
+
+		ts := time.Unix(int64(latestClaimableRoot.RewardsCalculationEndTimestamp), 0).UTC().Format(time.DateOnly)
+		logger.Debugf("Latest rewards snapshot timestamp: %s, root index: %d", ts, rootIndex)
 
 		return ts, rootIndex, nil
 	}
