@@ -1,10 +1,11 @@
-package operatorset
+package operator
 
 import (
 	"errors"
 	"fmt"
 	"math/big"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
@@ -38,24 +39,28 @@ type deregisterConfig struct {
 	outputFile      string
 }
 
-func DeregisterCmd(p utils.Prompter) *cli.Command {
+func ForceDeregister(p utils.Prompter) *cli.Command {
 	return &cli.Command{
-		Name:  "deregister",
-		Usage: "Force deregisters operator sets",
+		Name:      "force-deregister",
+		Usage:     "Force deregisters operator from operator sets",
+		UsageText: "deregister [flags] <avs-address> <operator-set-ids>",
 		Description: `
 Force deregisters operator sets. This can be use to deregister from any operator set in the AVS if in case AVS does not provide a way to deregister. This does not require any signature from the AVS.
+
+<avs-address> is the address of the AVS contract
+<operator-set-ids> is a comma-separated list of operator set IDs to deregister from
 `,
 		Flags: getDeregisterFlags(),
 		Action: func(c *cli.Context) error {
 			return deregisterOperatorSet(c, p)
 		},
+		// TODO(shrimalmadhur): Add this flag when we test it
+		Hidden: true,
 	}
 }
 
 func getDeregisterFlags() []cli.Flag {
 	baseFlags := []cli.Flag{
-		&flags.OperatorSetIdsFlag,
-		&flags.AvsAddressFlag,
 		&flags.NetworkFlag,
 		&flags.OperatorAddressFlag,
 		&flags.VerboseFlag,
@@ -74,7 +79,7 @@ func deregisterOperatorSet(c *cli.Context, p utils.Prompter) error {
 
 	config, err := readAndValidateDeregisterConfig(c, logger)
 	if err != nil {
-		return eigenSdkUtils.WrapError("failed to read and validate claim config", err)
+		return eigenSdkUtils.WrapError("failed to read and validate force deregister config. use --help", err)
 	}
 	c.App.Metadata["network"] = config.chainId.String()
 	avsDirectoryAddress, err := common.GetAVSDirectoryAddress(*config.chainId)
@@ -160,9 +165,10 @@ func deregisterOperatorSet(c *cli.Context, p utils.Prompter) error {
 			} else {
 				fmt.Println(calldataHex)
 			}
-		} else if config.outputType == string(common.OutputType_Pretty) {
+		} else {
 			fmt.Println("Force Deregister Operator Set")
-			fmt.Println("Operator Address:", config.operatorAddress.String())
+
+			fmt.Println("Operator Address (required if operator is not the sender):", config.operatorAddress.String())
 			fmt.Println("AVS Address:", config.avsAddress.String())
 			// Convert uint32 to strings
 			stringSlice := make([]string, len(config.operatorSetIds))
@@ -171,8 +177,6 @@ func deregisterOperatorSet(c *cli.Context, p utils.Prompter) error {
 			}
 			fmt.Println("Operator Set IDs:", strings.Join(stringSlice, ","))
 			fmt.Println("To broadcast the force deregister, use the --broadcast flag")
-		} else {
-			return fmt.Errorf("output type %s not supported for this command", config.outputType)
 		}
 	}
 	return nil
@@ -192,8 +196,16 @@ func readAndValidateDeregisterConfig(c *cli.Context, logger logging.Logger) (*de
 		return nil, err
 	}
 
-	operatorSetIds := uint64ArrayToUint32Array(c.Uint64Slice(flags.OperatorSetIdsFlag.Name))
-	avsAddress := gethcommon.HexToAddress(c.String(flags.AvsAddressFlag.Name))
+	args := c.Args().Slice()
+	if len(args) != 2 {
+		return nil, errors.New("invalid number of arguments")
+	}
+	avsAddress := gethcommon.HexToAddress(c.Args().Get(0))
+	operatorSetIds, err := stringToUnit32Array(strings.Split(c.Args().Get(1), ","))
+	if err != nil {
+		return nil, err
+	}
+
 	operatorAddress := gethcommon.HexToAddress(c.String(flags.OperatorAddressFlag.Name))
 	signer, err := common.GetSignerConfig(c, logger)
 	if err != nil {
@@ -216,11 +228,25 @@ func readAndValidateDeregisterConfig(c *cli.Context, logger logging.Logger) (*de
 	}, nil
 }
 
-func uint64ArrayToUint32Array(arr []uint64) []uint32 {
-	// Convert a uint64 array to a uint32 array
+func stringToUnit32Array(arr []string) ([]uint32, error) {
+	// Convert a string array to an uint32 array
 	res := make([]uint32, len(arr))
 	for i, v := range arr {
-		res[i] = uint32(v)
+		vUint, err := parseStringToUint32Array(v)
+		if err != nil {
+			return nil, err
+		}
+		res[i] = vUint
 	}
-	return res
+	return res, nil
+}
+
+func parseStringToUint32Array(s string) (uint32, error) {
+	// Convert a string to uint32
+	parseUint, err := strconv.ParseUint(s, 10, 32)
+	if err != nil {
+		return 0, err
+	}
+
+	return uint32(parseUint), nil
 }

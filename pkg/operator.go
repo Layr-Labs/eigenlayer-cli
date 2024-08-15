@@ -17,8 +17,7 @@ func OperatorCmd(p utils.Prompter) *cli.Command {
 			operator.StatusCmd(p),
 			operator.UpdateCmd(p),
 			operator.UpdateMetadataURICmd(p),
-
-			//operator.OperatorSetCmd(p),
+			operator.ForceDeregister(p),
 		},
 	}
 
