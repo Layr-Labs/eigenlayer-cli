@@ -86,7 +86,7 @@ This command only updates above details. To update metadata URI, use eigenlayer 
 				return err
 			}
 
-			receipt, err := elWriter.UpdateOperatorDetails(context.Background(), operatorCfg.Operator)
+			receipt, err := elWriter.UpdateOperatorDetails(context.Background(), operatorCfg.Operator, true)
 			if err != nil {
 				return err
 			}

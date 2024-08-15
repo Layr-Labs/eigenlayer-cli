@@ -20,7 +20,6 @@ import (
 	contractrewardscoordinator "github.com/Layr-Labs/eigenlayer-contracts/pkg/bindings/IRewardsCoordinator"
 
 	"github.com/Layr-Labs/eigenlayer-rewards-proofs/pkg/claimgen"
-	"github.com/Layr-Labs/eigenlayer-rewards-proofs/pkg/proofDataFetcher"
 	"github.com/Layr-Labs/eigenlayer-rewards-proofs/pkg/proofDataFetcher/httpProofDataFetcher"
 
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
@@ -187,7 +186,7 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 			return eigenSdkUtils.WrapError("failed to create new writer from config", err)
 		}
 
-		receipt, err := eLWriter.ProcessClaim(ctx, elClaim, config.RecipientAddress)
+		receipt, err := eLWriter.ProcessClaim(ctx, elClaim, config.RecipientAddress, true)
 		if err != nil {
 			return eigenSdkUtils.WrapError("failed to process claim", err)
 		}
@@ -268,7 +267,6 @@ func getClaimDistributionRoot(
 			return "", 0, eigenSdkUtils.WrapError("failed to get latest submitted timestamp", err)
 		}
 		claimDate := time.Unix(int64(latestSubmittedTimestamp), 0).UTC().Format(time.DateOnly)
-		logger.Debugf("Latest submitted timestamp: %s", claimDate)
 
 		rootCount, err := elReader.GetDistributionRootsLength(&bind.CallOpts{})
 		if err != nil {
@@ -276,41 +274,25 @@ func getClaimDistributionRoot(
 		}
 
 		rootIndex := uint32(rootCount.Uint64() - 1)
+		logger.Debugf("Latest active rewards snapshot timestamp: %s, root index: %d", claimDate, rootIndex)
 		return claimDate, rootIndex, nil
 	} else if claimTimestamp == "latest_active" {
-		// Get the latest 10 roots
-		postedRoots, err := df.FetchPostedRewards(ctx)
+		latestClaimableRoot, err := elReader.GetCurrentClaimableDistributionRoot(&bind.CallOpts{})
 		if err != nil {
-			return "", 0, eigenSdkUtils.WrapError("failed to fetch posted rewards", err)
+			return "", 0, eigenSdkUtils.WrapError("failed to get latest claimable root", err)
 		}
 
-		ts, rootIndex, err := getLatestActivePostedRoot(postedRoots)
+		rootIndex, err := elReader.GetRootIndexFromHash(&bind.CallOpts{}, latestClaimableRoot.Root)
 		if err != nil {
-			return "", 0, eigenSdkUtils.WrapError("failed to get latest active posted root", err)
+			return "", 0, eigenSdkUtils.WrapError("failed to get root index from hash", err)
 		}
-		logger.Debugf("Latest active posted root timestamp: %s, index: %d", ts, rootIndex)
+
+		ts := time.Unix(int64(latestClaimableRoot.RewardsCalculationEndTimestamp), 0).UTC().Format(time.DateOnly)
+		logger.Debugf("Latest rewards snapshot timestamp: %s, root index: %d", ts, rootIndex)
 
 		return ts, rootIndex, nil
 	}
 	return "", 0, errors.New("invalid claim timestamp")
-}
-
-// getLatestActivePostedRoot returns the latest active posted root by sorting the roots by the latest calculated end
-// timestamp in descending order and checking the latest timestamp which activated before the current time
-func getLatestActivePostedRoot(postedRoots []*proofDataFetcher.SubmittedRewardRoot) (string, uint32, error) {
-	// sort by latest calculated end timestamp
-	sort.Slice(postedRoots, func(i, j int) bool {
-		return postedRoots[i].CalcEndTimestamp.After(postedRoots[j].CalcEndTimestamp)
-	})
-
-	currTime := time.Now()
-	for _, postedRoot := range postedRoots {
-		if postedRoot.ActivatedAt.Before(currTime) {
-			return postedRoot.GetRewardDate(), postedRoot.RootIndex, nil
-		}
-		// There is no else here because on of last 10 root be
-	}
-	return "", 0, errors.New("no active posted roots found")
 }
 
 func convertClaimTokenLeaves(

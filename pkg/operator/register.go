@@ -102,7 +102,7 @@ func RegisterCmd(p utils.Prompter) *cli.Command {
 			}
 
 			if !status {
-				receipt, err := elWriter.RegisterAsOperator(ctx, operatorCfg.Operator)
+				receipt, err := elWriter.RegisterAsOperator(ctx, operatorCfg.Operator, true)
 				if err != nil {
 					return err
 				}

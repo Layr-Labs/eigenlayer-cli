@@ -157,7 +157,7 @@ func SetClaimer(cCtx *cli.Context, p utils.Prompter) error {
 		return err
 	}
 
-	receipt, err := elWriter.SetClaimerFor(context.Background(), config.ClaimerAddress)
+	receipt, err := elWriter.SetClaimerFor(context.Background(), config.ClaimerAddress, true)
 	if err != nil {
 		return err
 	}
