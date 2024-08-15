@@ -390,6 +390,11 @@ func readAndValidateClaimConfig(cCtx *cli.Context, logger logging.Logger) (*Clai
 		logger.Debugf("Failed to get signer config: %s", err)
 	}
 
+	// TODO(shrimalmadhur): Fix to make sure correct S3 bucket is used. Clean up later
+	if network == utils.MainnetNetworkName {
+		network = "ethereum"
+	}
+
 	return &ClaimConfig{
 		Network:                   network,
 		RPCUrl:                    rpcUrl,
@@ -413,7 +418,7 @@ func getEnvFromNetwork(network string) string {
 	case utils.HoleskyNetworkName:
 		return "testnet"
 	case utils.MainnetNetworkName:
-		return "prod"
+		return "mainnet"
 	default:
 		return "local"
 	}
