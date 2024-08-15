@@ -2,14 +2,10 @@ package rewards
 
 import (
 	"flag"
-	"os"
-	"testing"
-	"time"
-
-	"github.com/Layr-Labs/eigenlayer-rewards-proofs/pkg/proofDataFetcher"
-
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/testutils"
+	"os"
+	"testing"
 
 	"github.com/Layr-Labs/eigensdk-go/logging"
 
@@ -54,84 +50,4 @@ func TestReadAndValidateConfig_RecipientProvided(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Equal(t, common.HexToAddress(recipientAddress), config.RecipientAddress)
-}
-
-func TestGetLatestActivePostedRoot(t *testing.T) {
-	now := time.Now().UTC()
-	var tests = []struct {
-		name                   string
-		postedRoots            []*proofDataFetcher.SubmittedRewardRoot
-		expectedRootIndex      uint32
-		rewardsTimestampString string
-	}{
-		{
-			name: "found an activated root before current time",
-			postedRoots: []*proofDataFetcher.SubmittedRewardRoot{
-				{
-					RootIndex:        1,
-					ActivatedAt:      now,
-					CalcEndTimestamp: now.Add(-24 * time.Hour),
-				},
-				{
-					RootIndex:        2,
-					ActivatedAt:      now.Add(-2 * time.Hour),
-					CalcEndTimestamp: now.Add(-48 * time.Hour),
-				},
-				{
-					RootIndex:        3,
-					ActivatedAt:      now.Add(1 * time.Hour),
-					CalcEndTimestamp: now,
-				},
-			},
-			expectedRootIndex:      1,
-			rewardsTimestampString: now.Add(-24 * time.Hour).Format(time.DateOnly),
-		},
-		{
-			name: "found no activated root before current time",
-			postedRoots: []*proofDataFetcher.SubmittedRewardRoot{
-				{
-					RootIndex:        3,
-					ActivatedAt:      now.Add(1 * time.Hour),
-					CalcEndTimestamp: now,
-				},
-				{
-					RootIndex:        4,
-					ActivatedAt:      now.Add(2 * time.Hour),
-					CalcEndTimestamp: now.Add(3 * time.Hour),
-				},
-			},
-			expectedRootIndex: 0,
-		},
-		{
-			name: "found an activated root before current time 2",
-			postedRoots: []*proofDataFetcher.SubmittedRewardRoot{
-				{
-					RootIndex:        2,
-					ActivatedAt:      now.Add(-2 * time.Hour),
-					CalcEndTimestamp: now.Add(-24 * time.Hour),
-				},
-				{
-					RootIndex:        3,
-					ActivatedAt:      now.Add(1 * time.Hour),
-					CalcEndTimestamp: now.Add(-48 * time.Hour),
-				},
-			},
-			expectedRootIndex:      2,
-			rewardsTimestampString: now.Add(-24 * time.Hour).Format(time.DateOnly),
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			actualRewardTimeString, actualRootIndex, err := getLatestActivePostedRoot(tt.postedRoots)
-			if tt.expectedRootIndex == 0 {
-				assert.Error(t, err)
-			} else {
-				assert.NoError(t, err)
-				assert.Equal(t, tt.rewardsTimestampString, actualRewardTimeString)
-			}
-			assert.Equal(t, tt.expectedRootIndex, actualRootIndex)
-
-		})
-	}
 }

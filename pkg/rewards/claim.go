@@ -20,7 +20,6 @@ import (
 	contractrewardscoordinator "github.com/Layr-Labs/eigenlayer-contracts/pkg/bindings/IRewardsCoordinator"
 
 	"github.com/Layr-Labs/eigenlayer-rewards-proofs/pkg/claimgen"
-	"github.com/Layr-Labs/eigenlayer-rewards-proofs/pkg/proofDataFetcher"
 	"github.com/Layr-Labs/eigenlayer-rewards-proofs/pkg/proofDataFetcher/httpProofDataFetcher"
 
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
@@ -294,24 +293,6 @@ func getClaimDistributionRoot(
 		return ts, rootIndex, nil
 	}
 	return "", 0, errors.New("invalid claim timestamp")
-}
-
-// getLatestActivePostedRoot returns the latest active posted root by sorting the roots by the latest calculated end
-// timestamp in descending order and checking the latest timestamp which activated before the current time
-func getLatestActivePostedRoot(postedRoots []*proofDataFetcher.SubmittedRewardRoot) (string, uint32, error) {
-	// sort by latest calculated end timestamp
-	sort.Slice(postedRoots, func(i, j int) bool {
-		return postedRoots[i].CalcEndTimestamp.After(postedRoots[j].CalcEndTimestamp)
-	})
-
-	currTime := time.Now()
-	for _, postedRoot := range postedRoots {
-		if postedRoot.ActivatedAt.Before(currTime) {
-			return postedRoot.GetRewardDate(), postedRoot.RootIndex, nil
-		}
-		// There is no else here because on of last 10 root be
-	}
-	return "", 0, errors.New("no active posted roots found")
 }
 
 func convertClaimTokenLeaves(
