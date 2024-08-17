@@ -2,10 +2,11 @@ package rewards
 
 import (
 	"flag"
-	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
-	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/testutils"
 	"os"
 	"testing"
+
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/testutils"
 
 	"github.com/Layr-Labs/eigensdk-go/logging"
 

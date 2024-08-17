@@ -194,20 +194,19 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 		logger.Infof("Claim transaction submitted successfully")
 		common.PrintTransactionInfo(receipt.TxHash.String(), config.ChainID)
 	} else {
+		noSendTxOpts := common.GetNoSendTxOpts(config.EarnerAddress)
+		_, _, contractBindings, err := elcontracts.BuildClients(elcontracts.Config{
+			RewardsCoordinatorAddress: config.RewardsCoordinatorAddress,
+		}, ethClient, nil, logger, nil)
+		if err != nil {
+			return err
+		}
+
+		unsignedTx, err := contractBindings.RewardsCoordinator.ProcessClaim(noSendTxOpts, elClaim, config.RecipientAddress)
+		if err != nil {
+			return err
+		}
 		if config.OutputType == string(common.OutputType_Calldata) {
-			noSendTxOpts := common.GetNoSendTxOpts(config.EarnerAddress)
-			_, _, contractBindings, err := elcontracts.BuildClients(elcontracts.Config{
-				RewardsCoordinatorAddress: config.RewardsCoordinatorAddress,
-			}, ethClient, nil, logger, nil)
-			if err != nil {
-				return err
-			}
-
-			unsignedTx, err := contractBindings.RewardsCoordinator.ProcessClaim(noSendTxOpts, elClaim, config.RecipientAddress)
-			if err != nil {
-				return err
-			}
-
 			calldataHex := gethcommon.Bytes2Hex(unsignedTx.Data())
 
 			if !common.IsEmptyString(config.Output) {
@@ -248,6 +247,9 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 			fmt.Println("-------------------------------")
 			fmt.Println("To write to a file, use the --output flag")
 		}
+		txFeeDetails := common.GetTxFeeDetails(unsignedTx)
+		fmt.Println()
+		txFeeDetails.Print()
 		fmt.Println("To broadcast the claim, use the --broadcast flag")
 	}
 
@@ -262,13 +264,13 @@ func getClaimDistributionRoot(
 	logger logging.Logger,
 ) (string, uint32, error) {
 	if claimTimestamp == "latest" {
-		latestSubmittedTimestamp, err := elReader.CurrRewardsCalculationEndTimestamp(&bind.CallOpts{})
+		latestSubmittedTimestamp, err := elReader.CurrRewardsCalculationEndTimestamp(&bind.CallOpts{Context: ctx})
 		if err != nil {
 			return "", 0, eigenSdkUtils.WrapError("failed to get latest submitted timestamp", err)
 		}
 		claimDate := time.Unix(int64(latestSubmittedTimestamp), 0).UTC().Format(time.DateOnly)
 
-		rootCount, err := elReader.GetDistributionRootsLength(&bind.CallOpts{})
+		rootCount, err := elReader.GetDistributionRootsLength(&bind.CallOpts{Context: ctx})
 		if err != nil {
 			return "", 0, eigenSdkUtils.WrapError("failed to get number of published roots", err)
 		}
@@ -277,12 +279,12 @@ func getClaimDistributionRoot(
 		logger.Debugf("Latest active rewards snapshot timestamp: %s, root index: %d", claimDate, rootIndex)
 		return claimDate, rootIndex, nil
 	} else if claimTimestamp == "latest_active" {
-		latestClaimableRoot, err := elReader.GetCurrentClaimableDistributionRoot(&bind.CallOpts{})
+		latestClaimableRoot, err := elReader.GetCurrentClaimableDistributionRoot(&bind.CallOpts{Context: ctx})
 		if err != nil {
 			return "", 0, eigenSdkUtils.WrapError("failed to get latest claimable root", err)
 		}
 
-		rootIndex, err := elReader.GetRootIndexFromHash(&bind.CallOpts{}, latestClaimableRoot.Root)
+		rootIndex, err := elReader.GetRootIndexFromHash(&bind.CallOpts{Context: ctx}, latestClaimableRoot.Root)
 		if err != nil {
 			return "", 0, eigenSdkUtils.WrapError("failed to get root index from hash", err)
 		}

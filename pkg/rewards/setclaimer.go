@@ -87,16 +87,17 @@ func SetClaimer(cCtx *cli.Context, p utils.Prompter) error {
 	}
 
 	if !config.Broadcast {
-		if config.OutputType == string(common.OutputType_Calldata) {
-			_, _, contractBindings, err := elcontracts.BuildClients(elcontracts.Config{
-				RewardsCoordinatorAddress: config.RewardsCoordinatorAddress,
-			}, ethClient, nil, logger, nil)
-			if err != nil {
-				return err
-			}
+		_, _, contractBindings, err := elcontracts.BuildClients(elcontracts.Config{
+			RewardsCoordinatorAddress: config.RewardsCoordinatorAddress,
+		}, ethClient, nil, logger, nil)
+		if err != nil {
+			return err
+		}
 
-			noSendTxOpts := common.GetNoSendTxOpts(config.EarnerAddress)
-			unsignedTx, err := contractBindings.RewardsCoordinator.SetClaimerFor(noSendTxOpts, config.ClaimerAddress)
+		noSendTxOpts := common.GetNoSendTxOpts(config.EarnerAddress)
+		unsignedTx, err := contractBindings.RewardsCoordinator.SetClaimerFor(noSendTxOpts, config.ClaimerAddress)
+
+		if config.OutputType == string(common.OutputType_Calldata) {
 			if err != nil {
 				return err
 			}
@@ -122,6 +123,10 @@ func SetClaimer(cCtx *cli.Context, p utils.Prompter) error {
 		} else {
 			return fmt.Errorf("unsupported output type for this command %s", config.Output)
 		}
+		txFeeDetails := common.GetTxFeeDetails(unsignedTx)
+		fmt.Println()
+		txFeeDetails.Print()
+		fmt.Println("To broadcast the claim, use the --broadcast flag")
 
 		return nil
 	}
