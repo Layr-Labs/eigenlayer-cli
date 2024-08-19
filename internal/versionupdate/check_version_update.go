@@ -67,7 +67,9 @@ func Check(currentVersion string) {
 		fmt.Println()
 		fmt.Printf("There is a new version (%s) for this library available.\n", greenVersion)
 		fmt.Printf("Your current running verison is (%s).\n", yellowOldVersion)
-		fmt.Println("Please update (https://github.com/Layr-Labs/eigenlayer-cli#install-eigenlayer-cli-using-a-binary) to get latest features and bug fixes.")
+		fmt.Println(
+			"Please update (https://github.com/Layr-Labs/eigenlayer-cli#install-eigenlayer-cli-using-a-binary) to get latest features and bug fixes.",
+		)
 		fmt.Println()
 	}
 }
