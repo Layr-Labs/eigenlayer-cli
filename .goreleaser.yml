@@ -14,26 +14,15 @@ builds:
       - -X 'github.com/Layr-Labs/eigenlayer-cli/pkg/rewards.testnetUrl={{.Env.EIGENLAYER_BACKEND_TESTNET_URL}}'
     # windows is ignored by default, as the `goos` field by default only
     # contains linux and darwin
+    env:
+        - CGO_ENABLED=0
     goos:
       - linux
       - darwin
     goarch:
       - amd64
       - arm64
-    overrides:
-      - goos: linux
-        goarch: arm64
-        env:
-          - CC=aarch64-linux-gnu-gcc
-      - goos: darwin
-        goarch: arm64
-        env:
-          - CC=oa64-clang
-      - goos: darwin
-        goarch: amd64
-        goamd64: v1
-        env:
-          - CC=o64-clang
+
 release:
   # Repo in which the release will be created.
   # Default is extracted from the origin remote URL or empty if its private hosted.
