@@ -1,4 +1,6 @@
 # ref. https://goreleaser.com/customization/build/
+version: 2
+
 builds:
   - id: eigenlayer-cli
     main: ./cmd/eigenlayer/main.go
