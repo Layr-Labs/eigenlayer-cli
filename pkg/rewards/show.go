@@ -35,6 +35,9 @@ const (
 	All       ClaimType = "all"
 	Unclaimed ClaimType = "unclaimed"
 	Claimed   ClaimType = "claimed"
+
+	GetClaimableRewardsEndpoint        = "grpc/eigenlayer.RewardsService/GetClaimableRewards"
+	GetEarnedTokensForStrategyEndpoint = "grpc/eigenlayer.RewardsService/GetEarnedTokensForStrategy"
 )
 
 type ShowConfig struct {
@@ -93,7 +96,7 @@ func ShowRewards(cCtx *cli.Context) error {
 	cCtx.App.Metadata["network"] = config.ChainID.String()
 
 	url := testnetUrl
-	if config.Environment == "prod" {
+	if config.Environment == "mainnet" {
 		url = mainnetUrl
 	} else if config.Environment == "preprod" {
 		url = preprodUrl
@@ -105,7 +108,7 @@ func ShowRewards(cCtx *cli.Context) error {
 			"days":          fmt.Sprintf("%d", absInt64(config.NumberOfDays)),
 		}
 		resp, err := post(
-			fmt.Sprintf("%s/%s", url, "grpc/eigenlayer.RewardsService/GetEarnedTokensForStrategy"),
+			fmt.Sprintf("%s/%s", url, GetEarnedTokensForStrategyEndpoint),
 			requestBody,
 		)
 		if err != nil {
@@ -133,7 +136,8 @@ func ShowRewards(cCtx *cli.Context) error {
 		requestBody := map[string]string{
 			"earnerAddress": config.EarnerAddress.String(),
 		}
-		resp, err := post(fmt.Sprintf("%s/%s", url, "grpc/eigenlayer.RewardsService/GetUpcomingRewardDetails"), requestBody)
+		claimableRewardsUrl := fmt.Sprintf("%s/%s", url, GetClaimableRewardsEndpoint)
+		resp, err := post(claimableRewardsUrl, requestBody)
 		if err != nil {
 			return err
 		}
