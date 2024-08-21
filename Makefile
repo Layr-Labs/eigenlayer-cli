@@ -3,7 +3,7 @@
 include .env
 
 GO_LINES_IGNORED_DIRS=
-GO_PACKAGES=./pkg/... ./cmd/...
+GO_PACKAGES=./pkg/... ./cmd/... ./internal/...
 GO_FOLDERS=$(shell echo ${GO_PACKAGES} | sed -e "s/\.\///g" | sed -e "s/\/\.\.\.//g")
 
 help:

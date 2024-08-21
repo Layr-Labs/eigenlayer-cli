@@ -7,15 +7,15 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
-
-	"github.com/urfave/cli/v2"
 
 	"github.com/Layr-Labs/eigensdk-go/crypto/bls"
 
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
 	prompterMock "github.com/Layr-Labs/eigenlayer-cli/pkg/utils/mocks"
+
 	"github.com/stretchr/testify/assert"
+	"github.com/urfave/cli/v2"
 	"go.uber.org/mock/gomock"
 )
 
@@ -202,7 +202,7 @@ func TestImportCmd(t *testing.T) {
 				if tt.args[1] == KeyTypeECDSA {
 					key, err := GetECDSAPrivateKey(tt.keyPath, "")
 					assert.NoError(t, err)
-					assert.Equal(t, strings.Trim(tt.args[3], "0x"), hex.EncodeToString(key.D.Bytes()))
+					assert.Equal(t, common.Trim0x(tt.args[3]), hex.EncodeToString(key.D.Bytes()))
 				} else if tt.args[1] == KeyTypeBLS {
 					key, err := bls.ReadPrivateKeyFromFile(tt.keyPath, "")
 					assert.NoError(t, err)
