@@ -342,7 +342,7 @@ func GetSignerConfig(cCtx *cli.Context, logger eigensdkLogger.Logger) (*types.Si
 	ecdsaPrivateKeyString := cCtx.String(flags.EcdsaPrivateKeyFlag.Name)
 	if !IsEmptyString(ecdsaPrivateKeyString) {
 		logger.Debug("Using private key signer")
-		pk, err := crypto.HexToECDSA(ecdsaPrivateKeyString)
+		pk, err := crypto.HexToECDSA(Trim0x(ecdsaPrivateKeyString))
 		if err != nil {
 			return nil, err
 		}
@@ -437,4 +437,8 @@ func GetNoSendTxOpts(from common.Address) *bind.TransactOpts {
 		Signer: noopSigner,
 		NoSend: true,
 	}
+}
+
+func Trim0x(s string) string {
+	return strings.TrimPrefix(s, "0x")
 }

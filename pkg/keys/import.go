@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"math/big"
 	"regexp"
-	"strings"
 
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
-
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
+
 	"github.com/Layr-Labs/eigensdk-go/crypto/bls"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/urfave/cli/v2"
@@ -65,7 +65,7 @@ This command will import keys in $HOME/.eigenlayer/operator_keys/ location
 
 			switch keyType {
 			case KeyTypeECDSA:
-				privateKey = strings.TrimPrefix(privateKey, "0x")
+				privateKey = common.Trim0x(privateKey)
 				privateKeyPair, err := crypto.HexToECDSA(privateKey)
 				if err != nil {
 					return err
@@ -86,7 +86,7 @@ This command will import keys in $HOME/.eigenlayer/operator_keys/ location
 					// Try to parse as hex
 					fmt.Println("Importing from hex")
 					z := new(big.Int)
-					privateKey = strings.TrimPrefix(privateKey, "0x")
+					privateKey = common.Trim0x(privateKey)
 					_, ok := z.SetString(privateKey, 16)
 					if !ok {
 						return ErrInvalidHexPrivateKey
