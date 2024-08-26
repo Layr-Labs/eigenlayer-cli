@@ -3,8 +3,10 @@ package common
 import (
 	"fmt"
 	"math/big"
+	"strconv"
 	"strings"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 )
 
@@ -45,4 +47,48 @@ func GetTxFeeDetails(tx *types.Transaction) *TxFeeDetails {
 		GasTipCapGwei: gasTipCapGwei,
 		GasFeeCapGwei: gasFeeCapGwei,
 	}
+}
+
+func ConvertStringSliceToGethAddressSlice(addresses []string) []common.Address {
+	gethAddresses := make([]common.Address, 0, len(addresses))
+	for _, address := range addresses {
+		parsed := common.HexToAddress(address)
+		gethAddresses = append(gethAddresses, parsed)
+	}
+	return gethAddresses
+}
+
+func ShortEthAddress(address common.Address) string {
+	return fmt.Sprintf("%s...%s", address.Hex()[:6], address.Hex()[len(address.Hex())-4:])
+}
+
+func Uint64ToString(num uint64) string {
+	return strconv.FormatUint(num, 10)
+}
+
+func FormatNumberWithUnderscores(numStr string) string {
+
+	// If the number is less than 1000, no formatting is needed
+	if len(numStr) <= 3 {
+		return numStr
+	}
+
+	// Calculate the number of groups of 3 digits
+	groups := (len(numStr) - 1) / 3
+
+	// Create a slice to hold the result
+	result := make([]byte, len(numStr)+groups)
+
+	// Fill the result slice from right to left
+	resultIndex := len(result) - 1
+	for i := len(numStr) - 1; i >= 0; i-- {
+		if (len(numStr)-i-1)%3 == 0 && i != len(numStr)-1 {
+			result[resultIndex] = '_'
+			resultIndex--
+		}
+		result[resultIndex] = numStr[i]
+		resultIndex--
+	}
+
+	return string(result)
 }
