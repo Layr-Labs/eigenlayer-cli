@@ -27,7 +27,7 @@ import (
 )
 
 type fakeELReader struct {
-	roots                 []rewardscoordinator.IRewardsCoordinatorDistributionRoot
+	roots                 []rewardscoordinator.IRewardsCoordinatorTypesDistributionRoot
 	earnerTokenClaimedMap map[common.Address]map[common.Address]*big.Int
 }
 
@@ -35,8 +35,8 @@ func newFakeELReader(
 	now time.Time,
 	earnerTokenClaimedMap map[common.Address]map[common.Address]*big.Int,
 ) *fakeELReader {
-	roots := make([]rewardscoordinator.IRewardsCoordinatorDistributionRoot, 0)
-	rootOne := rewardscoordinator.IRewardsCoordinatorDistributionRoot{
+	roots := make([]rewardscoordinator.IRewardsCoordinatorTypesDistributionRoot, 0)
+	rootOne := rewardscoordinator.IRewardsCoordinatorTypesDistributionRoot{
 		Root:                           [32]byte{0x01},
 		RewardsCalculationEndTimestamp: uint32(now.Add(-time.Hour).Unix()),
 		ActivatedAt:                    uint32(now.Add(time.Hour).Unix()),
@@ -44,14 +44,14 @@ func newFakeELReader(
 	}
 
 	// This is the current claimable distribution root
-	rootTwo := rewardscoordinator.IRewardsCoordinatorDistributionRoot{
+	rootTwo := rewardscoordinator.IRewardsCoordinatorTypesDistributionRoot{
 		Root:                           [32]byte{0x02},
 		RewardsCalculationEndTimestamp: uint32(now.Add(48 * -time.Hour).Unix()),
 		ActivatedAt:                    uint32(now.Add(-24 * time.Hour).Unix()),
 		Disabled:                       false,
 	}
 
-	rootThree := rewardscoordinator.IRewardsCoordinatorDistributionRoot{
+	rootThree := rewardscoordinator.IRewardsCoordinatorTypesDistributionRoot{
 		Root:                           [32]byte{0x03},
 		RewardsCalculationEndTimestamp: uint32(now.Add(32 * -time.Hour).Unix()),
 		ActivatedAt:                    uint32(now.Add(-12 * time.Minute).Unix()),
@@ -84,7 +84,7 @@ func (f *fakeELReader) GetRootIndexFromHash(ctx context.Context, hash [32]byte) 
 
 func (f *fakeELReader) GetCurrentClaimableDistributionRoot(
 	ctx context.Context,
-) (rewardscoordinator.IRewardsCoordinatorDistributionRoot, error) {
+) (rewardscoordinator.IRewardsCoordinatorTypesDistributionRoot, error) {
 	// iterate from end to start since we want the latest active root
 	// and the roots are sorted in ascending order of activation time
 	for i := len(f.roots) - 1; i >= 0; i-- {
@@ -93,7 +93,9 @@ func (f *fakeELReader) GetCurrentClaimableDistributionRoot(
 		}
 	}
 
-	return rewardscoordinator.IRewardsCoordinatorDistributionRoot{}, errors.New("no active distribution root found")
+	return rewardscoordinator.IRewardsCoordinatorTypesDistributionRoot{}, errors.New(
+		"no active distribution root found",
+	)
 }
 
 func (f *fakeELReader) GetCumulativeClaimed(

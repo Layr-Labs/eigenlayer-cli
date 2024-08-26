@@ -44,7 +44,7 @@ type elChainReader interface {
 	GetRootIndexFromHash(ctx context.Context, hash [32]byte) (uint32, error)
 	GetCurrentClaimableDistributionRoot(
 		ctx context.Context,
-	) (rewardscoordinator.IRewardsCoordinatorDistributionRoot, error)
+	) (rewardscoordinator.IRewardsCoordinatorTypesDistributionRoot, error)
 	CurrRewardsCalculationEndTimestamp(ctx context.Context) (uint32, error)
 	GetCumulativeClaimed(ctx context.Context, earnerAddress, tokenAddress gethcommon.Address) (*big.Int, error)
 }
@@ -114,7 +114,7 @@ func batchClaim(
 		return eigenSdkUtils.WrapError("failed to parse YAML config", err)
 	}
 
-	var elClaims []rewardscoordinator.IRewardsCoordinatorRewardsMerkleClaim
+	var elClaims []rewardscoordinator.IRewardsCoordinatorTypesRewardsMerkleClaim
 	var claims []contractrewardscoordinator.IRewardsCoordinatorRewardsMerkleClaim
 	var accounts []merkletree.MerkleTree
 
@@ -163,7 +163,7 @@ func generateClaimPayload(
 	logger logging.Logger,
 	earnerAddress gethcommon.Address,
 	tokenAddresses []gethcommon.Address,
-) (*rewardscoordinator.IRewardsCoordinatorRewardsMerkleClaim, *contractrewardscoordinator.IRewardsCoordinatorRewardsMerkleClaim, *merkletree.MerkleTree, error) {
+) (*rewardscoordinator.IRewardsCoordinatorTypesRewardsMerkleClaim, *contractrewardscoordinator.IRewardsCoordinatorRewardsMerkleClaim, *merkletree.MerkleTree, error) {
 
 	claimableTokensOrderMap, present := proofData.Distribution.GetTokensForEarner(earnerAddress)
 	if !present {
@@ -187,11 +187,11 @@ func generateClaimPayload(
 		return nil, nil, nil, eigenSdkUtils.WrapError("failed to generate claim proof for earner", err)
 	}
 
-	elClaim := rewardscoordinator.IRewardsCoordinatorRewardsMerkleClaim{
+	elClaim := rewardscoordinator.IRewardsCoordinatorTypesRewardsMerkleClaim{
 		RootIndex:       claim.RootIndex,
 		EarnerIndex:     claim.EarnerIndex,
 		EarnerTreeProof: claim.EarnerTreeProof,
-		EarnerLeaf: rewardscoordinator.IRewardsCoordinatorEarnerTreeMerkleLeaf{
+		EarnerLeaf: rewardscoordinator.IRewardsCoordinatorTypesEarnerTreeMerkleLeaf{
 			Earner:          claim.EarnerLeaf.Earner,
 			EarnerTokenRoot: claim.EarnerLeaf.EarnerTokenRoot,
 		},
@@ -279,7 +279,7 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 		return err
 	}
 
-	elClaims := []rewardscoordinator.IRewardsCoordinatorRewardsMerkleClaim{*elClaim}
+	elClaims := []rewardscoordinator.IRewardsCoordinatorTypesRewardsMerkleClaim{*elClaim}
 	claims := []contractrewardscoordinator.IRewardsCoordinatorRewardsMerkleClaim{*claim}
 	accounts := []merkletree.MerkleTree{*account}
 	err = broadcastClaims(config, ethClient, logger, p, ctx, elClaims, claims, accounts)
@@ -293,7 +293,7 @@ func broadcastClaims(
 	logger logging.Logger,
 	p utils.Prompter,
 	ctx context.Context,
-	elClaims []rewardscoordinator.IRewardsCoordinatorRewardsMerkleClaim,
+	elClaims []rewardscoordinator.IRewardsCoordinatorTypesRewardsMerkleClaim,
 	claims []contractrewardscoordinator.IRewardsCoordinatorRewardsMerkleClaim,
 	accounts []merkletree.MerkleTree,
 ) error {
@@ -346,11 +346,7 @@ func broadcastClaims(
 		// since balance of contract can be 0, as it can be called by an EOA
 		// to claim. So we hardcode the gas limit to 150_000 so that we can
 		// create unsigned tx without gas limit estimation from contract bindings
-		code, err := ethClient.CodeAt(ctx, config.ClaimerAddress, nil)
-		if err != nil {
-			return eigenSdkUtils.WrapError("failed to get code at address", err)
-		}
-		if len(code) > 0 {
+		if common.IsSmartContractAddress(config.ClaimerAddress, ethClient) {
 			// Claimer is a smart contract
 			noSendTxOpts.GasLimit = 150_000
 		}
@@ -528,10 +524,10 @@ func filterClaimableTokenAddresses(
 
 func convertClaimTokenLeaves(
 	claimTokenLeaves []contractrewardscoordinator.IRewardsCoordinatorTokenTreeMerkleLeaf,
-) []rewardscoordinator.IRewardsCoordinatorTokenTreeMerkleLeaf {
-	var tokenLeaves []rewardscoordinator.IRewardsCoordinatorTokenTreeMerkleLeaf
+) []rewardscoordinator.IRewardsCoordinatorTypesTokenTreeMerkleLeaf {
+	var tokenLeaves []rewardscoordinator.IRewardsCoordinatorTypesTokenTreeMerkleLeaf
 	for _, claimTokenLeaf := range claimTokenLeaves {
-		tokenLeaves = append(tokenLeaves, rewardscoordinator.IRewardsCoordinatorTokenTreeMerkleLeaf{
+		tokenLeaves = append(tokenLeaves, rewardscoordinator.IRewardsCoordinatorTypesTokenTreeMerkleLeaf{
 			Token:              claimTokenLeaf.Token,
 			CumulativeEarnings: claimTokenLeaf.CumulativeEarnings,
 		})
