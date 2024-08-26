@@ -2,6 +2,8 @@ module github.com/Layr-Labs/eigenlayer-cli
 
 go 1.21.11
 
+replace github.com/Layr-Labs/eigensdk-go v0.1.11 => /Users/madhurshrimal/Desktop/github/Layr-Labs/eigensdk-go
+
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
 	github.com/Layr-Labs/eigenlayer-contracts v0.3.2-mainnet-rewards

@@ -5,6 +5,7 @@ import (
 	"math/big"
 	"strings"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 )
 
@@ -45,4 +46,13 @@ func GetTxFeeDetails(tx *types.Transaction) *TxFeeDetails {
 		GasTipCapGwei: gasTipCapGwei,
 		GasFeeCapGwei: gasFeeCapGwei,
 	}
+}
+
+func ConvertStringSliceToGethAddressSlice(addresses []string) []common.Address {
+	gethAddresses := make([]common.Address, 0, len(addresses))
+	for _, address := range addresses {
+		parsed := common.HexToAddress(address)
+		gethAddresses = append(gethAddresses, parsed)
+	}
+	return gethAddresses
 }

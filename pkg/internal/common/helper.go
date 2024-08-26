@@ -473,3 +473,14 @@ func GetNoSendTxOpts(from common.Address) *bind.TransactOpts {
 func Trim0x(s string) string {
 	return strings.TrimPrefix(s, "0x")
 }
+
+func GetEnvFromNetwork(network string) string {
+	switch network {
+	case utils.HoleskyNetworkName:
+		return "testnet"
+	case utils.MainnetNetworkName:
+		return "mainnet"
+	default:
+		return "local"
+	}
+}
