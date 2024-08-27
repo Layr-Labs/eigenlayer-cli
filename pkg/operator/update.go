@@ -10,8 +10,7 @@ import (
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
-	"github.com/Layr-Labs/eigensdk-go/chainio/txmgr"
-	eigenMetrics "github.com/Layr-Labs/eigensdk-go/metrics"
+	eigenSdkUtils "github.com/Layr-Labs/eigensdk-go/utils"
 
 	gethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -63,27 +62,23 @@ This command only updates above details. To update metadata URI, use eigenlayer 
 				return err
 			}
 
-			keyWallet, sender, err := common.GetWallet(
-				operatorCfg.SignerConfig,
-				operatorCfg.Operator.Address,
-				ethClient,
-				p,
-				operatorCfg.ChainId,
-				logger,
-			)
-			if err != nil {
-				return err
-			}
-
-			txMgr := txmgr.NewSimpleTxManager(keyWallet, ethClient, logger, sender)
-			noopMetrics := eigenMetrics.NewNoopMetrics()
 			contractCfg := elcontracts.Config{
 				DelegationManagerAddress: gethcommon.HexToAddress(operatorCfg.ELDelegationManagerAddress),
 				AvsDirectoryAddress:      gethcommon.HexToAddress(operatorCfg.ELAVSDirectoryAddress),
 			}
-			elWriter, err := elcontracts.NewWriterFromConfig(contractCfg, ethClient, logger, noopMetrics, txMgr)
+
+			elWriter, err := common.GetELWriter(
+				gethcommon.HexToAddress(operatorCfg.Operator.Address),
+				&operatorCfg.SignerConfig,
+				ethClient,
+				contractCfg,
+				p,
+				&operatorCfg.ChainId,
+				logger,
+			)
+
 			if err != nil {
-				return err
+				return eigenSdkUtils.WrapError("failed to get EL writer", err)
 			}
 
 			receipt, err := elWriter.UpdateOperatorDetails(context.Background(), operatorCfg.Operator, true)

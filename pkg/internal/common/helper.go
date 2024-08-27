@@ -51,7 +51,7 @@ func PrintTransactionInfo(txHash string, chainId *big.Int) {
 	}
 }
 
-func GetWallet(
+func getWallet(
 	cfg types.SignerConfig,
 	signerAddress string,
 	ethClient *ethclient.Client,
