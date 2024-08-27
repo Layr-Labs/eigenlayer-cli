@@ -22,10 +22,8 @@ import (
 	"github.com/Layr-Labs/eigenlayer-rewards-proofs/pkg/proofDataFetcher/httpProofDataFetcher"
 
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
-	"github.com/Layr-Labs/eigensdk-go/chainio/txmgr"
 	rewardscoordinator "github.com/Layr-Labs/eigensdk-go/contracts/bindings/IRewardsCoordinator"
 	"github.com/Layr-Labs/eigensdk-go/logging"
-	eigenMetrics "github.com/Layr-Labs/eigensdk-go/metrics"
 	eigenSdkUtils "github.com/Layr-Labs/eigensdk-go/utils"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -147,37 +145,23 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 	}
 
 	if config.Broadcast {
-		if config.SignerConfig == nil {
-			return errors.New("signer is required for broadcasting")
-		}
-		logger.Info("Broadcasting claim...")
-		keyWallet, sender, err := common.GetWallet(
-			*config.SignerConfig,
-			config.ClaimerAddress.String(),
+		eLWriter, err := common.GetELWriter(
+			config.ClaimerAddress,
+			config.SignerConfig,
 			ethClient,
-			p,
-			*config.ChainID,
-			logger,
-		)
-		if err != nil {
-			return eigenSdkUtils.WrapError("failed to get wallet", err)
-		}
-
-		txMgr := txmgr.NewSimpleTxManager(keyWallet, ethClient, logger, sender)
-		noopMetrics := eigenMetrics.NewNoopMetrics()
-		eLWriter, err := elcontracts.NewWriterFromConfig(
 			elcontracts.Config{
 				RewardsCoordinatorAddress: config.RewardsCoordinatorAddress,
 			},
-			ethClient,
+			p,
+			config.ChainID,
 			logger,
-			noopMetrics,
-			txMgr,
 		)
+
 		if err != nil {
-			return eigenSdkUtils.WrapError("failed to create new writer from config", err)
+			return eigenSdkUtils.WrapError("failed to get EL writer", err)
 		}
 
+		logger.Infof("Broadcasting claim transaction...")
 		receipt, err := eLWriter.ProcessClaim(ctx, elClaim, config.RecipientAddress, true)
 		if err != nil {
 			return eigenSdkUtils.WrapError("failed to process claim", err)

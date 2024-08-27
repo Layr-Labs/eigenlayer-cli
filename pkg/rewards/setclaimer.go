@@ -5,16 +5,15 @@ import (
 	"fmt"
 	"sort"
 
+	eigenSdkUtils "github.com/Layr-Labs/eigensdk-go/utils"
+
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
-	"github.com/Layr-Labs/eigensdk-go/chainio/txmgr"
 	"github.com/Layr-Labs/eigensdk-go/logging"
-	eigenMetrics "github.com/Layr-Labs/eigensdk-go/metrics"
-
 	gethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 
@@ -116,39 +115,20 @@ func SetClaimer(cCtx *cli.Context, p utils.Prompter) error {
 		return nil
 	}
 
-	if config.SignerConfig == nil {
-		return fmt.Errorf("signer config is required to broadcast the transaction")
-	}
-
-	keyWallet, sender, err := common.GetWallet(
-		*config.SignerConfig,
-		config.EarnerAddress.Hex(),
+	elWriter, err := common.GetELWriter(
+		config.EarnerAddress,
+		config.SignerConfig,
 		ethClient,
+		elcontracts.Config{
+			RewardsCoordinatorAddress: config.RewardsCoordinatorAddress,
+		},
 		p,
-		*config.ChainID,
+		config.ChainID,
 		logger,
 	)
+
 	if err != nil {
-		return err
-	}
-
-	if sender != config.EarnerAddress {
-		return fmt.Errorf(
-			"signer address(%s) and earner addresses(%s) do not match",
-			sender.String(),
-			config.EarnerAddress.String(),
-		)
-	}
-
-	txMgr := txmgr.NewSimpleTxManager(keyWallet, ethClient, logger, sender)
-	noopMetrics := eigenMetrics.NewNoopMetrics()
-	contractCfg := elcontracts.Config{
-		RewardsCoordinatorAddress: config.RewardsCoordinatorAddress,
-	}
-
-	elWriter, err := elcontracts.NewWriterFromConfig(contractCfg, ethClient, logger, noopMetrics, txMgr)
-	if err != nil {
-		return err
+		return eigenSdkUtils.WrapError("failed to get EL writer", err)
 	}
 
 	receipt, err := elWriter.SetClaimerFor(context.Background(), config.ClaimerAddress, true)
