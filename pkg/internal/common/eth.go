@@ -24,11 +24,11 @@ type TxFeeDetails struct {
 }
 
 func (t *TxFeeDetails) Print() {
-	message := strings.Repeat("-", 25) + " Gas Fee Details " + strings.Repeat("-", 25)
+	message := strings.Repeat("-", 30) + " Gas Fee Details " + strings.Repeat("-", 30)
 	fmt.Println(message)
 	fmt.Printf("Gas Tip Cap: %0.9f Gwei\n", t.GasTipCapGwei)
 	fmt.Printf("Gas Fee Cap: %0.9f Gwei\n", t.GasFeeCapGwei)
-	fmt.Printf("Gas Limit: %d\n", t.GasLimit)
+	fmt.Printf("Gas Limit: %d (If claimer is a smart contract, this value is hardcoded)\n", t.GasLimit)
 	fmt.Printf("Approximate Max Cost of transaction: %0.12f ETH\n", t.CostInEth)
 	fmt.Println(strings.Repeat("-", len(message)))
 }
