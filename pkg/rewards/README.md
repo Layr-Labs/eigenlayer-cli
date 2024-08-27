@@ -11,7 +11,8 @@ USAGE:
 
 OPTIONS:
    --broadcast, -b                                      Use this flag to broadcast the transaction (default: false) [$BROADCAST]
-   --claim-timestamp value, -c value                    Specify the timestamp. Only 'latest' and 'latest_active' are supported (default: "latest") [$CLAIM_TIMESTAMP]
+   --claim-timestamp value, -c value                    Specify the timestamp. Only 'latest' and 'latest_active' are supported. 'latest' can be an inactive root which you can't claim yet. (default: "latest_active") [$CLAIM_TIMESTAMP]
+   --claimer-address value, -a value                    Address of the claimer [$REWARDS_CLAIMER_ADDRESS]
    --earner-address value, --ea value                   Address of the earner [$REWARDS_EARNER_ADDRESS]
    --ecdsa-private-key value, -e value                  ECDSA private key hex to send transaction [$ECDSA_PRIVATE_KEY]
    --environment value, --env value                     Environment to use. Currently supports 'preprod' ,'testnet' and 'prod'. If not provided, it will be inferred based on network [$ENVIRONMENT]
@@ -78,7 +79,7 @@ DESCRIPTION:
 
 OPTIONS:
    --broadcast, -b                                      Use this flag to broadcast the transaction (default: false) [$BROADCAST]
-   --claimer-address value, -a value                    Address of the claimer [$NODE_OPERATOR_CLAIMER_ADDRESS]
+   --claimer-address value, -a value                    Address of the claimer [$REWARDS_CLAIMER_ADDRESS]
    --earner-address value, --ea value                   Address of the earner [$REWARDS_EARNER_ADDRESS]
    --ecdsa-private-key value, -e value                  ECDSA private key hex to send transaction [$ECDSA_PRIVATE_KEY]
    --eth-rpc-url value, -r value                        URL of the Ethereum RPC [$ETH_RPC_URL]

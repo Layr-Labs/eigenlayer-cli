@@ -419,11 +419,16 @@ func IsEmptyString(s string) bool {
 
 func GetLogger(cCtx *cli.Context) eigensdkLogger.Logger {
 	verbose := cCtx.Bool(flags.VerboseFlag.Name)
-	logLevel := slog.LevelInfo
-	if verbose {
-		logLevel = slog.LevelDebug
+	loggerOptions := &eigensdkLogger.SLoggerOptions{
+		Level: slog.LevelInfo,
 	}
-	logger := eigensdkLogger.NewTextSLogger(os.Stdout, &eigensdkLogger.SLoggerOptions{Level: logLevel})
+	if verbose {
+		loggerOptions = &eigensdkLogger.SLoggerOptions{
+			Level:     slog.LevelDebug,
+			AddSource: true,
+		}
+	}
+	logger := eigensdkLogger.NewTextSLogger(os.Stdout, loggerOptions)
 	return logger
 }
 

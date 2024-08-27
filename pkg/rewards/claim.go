@@ -41,6 +41,7 @@ type ClaimConfig struct {
 	RPCUrl                    string
 	EarnerAddress             gethcommon.Address
 	RecipientAddress          gethcommon.Address
+	ClaimerAddress            gethcommon.Address
 	Output                    string
 	OutputType                string
 	Broadcast                 bool
@@ -78,6 +79,7 @@ func getClaimFlags() []cli.Flag {
 		&EnvironmentFlag,
 		&RecipientAddressFlag,
 		&TokenAddressesFlag,
+		&ClaimerAddressFlag,
 		&RewardsCoordinatorAddressFlag,
 		&ClaimTimestampFlag,
 		&ProofStoreBaseURLFlag,
@@ -161,7 +163,7 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 		logger.Info("Broadcasting claim...")
 		keyWallet, sender, err := common.GetWallet(
 			*config.SignerConfig,
-			config.EarnerAddress.String(),
+			config.ClaimerAddress.String(),
 			ethClient,
 			p,
 			*config.ChainID,
@@ -194,7 +196,7 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 		logger.Infof("Claim transaction submitted successfully")
 		common.PrintTransactionInfo(receipt.TxHash.String(), config.ChainID)
 	} else {
-		noSendTxOpts := common.GetNoSendTxOpts(config.EarnerAddress)
+		noSendTxOpts := common.GetNoSendTxOpts(config.ClaimerAddress)
 		_, _, contractBindings, err := elcontracts.BuildClients(elcontracts.Config{
 			RewardsCoordinatorAddress: config.RewardsCoordinatorAddress,
 		}, ethClient, nil, logger, nil)
@@ -204,7 +206,7 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 
 		unsignedTx, err := contractBindings.RewardsCoordinator.ProcessClaim(noSendTxOpts, elClaim, config.RecipientAddress)
 		if err != nil {
-			return err
+			return eigenSdkUtils.WrapError("failed to create unsigned tx", err)
 		}
 		if config.OutputType == string(common.OutputType_Calldata) {
 			calldataHex := gethcommon.Bytes2Hex(unsignedTx.Data())
@@ -345,6 +347,16 @@ func readAndValidateClaimConfig(cCtx *cli.Context, logger logging.Logger) (*Clai
 	}
 	logger.Infof("Using rewards recipient address: %s", recipientAddress.String())
 
+	claimerAddress := gethcommon.HexToAddress(cCtx.String(ClaimerAddressFlag.Name))
+	if claimerAddress == utils.ZeroAddress {
+		logger.Infof(
+			"Claimer address not provided, using earner address (%s) as claimer address",
+			earnerAddress.String(),
+		)
+		claimerAddress = earnerAddress
+	}
+	logger.Infof("Using rewards claimer address: %s", claimerAddress.String())
+
 	chainID := utils.NetworkNameToChainId(network)
 	logger.Debugf("Using chain ID: %s", chainID.String())
 
@@ -394,6 +406,7 @@ func readAndValidateClaimConfig(cCtx *cli.Context, logger logging.Logger) (*Clai
 		RecipientAddress:          recipientAddress,
 		SignerConfig:              signerConfig,
 		ClaimTimestamp:            claimTimestamp,
+		ClaimerAddress:            claimerAddress,
 	}, nil
 }
 
