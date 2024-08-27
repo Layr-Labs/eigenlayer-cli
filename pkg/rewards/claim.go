@@ -204,10 +204,23 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 			return err
 		}
 
+		// If claimer is a smart contract, we can't estimate gas using geth
+		// since it doesn't support estimate gas for calling smart contract
+		// from smart contract. So we set a default gas limit.
+		code, err := ethClient.CodeAt(ctx, config.ClaimerAddress, nil)
+		if err != nil {
+			return eigenSdkUtils.WrapError("failed to get code at address", err)
+		}
+		if len(code) > 0 {
+			// Claimer is a smart contract
+			noSendTxOpts.GasLimit = 150_000
+		}
+
 		unsignedTx, err := contractBindings.RewardsCoordinator.ProcessClaim(noSendTxOpts, elClaim, config.RecipientAddress)
 		if err != nil {
 			return eigenSdkUtils.WrapError("failed to create unsigned tx", err)
 		}
+
 		if config.OutputType == string(common.OutputType_Calldata) {
 			calldataHex := gethcommon.Bytes2Hex(unsignedTx.Data())
 
