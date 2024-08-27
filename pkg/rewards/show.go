@@ -40,16 +40,6 @@ const (
 	GetEarnedTokensForStrategyEndpoint = "grpc/eigenlayer.RewardsService/GetEarnedTokensForStrategy"
 )
 
-type ShowConfig struct {
-	EarnerAddress gethcommon.Address
-	NumberOfDays  int64
-	Network       string
-	Environment   string
-	ClaimType     ClaimType
-	ChainID       *big.Int
-	Output        string
-}
-
 func ShowCmd(p utils.Prompter) *cli.Command {
 	showCmd := &cli.Command{
 		Name:      "show",
