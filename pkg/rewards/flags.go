@@ -51,8 +51,8 @@ var (
 		Name:     "claimer-address",
 		Aliases:  []string{"a"},
 		Usage:    "Address of the claimer",
-		Required: true,
-		EnvVars:  []string{"NODE_OPERATOR_CLAIMER_ADDRESS"},
+		Required: false,
+		EnvVars:  []string{"REWARDS_CLAIMER_ADDRESS"},
 	}
 
 	EarnerAddressFlag = cli.StringFlag{

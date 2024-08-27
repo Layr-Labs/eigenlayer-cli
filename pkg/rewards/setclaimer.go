@@ -131,6 +131,10 @@ func SetClaimer(cCtx *cli.Context, p utils.Prompter) error {
 		return nil
 	}
 
+	if config.SignerConfig == nil {
+		return fmt.Errorf("signer config is required to broadcast the transaction")
+	}
+
 	keyWallet, sender, err := common.GetWallet(
 		*config.SignerConfig,
 		config.EarnerAddress.Hex(),
@@ -191,6 +195,10 @@ func readAndValidateSetClaimerConfig(cCtx *cli.Context, logger logging.Logger) (
 	earnerAddress := gethcommon.HexToAddress(cCtx.String(EarnerAddressFlag.Name))
 	broadcast := cCtx.Bool(flags.BroadcastFlag.Name)
 	claimerAddress := cCtx.String(ClaimerAddressFlag.Name)
+	if common.IsEmptyString(claimerAddress) {
+		return nil, fmt.Errorf("claimer address is required")
+	}
+
 	rewardsCoordinatorAddress := cCtx.String(RewardsCoordinatorAddressFlag.Name)
 	var err error
 	if common.IsEmptyString(rewardsCoordinatorAddress) {
