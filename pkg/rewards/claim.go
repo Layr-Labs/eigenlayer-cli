@@ -38,7 +38,9 @@ import (
 type elChainReader interface {
 	GetDistributionRootsLength(opts *bind.CallOpts) (*big.Int, error)
 	GetRootIndexFromHash(opts *bind.CallOpts, hash [32]byte) (uint32, error)
-	GetCurrentClaimableDistributionRoot(opts *bind.CallOpts) (rewardscoordinator.IRewardsCoordinatorDistributionRoot, error)
+	GetCurrentClaimableDistributionRoot(
+		opts *bind.CallOpts,
+	) (rewardscoordinator.IRewardsCoordinatorDistributionRoot, error)
 	CurrRewardsCalculationEndTimestamp(opts *bind.CallOpts) (uint32, error)
 }
 
