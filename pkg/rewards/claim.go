@@ -205,8 +205,9 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 		}
 
 		// If claimer is a smart contract, we can't estimate gas using geth
-		// since it doesn't support estimate gas for calling smart contract
-		// from smart contract. So we set a default gas limit.
+		// since balance of contract can be 0, as it can be called by an EOA
+		// to claim. So we hardcode the gas limit to 150_000 so that we can
+		// create unsigned tx without gas limit estimation from contract bindings
 		code, err := ethClient.CodeAt(ctx, config.ClaimerAddress, nil)
 		if err != nil {
 			return eigenSdkUtils.WrapError("failed to get code at address", err)
