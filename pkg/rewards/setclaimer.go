@@ -3,13 +3,11 @@ package rewards
 import (
 	"context"
 	"fmt"
-	"math/big"
 	"sort"
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
-	"github.com/Layr-Labs/eigenlayer-cli/pkg/types"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
@@ -22,19 +20,6 @@ import (
 
 	"github.com/urfave/cli/v2"
 )
-
-type SetClaimerConfig struct {
-	ClaimerAddress            gethcommon.Address
-	Network                   string
-	RPCUrl                    string
-	Broadcast                 bool
-	RewardsCoordinatorAddress gethcommon.Address
-	ChainID                   *big.Int
-	SignerConfig              *types.SignerConfig
-	EarnerAddress             gethcommon.Address
-	Output                    string
-	OutputType                string
-}
 
 func SetClaimerCmd(p utils.Prompter) *cli.Command {
 	setClaimerCmd := &cli.Command{

@@ -14,7 +14,6 @@ import (
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
-	"github.com/Layr-Labs/eigenlayer-cli/pkg/types"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 
 	contractrewardscoordinator "github.com/Layr-Labs/eigenlayer-contracts/pkg/bindings/IRewardsCoordinator"
@@ -36,22 +35,11 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-type ClaimConfig struct {
-	Network                   string
-	RPCUrl                    string
-	EarnerAddress             gethcommon.Address
-	RecipientAddress          gethcommon.Address
-	ClaimerAddress            gethcommon.Address
-	Output                    string
-	OutputType                string
-	Broadcast                 bool
-	TokenAddresses            []gethcommon.Address
-	RewardsCoordinatorAddress gethcommon.Address
-	ClaimTimestamp            string
-	ChainID                   *big.Int
-	ProofStoreBaseURL         string
-	Environment               string
-	SignerConfig              *types.SignerConfig
+type elChainReader interface {
+	GetDistributionRootsLength(opts *bind.CallOpts) (*big.Int, error)
+	GetRootIndexFromHash(opts *bind.CallOpts, hash [32]byte) (uint32, error)
+	GetCurrentClaimableDistributionRoot(opts *bind.CallOpts) (rewardscoordinator.IRewardsCoordinatorDistributionRoot, error)
+	CurrRewardsCalculationEndTimestamp(opts *bind.CallOpts) (uint32, error)
 }
 
 func ClaimCmd(p utils.Prompter) *cli.Command {
@@ -123,7 +111,7 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 		http.DefaultClient,
 	)
 
-	claimDate, rootIndex, err := getClaimDistributionRoot(ctx, config.ClaimTimestamp, df, elReader, logger)
+	claimDate, rootIndex, err := getClaimDistributionRoot(ctx, config.ClaimTimestamp, elReader, logger)
 	if err != nil {
 		return eigenSdkUtils.WrapError("failed to get claim distribution root", err)
 	}
@@ -275,8 +263,7 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 func getClaimDistributionRoot(
 	ctx context.Context,
 	claimTimestamp string,
-	df *httpProofDataFetcher.HttpProofDataFetcher,
-	elReader *elcontracts.ChainReader,
+	elReader elChainReader,
 	logger logging.Logger,
 ) (string, uint32, error) {
 	if claimTimestamp == "latest" {

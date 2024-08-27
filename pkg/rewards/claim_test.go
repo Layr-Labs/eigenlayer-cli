@@ -52,3 +52,39 @@ func TestReadAndValidateConfig_RecipientProvided(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, common.HexToAddress(recipientAddress), config.RecipientAddress)
 }
+
+func TestReadAndValidateConfig_NoClaimerProvided(t *testing.T) {
+	earnerAddress := testutils.GenerateRandomEthereumAddressString()
+	fs := flag.NewFlagSet("test", flag.ContinueOnError)
+	fs.String(flags.ETHRpcUrlFlag.Name, "rpc", "")
+	fs.String(EarnerAddressFlag.Name, earnerAddress, "")
+	fs.String(RewardsCoordinatorAddressFlag.Name, "0x1234", "")
+	fs.String(ClaimTimestampFlag.Name, "latest", "")
+	fs.String(ProofStoreBaseURLFlag.Name, "dummy-url", "")
+	cliCtx := cli.NewContext(nil, fs, nil)
+
+	logger := logging.NewJsonSLogger(os.Stdout, &logging.SLoggerOptions{})
+
+	config, err := readAndValidateClaimConfig(cliCtx, logger)
+
+	assert.NoError(t, err)
+	assert.Equal(t, common.HexToAddress(earnerAddress), config.ClaimerAddress)
+}
+
+func TestReadAndValidateConfig_ClaimerProvided(t *testing.T) {
+	claimerAddress := testutils.GenerateRandomEthereumAddressString()
+	fs := flag.NewFlagSet("test", flag.ContinueOnError)
+	fs.String(flags.ETHRpcUrlFlag.Name, "rpc", "")
+	fs.String(ClaimerAddressFlag.Name, claimerAddress, "")
+	fs.String(RewardsCoordinatorAddressFlag.Name, "0x1234", "")
+	fs.String(ClaimTimestampFlag.Name, "latest", "")
+	fs.String(ProofStoreBaseURLFlag.Name, "dummy-url", "")
+	cliCtx := cli.NewContext(nil, fs, nil)
+
+	logger := logging.NewJsonSLogger(os.Stdout, &logging.SLoggerOptions{})
+
+	config, err := readAndValidateClaimConfig(cliCtx, logger)
+
+	assert.NoError(t, err)
+	assert.Equal(t, common.HexToAddress(claimerAddress), config.ClaimerAddress)
+}
