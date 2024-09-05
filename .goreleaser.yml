@@ -9,6 +9,7 @@ builds:
       - -v
     ldflags:
       - -X 'main.version={{.Version}}'
+      - -X 'github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry.telemetryToken={{ .Env.TELEMETRY_TOKEN }}'
       - -X 'github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry.version={{.Version}}'
       - -X 'github.com/Layr-Labs/eigenlayer-cli/pkg/rewards.preprodUrl={{.Env.EIGENLAYER_BACKEND_PREPROD_URL}}'
       - -X 'github.com/Layr-Labs/eigenlayer-cli/pkg/rewards.mainnetUrl={{.Env.EIGENLAYER_BACKEND_MAINNET_URL}}'
