@@ -43,6 +43,7 @@ func isEnabled() bool {
 }
 
 func handleTacking(cCtx *cli.Context) {
+	telemetryToken = os.Getenv("TELEMETRY_TOKEN")
 	if telemetryToken == "" {
 		return
 	}
