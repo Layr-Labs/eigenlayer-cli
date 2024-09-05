@@ -37,8 +37,6 @@ jobs:
   release:
     needs: [lint, test]
     runs-on: ubuntu-20.04
-    env:
-      TELEMETRY_TOKEN: ${{ secrets.TELEMETRY_TOKEN }}
     steps:
       - name: Git checkout
         uses: actions/checkout@v4
