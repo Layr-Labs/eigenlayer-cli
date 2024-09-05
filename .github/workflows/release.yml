@@ -1,6 +1,7 @@
 name: Release (with lint and test)
 
 on:
+  workflow_dispatch:
   push:
     tags:
       - "*"
