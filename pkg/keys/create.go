@@ -16,8 +16,12 @@ import (
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 	"github.com/Layr-Labs/eigensdk-go/crypto/bls"
 	sdkEcdsa "github.com/Layr-Labs/eigensdk-go/crypto/ecdsa"
+
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
+
+	hdwallet "github.com/miguelmota/go-ethereum-hdwallet"
+	"github.com/tyler-smith/go-bip39"
 	"github.com/urfave/cli/v2"
 	passwordvalidator "github.com/wagslane/go-password-validator"
 )
@@ -75,11 +79,11 @@ This command will create keys in $HOME/.eigenlayer/operator_keys/ location
 
 			switch keyType {
 			case KeyTypeECDSA:
-				privateKey, err := crypto.GenerateKey()
+				privateKey, mnemonic, err := generateEcdsaKeyWithMnemonic()
 				if err != nil {
 					return err
 				}
-				return saveEcdsaKey(keyName, p, privateKey, insecure, stdInPassword, readFromPipe)
+				return saveEcdsaKey(keyName, p, privateKey, insecure, stdInPassword, readFromPipe, mnemonic)
 			case KeyTypeBLS:
 				blsKeyPair, err := bls.GenRandomBlsKeys()
 				if err != nil {
@@ -92,6 +96,41 @@ This command will create keys in $HOME/.eigenlayer/operator_keys/ location
 		},
 	}
 	return createCmd
+}
+
+func generateEcdsaKeyWithMnemonic() (*ecdsa.PrivateKey, string, error) {
+	// Generate entropy for mnemonic
+	entropy, err := bip39.NewEntropy(128)
+	if err != nil {
+		return nil, "", fmt.Errorf("failed to generate entropy: %v", err)
+	}
+
+	// Generate mnemonic
+	mnemonic, err := bip39.NewMnemonic(entropy)
+	if err != nil {
+		return nil, "", fmt.Errorf("failed to generate mnemonic: %v", err)
+	}
+
+	// Create HD wallet
+	wallet, err := hdwallet.NewFromMnemonic(mnemonic)
+	if err != nil {
+		return nil, "", fmt.Errorf("failed to create wallet from mnemonic: %v", err)
+	}
+
+	// Derive the Ethereum account using the standard derivation path
+	path := hdwallet.MustParseDerivationPath("m/44'/60'/0'/0/0")
+	account, err := wallet.Derive(path, false)
+	if err != nil {
+		return nil, "", fmt.Errorf("failed to derive account: %v", err)
+	}
+
+	// Get private key
+	privateKey, err := wallet.PrivateKey(account)
+	if err != nil {
+		return nil, "", fmt.Errorf("failed to get private key: %v", err)
+	}
+
+	return privateKey, mnemonic, nil
 }
 
 func validateKeyName(keyName string) error {
@@ -149,7 +188,7 @@ func saveBlsKey(
 	publicKeyHex := keyPair.PubKey.String()
 
 	fmt.Printf("\nKey location: %s\nPublic Key: %s\n\n", fileLoc, publicKeyHex)
-	return displayWithLess(privateKeyHex, KeyTypeBLS)
+	return displayWithLess(privateKeyHex, KeyTypeBLS, "")
 }
 
 func saveEcdsaKey(
@@ -159,6 +198,7 @@ func saveEcdsaKey(
 	insecure bool,
 	stdInPassword string,
 	readFromPipe bool,
+	mnemonic string,
 ) error {
 	homePath, err := os.UserHomeDir()
 	if err != nil {
@@ -203,7 +243,7 @@ func saveEcdsaKey(
 	address := crypto.PubkeyToAddress(*publicKeyECDSA).Hex()
 
 	fmt.Printf("\nKey location: %s\nPublic Key hex: %s\nEthereum Address: %s\n\n", fileLoc, publicKeyHex, address)
-	return displayWithLess(privateKeyHex, KeyTypeECDSA)
+	return displayWithLess(privateKeyHex, KeyTypeECDSA, mnemonic)
 }
 
 func padLeft(str string, length int) string {
@@ -213,7 +253,7 @@ func padLeft(str string, length int) string {
 	return str
 }
 
-func displayWithLess(privateKeyHex string, keyType string) error {
+func displayWithLess(privateKeyHex string, keyType string, mnemonic string) error {
 	var message, border, keyLine string
 	tabSpace := "    "
 
@@ -254,6 +294,29 @@ BLS Private Key (Hex):
 🔐 Please backup the above private key hex in a safe place 🔒
 
 `, border, paddingLine, keyLine, paddingLine, border)
+	}
+
+	if mnemonic != "" {
+		// format mnemonic to be displayed in above format
+		mnemonicContent := tabSpace + mnemonic + tabSpace
+		borderLength := len(mnemonicContent) + 4
+		border = strings.Repeat("/", borderLength)
+		paddingLine := "//" + strings.Repeat(" ", borderLength-4) + "//"
+
+		keyLine = fmt.Sprintf("//%s//", mnemonicContent)
+		mnemonicDisplay := fmt.Sprintf(`
+Mnemonic:
+
+%s
+%s
+%s
+%s
+%s
+
+🔐 Please backup the above mnemonic in a safe place 🔒
+
+`, border, paddingLine, keyLine, paddingLine, border)
+		message = fmt.Sprintf("%s%s", message, mnemonicDisplay)
 	}
 
 	cmd := exec.Command("less", "-R")
