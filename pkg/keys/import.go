@@ -70,7 +70,8 @@ This command will import keys in $HOME/.eigenlayer/operator_keys/ location
 				if err != nil {
 					return err
 				}
-				return saveEcdsaKey(keyName, p, privateKeyPair, insecure, stdInPassword, readFromPipe)
+				// TODO: Add support for mnemonic imports
+				return saveEcdsaKey(keyName, p, privateKeyPair, insecure, stdInPassword, readFromPipe, "")
 			case KeyTypeBLS:
 				privateKeyBigInt := new(big.Int)
 				_, ok := privateKeyBigInt.SetString(privateKey, 10)
