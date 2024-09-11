@@ -314,7 +314,7 @@ func readAndValidateClaimConfig(cCtx *cli.Context, logger logging.Logger) (*Clai
 
 	var err error
 	if common.IsEmptyString(rewardsCoordinatorAddress) {
-		rewardsCoordinatorAddress, err = utils.GetRewardCoordinatorAddress(utils.NetworkNameToChainId(network))
+		rewardsCoordinatorAddress, err = common.GetRewardCoordinatorAddress(utils.NetworkNameToChainId(network))
 		if err != nil {
 			return nil, err
 		}
@@ -351,7 +351,7 @@ func readAndValidateClaimConfig(cCtx *cli.Context, logger logging.Logger) (*Clai
 
 	// If empty get from utils
 	if common.IsEmptyString(proofStoreBaseURL) {
-		proofStoreBaseURL = utils.GetProofStoreBaseURL(network)
+		proofStoreBaseURL = getProofStoreBaseURL(network)
 
 		// If still empty return error
 		if common.IsEmptyString(proofStoreBaseURL) {
@@ -395,6 +395,16 @@ func readAndValidateClaimConfig(cCtx *cli.Context, logger logging.Logger) (*Clai
 		ClaimTimestamp:            claimTimestamp,
 		ClaimerAddress:            claimerAddress,
 	}, nil
+}
+
+func getProofStoreBaseURL(network string) string {
+	chainId := utils.NetworkNameToChainId(network)
+	chainMetadata, ok := common.ChainMetadataMap[chainId.Int64()]
+	if !ok {
+		return ""
+	} else {
+		return chainMetadata.ProofStoreBaseURL
+	}
 }
 
 func getEnvFromNetwork(network string) string {
