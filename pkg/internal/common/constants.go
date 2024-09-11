@@ -10,4 +10,13 @@ const (
 	OutputType_Calldata OutputType = "calldata"
 	OutputType_Pretty   OutputType = "pretty"
 	OutputType_Json     OutputType = "json"
+
+	MainnetChainId = 1
+	HoleskyChainId = 17000
+	AnvilChainId   = 31337
+
+	MainnetNetworkName = "mainnet"
+	HoleskyNetworkName = "holesky"
+	AnvilNetworkName   = "anvil"
+	UnknownNetworkName = "unknown"
 )

@@ -7,6 +7,7 @@ import (
 	"math/big"
 	"os"
 
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/types"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
@@ -166,13 +167,13 @@ func promptOperatorInfo(config *types.OperatorConfig, p utils.Prompter) (types.O
 	switch chainId {
 	case utils.MainnetNetworkName:
 		config.ChainId = *big.NewInt(utils.MainnetChainId)
-		config.ELDelegationManagerAddress = utils.ChainMetadataMap[utils.MainnetChainId].ELDelegationManagerAddress
+		config.ELDelegationManagerAddress = common.ChainMetadataMap[utils.MainnetChainId].ELDelegationManagerAddress
 	case utils.HoleskyNetworkName:
 		config.ChainId = *big.NewInt(utils.HoleskyChainId)
-		config.ELDelegationManagerAddress = utils.ChainMetadataMap[utils.HoleskyChainId].ELDelegationManagerAddress
+		config.ELDelegationManagerAddress = common.ChainMetadataMap[utils.HoleskyChainId].ELDelegationManagerAddress
 	case utils.AnvilNetworkName:
 		config.ChainId = *big.NewInt(utils.AnvilChainId)
-		config.ELDelegationManagerAddress = utils.ChainMetadataMap[utils.AnvilChainId].ELDelegationManagerAddress
+		config.ELDelegationManagerAddress = common.ChainMetadataMap[utils.AnvilChainId].ELDelegationManagerAddress
 	}
 
 	// Prompt for signer type

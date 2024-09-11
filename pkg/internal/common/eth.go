@@ -32,6 +32,7 @@ func (t *TxFeeDetails) Print() {
 	fmt.Printf("Approximate Max Cost of transaction: %0.12f ETH\n", t.CostInEth)
 	fmt.Println(strings.Repeat("-", len(message)))
 }
+
 func GetTxFeeDetails(tx *types.Transaction) *TxFeeDetails {
 	gasTipCapGwei := float64(tx.GasTipCap().Uint64()) / GweiToWei
 	gasFeeCapGwei := float64(tx.GasFeeCap().Uint64()) / GweiToWei
