@@ -4,7 +4,6 @@ import (
 	"crypto/ecdsa"
 	"fmt"
 	"math/big"
-	"regexp"
 	"strings"
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
@@ -119,16 +118,4 @@ This command will import keys in $HOME/.eigenlayer/operator_keys/ location
 		},
 	}
 	return importCmd
-}
-
-func validatePrivateKey(pk string) error {
-	if len(pk) == 0 {
-		return ErrEmptyPrivateKey
-	}
-
-	if match, _ := regexp.MatchString("\\s", pk); match {
-		return ErrPrivateKeyContainsWhitespaces
-	}
-
-	return nil
 }
