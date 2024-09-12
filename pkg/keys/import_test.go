@@ -11,7 +11,6 @@ import (
 
 	"github.com/Layr-Labs/eigensdk-go/crypto/bls"
 
-	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
 	prompterMock "github.com/Layr-Labs/eigenlayer-cli/pkg/utils/mocks"
 
 	"github.com/stretchr/testify/assert"
@@ -67,7 +66,7 @@ func TestImportCmd(t *testing.T) {
 		{
 			name: "keyname with whitespaces",
 			args: []string{"--key-type", "ecdsa", "hello", "hello world"},
-			err:  ErrPrivateKeyContainsWhitespaces,
+			err:  ErrInvalidKeyFormat,
 		},
 		{
 			name: "invalid key type",
@@ -125,6 +124,22 @@ func TestImportCmd(t *testing.T) {
 				p.EXPECT().InputHiddenString(gomock.Any(), gomock.Any(), gomock.Any()).Return("", nil)
 			},
 			expectedPrivKey: "6842fb8f5fa574d0482818b8a825a15c4d68f542693197f2c2497e3562f335f6",
+			keyPath:         filepath.Join(homePath, OperatorKeystoreSubFolder, "/test.ecdsa.key.json"),
+		},
+		{
+			name: "valid ecdsa key import with mnemonic",
+			args: []string{
+				"--key-type",
+				"ecdsa",
+				"test",
+				"kidney various problem toe ready mass exhibit volume shuffle must glue sketch",
+			},
+			err: nil,
+			promptMock: func(p *prompterMock.MockPrompter) {
+				p.EXPECT().InputHiddenString(gomock.Any(), gomock.Any(), gomock.Any()).Return("", nil)
+				p.EXPECT().InputHiddenString(gomock.Any(), gomock.Any(), gomock.Any()).Return("", nil)
+			},
+			expectedPrivKey: "aee7f88721a86c9e269f50ba9a8675609ee8eef54947827fcdce818d8aafd3b1",
 			keyPath:         filepath.Join(homePath, OperatorKeystoreSubFolder, "/test.ecdsa.key.json"),
 		},
 		{
@@ -202,7 +217,7 @@ func TestImportCmd(t *testing.T) {
 				if tt.args[1] == KeyTypeECDSA {
 					key, err := GetECDSAPrivateKey(tt.keyPath, "")
 					assert.NoError(t, err)
-					assert.Equal(t, common.Trim0x(tt.args[3]), hex.EncodeToString(key.D.Bytes()))
+					assert.Equal(t, tt.expectedPrivKey, hex.EncodeToString(key.D.Bytes()))
 				} else if tt.args[1] == KeyTypeBLS {
 					key, err := bls.ReadPrivateKeyFromFile(tt.keyPath, "")
 					assert.NoError(t, err)

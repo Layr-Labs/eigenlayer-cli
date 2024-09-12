@@ -1,9 +1,10 @@
 package keys
 
 import (
+	"crypto/ecdsa"
 	"fmt"
 	"math/big"
-	"regexp"
+	"strings"
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
@@ -53,8 +54,13 @@ This command will import keys in $HOME/.eigenlayer/operator_keys/ location
 			}
 
 			privateKey := args.Get(1)
-			if err := validatePrivateKey(privateKey); err != nil {
-				return err
+			if privateKey == "" {
+				return ErrEmptyPrivateKey
+			}
+
+			pkSlice := strings.Split(privateKey, " ")
+			if len(pkSlice) != 1 && len(pkSlice) != 12 {
+				return ErrInvalidKeyFormat
 			}
 
 			// Check if input is available in the pipe and read the password from it
@@ -65,12 +71,20 @@ This command will import keys in $HOME/.eigenlayer/operator_keys/ location
 
 			switch keyType {
 			case KeyTypeECDSA:
-				privateKey = common.Trim0x(privateKey)
-				privateKeyPair, err := crypto.HexToECDSA(privateKey)
-				if err != nil {
-					return err
+				var privateKeyPair *ecdsa.PrivateKey
+				var err error
+				if len(pkSlice) == 1 {
+					privateKey = common.Trim0x(privateKey)
+					privateKeyPair, err = crypto.HexToECDSA(privateKey)
+					if err != nil {
+						return err
+					}
+				} else {
+					privateKeyPair, _, err = generateEcdsaKeyWithMnemonic(privateKey)
+					if err != nil {
+						return err
+					}
 				}
-				// TODO: Add support for mnemonic imports
 				return saveEcdsaKey(keyName, p, privateKeyPair, insecure, stdInPassword, readFromPipe, "")
 			case KeyTypeBLS:
 				privateKeyBigInt := new(big.Int)
@@ -104,16 +118,4 @@ This command will import keys in $HOME/.eigenlayer/operator_keys/ location
 		},
 	}
 	return importCmd
-}
-
-func validatePrivateKey(pk string) error {
-	if len(pk) == 0 {
-		return ErrEmptyPrivateKey
-	}
-
-	if match, _ := regexp.MatchString("\\s", pk); match {
-		return ErrPrivateKeyContainsWhitespaces
-	}
-
-	return nil
 }
