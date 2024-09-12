@@ -79,7 +79,8 @@ This command will create keys in $HOME/.eigenlayer/operator_keys/ location
 
 			switch keyType {
 			case KeyTypeECDSA:
-				privateKey, mnemonic, err := generateEcdsaKeyWithMnemonic()
+				// Passing empty string to generate a new mnemonic
+				privateKey, mnemonic, err := generateEcdsaKeyWithMnemonic("")
 				if err != nil {
 					return err
 				}
@@ -98,17 +99,18 @@ This command will create keys in $HOME/.eigenlayer/operator_keys/ location
 	return createCmd
 }
 
-func generateEcdsaKeyWithMnemonic() (*ecdsa.PrivateKey, string, error) {
-	// Generate entropy for mnemonic
-	entropy, err := bip39.NewEntropy(128)
-	if err != nil {
-		return nil, "", fmt.Errorf("failed to generate entropy: %v", err)
-	}
-
-	// Generate mnemonic
-	mnemonic, err := bip39.NewMnemonic(entropy)
-	if err != nil {
-		return nil, "", fmt.Errorf("failed to generate mnemonic: %v", err)
+func generateEcdsaKeyWithMnemonic(mnemonic string) (*ecdsa.PrivateKey, string, error) {
+	if mnemonic == "" {
+		// Generate entropy for mnemonic
+		entropy, err := bip39.NewEntropy(128)
+		if err != nil {
+			return nil, "", fmt.Errorf("failed to generate entropy: %v", err)
+		}
+		// Generate mnemonic
+		mnemonic, err = bip39.NewMnemonic(entropy)
+		if err != nil {
+			return nil, "", fmt.Errorf("failed to generate mnemonic: %v", err)
+		}
 	}
 
 	// Create HD wallet

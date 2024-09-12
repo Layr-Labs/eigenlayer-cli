@@ -11,4 +11,7 @@ var (
 	ErrInvalidKeyType                = errors.New("invalid key type. key type must be either 'ecdsa' or 'bls'")
 	ErrInvalidPassword               = errors.New("invalid password")
 	ErrInvalidHexPrivateKey          = errors.New("invalid hex private key")
+	ErrInvalidKeyFormat              = errors.New(
+		"invalid key format. Please provide a single hex encoded private key or a 12-word mnemonic",
+	)
 )
