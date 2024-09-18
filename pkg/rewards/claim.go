@@ -144,6 +144,16 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 		TokenLeaves:     convertClaimTokenLeaves(claim.TokenLeaves),
 	}
 
+	logger.Info("Validating claim proof...")
+	ok, err := elReader.CheckClaim(&bind.CallOpts{Context: ctx}, elClaim)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return errors.New("failed to validate claim")
+	}
+	logger.Info("Claim proof validated successfully")
+
 	if config.Broadcast {
 		eLWriter, err := common.GetELWriter(
 			config.ClaimerAddress,
