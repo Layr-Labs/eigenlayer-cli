@@ -74,7 +74,7 @@ func updateAllocations(cCtx *cli.Context, p utils.Prompter) error {
 	}
 
 	// Temp to test modify Allocations
-	config.delegationManagerAddress = gethcommon.HexToAddress("0xD9DFF502e91aE5887399C8ca11a0708dc1ee1cbf")
+	config.delegationManagerAddress = gethcommon.HexToAddress("0xec91e43612896E7D45736cE751bea6dbf1BBEdB5")
 
 	elReader, err := elcontracts.NewReaderFromConfig(
 		elcontracts.Config{
@@ -469,7 +469,7 @@ func readAndValidateUpdateFlags(cCtx *cli.Context, logger logging.Logger) (*upda
 	csvFilePath := cCtx.String(flags.CSVFileFlag.Name)
 	chainId := utils.NetworkNameToChainId(network)
 
-	delegationManagerAddress, err := utils.GetDelegationManagerAddress(chainId)
+	delegationManagerAddress, err := common.GetDelegationManagerAddress(chainId)
 	if err != nil {
 		return nil, err
 	}

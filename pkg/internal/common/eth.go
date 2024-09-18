@@ -56,3 +56,7 @@ func ConvertStringSliceToGethAddressSlice(addresses []string) []common.Address {
 	}
 	return gethAddresses
 }
+
+func ShortEthAddress(address common.Address) string {
+	return fmt.Sprintf("%s...%s", address.Hex()[:6], address.Hex()[len(address.Hex())-4:])
+}

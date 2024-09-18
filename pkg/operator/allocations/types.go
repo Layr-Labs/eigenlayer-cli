@@ -3,8 +3,10 @@ package allocations
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
 	"math/big"
 	"strings"
+	"time"
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/types"
 
@@ -102,7 +104,7 @@ type SlashableMagnitudesHolder struct {
 func (s SlashableMagnitudeHolders) PrintPretty() {
 	// Define column headers and widths
 	headers := []string{"Strategy Address", "AVS Address", "Operator Set ID", "Slashable Magnitude"}
-	widths := []int{43, 43, 16, 20}
+	widths := []int{20, 20, 16, 20}
 
 	// print dashes
 	for _, width := range widths {
@@ -125,8 +127,8 @@ func (s SlashableMagnitudeHolders) PrintPretty() {
 	// Print data rows
 	for _, holder := range s {
 		fmt.Printf("| %-*s| %-*s| %-*d| %-*d|\n",
-			widths[0], holder.StrategyAddress.Hex(),
-			widths[1], holder.AVSAddress.Hex(),
+			widths[0], common.ShortEthAddress(holder.StrategyAddress),
+			widths[1], common.ShortEthAddress(holder.AVSAddress),
 			widths[2], holder.OperatorSetId,
 			widths[3], holder.SlashableMagnitude)
 	}
@@ -139,10 +141,77 @@ func (s SlashableMagnitudeHolders) PrintPretty() {
 }
 
 func (s SlashableMagnitudeHolders) PrintJSON() {
-	json, err := json.MarshalIndent(s, "", "  ")
+	obj, err := json.MarshalIndent(s, "", "  ")
 	if err != nil {
 		fmt.Println("Error marshalling to JSON:", err)
 		return
 	}
-	fmt.Println(string(json))
+	fmt.Println(string(obj))
+}
+
+type AllocationDetailsHolder []AllocationDetails
+
+type AllocationDetails struct {
+	StrategyAddress gethcommon.Address
+	AVSAddress      gethcommon.Address
+	OperatorSetId   uint32
+	Allocation      uint64
+	Timestamp       uint32
+}
+
+func (a AllocationDetailsHolder) PrintPretty() {
+	// Define column headers and widths
+	headers := []string{"Strategy Address", "AVS Address", "Operator Set ID", "Allocation", "Application Timestamp"}
+	widths := []int{20, 20, 16, 20, 25}
+
+	// print dashes
+	for _, width := range widths {
+		fmt.Print("+" + strings.Repeat("-", width+1))
+	}
+	fmt.Println("+")
+
+	// Print header
+	for i, header := range headers {
+		fmt.Printf("| %-*s", widths[i], header)
+	}
+	fmt.Println("|")
+
+	// Print separator
+	for _, width := range widths {
+		fmt.Print("|", strings.Repeat("-", width+1))
+	}
+	fmt.Println("|")
+
+	// Print data rows
+	for _, holder := range a {
+		// Example timestamp (Unix timestamp in seconds)
+		timestamp := int64(holder.Timestamp)
+
+		// Convert timestamp to time.Time
+		t := time.Unix(timestamp, 0)
+
+		// Format the time as a string
+		formattedTime := t.Format("2006-01-02 15:04:05")
+		fmt.Printf("| %-*s| %-*s| %-*d| %-*d| %-*s|\n",
+			widths[0], common.ShortEthAddress(holder.StrategyAddress),
+			widths[1], common.ShortEthAddress(holder.AVSAddress),
+			widths[2], holder.OperatorSetId,
+			widths[3], holder.Allocation,
+			widths[4], formattedTime)
+	}
+
+	// print dashes
+	for _, width := range widths {
+		fmt.Print("+" + strings.Repeat("-", width+1))
+	}
+	fmt.Println("+")
+}
+
+func (a AllocationDetailsHolder) PrintJSON() {
+	obj, err := json.MarshalIndent(a, "", "  ")
+	if err != nil {
+		fmt.Println("Error marshalling to JSON:", err)
+		return
+	}
+	fmt.Println(string(obj))
 }

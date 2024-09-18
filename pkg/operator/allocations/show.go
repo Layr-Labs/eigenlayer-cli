@@ -1,6 +1,7 @@
 package allocations
 
 import (
+	"fmt"
 	"sort"
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
@@ -51,7 +52,7 @@ func showAction(cCtx *cli.Context, p utils.Prompter) error {
 	}
 
 	// Temp to test modify allocations
-	config.delegationManagerAddress = gethcommon.HexToAddress("0xD9DFF502e91aE5887399C8ca11a0708dc1ee1cbf")
+	config.delegationManagerAddress = gethcommon.HexToAddress("0xec91e43612896E7D45736cE751bea6dbf1BBEdB5")
 
 	elReader, err := elcontracts.NewReaderFromConfig(
 		elcontracts.Config{
@@ -77,7 +78,7 @@ func showAction(cCtx *cli.Context, p utils.Prompter) error {
 		logger.Debugf("Allocatable magnitude for strategy %v: %d", strategyAddress, allocatableMagnitude)
 	}
 
-	opSet, slashableMagnitudes, err := elReader.GetCurrentSlashableMagnitudes(
+	opSets, slashableMagnitudes, err := elReader.GetCurrentSlashableMagnitudes(
 		&bind.CallOpts{Context: ctx},
 		config.operatorAddress,
 		config.strategyAddresses,
@@ -89,7 +90,7 @@ func showAction(cCtx *cli.Context, p utils.Prompter) error {
 	slashableMagnitudeHolders := make(SlashableMagnitudeHolders, 0)
 	for i, strategyAddress := range config.strategyAddresses {
 		slashableMagnitude := slashableMagnitudes[i]
-		for j, opSet := range opSet {
+		for j, opSet := range opSets {
 			slashableMagnitudeHolders = append(slashableMagnitudeHolders, SlashableMagnitudesHolder{
 				StrategyAddress:    strategyAddress,
 				AVSAddress:         opSet.Avs,
@@ -99,6 +100,79 @@ func showAction(cCtx *cli.Context, p utils.Prompter) error {
 		}
 	}
 
+	// Get Pending allocations
+	pendingAllocationsDetails := make(AllocationDetailsHolder, 0)
+	for _, strategyAddress := range config.strategyAddresses {
+		pendingAllocations, timestamps, err := elReader.GetPendingAllocations(
+			&bind.CallOpts{Context: ctx},
+			config.operatorAddress,
+			strategyAddress,
+			opSets,
+		)
+		if err != nil {
+			return eigenSdkUtils.WrapError("failed to get pending allocations", err)
+		}
+		for i, opSet := range opSets {
+			pendingAllocation := pendingAllocations[i]
+			timestamp := timestamps[i]
+			if pendingAllocation == 0 && timestamp == 0 {
+				continue
+			}
+			pendingAllocationsDetails = append(pendingAllocationsDetails, AllocationDetails{
+				StrategyAddress: strategyAddress,
+				AVSAddress:      opSet.Avs,
+				OperatorSetId:   opSet.OperatorSetId,
+				Allocation:      pendingAllocation,
+				Timestamp:       timestamp,
+			})
+		}
+	}
+
+	pendingDeallocationsDetails := make(AllocationDetailsHolder, 0)
+	for _, strategyAddress := range config.strategyAddresses {
+		pendingDeallocations, err := elReader.GetPendingDeallocations(
+			&bind.CallOpts{Context: ctx},
+			config.operatorAddress,
+			strategyAddress,
+			opSets,
+		)
+		if err != nil {
+			return eigenSdkUtils.WrapError("failed to get pending deallocations", err)
+		}
+		for i, opSet := range opSets {
+			pendingAllocation := pendingDeallocations[i]
+			if pendingAllocation.MagnitudeDiff == 0 && pendingAllocation.CompletableTimestamp == 0 {
+				continue
+			}
+			pendingDeallocationsDetails = append(pendingDeallocationsDetails, AllocationDetails{
+				StrategyAddress: strategyAddress,
+				AVSAddress:      opSet.Avs,
+				OperatorSetId:   opSet.OperatorSetId,
+				Allocation:      pendingAllocation.MagnitudeDiff,
+				Timestamp:       pendingAllocation.CompletableTimestamp,
+			})
+		}
+	}
+
+	fmt.Println()
+	fmt.Println("------------------Pending Allocations---------------------")
+	if config.outputType == string(common.OutputType_Json) {
+		pendingAllocationsDetails.PrintJSON()
+	} else {
+		pendingAllocationsDetails.PrintPretty()
+	}
+	fmt.Println()
+
+	fmt.Println()
+	fmt.Println("------------------Pending Deallocations---------------------")
+	if config.outputType == string(common.OutputType_Json) {
+		pendingDeallocationsDetails.PrintJSON()
+	} else {
+		pendingDeallocationsDetails.PrintPretty()
+	}
+	fmt.Println()
+
+	fmt.Println("------------------Current Slashable Magnitudes---------------------")
 	if config.outputType == string(common.OutputType_Json) {
 		slashableMagnitudeHolders.PrintJSON()
 	} else {
@@ -119,7 +193,7 @@ func readAndValidateShowConfig(cCtx *cli.Context, logger *logging.Logger) (*show
 	outputType := cCtx.String(flags.OutputTypeFlag.Name)
 
 	chainId := utils.NetworkNameToChainId(network)
-	delegationManagerAddress, err := utils.GetDelegationManagerAddress(chainId)
+	delegationManagerAddress, err := common.GetDelegationManagerAddress(chainId)
 	if err != nil {
 		return nil, err
 	}

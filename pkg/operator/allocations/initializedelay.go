@@ -51,7 +51,7 @@ func initializeDelayAction(cCtx *cli.Context, p utils.Prompter) error {
 	}
 
 	// Temp to test modify Allocations
-	config.delegationManagerAddress = gethcommon.HexToAddress("0xD9DFF502e91aE5887399C8ca11a0708dc1ee1cbf")
+	config.delegationManagerAddress = gethcommon.HexToAddress("0xec91e43612896E7D45736cE751bea6dbf1BBEdB5")
 
 	if config.broadcast {
 		confirm, err := p.Confirm(
@@ -80,7 +80,7 @@ func initializeDelayAction(cCtx *cli.Context, p utils.Prompter) error {
 			return eigenSdkUtils.WrapError("failed to get EL writer", err)
 		}
 
-		receipt, err := eLWriter.InitializeAllocationDelay(ctx, config.allocationDelay, true)
+		receipt, err := eLWriter.InitializeAllocationDelay(ctx, config.operatorAddress, config.allocationDelay, true)
 		if err != nil {
 			return err
 		}
@@ -102,7 +102,7 @@ func initializeDelayAction(cCtx *cli.Context, p utils.Prompter) error {
 			noSendTxOpts.GasLimit = 150_000
 		}
 
-		unsignedTx, err := contractBindings.DelegationManager.InitializeAllocationDelay(noSendTxOpts, config.allocationDelay)
+		unsignedTx, err := contractBindings.AllocationManager.SetAllocationDelay(noSendTxOpts, config.operatorAddress, config.allocationDelay)
 		if err != nil {
 			return eigenSdkUtils.WrapError("failed to create unsigned tx", err)
 		}
@@ -186,7 +186,7 @@ func readAndValidateAllocationDelayConfig(c *cli.Context, logger logging.Logger)
 		logger.Debugf("Failed to get signer config: %s", err)
 	}
 
-	delegationManagerAddress, err := utils.GetDelegationManagerAddress(chainID)
+	delegationManagerAddress, err := common.GetDelegationManagerAddress(chainID)
 	if err != nil {
 		return nil, err
 	}
