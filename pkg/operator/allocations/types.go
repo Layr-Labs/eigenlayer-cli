@@ -20,24 +20,54 @@ type BulkModifyAllocations struct {
 	AllocatableMagnitudes map[gethcommon.Address]uint64
 }
 
-func (b *BulkModifyAllocations) Print() {
-	for _, a := range b.Allocations {
-		fmt.Printf(
-			"Strategy: %s, Expected Total Magnitude: %d, Allocatable Magnitude %d\n",
-			a.Strategy.Hex(),
-			a.ExpectedTotalMagnitude,
-			b.AllocatableMagnitudes[a.Strategy],
-		)
-		for i, opSet := range a.OperatorSets {
-			fmt.Printf(
-				"Operator Set: %d, AVS: %s, Magnitude: %d\n",
-				opSet.OperatorSetId,
-				opSet.Avs.Hex(),
-				a.Magnitudes[i],
-			)
-		}
-		fmt.Println()
+func (b *BulkModifyAllocations) PrintPretty() {
+
+	fmt.Println()
+	fmt.Println("Allocations to be Updated")
+	allocations := b.Allocations
+	headers := []string{"Strategy", "Expected Total Magnitude", "Allocatable Magnitude", "Operator Set ID", "AVS", "Magnitude"}
+	widths := []int{20, 25, 25, 20, 20, 25}
+
+	// print dashes
+	for _, width := range widths {
+		fmt.Print("+" + strings.Repeat("-", width+1))
 	}
+
+	fmt.Println("+")
+
+	// Print header
+	for i, header := range headers {
+		fmt.Printf("| %-*s", widths[i], header)
+	}
+
+	fmt.Println("|")
+
+	// Print separator
+	for _, width := range widths {
+		fmt.Print("|", strings.Repeat("-", width+1))
+	}
+
+	fmt.Println("|")
+
+	// Print data rows
+	for _, a := range allocations {
+		for i, opSet := range a.OperatorSets {
+			fmt.Printf("| %-*s| %-*s| %-*s| %-*d| %-*s| %-*s|\n",
+				widths[0], common.ShortEthAddress(a.Strategy),
+				widths[1], common.FormatNumberWithUnderscores(a.ExpectedTotalMagnitude),
+				widths[2], common.FormatNumberWithUnderscores(b.AllocatableMagnitudes[a.Strategy]),
+				widths[3], opSet.OperatorSetId,
+				widths[4], common.ShortEthAddress(opSet.Avs),
+				widths[5], common.FormatNumberWithUnderscores(a.Magnitudes[i]))
+		}
+	}
+
+	// print dashes
+	for _, width := range widths {
+		fmt.Print("+" + strings.Repeat("-", width+1))
+	}
+
+	fmt.Println("+")
 }
 
 type updateConfig struct {
@@ -95,16 +125,18 @@ type showConfig struct {
 type SlashableMagnitudeHolders []SlashableMagnitudesHolder
 
 type SlashableMagnitudesHolder struct {
-	StrategyAddress    gethcommon.Address
-	AVSAddress         gethcommon.Address
-	OperatorSetId      uint32
-	SlashableMagnitude uint64
+	StrategyAddress       gethcommon.Address
+	AVSAddress            gethcommon.Address
+	OperatorSetId         uint32
+	SlashableMagnitude    uint64
+	NewMagnitude          uint64
+	NewMagnitudeTimestamp uint32
 }
 
 func (s SlashableMagnitudeHolders) PrintPretty() {
 	// Define column headers and widths
-	headers := []string{"Strategy Address", "AVS Address", "Operator Set ID", "Slashable Magnitude"}
-	widths := []int{20, 20, 16, 20}
+	headers := []string{"Strategy Address", "AVS Address", "Operator Set ID", "Slashable Magnitude", "New Magnitude", "New Magnitude Timestamp"}
+	widths := []int{20, 20, 16, 25, 25, 25}
 
 	// print dashes
 	for _, width := range widths {
@@ -126,11 +158,22 @@ func (s SlashableMagnitudeHolders) PrintPretty() {
 
 	// Print data rows
 	for _, holder := range s {
-		fmt.Printf("| %-*s| %-*s| %-*d| %-*d|\n",
+		// Example timestamp (Unix timestamp in seconds)
+		timestamp := int64(holder.NewMagnitudeTimestamp)
+
+		// Convert timestamp to time.Time
+		t := time.Unix(timestamp, 0)
+
+		// Format the time as a string
+		formattedTime := t.Format("2006-01-02 15:04:05")
+		fmt.Printf("| %-*s| %-*s| %-*d| %-*s| %-*s| %-*s|\n",
 			widths[0], common.ShortEthAddress(holder.StrategyAddress),
 			widths[1], common.ShortEthAddress(holder.AVSAddress),
 			widths[2], holder.OperatorSetId,
-			widths[3], holder.SlashableMagnitude)
+			widths[3], common.FormatNumberWithUnderscores(holder.SlashableMagnitude),
+			widths[4], common.FormatNumberWithUnderscores(holder.NewMagnitude),
+			widths[5], formattedTime,
+		)
 	}
 
 	// print dashes
@@ -162,7 +205,7 @@ type AllocationDetails struct {
 func (a AllocationDetailsHolder) PrintPretty() {
 	// Define column headers and widths
 	headers := []string{"Strategy Address", "AVS Address", "Operator Set ID", "Allocation", "Application Timestamp"}
-	widths := []int{20, 20, 16, 20, 25}
+	widths := []int{20, 20, 16, 25, 25}
 
 	// print dashes
 	for _, width := range widths {
@@ -192,11 +235,11 @@ func (a AllocationDetailsHolder) PrintPretty() {
 
 		// Format the time as a string
 		formattedTime := t.Format("2006-01-02 15:04:05")
-		fmt.Printf("| %-*s| %-*s| %-*d| %-*d| %-*s|\n",
+		fmt.Printf("| %-*s| %-*s| %-*d| %-*s| %-*s|\n",
 			widths[0], common.ShortEthAddress(holder.StrategyAddress),
 			widths[1], common.ShortEthAddress(holder.AVSAddress),
 			widths[2], holder.OperatorSetId,
-			widths[3], holder.Allocation,
+			widths[3], common.FormatNumberWithUnderscores(holder.Allocation),
 			widths[4], formattedTime)
 	}
 
@@ -214,4 +257,9 @@ func (a AllocationDetailsHolder) PrintJSON() {
 		return
 	}
 	fmt.Println(string(obj))
+}
+
+type AllocDetails struct {
+	Magnitude uint64
+	Timestamp uint32
 }

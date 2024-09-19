@@ -74,7 +74,7 @@ func updateAllocations(cCtx *cli.Context, p utils.Prompter) error {
 	}
 
 	// Temp to test modify Allocations
-	config.delegationManagerAddress = gethcommon.HexToAddress("0xec91e43612896E7D45736cE751bea6dbf1BBEdB5")
+	config.delegationManagerAddress = gethcommon.HexToAddress("0x1a597729A7dCfeDDD1f6130fBb099892B7623FAd")
 
 	elReader, err := elcontracts.NewReaderFromConfig(
 		elcontracts.Config{
@@ -170,7 +170,7 @@ func updateAllocations(cCtx *cli.Context, p utils.Prompter) error {
 				fmt.Println("output file not supported for pretty output type")
 				fmt.Println()
 			}
-			allocationsToUpdate.Print()
+			allocationsToUpdate.PrintPretty()
 		}
 		txFeeDetails := common.GetTxFeeDetails(unsignedTx)
 		fmt.Println()
