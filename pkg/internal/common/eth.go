@@ -62,9 +62,11 @@ func ShortEthAddress(address common.Address) string {
 	return fmt.Sprintf("%s...%s", address.Hex()[:6], address.Hex()[len(address.Hex())-4:])
 }
 
-func FormatNumberWithUnderscores(n uint64) string {
-	// Convert the number to a string
-	numStr := strconv.FormatUint(n, 10)
+func Uint64ToString(num uint64) string {
+	return strconv.FormatUint(num, 10)
+}
+
+func FormatNumberWithUnderscores(numStr string) string {
 
 	// If the number is less than 1000, no formatting is needed
 	if len(numStr) <= 3 {

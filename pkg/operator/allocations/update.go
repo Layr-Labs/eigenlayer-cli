@@ -74,7 +74,7 @@ func updateAllocations(cCtx *cli.Context, p utils.Prompter) error {
 	}
 
 	// Temp to test modify Allocations
-	config.delegationManagerAddress = gethcommon.HexToAddress("0x1a597729A7dCfeDDD1f6130fBb099892B7623FAd")
+	config.delegationManagerAddress = gethcommon.HexToAddress("0xFF30144A9A749144e88bEb4FAbF020Cc7F71d2dC")
 
 	elReader, err := elcontracts.NewReaderFromConfig(
 		elcontracts.Config{
@@ -417,12 +417,15 @@ func convertAllocationsToMagnitudeAllocations(
 	}
 
 	for strategy, operatorSets := range operatorSetsPerStragyMap {
-		magnitudeAllocations = append(magnitudeAllocations, contractIAllocationManager.IAllocationManagerMagnitudeAllocation{
-			Strategy:               strategy,
-			ExpectedTotalMagnitude: strategyTotalMagnitudes[strategy],
-			OperatorSets:           operatorSets,
-			Magnitudes:             magnitudeAllocationsPerStrategyMap[strategy],
-		})
+		magnitudeAllocations = append(
+			magnitudeAllocations,
+			contractIAllocationManager.IAllocationManagerMagnitudeAllocation{
+				Strategy:               strategy,
+				ExpectedTotalMagnitude: strategyTotalMagnitudes[strategy],
+				OperatorSets:           operatorSets,
+				Magnitudes:             magnitudeAllocationsPerStrategyMap[strategy],
+			},
+		)
 	}
 	return magnitudeAllocations
 }
