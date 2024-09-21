@@ -72,7 +72,9 @@ func showAction(cCtx *cli.Context, p utils.Prompter) error {
 		return eigenSdkUtils.WrapError("failed to create new reader from config", err)
 	}
 
-	// for each strategy address, get the allocatable magnitude
+	/*
+		1. Get the allocatable magnitude for all strategies
+	*/
 	for _, strategyAddress := range config.strategyAddresses {
 		allocatableMagnitude, err := elReader.GetAllocatableMagnitude(
 			&bind.CallOpts{Context: ctx},
@@ -89,7 +91,9 @@ func showAction(cCtx *cli.Context, p utils.Prompter) error {
 		)
 	}
 
-	// for each strategy address, get the total magnitude
+	/*
+		2. Get the total magnitude for all strategies
+	*/
 	totalMagnitudeMap := make(map[string]uint64)
 	totalMagnitudes, err := elReader.GetTotalMagnitudes(
 		&bind.CallOpts{Context: ctx},
@@ -103,6 +107,9 @@ func showAction(cCtx *cli.Context, p utils.Prompter) error {
 		totalMagnitudeMap[strategyAddress.String()] = totalMagnitudes[i]
 	}
 
+	/*
+		3. Get the operator set and slashable magnitude for all strategies
+	*/
 	opSets, slashableMagnitudes, err := elReader.GetCurrentSlashableMagnitudes(
 		&bind.CallOpts{Context: ctx},
 		config.operatorAddress,
@@ -112,7 +119,9 @@ func showAction(cCtx *cli.Context, p utils.Prompter) error {
 		return eigenSdkUtils.WrapError("failed to get slashable magnitude", err)
 	}
 
-	// Get Pending allocations
+	/*
+		4. Get the pending allocations for all strategies
+	*/
 	pendingAllocationMap := make(map[string]AllocDetails)
 	for _, strategyAddress := range config.strategyAddresses {
 		pendingAllocations, timestamps, err := elReader.GetPendingAllocations(
@@ -137,6 +146,9 @@ func showAction(cCtx *cli.Context, p utils.Prompter) error {
 		}
 	}
 
+	/*
+		5. Get the pending deallocations for all strategies
+	*/
 	pendingdeAllocationMap := make(map[string]AllocDetails)
 	for _, strategyAddress := range config.strategyAddresses {
 		pendingDeallocations, err := elReader.GetPendingDeallocations(
@@ -160,7 +172,9 @@ func showAction(cCtx *cli.Context, p utils.Prompter) error {
 		}
 	}
 
-	// Get Operator Shares
+	/*
+		6. Get the operator scaled shares for all strategies
+	*/
 	operatorScaledSharesMap := make(map[string]*big.Int)
 	for _, strategyAddress := range config.strategyAddresses {
 		shares, err := elReader.GetOperatorScaledShares(&bind.CallOpts{}, config.operatorAddress, strategyAddress)
@@ -170,6 +184,10 @@ func showAction(cCtx *cli.Context, p utils.Prompter) error {
 		operatorScaledSharesMap[strategyAddress.String()] = shares
 	}
 
+	/*
+		7. Using all of the above, calculate SlashableMagnitudeHolders object
+		   for displaying the allocation state of the operator
+	*/
 	slashableMagnitudeHolders := make(SlashableMagnitudeHolders, 0)
 	for i, strategyAddress := range config.strategyAddresses {
 		slashableMagnitude := slashableMagnitudes[i]
@@ -178,12 +196,21 @@ func showAction(cCtx *cli.Context, p utils.Prompter) error {
 			newTimestamp := uint32(0)
 			currSlashableMag := slashableMagnitude[j]
 			someKey := getUniqueKey(strategyAddress, opSet)
+
+			/*
+				1. Check if there's a pending allocation for this opera
+			*/
 			if _, ok := pendingAllocationMap[someKey]; ok {
 				newAllocation = pendingAllocationMap[someKey].Magnitude
 				newTimestamp = pendingAllocationMap[someKey].Timestamp
 			}
 
+			/*
+				2. Check if there's a pending deallocation for this operator
+			*/
 			if _, ok := pendingdeAllocationMap[someKey]; ok {
+				// pendingdeAllocationMap has the magnitude diff for deallocations so we have to
+				// do some extra math to get the new magnitude
 				newAllocationDiff := pendingdeAllocationMap[someKey].Magnitude
 				newTimestamp = pendingdeAllocationMap[someKey].Timestamp
 				newAllocation = currSlashableMag
@@ -192,31 +219,30 @@ func showAction(cCtx *cli.Context, p utils.Prompter) error {
 
 			operatorScaledShares := operatorScaledSharesMap[strategyAddress.String()]
 
-			currSlashableMagBigInt := big.NewInt(1)
-			currSlashableMagBigInt = currSlashableMagBigInt.SetUint64(currSlashableMag)
+			/*
+				3. Calculate the current shares and percentage shares for the operator
+			*/
+			shares, percentShares := getSharesFromMagnitude(operatorScaledShares, currSlashableMag)
 
-			scaledOpShares := big.NewInt(1)
-			scaledOpShares = scaledOpShares.Set(operatorScaledShares)
-			scaledOpShares = scaledOpShares.Div(scaledOpShares, PrecisionFactor)
-			shares := scaledOpShares.Mul(scaledOpShares, currSlashableMagBigInt)
+			/*
+				4. Calculate the new shares and percentage shares for the operator if any
+			*/
+			newShares, newSharesPercentage := getSharesFromMagnitude(operatorScaledShares, newAllocation)
 
-			newShares := getSharesFromMagnitude(operatorScaledShares, newAllocation)
-
-			percentageShares := big.NewInt(1)
-			percentageShares = percentageShares.Mul(scaledOpShares, big.NewInt(100))
-			percentageSharesFloat := new(
-				big.Float,
-			).Quo(new(big.Float).SetInt(percentageShares), new(big.Float).SetInt(operatorScaledShares))
+			/*
+				5. Append the SlashableMagnitudeHolder object to the list
+			*/
 			slashableMagnitudeHolders = append(slashableMagnitudeHolders, SlashableMagnitudesHolder{
-				StrategyAddress:       strategyAddress,
-				AVSAddress:            opSet.Avs,
-				OperatorSetId:         opSet.OperatorSetId,
-				SlashableMagnitude:    currSlashableMag,
-				NewMagnitude:          newAllocation,
-				NewMagnitudeTimestamp: newTimestamp,
-				Shares:                shares,
-				SharesPercentage:      percentageSharesFloat.String(),
-				NewAllocationShares:   newShares,
+				StrategyAddress:          strategyAddress,
+				AVSAddress:               opSet.Avs,
+				OperatorSetId:            opSet.OperatorSetId,
+				SlashableMagnitude:       currSlashableMag,
+				NewMagnitude:             newAllocation,
+				NewMagnitudeTimestamp:    newTimestamp,
+				Shares:                   shares,
+				SharesPercentage:         percentShares.String(),
+				NewAllocationShares:      newShares,
+				UpcomingSharesPercentage: newSharesPercentage.String(),
 			})
 		}
 	}
@@ -246,7 +272,13 @@ func showAction(cCtx *cli.Context, p utils.Prompter) error {
 	return nil
 }
 
-func getSharesFromMagnitude(totalScaledShare *big.Int, magnitude uint64) *big.Int {
+func getSharesFromMagnitude(totalScaledShare *big.Int, magnitude uint64) (*big.Int, *big.Float) {
+
+	/*
+	 * shares = totalScaledShare * magnitude / PrecisionFactor
+	 * percentageShares = (shares / totalScaledShare) * 100
+	 */
+
 	slashableMagBigInt := big.NewInt(1)
 	slashableMagBigInt = slashableMagBigInt.SetUint64(magnitude)
 
@@ -254,7 +286,14 @@ func getSharesFromMagnitude(totalScaledShare *big.Int, magnitude uint64) *big.In
 	scaledOpShares = scaledOpShares.Set(totalScaledShare)
 	scaledOpShares = scaledOpShares.Div(scaledOpShares, PrecisionFactor)
 	shares := scaledOpShares.Mul(scaledOpShares, slashableMagBigInt)
-	return shares
+
+	percentageShares := big.NewInt(1)
+	percentageShares = percentageShares.Mul(scaledOpShares, big.NewInt(100))
+	percentageSharesFloat := new(
+		big.Float,
+	).Quo(new(big.Float).SetInt(percentageShares), new(big.Float).SetInt(totalScaledShare))
+
+	return shares, percentageSharesFloat
 }
 
 func getUniqueKey(strategyAddress gethcommon.Address, opSet contractIAllocationManager.OperatorSet) string {

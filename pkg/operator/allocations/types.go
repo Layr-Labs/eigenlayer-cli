@@ -141,15 +141,16 @@ type showConfig struct {
 type SlashableMagnitudeHolders []SlashableMagnitudesHolder
 
 type SlashableMagnitudesHolder struct {
-	StrategyAddress       gethcommon.Address
-	AVSAddress            gethcommon.Address
-	OperatorSetId         uint32
-	SlashableMagnitude    uint64
-	NewMagnitude          uint64
-	NewAllocationShares   *big.Int
-	NewMagnitudeTimestamp uint32
-	Shares                *big.Int
-	SharesPercentage      string
+	StrategyAddress          gethcommon.Address
+	AVSAddress               gethcommon.Address
+	OperatorSetId            uint32
+	SlashableMagnitude       uint64
+	NewMagnitude             uint64
+	NewAllocationShares      *big.Int
+	NewMagnitudeTimestamp    uint32
+	Shares                   *big.Int
+	SharesPercentage         string
+	UpcomingSharesPercentage string
 }
 
 func (s SlashableMagnitudeHolders) PrintPretty() {
@@ -159,11 +160,12 @@ func (s SlashableMagnitudeHolders) PrintPretty() {
 		"AVS Address",
 		"OperatorSet ID",
 		"Slashable Shares (Wei)",
-		"Shares Percentage",
+		"Shares %",
 		"Upcoming Shares (Wei)",
+		"Upcoming Shares %",
 		"Update Time",
 	}
-	widths := []int{len(headers[0]) + 1, len(headers[1]) + 3, 15, 30, 25, 30, 25}
+	widths := []int{len(headers[0]) + 1, len(headers[1]) + 3, 15, 30, 25, 30, 25, 25}
 
 	// print dashes
 	for _, width := range widths {
@@ -198,15 +200,17 @@ func (s SlashableMagnitudeHolders) PrintPretty() {
 		if holder.NewMagnitudeTimestamp == 0 && holder.NewMagnitude == 0 {
 			formattedTime = "N/A"
 			upcomingSharesDisplay = "N/A"
+			holder.UpcomingSharesPercentage = "N/A"
 		}
-		fmt.Printf("| %-*s| %-*s| %-*d| %-*s| %-*s| %-*s| %-*s|\n",
+		fmt.Printf("| %-*s| %-*s| %-*d| %-*s| %-*s| %-*s| %-*s| %-*s|\n",
 			widths[0], common.ShortEthAddress(holder.StrategyAddress),
 			widths[1], common.ShortEthAddress(holder.AVSAddress),
 			widths[2], holder.OperatorSetId,
 			widths[3], common.FormatNumberWithUnderscores(holder.Shares.String()),
 			widths[4], holder.SharesPercentage+" %",
 			widths[5], upcomingSharesDisplay,
-			widths[6], formattedTime,
+			widths[6], holder.UpcomingSharesPercentage+" %",
+			widths[7], formattedTime,
 		)
 	}
 
