@@ -66,9 +66,15 @@ var (
 	NumberOfDaysFlag = cli.IntFlag{
 		Name:    "number-of-days",
 		Aliases: []string{"nd"},
-		Usage:   "Number of days to show rewards for. Negative means past days, positive means future days (future days is not supported yet). Only used for 'all' claim type",
+		Usage:   "Number of past days to show rewards for. It should be negative. Only used for 'all' claim type",
 		Value:   -21,
 		EnvVars: []string{"REWARDS_NUMBER_OF_DAYS"},
+		Action: func(context *cli.Context, i int) error {
+			if i >= 0 {
+				return cli.Exit("Number of days should be negative to represent past days", 1)
+			}
+			return nil
+		},
 	}
 
 	AVSAddressesFlag = cli.StringFlag{

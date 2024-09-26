@@ -115,6 +115,32 @@ eigenlayer rewards set-claimer \
 For testnet, remove the `--rewards-coordinator-address` flag and binary will automatically use the testnet rewards coordinator address.
 
 ### Show Rewards
+```bash
+eigenlayer rewards show --help
+NAME:
+   eigenlayer rewards show - Show rewards for an address
+
+USAGE:
+   show
+
+DESCRIPTION:
+
+   Command to show rewards for earners
+
+   Currently supports past total rewards (claimed and unclaimed) and past unclaimed rewards
+
+
+OPTIONS:
+   --avs-addresses value, -a value     Comma seperated addresses of the AVS [$AVS_ADDRESSES]
+   --claim-type value, --ct value      Type of claim you want to see. Can be 'all', 'unclaimed', or 'claimed' (default: "all") [$REWARDS_CLAIM_TYPE]
+   --earner-address value, --ea value  Address of the earner [$REWARDS_EARNER_ADDRESS]
+   --environment value, --env value    Environment to use. Currently supports 'preprod' ,'testnet' and 'prod'. If not provided, it will be inferred based on network [$ENVIRONMENT]
+   --network value, -n value           Network to use. Currently supports 'holesky' and 'mainnet' (default: "holesky") [$NETWORK]
+   --number-of-days value, --nd value  Number of past days to show rewards for. It should be negative. Only used for 'all' claim type (default: -21) [$REWARDS_NUMBER_OF_DAYS]
+   --output-file value, -o value       Output file to write the data [$OUTPUT_FILE]
+   --verbose, -v                       Enable verbose logging (default: false) [$VERBOSE]
+   --help, -h                          show help
+```
 ### Testnet
 Show all Rewards
 ```bash
