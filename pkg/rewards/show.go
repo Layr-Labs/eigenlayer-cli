@@ -259,11 +259,6 @@ func readAndValidateConfig(cCtx *cli.Context, logger logging.Logger) (*ShowConfi
 	earnerAddress := gethcommon.HexToAddress(cCtx.String(EarnerAddressFlag.Name))
 	output := cCtx.String(flags.OutputFileFlag.Name)
 	numberOfDays := cCtx.Int64(NumberOfDaysFlag.Name)
-	if numberOfDays >= 0 {
-		return nil, errors.New(
-			"future rewards projection is not supported yet. Please provide a negative number of days for past rewards",
-		)
-	}
 	network := cCtx.String(flags.NetworkFlag.Name)
 	env := cCtx.String(EnvironmentFlag.Name)
 	if env == "" {
