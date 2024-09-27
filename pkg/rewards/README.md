@@ -131,15 +131,17 @@ DESCRIPTION:
 
 
 OPTIONS:
-   --avs-addresses value, -a value     Comma seperated addresses of the AVS [$AVS_ADDRESSES]
-   --claim-type value, --ct value      Type of claim you want to see. Can be 'all', 'unclaimed', or 'claimed' (default: "all") [$REWARDS_CLAIM_TYPE]
-   --earner-address value, --ea value  Address of the earner [$REWARDS_EARNER_ADDRESS]
-   --environment value, --env value    Environment to use. Currently supports 'preprod' ,'testnet' and 'prod'. If not provided, it will be inferred based on network [$ENVIRONMENT]
-   --network value, -n value           Network to use. Currently supports 'holesky' and 'mainnet' (default: "holesky") [$NETWORK]
-   --number-of-days value, --nd value  Number of past days to show rewards for. It should be negative. Only used for 'all' claim type (default: -21) [$REWARDS_NUMBER_OF_DAYS]
-   --output-file value, -o value       Output file to write the data [$OUTPUT_FILE]
-   --verbose, -v                       Enable verbose logging (default: false) [$VERBOSE]
-   --help, -h                          show help
+   --avs-addresses value, -a value             Comma seperated addresses of the AVS [$AVS_ADDRESSES]
+   --claim-type value, --ct value              Type of claim you want to see. Can be 'all', 'unclaimed', or 'claimed' (default: "all") [$REWARDS_CLAIM_TYPE]
+   --earner-address value, --ea value          Address of the earner [$REWARDS_EARNER_ADDRESS]
+   --environment value, --env value            Environment to use. Currently supports 'preprod' ,'testnet' and 'prod'. If not provided, it will be inferred based on network [$ENVIRONMENT]
+   --eth-rpc-url value, -r value               URL of the Ethereum RPC [$ETH_RPC_URL]
+   --network value, -n value                   Network to use. Currently supports 'holesky' and 'mainnet' (default: "holesky") [$NETWORK]
+   --output-file value, -o value               Output file to write the data [$OUTPUT_FILE]
+   --output-type value, --ot value             Output format of the command. One of 'pretty', 'json' or 'calldata' (default: "pretty") [$OUTPUT_TYPE]
+   --proof-store-base-url value, --psbu value  Specify the base URL of the proof store. If not provided, the value based on network will be used [$PROOF_STORE_BASE_URL]
+   --verbose, -v                               Enable verbose logging (default: false) [$VERBOSE]
+   --help, -h                                  show help
 ```
 ### Testnet
 Show all Rewards
