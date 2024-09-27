@@ -63,7 +63,6 @@ func getShowFlags() []cli.Flag {
 		&flags.VerboseFlag,
 		&flags.ETHRpcUrlFlag,
 		&EarnerAddressFlag,
-		&AVSAddressesFlag,
 		&EnvironmentFlag,
 		&ClaimTypeFlag,
 		&ProofStoreBaseURLFlag,

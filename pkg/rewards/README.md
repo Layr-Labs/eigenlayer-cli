@@ -131,7 +131,6 @@ DESCRIPTION:
 
 
 OPTIONS:
-   --avs-addresses value, -a value             Comma seperated addresses of the AVS [$AVS_ADDRESSES]
    --claim-type value, --ct value              Type of claim you want to see. Can be 'all', 'unclaimed', or 'claimed' (default: "all") [$REWARDS_CLAIM_TYPE]
    --earner-address value, --ea value          Address of the earner [$REWARDS_EARNER_ADDRESS]
    --environment value, --env value            Environment to use. Currently supports 'preprod' ,'testnet' and 'prod'. If not provided, it will be inferred based on network [$ENVIRONMENT]
