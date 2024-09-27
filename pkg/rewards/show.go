@@ -38,10 +38,6 @@ const (
 	All       ClaimType = "all"
 	Unclaimed ClaimType = "unclaimed"
 	Claimed   ClaimType = "claimed"
-
-	AllRewards       = "All Rewards"
-	UnclaimedRewards = "Unclaimed Rewards"
-	ClaimedRewards   = "Claimed Rewards"
 )
 
 func ShowCmd(p utils.Prompter) *cli.Command {
@@ -129,7 +125,7 @@ func ShowRewards(cCtx *cli.Context) error {
 	}
 
 	allRewards := make(map[gethcommon.Address]*big.Int)
-	msg := AllRewards
+	msg := "All Rewards"
 	for pair := tokenAddressesMap.Oldest(); pair != nil; pair = pair.Next() {
 		amt, _ := new(big.Int).SetString(pair.Value.String(), 10)
 		allRewards[pair.Key] = amt
@@ -143,10 +139,10 @@ func ShowRewards(cCtx *cli.Context) error {
 		switch config.ClaimType {
 		case Claimed:
 			allRewards = claimedRewards
-			msg = ClaimedRewards
+			msg = "Claimed Rewards"
 		case Unclaimed:
 			allRewards = calculateUnclaimedRewards(allRewards, claimedRewards)
-			msg = UnclaimedRewards
+			msg = "Unclaimed Rewards"
 		}
 	}
 	err = handleRewardsOutput(config.Output, config.OutputType, allRewards, msg)
