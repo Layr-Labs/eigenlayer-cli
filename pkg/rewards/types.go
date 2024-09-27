@@ -7,41 +7,12 @@ import (
 	gethcommon "github.com/ethereum/go-ethereum/common"
 )
 
-type RewardResponse struct {
-	Rewards []Reward `json:"rewards"`
+type rewardsJson struct {
+	Address string `json:"tokenAddress"`
+	Amount  string `json:"amount"`
 }
 
-type Reward struct {
-	StrategyAddress    string              `json:"strategyAddress"`
-	RewardsPerStrategy []RewardPerStrategy `json:"rewards"`
-}
-
-type RewardPerStrategy struct {
-	AVSAddress string  `json:"avsAddress"`
-	Tokens     []Token `json:"tokens"`
-}
-
-type Token struct {
-	TokenAddress string `json:"tokenAddress"`
-	WeiAmount    string `json:"weiAmount"`
-}
-
-type NormalizedReward struct {
-	StrategyAddress string   `csv:"strategyAddress"`
-	AVSAddress      string   `csv:"avsAddress"`
-	TokenAddress    string   `csv:"tokenAddress"`
-	WeiAmount       *big.Int `csv:"weiAmount"`
-}
-
-type UnclaimedRewardResponse struct {
-	BlockHeight string              `json:"blockHeight"`
-	Rewards     []RewardPerStrategy `json:"rewards"`
-}
-
-type NormalizedUnclaimedReward struct {
-	TokenAddress string   `csv:"tokenAddress"`
-	WeiAmount    *big.Int `csv:"weiAmount"`
-}
+type allRewardsJson []rewardsJson
 
 type ClaimConfig struct {
 	Network                   string
@@ -75,11 +46,15 @@ type SetClaimerConfig struct {
 }
 
 type ShowConfig struct {
-	EarnerAddress gethcommon.Address
-	NumberOfDays  int64
-	Network       string
-	Environment   string
-	ClaimType     ClaimType
-	ChainID       *big.Int
-	Output        string
+	EarnerAddress             gethcommon.Address
+	RPCUrl                    string
+	NumberOfDays              int64
+	Network                   string
+	Environment               string
+	ClaimType                 ClaimType
+	ChainID                   *big.Int
+	Output                    string
+	OutputType                string
+	ProofStoreBaseURL         string
+	RewardsCoordinatorAddress gethcommon.Address
 }

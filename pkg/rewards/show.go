@@ -1,14 +1,13 @@
 package rewards
 
 import (
-	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"sort"
-
 	"math/big"
 	"net/http"
+	"sort"
 	"strings"
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
@@ -16,28 +15,29 @@ import (
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 
+	"github.com/Layr-Labs/eigenlayer-rewards-proofs/pkg/proofDataFetcher/httpProofDataFetcher"
+
+	"github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
 	"github.com/Layr-Labs/eigensdk-go/logging"
+	eigenSdkUtils "github.com/Layr-Labs/eigensdk-go/utils"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 
 	gethcommon "github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/ethclient"
 
 	"github.com/urfave/cli/v2"
 )
 
-var (
-	preprodUrl = ""
-	testnetUrl = ""
-	mainnetUrl = ""
-)
-
 type ClaimType string
+
+type ELReader interface {
+	GetCumulativeClaimed(opts *bind.CallOpts, earnerAddress, tokenAddress gethcommon.Address) (*big.Int, error)
+}
 
 const (
 	All       ClaimType = "all"
 	Unclaimed ClaimType = "unclaimed"
 	Claimed   ClaimType = "claimed"
-
-	GetClaimableRewardsEndpoint        = "grpc/eigenlayer.RewardsService/GetClaimableRewards"
-	GetEarnedTokensForStrategyEndpoint = "grpc/eigenlayer.RewardsService/GetEarnedTokensForStrategy"
 )
 
 func ShowCmd(p utils.Prompter) *cli.Command {
@@ -64,12 +64,13 @@ func getShowFlags() []cli.Flag {
 	baseFlags := []cli.Flag{
 		&flags.NetworkFlag,
 		&flags.OutputFileFlag,
+		&flags.OutputTypeFlag,
 		&flags.VerboseFlag,
+		&flags.ETHRpcUrlFlag,
 		&EarnerAddressFlag,
-		&NumberOfDaysFlag,
-		&AVSAddressesFlag,
 		&EnvironmentFlag,
 		&ClaimTypeFlag,
+		&ProofStoreBaseURLFlag,
 	}
 
 	sort.Sort(cli.FlagsByName(baseFlags))
@@ -77,6 +78,7 @@ func getShowFlags() []cli.Flag {
 }
 
 func ShowRewards(cCtx *cli.Context) error {
+	ctx := cCtx.Context
 	logger := common.GetLogger(cCtx)
 
 	config, err := readAndValidateConfig(cCtx, logger)
@@ -85,186 +87,208 @@ func ShowRewards(cCtx *cli.Context) error {
 	}
 	cCtx.App.Metadata["network"] = config.ChainID.String()
 
-	url := testnetUrl
-	if config.Environment == "mainnet" {
-		url = mainnetUrl
-	} else if config.Environment == "preprod" {
-		url = preprodUrl
+	ethClient, err := ethclient.Dial(config.RPCUrl)
+	if err != nil {
+		return eigenSdkUtils.WrapError("failed to create new eth client", err)
 	}
 
-	if config.ClaimType == All {
-		requestBody := map[string]string{
-			"earnerAddress": config.EarnerAddress.String(),
-			"days":          fmt.Sprintf("%d", absInt64(config.NumberOfDays)),
-		}
-		resp, err := post(
-			fmt.Sprintf("%s/%s", url, GetEarnedTokensForStrategyEndpoint),
-			requestBody,
-		)
-		if err != nil {
-			return err
-		}
-		defer resp.Body.Close()
-
-		var responseBody RewardResponse
-		err = json.NewDecoder(resp.Body).Decode(&responseBody)
-		if err != nil {
-			return err
-		}
-		normalizedRewards := normalizeRewardResponse(responseBody)
-		if common.IsEmptyString(config.Output) {
-			printNormalizedRewardsAsTable(normalizedRewards)
-		} else {
-			logger.Debugf("Writing total rewards to %s", config.Output)
-			err = common.WriteToCSV(normalizedRewards, config.Output)
-			if err != nil {
-				return err
-			}
-			logger.Infof("Total rewards written to %s", config.Output)
-		}
-	} else if config.ClaimType == Unclaimed {
-		requestBody := map[string]string{
-			"earnerAddress": config.EarnerAddress.String(),
-		}
-		claimableRewardsUrl := fmt.Sprintf("%s/%s", url, GetClaimableRewardsEndpoint)
-		resp, err := post(claimableRewardsUrl, requestBody)
-		if err != nil {
-			return err
-		}
-		defer resp.Body.Close()
-
-		var response UnclaimedRewardResponse
-		err = json.NewDecoder(resp.Body).Decode(&response)
-		if err != nil {
-			return err
-		}
-		unclaimedNormalizedRewards := normalizeUnclaimedRewardResponse(response)
-		if common.IsEmptyString(config.Output) {
-			printUnclaimedNormalizedRewardsAsTable(unclaimedNormalizedRewards)
-		} else {
-			logger.Debugf("Writing unclaimed rewards to %s", config.Output)
-			err = common.WriteToCSV(unclaimedNormalizedRewards, config.Output)
-			if err != nil {
-				return err
-			}
-			logger.Infof("Unclaimed rewards written to %s", config.Output)
-		}
-	} else {
-		return fmt.Errorf("claim type %s not supported", config.ClaimType)
+	elReader, err := elcontracts.NewReaderFromConfig(
+		elcontracts.Config{
+			RewardsCoordinatorAddress: config.RewardsCoordinatorAddress,
+		},
+		ethClient, logger,
+	)
+	if err != nil {
+		return eigenSdkUtils.WrapError("failed to create new reader from config", err)
 	}
 
+	df := httpProofDataFetcher.NewHttpProofDataFetcher(
+		config.ProofStoreBaseURL,
+		config.Environment,
+		config.Network,
+		http.DefaultClient,
+	)
+
+	claimDate, _, err := getClaimDistributionRoot(ctx, "latest_active", elReader, logger)
+	if err != nil {
+		return eigenSdkUtils.WrapError("failed to get claim distribution root", err)
+	}
+
+	proofData, err := df.FetchClaimAmountsForDate(ctx, claimDate)
+	if err != nil {
+		return eigenSdkUtils.WrapError("failed to fetch claim amounts for date", err)
+	}
+
+	tokenAddressesMap, present := proofData.Distribution.GetTokensForEarner(config.EarnerAddress)
+	if !present {
+		return eigenSdkUtils.WrapError("earner address not found in distribution", nil)
+	}
+
+	allRewards := make(map[gethcommon.Address]*big.Int)
+	msg := "All Rewards"
+	for pair := tokenAddressesMap.Oldest(); pair != nil; pair = pair.Next() {
+		amt, _ := new(big.Int).SetString(pair.Value.String(), 10)
+		allRewards[pair.Key] = amt
+	}
+
+	if config.ClaimType != All {
+		claimedRewards, err := getClaimedRewards(ctx, elReader, config.EarnerAddress, allRewards)
+		if err != nil {
+			return eigenSdkUtils.WrapError("failed to get claimed rewards", err)
+		}
+		switch config.ClaimType {
+		case Claimed:
+			allRewards = claimedRewards
+			msg = "Claimed Rewards"
+		case Unclaimed:
+			allRewards = calculateUnclaimedRewards(allRewards, claimedRewards)
+			msg = "Unclaimed Rewards"
+		}
+	}
+	err = handleRewardsOutput(config.Output, config.OutputType, allRewards, msg)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
-func post(url string, requestBody map[string]string) (*http.Response, error) {
-	jsonData, err := json.Marshal(requestBody)
-	if err != nil {
-		return nil, err
+func getClaimedRewards(
+	ctx context.Context,
+	elReader ELReader,
+	earnerAddress gethcommon.Address,
+	allRewards map[gethcommon.Address]*big.Int,
+) (map[gethcommon.Address]*big.Int, error) {
+	claimedRewards := make(map[gethcommon.Address]*big.Int)
+	for address := range allRewards {
+		claimed, err := elReader.GetCumulativeClaimed(&bind.CallOpts{Context: ctx}, earnerAddress, address)
+		if err != nil {
+			return nil, err
+		}
+		if claimed == nil {
+			claimed = big.NewInt(0)
+		}
+		claimedRewards[address] = claimed
 	}
-	return http.Post(url, "application/json", bytes.NewBuffer(jsonData))
+	return claimedRewards, nil
 }
 
-func normalizeUnclaimedRewardResponse(unclaimedRewardResponse UnclaimedRewardResponse) []NormalizedUnclaimedReward {
-	var normalizedUnclaimedRewards []NormalizedUnclaimedReward
-	for _, rewardsPerAVS := range unclaimedRewardResponse.Rewards {
-		for _, token := range rewardsPerAVS.Tokens {
-			amount := new(big.Int)
-			amount.SetString(token.WeiAmount, 10)
-			normalizedUnclaimedRewards = append(normalizedUnclaimedRewards, NormalizedUnclaimedReward{
-				TokenAddress: token.TokenAddress,
-				WeiAmount:    amount,
+func calculateUnclaimedRewards(
+	allRewards,
+	claimedRewards map[gethcommon.Address]*big.Int,
+) map[gethcommon.Address]*big.Int {
+	unclaimedRewards := make(map[gethcommon.Address]*big.Int)
+	for address, total := range allRewards {
+		claimed := claimedRewards[address]
+		unclaimedRewards[address] = new(big.Int).Sub(total, claimed)
+	}
+	return unclaimedRewards
+}
+
+func handleRewardsOutput(
+	outputFile string,
+	outputType string,
+	rewards map[gethcommon.Address]*big.Int,
+	msg string,
+) error {
+	fmt.Println(strings.Repeat("-", 30), msg, strings.Repeat("-", 30))
+	if outputType == "json" {
+		allRewards := make(allRewardsJson, 0)
+		for address, amount := range rewards {
+			allRewards = append(allRewards, rewardsJson{
+				Address: address.Hex(),
+				Amount:  amount.String(),
 			})
 		}
-	}
-	return normalizedUnclaimedRewards
-}
-
-func normalizeRewardResponse(rewardResponse RewardResponse) []NormalizedReward {
-	var normalizedRewards []NormalizedReward
-	for _, reward := range rewardResponse.Rewards {
-		for _, rewardsPerAVS := range reward.RewardsPerStrategy {
-			for _, token := range rewardsPerAVS.Tokens {
-				amount := new(big.Int)
-				amount.SetString(token.WeiAmount, 10)
-				normalizedRewards = append(normalizedRewards, NormalizedReward{
-					StrategyAddress: reward.StrategyAddress,
-					AVSAddress:      rewardsPerAVS.AVSAddress,
-					TokenAddress:    token.TokenAddress,
-					WeiAmount:       amount,
-				})
-			}
+		out, err := json.MarshalIndent(allRewards, "", "  ")
+		if err != nil {
+			return err
 		}
+		if outputFile != "" {
+			return common.WriteToFile(out, outputFile)
+		} else {
+			fmt.Println(string(out))
+		}
+	} else {
+		printRewards(rewards)
 	}
-	return normalizedRewards
+	return nil
 }
 
-func printUnclaimedNormalizedRewardsAsTable(normalizedRewards []NormalizedUnclaimedReward) {
-	column := formatColumns(
+func printRewards(rewards map[gethcommon.Address]*big.Int) {
+	// Define column headers and widths
+	headers := []string{
 		"Token Address",
-		common.MaxAddressLength,
-	) + " | " + formatColumns(
-		"Wei Amount",
-		common.MaxAddressLength,
-	)
-	fmt.Println(strings.Repeat("-", len(column)))
-	fmt.Println(column)
-	fmt.Println(strings.Repeat("-", len(column)))
-	for _, reward := range normalizedRewards {
-		if reward.WeiAmount.Cmp(big.NewInt(0)) == 0 {
-			continue
-		}
-		fmt.Printf(
-			"%s | %s\n",
-			reward.TokenAddress,
-			reward.WeiAmount.String(),
+		"Amount (Wei)",
+	}
+	widths := []int{46, 30}
+
+	// print dashes
+	for _, width := range widths {
+		fmt.Print("+" + strings.Repeat("-", width+1))
+	}
+	fmt.Println("+")
+
+	// Print header
+	for i, header := range headers {
+		fmt.Printf("| %-*s", widths[i], header)
+	}
+	fmt.Println("|")
+
+	// Print separator
+	for _, width := range widths {
+		fmt.Print("|", strings.Repeat("-", width+1))
+	}
+	fmt.Println("|")
+
+	// Print data rows
+	for address, amount := range rewards {
+		fmt.Printf("| %-*s| %-*s|\n",
+			widths[0], address.Hex(),
+			widths[1], amount.String(),
 		)
 	}
-	fmt.Println(strings.Repeat("-", len(column)))
-}
 
-func printNormalizedRewardsAsTable(normalizedRewards []NormalizedReward) {
-	column := formatColumns(
-		"Strategy Address",
-		common.MaxAddressLength,
-	) + " | " + formatColumns(
-		"AVS Address",
-		common.MaxAddressLength,
-	) + " | " + formatColumns(
-		"Token Address",
-		common.MaxAddressLength,
-	) + " | " + formatColumns(
-		"Wei Amount",
-		common.MaxAddressLength,
-	)
-	fmt.Println(strings.Repeat("-", len(column)))
-	fmt.Println(column)
-	fmt.Println(strings.Repeat("-", len(column)))
-	for _, reward := range normalizedRewards {
-		fmt.Printf(
-			"%s | %s | %s | %s\n",
-			reward.StrategyAddress,
-			reward.AVSAddress,
-			reward.TokenAddress,
-			reward.WeiAmount.String(),
-		)
+	// print dashes
+	for _, width := range widths {
+		fmt.Print("+" + strings.Repeat("-", width+1))
 	}
-	fmt.Println(strings.Repeat("-", len(column)))
-}
-
-func formatColumns(columnName string, size int32) string {
-	return fmt.Sprintf("%-*s", size, columnName)
+	fmt.Println("+")
 }
 
 func readAndValidateConfig(cCtx *cli.Context, logger logging.Logger) (*ShowConfig, error) {
 	earnerAddress := gethcommon.HexToAddress(cCtx.String(EarnerAddressFlag.Name))
 	output := cCtx.String(flags.OutputFileFlag.Name)
-	numberOfDays := cCtx.Int64(NumberOfDaysFlag.Name)
+	outputType := cCtx.String(flags.OutputTypeFlag.Name)
+	ethRpcUrl := cCtx.String(flags.ETHRpcUrlFlag.Name)
 	network := cCtx.String(flags.NetworkFlag.Name)
 	env := cCtx.String(EnvironmentFlag.Name)
 	if env == "" {
 		env = getEnvFromNetwork(network)
 	}
 	logger.Debugf("Network: %s, Env: %s", network, env)
+	rewardsCoordinatorAddress := cCtx.String(RewardsCoordinatorAddressFlag.Name)
+
+	var err error
+	if common.IsEmptyString(rewardsCoordinatorAddress) {
+		rewardsCoordinatorAddress, err = common.GetRewardCoordinatorAddress(utils.NetworkNameToChainId(network))
+		if err != nil {
+			return nil, err
+		}
+	}
+	logger.Debugf("Using Rewards Coordinator address: %s", rewardsCoordinatorAddress)
+
+	proofStoreBaseURL := cCtx.String(ProofStoreBaseURLFlag.Name)
+
+	// If empty get from utils
+	if common.IsEmptyString(proofStoreBaseURL) {
+		proofStoreBaseURL = getProofStoreBaseURL(network)
+
+		// If still empty return error
+		if common.IsEmptyString(proofStoreBaseURL) {
+			return nil, errors.New("proof store base URL not provided")
+		}
+	}
+	logger.Debugf("Using Proof store base URL: %s", proofStoreBaseURL)
 
 	claimType := ClaimType(cCtx.String(ClaimTypeFlag.Name))
 	if claimType != All && claimType != Unclaimed && claimType != Claimed {
@@ -275,20 +299,15 @@ func readAndValidateConfig(cCtx *cli.Context, logger logging.Logger) (*ShowConfi
 	logger.Debugf("Using chain ID: %s", chainID.String())
 
 	return &ShowConfig{
-		EarnerAddress: earnerAddress,
-		NumberOfDays:  numberOfDays,
-		Network:       network,
-		Environment:   env,
-		ClaimType:     claimType,
-		ChainID:       chainID,
-		Output:        output,
+		EarnerAddress:             earnerAddress,
+		Network:                   network,
+		Environment:               env,
+		ClaimType:                 claimType,
+		ChainID:                   chainID,
+		Output:                    output,
+		OutputType:                outputType,
+		RPCUrl:                    ethRpcUrl,
+		ProofStoreBaseURL:         proofStoreBaseURL,
+		RewardsCoordinatorAddress: gethcommon.HexToAddress(rewardsCoordinatorAddress),
 	}, nil
-}
-
-// absInt64 returns the absolute value of an int64.
-func absInt64(x int64) int64 {
-	if x < 0 {
-		return -x
-	}
-	return x
 }

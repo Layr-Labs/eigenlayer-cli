@@ -58,6 +58,3 @@ jobs:
           #https://docs.github.com/en/actions/security-guides/automatic-token-authentication#about-the-github_token-secret
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TELEMETRY_TOKEN: ${{ secrets.TELEMETRY_TOKEN }}
-          EIGENLAYER_BACKEND_MAINNET_URL: ${{ secrets.EIGENLAYER_BACKEND_MAINNET_URL }}
-          EIGENLAYER_BACKEND_TESTNET_URL: ${{ secrets.EIGENLAYER_BACKEND_TESTNET_URL }}
-          EIGENLAYER_BACKEND_PREPROD_URL: ${{ secrets.EIGENLAYER_BACKEND_PREPROD_URL }}

@@ -12,8 +12,9 @@ github.com/Layr-Labs/eigenlayer-rewards-proofs v0.2.12 h1:G5Q1SnLmFbEjhOkky3vIHk
 github.com/Layr-Labs/eigenlayer-rewards-proofs v0.2.12/go.mod h1:OlJd1QjqEW53wfWG/lJyPCGvrXwWVEjPQsP4TV+gttQ=
 github.com/Layr-Labs/eigenpod-proofs-generation v0.0.14-stable.0.20240730152248-5c11a259293e h1:DvW0/kWHV9mZsbH2KOjEHKTSIONNPUj6X05FJvUohy4=
 github.com/Layr-Labs/eigenpod-proofs-generation v0.0.14-stable.0.20240730152248-5c11a259293e/go.mod h1:T7tYN8bTdca2pkMnz9G2+ZwXYWw5gWqQUIu4KLgC/vM=
-github.com/Layr-Labs/eigensdk-go v0.1.11 h1:ZTOPKGoOyzKfi7DbYI2azMECcjmK2sRtHoPpjCq1MBc=
 github.com/Layr-Labs/eigensdk-go v0.1.11/go.mod h1:XcLVDtlB1vOPj63D236b451+SC75B8gwgkpNhYHSxNs=
+github.com/Layr-Labs/eigensdk-go v0.1.13-0.20240927005004-ed4b05c87610 h1:lGy4uSImJyOiaM8vSx0CEbsL3rbVfw0uEIuhGey/ubc=
+github.com/Layr-Labs/eigensdk-go v0.1.13-0.20240927005004-ed4b05c87610/go.mod h1:bA21qMfmUFZcUe+a1RsDeOGm25xZO802Kfll2GlS8Us=
 github.com/Microsoft/go-winio v0.6.2 h1:F2VQgta7ecxGYO8k3ZZz3RS8fVIXVxONVUPlNERoyfY=
 github.com/Microsoft/go-winio v0.6.2/go.mod h1:yd8OoFMLzJbo9gZq8j5qaps8bJ9aShtEA8Ipt1oGCvU=
 github.com/Microsoft/hcsshim v0.11.4 h1:68vKo2VN8DE9AdN4tnkWnmdhqdbpUFM8OF3Airm7fz8=
@@ -134,8 +135,8 @@ github.com/decred/dcrd/dcrec/secp256k1/v4 v4.0.1 h1:YLtO71vCjJRCBcrPMtQ9nqBsqpA1
 github.com/decred/dcrd/dcrec/secp256k1/v4 v4.0.1/go.mod h1:hyedUtir6IdtD/7lIxGeCxkaw7y45JueMRL4DIyJDKs=
 github.com/distribution/reference v0.5.0 h1:/FUIFXtfc/x2gpa5/VGfiGLuOIdYa1t65IKK2OFGvA0=
 github.com/distribution/reference v0.5.0/go.mod h1:BbU0aIcezP1/5jX/8MP0YiH4SdvB5Y4f/wlDRiLyi3E=
-github.com/docker/docker v25.0.5+incompatible h1:UmQydMduGkrD5nQde1mecF/YnSbTOaPeFIeP5C4W+DE=
-github.com/docker/docker v25.0.5+incompatible/go.mod h1:eEKB0N0r5NX/I1kEveEz05bcu8tLC/8azJZsviup8Sk=
+github.com/docker/docker v25.0.6+incompatible h1:5cPwbwriIcsua2REJe8HqQV+6WlWc1byg2QSXzBxBGg=
+github.com/docker/docker v25.0.6+incompatible/go.mod h1:eEKB0N0r5NX/I1kEveEz05bcu8tLC/8azJZsviup8Sk=
 github.com/docker/go-connections v0.5.0 h1:USnMq7hx7gwdVZq1L49hLXaFtUdTADjXGp+uj1Br63c=
 github.com/docker/go-connections v0.5.0/go.mod h1:ov60Kzw0kKElRwhNs9UlUHAE/F9Fe6GLaXnqyDdmEXc=
 github.com/docker/go-units v0.5.0 h1:69rxXcBk27SvSaaxTtLh/8llcHD8vYHT7WSdRZ/jvr4=
