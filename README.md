@@ -23,6 +23,7 @@ EigenLayer CLI is used to interact with EigenLayer core contracts.
 * Operator Keys Creation and Management via local keystore (ECDSA and BLS over bn254 curve) - `eigenlayer keys --help`
 * Operator Registration, Updates and Status check - `eigenlayer operator --help`
 * Reward Claiming and Setting Claimers - `eigenlayer rewards --help`
+  * [Detailed Command Documentation](pkg/rewards/README.md)
 
 ## Supported Key Management Backends
 * Private Key Hex (not recommended for production use)
