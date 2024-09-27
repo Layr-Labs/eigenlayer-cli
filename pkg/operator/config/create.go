@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math/big"
 	"os"
+	"strconv"
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
@@ -157,6 +158,39 @@ func promptOperatorInfo(config *types.OperatorConfig, p utils.Prompter) (types.O
 		return types.OperatorConfig{}, err
 	}
 	config.EthRPCUrl = rpcUrl
+
+	// Prompt for allocation delay
+	allocationDelay, err := p.InputInteger(
+		"Enter your allocation delay (in seconds, default is 17.5 days):",
+		"1512000",
+		"",
+		func(i int64) error {
+			if i < 0 {
+				return errors.New("allocation delay should be non-negative")
+			}
+			return nil
+		},
+	)
+	if err != nil {
+		return types.OperatorConfig{}, err
+	}
+
+	// confirm again
+	confirm, err := p.Confirm(
+		"Are you sure you want to set the allocation delay to " + strconv.FormatInt(
+			allocationDelay,
+			10,
+		) + " seconds? This cannot be changed once set.",
+	)
+	if err != nil {
+		return types.OperatorConfig{}, err
+	}
+
+	if confirm {
+		config.Operator.AllocationDelay = uint32(allocationDelay)
+	} else {
+		return types.OperatorConfig{}, errors.New("operator cancelled")
+	}
 
 	// Prompt for network & set chainId
 	chainId, err := p.Select("Select your network:", []string{"mainnet", "holesky", "local"})

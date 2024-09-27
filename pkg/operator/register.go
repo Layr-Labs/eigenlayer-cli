@@ -45,6 +45,7 @@ func RegisterCmd(p utils.Prompter) *cli.Command {
 
 			configurationFilePath := args.Get(0)
 			operatorCfg, err := common.ValidateAndReturnConfig(configurationFilePath, logger)
+			logger.Debugf("operatorCfg: %v", operatorCfg)
 			if err != nil {
 				return err
 			}
