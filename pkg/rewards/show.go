@@ -298,6 +298,11 @@ func readAndValidateConfig(cCtx *cli.Context, logger logging.Logger) (*ShowConfi
 	chainID := utils.NetworkNameToChainId(network)
 	logger.Debugf("Using chain ID: %s", chainID.String())
 
+	// TODO(shrimalmadhur): Fix to make sure correct S3 bucket is used. Clean up later
+	if network == utils.MainnetNetworkName {
+		network = "ethereum"
+	}
+
 	return &ShowConfig{
 		EarnerAddress:             earnerAddress,
 		Network:                   network,
