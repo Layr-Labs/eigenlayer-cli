@@ -4,13 +4,13 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/Layr-Labs/bn254-keystore-go/keystore"
 	"os"
 	"path/filepath"
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
-	"github.com/Layr-Labs/eigensdk-go/crypto/bls"
 	"github.com/Layr-Labs/eigensdk-go/crypto/ecdsa"
 	"github.com/urfave/cli/v2"
 )
@@ -99,11 +99,23 @@ func getPrivateKey(keyType string, filePath string, password string) (string, er
 		}
 		return hex.EncodeToString(key.D.Bytes()), nil
 	case KeyTypeBLS:
-		key, err := bls.ReadPrivateKeyFromFile(filePath, password)
+		ks := new(keystore.Keystore)
+		err := ks.FromFile(filePath)
 		if err != nil {
 			return "", err
 		}
-		return key.PrivKey.String(), nil
+		skBytes, err := ks.Decrypt(password)
+		if err != nil {
+			return "", err
+		}
+		skString := hex.EncodeToString(skBytes)
+		return skString, nil
+
+		//key, err := bls.ReadPrivateKeyFromFile(filePath, password)
+		//if err != nil {
+		//	return "", err
+		//}
+		//return key.PrivKey.String(), nil
 	default:
 		return "", ErrInvalidKeyType
 	}

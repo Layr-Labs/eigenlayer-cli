@@ -11,16 +11,19 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
+	"github.com/Layr-Labs/bn254-keystore-go/curve"
+	"github.com/Layr-Labs/bn254-keystore-go/keystore"
+	"github.com/Layr-Labs/bn254-keystore-go/mnemonic"
 
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 	"github.com/Layr-Labs/eigensdk-go/crypto/bls"
 	sdkEcdsa "github.com/Layr-Labs/eigensdk-go/crypto/ecdsa"
 
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
-
 	hdwallet "github.com/miguelmota/go-ethereum-hdwallet"
+
 	"github.com/tyler-smith/go-bip39"
 	"github.com/urfave/cli/v2"
 	passwordvalidator "github.com/wagslane/go-password-validator"
@@ -80,17 +83,27 @@ This command will create keys in $HOME/.eigenlayer/operator_keys/ location
 			switch keyType {
 			case KeyTypeECDSA:
 				// Passing empty string to generate a new mnemonic
-				privateKey, mnemonic, err := generateEcdsaKeyWithMnemonic("")
+				privateKey, pkMnemonic, err := generateEcdsaKeyWithMnemonic("")
 				if err != nil {
 					return err
 				}
-				return saveEcdsaKey(keyName, p, privateKey, insecure, stdInPassword, readFromPipe, mnemonic)
+				return saveEcdsaKey(keyName, p, privateKey, insecure, stdInPassword, readFromPipe, pkMnemonic)
 			case KeyTypeBLS:
-				blsKeyPair, err := bls.GenRandomBlsKeys()
+				password, err := getPassword(
+					p,
+					insecure,
+					stdInPassword,
+					readFromPipe,
+					"Enter password to encrypt the bls private key:",
+				)
 				if err != nil {
 					return err
 				}
-				return saveBlsKey(keyName, p, blsKeyPair, insecure, stdInPassword, readFromPipe)
+				blsKeyPair, err := keystore.NewKeyPair(password, mnemonic.English)
+				if err != nil {
+					return err
+				}
+				return saveBlsKeyWithMnemonic(keyName, blsKeyPair)
 			default:
 				return ErrInvalidKeyType
 			}
@@ -147,6 +160,64 @@ func validateKeyName(keyName string) error {
 	return nil
 }
 
+func saveBlsKeyWithMnemonic(
+	keyName string,
+	keyPair *keystore.KeyPair,
+) error {
+	homePath, err := os.UserHomeDir()
+	if err != nil {
+		return err
+	}
+	keyFileName := keyName + ".bls.key"
+	fileLoc := filepath.Clean(filepath.Join(homePath, OperatorKeystoreSubFolder, keyFileName))
+	if checkIfKeyExists(fileLoc + ".json") {
+		return errors.New("key name already exists. Please choose a different name")
+	}
+
+	encryptedKeystore, err := keyPair.Encrypt(keystore.KDFScrypt, curve.BN254)
+	if err != nil {
+		return err
+	}
+
+	err = encryptedKeystore.SaveWithPubKeyHex(filepath.Join(homePath, OperatorKeystoreSubFolder), keyFileName)
+	if err != nil {
+		return err
+	}
+
+	privateKeyHex := hex.EncodeToString(keyPair.PrivateKey)
+	publicKeyHex := encryptedKeystore.PubKey
+
+	fmt.Printf("\nKey location: %s\nPublic Key: %s\n\n", fileLoc+".json", publicKeyHex)
+	return displayWithLess(privateKeyHex, KeyTypeBLS, keyPair.Mnemonic)
+}
+
+func getPassword(
+	p utils.Prompter,
+	insecure bool,
+	stdInPassword string,
+	readFromPipe bool,
+	helpMessage string,
+) (string, error) {
+	var password string
+	var err error
+	if !readFromPipe {
+		password, err = getPasswordFromPrompt(p, insecure, helpMessage)
+		if err != nil {
+			return "", err
+		}
+	} else {
+		password = stdInPassword
+		if !insecure {
+			err = validatePassword(password)
+			if err != nil {
+				return "", err
+			}
+		}
+	}
+
+	return password, nil
+}
+
 func saveBlsKey(
 	keyName string,
 	p utils.Prompter,
@@ -165,20 +236,15 @@ func saveBlsKey(
 		return errors.New("key name already exists. Please choose a different name")
 	}
 
-	var password string
-	if !readFromPipe {
-		password, err = getPasswordFromPrompt(p, insecure, "Enter password to encrypt the bls private key:")
-		if err != nil {
-			return err
-		}
-	} else {
-		password = stdInPassword
-		if !insecure {
-			err = validatePassword(password)
-			if err != nil {
-				return err
-			}
-		}
+	password, err := getPassword(
+		p,
+		insecure,
+		stdInPassword,
+		readFromPipe,
+		"Enter password to encrypt the bls private key:",
+	)
+	if err != nil {
+		return err
 	}
 
 	err = keyPair.SaveToFile(fileLoc, password)
@@ -212,20 +278,15 @@ func saveEcdsaKey(
 		return errors.New("key name already exists. Please choose a different name")
 	}
 
-	var password string
-	if !readFromPipe {
-		password, err = getPasswordFromPrompt(p, insecure, "Enter password to encrypt the ecdsa private key:")
-		if err != nil {
-			return err
-		}
-	} else {
-		password = stdInPassword
-		if !insecure {
-			err = validatePassword(password)
-			if err != nil {
-				return err
-			}
-		}
+	password, err := getPassword(
+		p,
+		insecure,
+		stdInPassword,
+		readFromPipe,
+		"Enter password to encrypt the ecdsa private key:",
+	)
+	if err != nil {
+		return err
 	}
 
 	err = sdkEcdsa.WriteKey(fileLoc, privateKey, password)
