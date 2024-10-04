@@ -59,7 +59,7 @@ func showAction(cCtx *cli.Context, p utils.Prompter) error {
 	}
 
 	// Temp to test modify allocations
-	config.delegationManagerAddress = gethcommon.HexToAddress("0xFF30144A9A749144e88bEb4FAbF020Cc7F71d2dC")
+	config.delegationManagerAddress = gethcommon.HexToAddress("0xa5960a80e91D200794ec699b6aBE920908C0e5C5")
 
 	elReader, err := elcontracts.NewReaderFromConfig(
 		elcontracts.Config{
@@ -110,7 +110,7 @@ func showAction(cCtx *cli.Context, p utils.Prompter) error {
 	/*
 		3. Get the operator set and slashable magnitude for all strategies
 	*/
-	opSets, slashableMagnitudes, err := elReader.GetCurrentSlashableMagnitudes(
+	opSets, slashableMagnitudes, err := elReader.GetSlashableMagnitudes(
 		&bind.CallOpts{Context: ctx},
 		config.operatorAddress,
 		config.strategyAddresses,
@@ -175,13 +175,13 @@ func showAction(cCtx *cli.Context, p utils.Prompter) error {
 	/*
 		6. Get the operator scaled shares for all strategies
 	*/
-	operatorScaledSharesMap := make(map[string]*big.Int)
+	operatorDelegatedSharesMap := make(map[string]*big.Int)
 	for _, strategyAddress := range config.strategyAddresses {
-		shares, err := elReader.GetOperatorScaledShares(&bind.CallOpts{}, config.operatorAddress, strategyAddress)
+		shares, err := elReader.GetOperatorDelegatedShares(&bind.CallOpts{}, config.operatorAddress, strategyAddress)
 		if err != nil {
 			return err
 		}
-		operatorScaledSharesMap[strategyAddress.String()] = shares
+		operatorDelegatedSharesMap[strategyAddress.String()] = shares
 	}
 
 	/*
@@ -217,7 +217,7 @@ func showAction(cCtx *cli.Context, p utils.Prompter) error {
 				currSlashableMag = currSlashableMag + newAllocationDiff
 			}
 
-			operatorScaledShares := operatorScaledSharesMap[strategyAddress.String()]
+			operatorScaledShares := operatorDelegatedSharesMap[strategyAddress.String()]
 
 			/*
 				3. Calculate the current shares and percentage shares for the operator

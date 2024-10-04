@@ -51,7 +51,7 @@ func initializeDelayAction(cCtx *cli.Context, p utils.Prompter) error {
 	}
 
 	// Temp to test modify Allocations
-	config.delegationManagerAddress = gethcommon.HexToAddress("0xFF30144A9A749144e88bEb4FAbF020Cc7F71d2dC")
+	config.delegationManagerAddress = gethcommon.HexToAddress("0xa5960a80e91D200794ec699b6aBE920908C0e5C5")
 
 	if config.broadcast {
 		confirm, err := p.Confirm(
