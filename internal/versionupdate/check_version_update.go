@@ -42,7 +42,7 @@ func Check(currentVersion string) {
 		// If we can't get the latest version, just return
 		return
 	}
-	
+
 	respBytes, err := io.ReadAll(response.Body)
 	if err != nil {
 		return
