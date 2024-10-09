@@ -38,6 +38,11 @@ func Check(currentVersion string) {
 		return
 	}
 	defer response.Body.Close()
+	if response.StatusCode != http.StatusOK {
+		// If we can't get the latest version, just return
+		return
+	}
+	
 	respBytes, err := io.ReadAll(response.Body)
 	if err != nil {
 		return
