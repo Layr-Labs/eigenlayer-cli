@@ -2,6 +2,7 @@ package keys
 
 import (
 	"crypto/ecdsa"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -60,16 +61,34 @@ It will only list keys created in the default folder (./operator_keys/)
 					fmt.Println()
 				case KeyTypeBLS:
 					fmt.Println("Key Type: BLS")
+					var operatorIdStr string
 					keyFilePath := filepath.Join(keyStorePath, file.Name())
-					pubKey, err := GetPubKey(filepath.Clean(keyFilePath))
+					usingOldKeystore, err := checkIfUsingOldKeystore(keyFilePath)
 					if err != nil {
 						return err
 					}
-					fmt.Println("Public Key: " + pubKey)
-					operatorIdStr, err := GetOperatorIdFromBLSPubKey(pubKey)
-					if err != nil {
-						return err
+					if usingOldKeystore {
+						pubKey, err := GetPubKey(filepath.Clean(keyFilePath))
+						if err != nil {
+							return err
+						}
+						fmt.Println("Public Key: " + pubKey)
+						operatorIdStr, err = GetOperatorIdFromBLSPubKey(pubKey)
+						if err != nil {
+							return err
+						}
+					} else {
+						pubKey, err := GetPubKeyNew(filepath.Clean(keyFilePath))
+						if err != nil {
+							return err
+						}
+						fmt.Println("Public Key: 0x" + pubKey)
+						operatorIdStr, err = GetOperatorIdFromBLSPubKeyNew(pubKey)
+						if err != nil {
+							return err
+						}
 					}
+
 					fmt.Println("Operator Id: 0x" + operatorIdStr)
 					fmt.Println("Key location: " + keyFilePath)
 					fmt.Println("====================================================================================")
@@ -81,6 +100,24 @@ It will only list keys created in the default folder (./operator_keys/)
 		},
 	}
 	return listCmd
+}
+
+func GetPubKeyNew(keyStoreFile string) (string, error) {
+	keyJson, err := os.ReadFile(keyStoreFile)
+	if err != nil {
+		return "", err
+	}
+
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(keyJson, &m); err != nil {
+		return "", err
+	}
+
+	if pubKey, ok := m["pubkey"].(string); !ok {
+		return "", fmt.Errorf("pubkey not found in key file")
+	} else {
+		return pubKey, nil
+	}
 }
 
 func GetPubKey(keyStoreFile string) (string, error) {
@@ -99,6 +136,27 @@ func GetPubKey(keyStoreFile string) (string, error) {
 	} else {
 		return pubKey, nil
 	}
+}
+
+func GetOperatorIdFromBLSPubKeyNew(pubKey string) (string, error) {
+	pubKeyBytes, err := hex.DecodeString(pubKey)
+	if err != nil {
+		return "", err
+	}
+
+	g1Affine := new(bn254.G1Affine)
+	_, err = g1Affine.SetBytes(pubKeyBytes)
+	if err != nil {
+		return "", err
+	}
+
+	point := &bls.G1Point{
+		G1Affine: g1Affine,
+	}
+
+	operatorId := types.OperatorIdFromG1Pubkey(point)
+
+	return operatorId.LogValue().String(), nil
 }
 
 func GetOperatorIdFromBLSPubKey(pubKey string) (string, error) {

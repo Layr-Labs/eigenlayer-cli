@@ -152,8 +152,8 @@ func TestImportCmd(t *testing.T) {
 			},
 			err: nil,
 			promptMock: func(p *prompterMock.MockPrompter) {
-				p.EXPECT().InputHiddenString(gomock.Any(), gomock.Any(), gomock.Any()).Return("", nil)
-				p.EXPECT().InputHiddenString(gomock.Any(), gomock.Any(), gomock.Any()).Return("", nil)
+				p.EXPECT().InputHiddenString(gomock.Any(), gomock.Any(), gomock.Any()).Return("p@$$w0rd", nil)
+				p.EXPECT().InputHiddenString(gomock.Any(), gomock.Any(), gomock.Any()).Return("p@$$w0rd", nil)
 			},
 			expectedPrivKey: "20030410000080487431431153104351076122223465926814327806350179952713280726583",
 			keyPath:         filepath.Join(homePath, OperatorKeystoreSubFolder, "/test.bls.key.json"),

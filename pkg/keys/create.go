@@ -103,7 +103,7 @@ This command will create keys in $HOME/.eigenlayer/operator_keys/ location
 				if err != nil {
 					return err
 				}
-				return saveBlsKeyWithMnemonic(keyName, blsKeyPair)
+				return saveBlsKeyERC2335(keyName, blsKeyPair)
 			default:
 				return ErrInvalidKeyType
 			}
@@ -160,7 +160,7 @@ func validateKeyName(keyName string) error {
 	return nil
 }
 
-func saveBlsKeyWithMnemonic(
+func saveBlsKeyERC2335(
 	keyName string,
 	keyPair *keystore.KeyPair,
 ) error {

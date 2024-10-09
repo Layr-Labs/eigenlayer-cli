@@ -4,6 +4,7 @@ go 1.21.11
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
+	github.com/Layr-Labs/bn254-keystore-go v0.0.0-20241002000313-5827598c00b0
 	github.com/Layr-Labs/eigenlayer-contracts v0.3.2-mainnet-rewards
 	github.com/Layr-Labs/eigenlayer-rewards-proofs v0.2.12
 	github.com/Layr-Labs/eigenpod-proofs-generation v0.0.14-stable.0.20240730152248-5c11a259293e
@@ -25,7 +26,6 @@ require (
 )
 
 require (
-	github.com/Layr-Labs/bn254-keystore-go v0.0.0-20241002000313-5827598c00b0 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/StackExchange/wmi v1.2.1 // indirect
 	github.com/attestantio/go-eth2-client v0.19.9 // indirect

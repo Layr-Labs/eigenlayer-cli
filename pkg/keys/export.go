@@ -2,9 +2,11 @@ package keys
 
 import (
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/Layr-Labs/bn254-keystore-go/keystore"
+	"github.com/Layr-Labs/eigensdk-go/crypto/bls"
 	"os"
 	"path/filepath"
 
@@ -99,8 +101,21 @@ func getPrivateKey(keyType string, filePath string, password string) (string, er
 		}
 		return hex.EncodeToString(key.D.Bytes()), nil
 	case KeyTypeBLS:
+		usingOldKeystore, err := checkIfUsingOldKeystore(filePath)
+		if err != nil {
+			return "", err
+		}
+
+		if usingOldKeystore {
+			key, err := bls.ReadPrivateKeyFromFile(filePath, password)
+			if err != nil {
+				return "", err
+			}
+			return key.PrivKey.String(), nil
+		}
+
 		ks := new(keystore.Keystore)
-		err := ks.FromFile(filePath)
+		err = ks.FromFile(filePath)
 		if err != nil {
 			return "", err
 		}
@@ -110,15 +125,26 @@ func getPrivateKey(keyType string, filePath string, password string) (string, er
 		}
 		skString := hex.EncodeToString(skBytes)
 		return skString, nil
-
-		//key, err := bls.ReadPrivateKeyFromFile(filePath, password)
-		//if err != nil {
-		//	return "", err
-		//}
-		//return key.PrivKey.String(), nil
 	default:
 		return "", ErrInvalidKeyType
 	}
+}
+
+func checkIfUsingOldKeystore(path string) (bool, error) {
+	data, err := os.ReadFile(filepath.Clean(path))
+	if err != nil {
+		return false, err
+	}
+	var m map[string]interface{}
+	err = json.Unmarshal(data, &m)
+	if err != nil {
+		return false, err
+	}
+	// The new keystore has a "curve" field
+	if _, ok := m["curve"]; ok {
+		return false, nil
+	}
+	return true, nil
 }
 
 func getKeyPath(keyPath string, keyName string, keyType string) (string, error) {

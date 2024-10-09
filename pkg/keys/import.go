@@ -2,7 +2,9 @@ package keys
 
 import (
 	"crypto/ecdsa"
+	"encoding/hex"
 	"fmt"
+	"github.com/Layr-Labs/bn254-keystore-go/keystore"
 	"math/big"
 	"strings"
 
@@ -10,7 +12,6 @@ import (
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 
-	"github.com/Layr-Labs/eigensdk-go/crypto/bls"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/urfave/cli/v2"
 )
@@ -87,31 +88,34 @@ This command will import keys in $HOME/.eigenlayer/operator_keys/ location
 				}
 				return saveEcdsaKey(keyName, p, privateKeyPair, insecure, stdInPassword, readFromPipe, "")
 			case KeyTypeBLS:
-				privateKeyBigInt := new(big.Int)
-				_, ok := privateKeyBigInt.SetString(privateKey, 10)
-				var blsKeyPair *bls.KeyPair
-				var err error
-				if ok {
-					fmt.Println("Importing from large integer")
-					blsKeyPair, err = bls.NewKeyPairFromString(privateKey)
-					if err != nil {
-						return err
+				var pkBytes []byte
+				var keyPair *keystore.KeyPair
+				password, err := getPassword(p, insecure, stdInPassword, readFromPipe, "Enter password to encrypt the bls private key:")
+				if len(pkSlice) == 1 {
+					pkInt, ok := new(big.Int).SetString(privateKey, 10)
+					if ok {
+						// It's a bigInt
+						pkBytes = pkInt.Bytes()
+					} else {
+						// It's a hex string
+						pkHex := common.Trim0x(privateKey)
+						pkBytes, err = hex.DecodeString(pkHex)
+						if err != nil {
+							return err
+						}
+					}
+					keyPair = &keystore.KeyPair{
+						PrivateKey: pkBytes,
+						Password:   password,
 					}
 				} else {
-					// Try to parse as hex
-					fmt.Println("Importing from hex")
-					z := new(big.Int)
-					privateKey = common.Trim0x(privateKey)
-					_, ok := z.SetString(privateKey, 16)
-					if !ok {
-						return ErrInvalidHexPrivateKey
-					}
-					blsKeyPair, err = bls.NewKeyPairFromString(z.String())
+					keyPair, err = keystore.NewKeyPairFromMnemonic(privateKey, password)
 					if err != nil {
 						return err
 					}
 				}
-				return saveBlsKey(keyName, p, blsKeyPair, insecure, stdInPassword, readFromPipe)
+
+				return saveBlsKeyERC2335(keyName, keyPair)
 			default:
 				return ErrInvalidKeyType
 			}
