@@ -19,6 +19,7 @@ import (
 	contractrewardscoordinator "github.com/Layr-Labs/eigenlayer-contracts/pkg/bindings/IRewardsCoordinator"
 
 	"github.com/Layr-Labs/eigenlayer-rewards-proofs/pkg/claimgen"
+	"github.com/Layr-Labs/eigenlayer-rewards-proofs/pkg/distribution"
 	"github.com/Layr-Labs/eigenlayer-rewards-proofs/pkg/proofDataFetcher/httpProofDataFetcher"
 
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
@@ -31,6 +32,7 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 
 	"github.com/urfave/cli/v2"
+	"github.com/wk8/go-ordered-map/v2"
 )
 
 type elChainReader interface {
@@ -121,10 +123,15 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 		return eigenSdkUtils.WrapError("failed to fetch claim amounts for date", err)
 	}
 
+	claimableTokens, present := proofData.Distribution.GetTokensForEarner(config.EarnerAddress)
+	if !present {
+		return errors.New("no tokens claimable by earner")
+	}
+
 	cg := claimgen.NewClaimgen(proofData.Distribution)
 	accounts, claim, err := cg.GenerateClaimProofForEarner(
 		config.EarnerAddress,
-		config.TokenAddresses,
+		getTokensToClaim(claimableTokens, config.TokenAddresses),
 		rootIndex,
 	)
 	if err != nil {
@@ -296,6 +303,44 @@ func getClaimDistributionRoot(
 	return "", 0, errors.New("invalid claim timestamp")
 }
 
+func getTokensToClaim(
+	claimableTokens *orderedmap.OrderedMap[gethcommon.Address, *distribution.BigInt],
+	tokenAddresses []gethcommon.Address,
+) []gethcommon.Address {
+	if len(tokenAddresses) == 0 {
+		tokenAddresses = getAllClaimableTokenAddresses(claimableTokens)
+	} else {
+		tokenAddresses = filterClaimableTokenAddresses(claimableTokens, tokenAddresses)
+	}
+
+	return tokenAddresses
+}
+
+func getAllClaimableTokenAddresses(
+	addressesMap *orderedmap.OrderedMap[gethcommon.Address, *distribution.BigInt],
+) []gethcommon.Address {
+	var addresses []gethcommon.Address
+	for pair := addressesMap.Oldest(); pair != nil; pair = pair.Next() {
+		addresses = append(addresses, pair.Key)
+	}
+
+	return addresses
+}
+
+func filterClaimableTokenAddresses(
+	addressesMap *orderedmap.OrderedMap[gethcommon.Address, *distribution.BigInt],
+	providedAddresses []gethcommon.Address,
+) []gethcommon.Address {
+	var addresses []gethcommon.Address
+	for _, address := range providedAddresses {
+		if _, ok := addressesMap.Get(address); ok {
+			addresses = append(addresses, address)
+		}
+	}
+
+	return addresses
+}
+
 func convertClaimTokenLeaves(
 	claimTokenLeaves []contractrewardscoordinator.IRewardsCoordinatorTokenTreeMerkleLeaf,
 ) []rewardscoordinator.IRewardsCoordinatorTokenTreeMerkleLeaf {
@@ -307,7 +352,6 @@ func convertClaimTokenLeaves(
 		})
 	}
 	return tokenLeaves
-
 }
 
 func readAndValidateClaimConfig(cCtx *cli.Context, logger logging.Logger) (*ClaimConfig, error) {
@@ -319,7 +363,8 @@ func readAndValidateClaimConfig(cCtx *cli.Context, logger logging.Logger) (*Clai
 	outputType := cCtx.String(flags.OutputTypeFlag.Name)
 	broadcast := cCtx.Bool(flags.BroadcastFlag.Name)
 	tokenAddresses := cCtx.String(TokenAddressesFlag.Name)
-	tokenAddressArray := stringToAddressArray(strings.Split(tokenAddresses, ","))
+	splitTokenAddresses := strings.Split(tokenAddresses, ",")
+	validTokenAddresses := getValidHexAddresses(splitTokenAddresses)
 	rewardsCoordinatorAddress := cCtx.String(RewardsCoordinatorAddressFlag.Name)
 
 	var err error
@@ -395,7 +440,7 @@ func readAndValidateClaimConfig(cCtx *cli.Context, logger logging.Logger) (*Clai
 		Output:                    output,
 		OutputType:                outputType,
 		Broadcast:                 broadcast,
-		TokenAddresses:            tokenAddressArray,
+		TokenAddresses:            validTokenAddresses,
 		RewardsCoordinatorAddress: gethcommon.HexToAddress(rewardsCoordinatorAddress),
 		ChainID:                   chainID,
 		ProofStoreBaseURL:         proofStoreBaseURL,
@@ -428,10 +473,12 @@ func getEnvFromNetwork(network string) string {
 	}
 }
 
-func stringToAddressArray(addresses []string) []gethcommon.Address {
+func getValidHexAddresses(addresses []string) []gethcommon.Address {
 	var addressArray []gethcommon.Address
 	for _, address := range addresses {
-		addressArray = append(addressArray, gethcommon.HexToAddress(address))
+		if gethcommon.IsHexAddress(address) && address != utils.ZeroAddress.String() {
+			addressArray = append(addressArray, gethcommon.HexToAddress(address))
+		}
 	}
 	return addressArray
 }
