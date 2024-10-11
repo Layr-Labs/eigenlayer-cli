@@ -14,5 +14,6 @@ func GetSignerFlags() []cli.Flag {
 		&FireblocksTimeoutFlag,
 		&FireblocksSecretStorageTypeFlag,
 		&Web3SignerUrlFlag,
+		&SilentFlag,
 	}
 }

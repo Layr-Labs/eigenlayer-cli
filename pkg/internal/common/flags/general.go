@@ -75,4 +75,11 @@ var (
 		Usage:   "Enable verbose logging",
 		EnvVars: []string{"VERBOSE"},
 	}
+
+	SilentFlag = cli.BoolFlag{
+		Name:    "silent",
+		Aliases: []string{"s"},
+		Usage:   "Suppress unnecessary output (except for claim data to enable piping)",
+		EnvVars: []string{"SILENT"},
+	}
 )
