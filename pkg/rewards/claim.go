@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"math/big"
 	"net/http"
 	"sort"
@@ -75,7 +74,6 @@ func getClaimFlags() []cli.Flag {
 		&ClaimTimestampFlag,
 		&ProofStoreBaseURLFlag,
 		&flags.VerboseFlag,
-		&SilentFlag,
 	}
 
 	allFlags := append(baseFlags, flags.GetSignerFlags()...)
@@ -86,10 +84,6 @@ func getClaimFlags() []cli.Flag {
 func Claim(cCtx *cli.Context, p utils.Prompter) error {
 	ctx := cCtx.Context
 	logger := common.GetLogger(cCtx)
-
-	if cCtx.Bool(SilentFlag.Name) {
-		logger = logging.NewTextSLogger(io.Discard, nil)
-	}
 
 	config, err := readAndValidateClaimConfig(cCtx, logger)
 	if err != nil {
@@ -246,24 +240,31 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 				logger.Infof("Claim written to file: %s", config.Output)
 			} else {
 				fmt.Println(string(jsonData))
-				logger.Info("To write to a file, use the --output flag")
+				fmt.Println()
+				fmt.Println("To write to a file, use the --output flag")
 			}
 		} else {
 			if !common.IsEmptyString(config.Output) {
-				logger.Info("output file not supported for pretty output type")
+				fmt.Println("output file not supported for pretty output type")
+				fmt.Println()
 			}
 			solidityClaim := claimgen.FormatProofForSolidity(accounts.Root(), claim)
-			logger.Info("------- Claim generated -------")
+			if !config.IsSilent {
+				fmt.Println("------- Claim generated -------")
+			}
 			common.PrettyPrintStruct(*solidityClaim)
-			logger.Info("-------------------------------")
-			logger.Info("To write to a file, use the --output flag")
+			if !config.IsSilent {
+				fmt.Println("-------------------------------")
+				fmt.Println("To write to a file, use the --output flag")
+			}
 		}
-		if !cCtx.Bool(SilentFlag.Name) {
+		if !config.IsSilent {
 			txFeeDetails := common.GetTxFeeDetails(unsignedTx)
-			logger.Info("\n")
+			fmt.Println()
 			txFeeDetails.Print()
+
+			fmt.Println("To broadcast the claim, use the --broadcast flag")
 		}
-		logger.Info("To broadcast the claim, use the --broadcast flag")
 	}
 
 	return nil
@@ -372,6 +373,7 @@ func readAndValidateClaimConfig(cCtx *cli.Context, logger logging.Logger) (*Clai
 	splitTokenAddresses := strings.Split(tokenAddresses, ",")
 	validTokenAddresses := getValidHexAddresses(splitTokenAddresses)
 	rewardsCoordinatorAddress := cCtx.String(RewardsCoordinatorAddressFlag.Name)
+	isSilent := cCtx.Bool(SilentFlag.Name)
 
 	var err error
 	if common.IsEmptyString(rewardsCoordinatorAddress) {
@@ -455,6 +457,7 @@ func readAndValidateClaimConfig(cCtx *cli.Context, logger logging.Logger) (*Clai
 		SignerConfig:              signerConfig,
 		ClaimTimestamp:            claimTimestamp,
 		ClaimerAddress:            claimerAddress,
+		IsSilent:                  isSilent,
 	}, nil
 }
 

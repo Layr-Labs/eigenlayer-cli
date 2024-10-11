@@ -30,6 +30,7 @@ type ClaimConfig struct {
 	ProofStoreBaseURL         string
 	Environment               string
 	SignerConfig              *types.SignerConfig
+	IsSilent                  bool
 }
 
 type SetClaimerConfig struct {

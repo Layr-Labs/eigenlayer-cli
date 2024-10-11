@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"log/slog"
 	"math/big"
 	"os"
@@ -445,6 +446,11 @@ func IsEmptyString(s string) bool {
 
 func GetLogger(cCtx *cli.Context) eigensdkLogger.Logger {
 	verbose := cCtx.Bool(flags.VerboseFlag.Name)
+
+	if cCtx.Bool(flags.SilentFlag.Name) {
+		return eigensdkLogger.NewTextSLogger(io.Discard, nil)
+	}
+
 	loggerOptions := &eigensdkLogger.SLoggerOptions{
 		Level: slog.LevelInfo,
 	}
