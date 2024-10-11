@@ -96,6 +96,6 @@ var (
 		Name:    "silent",
 		Aliases: []string{"s"},
 		Usage:   "Suppress output except for claim",
-		EnvVars: []string{"SILENT"},
+		EnvVars: []string{"REWARDS_CLAIM_SILENT"},
 	}
 )
