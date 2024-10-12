@@ -6,9 +6,9 @@ var (
 	TokenAddressesFlag = cli.StringFlag{
 		Name:     "token-addresses",
 		Aliases:  []string{"t"},
-		Usage:    "Specify the addresses of the tokens to claim. Comma separated list of addresses",
+		Usage:    "Specify the addresses of the tokens to claim. Comma separated list of addresses. Omit to claim all rewards.",
 		EnvVars:  []string{"TOKEN_ADDRESSES"},
-		Required: true,
+		Required: false,
 	}
 
 	RewardsCoordinatorAddressFlag = cli.StringFlag{

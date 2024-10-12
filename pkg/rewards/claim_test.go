@@ -12,6 +12,9 @@ import (
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/testutils"
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
+
+	"github.com/Layr-Labs/eigenlayer-rewards-proofs/pkg/distribution"
 
 	rewardscoordinator "github.com/Layr-Labs/eigensdk-go/contracts/bindings/IRewardsCoordinator"
 	"github.com/Layr-Labs/eigensdk-go/logging"
@@ -21,6 +24,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/urfave/cli/v2"
+	"github.com/wk8/go-ordered-map/v2"
 )
 
 type fakeELReader struct {
@@ -112,6 +116,48 @@ func TestReadAndValidateConfig_NoRecipientProvided(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Equal(t, common.HexToAddress(earnerAddress), config.RecipientAddress)
+}
+
+func TestReadAndValidateConfig_NoTokenAddressesProvided(t *testing.T) {
+	earnerAddress := testutils.GenerateRandomEthereumAddressString()
+	recipientAddress := testutils.GenerateRandomEthereumAddressString()
+	fs := flag.NewFlagSet("test", flag.ContinueOnError)
+	fs.String(flags.ETHRpcUrlFlag.Name, "rpc", "")
+	fs.String(EarnerAddressFlag.Name, earnerAddress, "")
+	fs.String(RecipientAddressFlag.Name, recipientAddress, "")
+	fs.String(RewardsCoordinatorAddressFlag.Name, "0x1234", "")
+	fs.String(TokenAddressesFlag.Name, "", "")
+	fs.String(ClaimTimestampFlag.Name, "latest", "")
+	fs.String(ProofStoreBaseURLFlag.Name, "dummy-url", "")
+	cliCtx := cli.NewContext(nil, fs, nil)
+
+	logger := logging.NewJsonSLogger(os.Stdout, &logging.SLoggerOptions{})
+
+	config, err := readAndValidateClaimConfig(cliCtx, logger)
+
+	assert.NoError(t, err)
+	assert.ElementsMatch(t, config.TokenAddresses, []common.Address{})
+}
+
+func TestReadAndValidateConfig_ZeroTokenAddressesProvided(t *testing.T) {
+	earnerAddress := testutils.GenerateRandomEthereumAddressString()
+	recipientAddress := testutils.GenerateRandomEthereumAddressString()
+	fs := flag.NewFlagSet("test", flag.ContinueOnError)
+	fs.String(flags.ETHRpcUrlFlag.Name, "rpc", "")
+	fs.String(EarnerAddressFlag.Name, earnerAddress, "")
+	fs.String(RecipientAddressFlag.Name, recipientAddress, "")
+	fs.String(RewardsCoordinatorAddressFlag.Name, "0x1234", "")
+	fs.String(TokenAddressesFlag.Name, utils.ZeroAddress.String(), "")
+	fs.String(ClaimTimestampFlag.Name, "latest", "")
+	fs.String(ProofStoreBaseURLFlag.Name, "dummy-url", "")
+	cliCtx := cli.NewContext(nil, fs, nil)
+
+	logger := logging.NewJsonSLogger(os.Stdout, &logging.SLoggerOptions{})
+
+	config, err := readAndValidateClaimConfig(cliCtx, logger)
+
+	assert.NoError(t, err)
+	assert.ElementsMatch(t, config.TokenAddresses, []common.Address{})
 }
 
 func TestReadAndValidateConfig_RecipientProvided(t *testing.T) {
@@ -221,4 +267,65 @@ func TestGetClaimDistributionRoot(t *testing.T) {
 			assert.Equal(t, tt.expectedRootIndex, rootIndex)
 		})
 	}
+}
+
+func TestGetTokensToClaim(t *testing.T) {
+	// Set up a mock claimableTokens map
+	claimableTokens := orderedmap.New[common.Address, *distribution.BigInt]()
+	addr1 := common.HexToAddress(testutils.GenerateRandomEthereumAddressString())
+	addr2 := common.HexToAddress(testutils.GenerateRandomEthereumAddressString())
+	addr3 := common.HexToAddress(testutils.GenerateRandomEthereumAddressString())
+
+	claimableTokens.Set(addr1, newBigInt(100))
+	claimableTokens.Set(addr2, newBigInt(200))
+
+	// Case 1: No token addresses provided, should return all addresses in claimableTokens
+	result := getTokensToClaim(claimableTokens, []common.Address{})
+	expected := []common.Address{addr1, addr2}
+	assert.ElementsMatch(t, result, expected)
+
+	// Case 2: Provided token addresses, should return only those present in claimableTokens
+	result = getTokensToClaim(claimableTokens, []common.Address{addr2, addr3})
+	expected = []common.Address{addr2}
+	assert.ElementsMatch(t, result, expected)
+}
+
+func TestGetTokenAddresses(t *testing.T) {
+	// Set up a mock addresses map
+	addressesMap := orderedmap.New[common.Address, *distribution.BigInt]()
+	addr1 := common.HexToAddress(testutils.GenerateRandomEthereumAddressString())
+	addr2 := common.HexToAddress(testutils.GenerateRandomEthereumAddressString())
+
+	addressesMap.Set(addr1, newBigInt(100))
+	addressesMap.Set(addr2, newBigInt(200))
+
+	// Test that the function returns all addresses in the map
+	result := getAllClaimableTokenAddresses(addressesMap)
+	expected := []common.Address{addr1, addr2}
+	assert.ElementsMatch(t, result, expected)
+}
+
+func TestFilterClaimableTokenAddresses(t *testing.T) {
+	// Set up a mock addresses map
+	addressesMap := orderedmap.New[common.Address, *distribution.BigInt]()
+	addr1 := common.HexToAddress(testutils.GenerateRandomEthereumAddressString())
+	addr2 := common.HexToAddress(testutils.GenerateRandomEthereumAddressString())
+
+	addressesMap.Set(addr1, newBigInt(100))
+	addressesMap.Set(addr2, newBigInt(200))
+
+	// Test filtering with provided addresses
+	newMissingAddress := common.HexToAddress(testutils.GenerateRandomEthereumAddressString())
+	providedAddresses := []common.Address{
+		addr1,
+		newMissingAddress,
+	}
+
+	result := filterClaimableTokenAddresses(addressesMap, providedAddresses)
+	expected := []common.Address{addr1}
+	assert.ElementsMatch(t, result, expected)
+}
+
+func newBigInt(value int64) *distribution.BigInt {
+	return &distribution.BigInt{Int: big.NewInt(value)}
 }
