@@ -278,7 +278,11 @@ func getSharesFromMagnitude(totalScaledShare *big.Int, magnitude uint64) (*big.I
 	 * shares = totalScaledShare * magnitude / PrecisionFactor
 	 * percentageShares = (shares / totalScaledShare) * 100
 	 */
-
+	// Check for zero magnitude or totalScaledShare to avoid divide-by-zero errors
+	if magnitude == 0 || totalScaledShare.Cmp(big.NewInt(0)) == 0 {
+		return big.NewInt(0), big.NewFloat(0)
+	}
+	
 	slashableMagBigInt := big.NewInt(1)
 	slashableMagBigInt = slashableMagBigInt.SetUint64(magnitude)
 
