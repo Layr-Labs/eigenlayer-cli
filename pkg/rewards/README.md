@@ -118,7 +118,7 @@ For testnet, remove the `--rewards-coordinator-address` flag and binary will aut
 ```bash
 eigenlayer rewards show --help
 NAME:
-   eigenlayer rewards show - Show rewards for an address
+   eigenlayer rewards show - Show rewards for an address against the latest `active` `DistributionRoot` posted on-chain by the rewards updater.
 
 USAGE:
    show
