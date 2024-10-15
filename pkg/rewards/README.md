@@ -31,13 +31,23 @@ OPTIONS:
    --proof-store-base-url value, --psbu value           Specify the base URL of the proof store. If not provided, the value based on network will be used [$PROOF_STORE_BASE_URL]
    --recipient-address value, --ra value                Specify the address of the recipient. If this is not provided, the earner address will be used [$RECIPIENT_ADDRESS]
    --rewards-coordinator-address value, --rc value      Specify the address of the rewards coordinator. If not provided, the address will be used based on provided network [$REWARDS_COORDINATOR_ADDRESS]
-   --token-addresses value, -t value                    Specify the addresses of the tokens to claim. Comma separated list of addresses [$TOKEN_ADDRESSES]
+   --silent, -s                                         Suppress unnecessary output (default: false) [$SILENT]
+   --token-addresses value, -t value                    Specify the addresses of the tokens to claim. Comma separated list of addresses. Omit to claim all rewards. [$TOKEN_ADDRESSES]
    --verbose, -v                                        Enable verbose logging (default: false) [$VERBOSE]
    --web3signer-url value, -w value                     URL of the Web3Signer [$WEB3SIGNER_URL]
    --help, -h                                           show help
 ```
 
 #### Example
+##### Mainnet
+```bash
+eigenlayer rewards claim \
+  --network mainnet \
+  --eth-rpc-url https://rpc.ankr.com/eth/<> \
+  --earner-address 0x2222AAC0C980Cc029624b7ff55B88Bc6F63C538f \
+  --path-to-key-store /path/to/key \
+  --broadcast
+```
 ##### Testnet
 ```bash
 eigenlayer rewards claim \
@@ -46,21 +56,6 @@ eigenlayer rewards claim \
   --earner-address 0x111116fe4f8c2f83e3eb2318f090557b7cd0bf76 \
   --recipient-address 0x2222AAC0C980Cc029624b7ff55B88Bc6F63C538f \
   --path-to-key-store /path/to/key/store \
-  --token-addresses 0xdeeeeE2b48C121e6728ed95c860e296177849932 --broadcast
-```
-
-##### Preprod
-```bash
-eigenlayer rewards claim \
-  --network holesky \
-  --env preprod \
-  --eth-rpc-url https://rpc.ankr.com/eth_holesky/<> \
-  --earner-address 0x2222AAC0C980Cc029624b7ff55B88Bc6F63C538f \
-  --path-to-key-store /path/to/key \
-  --token-addresses 0x554c393923c753d146aa34608523ad7946b61662 \
-  --rewards-coordinator-address 0xb22Ef643e1E067c994019A4C19e403253C05c2B0 \
-  --proof-store-base-url https://eigenlabs-rewards-preprod-holesky.s3.amazonaws.com
-  --broadcast
 ```
 
 ### Set Claimer Command
@@ -101,7 +96,17 @@ OPTIONS:
 ```
 
 #### Example
-##### Preprod
+##### Mainnet
+```bash
+eigenlayer rewards set-claimer \
+  --network mainnet \
+  --eth-rpc-url https://rpc.ankr.com/eth/<> \
+  --earner-address 0x2222AAC0C980Cc029624b7ff55B88Bc6F63C538f \
+  --claimer-address 0x2222AAC0C980Cc029624b7ff55B88Bc6F63C538f \
+  --path-to-key-store /path/to/key/store \
+  --broadcast
+```
+##### Testnet
 ```bash
 eigenlayer rewards set-claimer \
   --network holesky \
@@ -109,10 +114,8 @@ eigenlayer rewards set-claimer \
   --earner-address 0x2222AAC0C980Cc029624b7ff55B88Bc6F63C538f \
   --claimer-address 0x2222AAC0C980Cc029624b7ff55B88Bc6F63C538f \
   --path-to-key-store /path/to/key/store \
-  --rewards-coordinator-address 0xb22Ef643e1E067c994019A4C19e403253C05c2B0
   --broadcast
 ```
-For testnet, remove the `--rewards-coordinator-address` flag and binary will automatically use the testnet rewards coordinator address.
 
 ### Show Rewards
 ```bash
@@ -142,18 +145,31 @@ OPTIONS:
    --verbose, -v                               Enable verbose logging (default: false) [$VERBOSE]
    --help, -h                                  show help
 ```
-### Testnet
+
+#### Example
 Show all Rewards
 ```bash
 ./bin/eigenlayer rewards show \
-  --network holesky \
+  --network mainnet \
   --earner-address 0x2222AAC0C980Cc029624b7ff55B88Bc6F63C538f \
+  --eth-rpc-url https://rpc.ankr.com/eth/<> \
   --claim-type all --verbose
 ```
+
+Show claimed Rewards
+```bash
+./bin/eigenlayer rewards show \
+  --network mainnet \
+  --earner-address 0x2222AAC0C980Cc029624b7ff55B88Bc6F63C538f \
+  --eth-rpc-url https://rpc.ankr.com/eth/<> \
+  --claim-type claomed --verbose
+```
+
 Show unclaimed Rewards
 ```bash
 ./bin/eigenlayer rewards show \
-  --network holesky \
+  --network mainnet \
   --earner-address 0x2222AAC0C980Cc029624b7ff55B88Bc6F63C538f \
+  --eth-rpc-url https://rpc.ankr.com/eth/<> \
   --claim-type unclaimed --verbose
 ```
