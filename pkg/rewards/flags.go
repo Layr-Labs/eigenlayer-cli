@@ -91,11 +91,4 @@ var (
 		Value:   "all",
 		EnvVars: []string{"REWARDS_CLAIM_TYPE"},
 	}
-
-	SilentFlag = cli.BoolFlag{
-		Name:    "silent",
-		Aliases: []string{"s"},
-		Usage:   "Suppress output except for claim",
-		EnvVars: []string{"REWARDS_CLAIM_SILENT"},
-	}
 )

@@ -79,7 +79,7 @@ var (
 	SilentFlag = cli.BoolFlag{
 		Name:    "silent",
 		Aliases: []string{"s"},
-		Usage:   "Suppress unnecessary output (except for claim data to enable piping)",
+		Usage:   "Suppress unnecessary output",
 		EnvVars: []string{"SILENT"},
 	}
 )

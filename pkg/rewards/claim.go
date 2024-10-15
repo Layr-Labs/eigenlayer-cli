@@ -74,6 +74,7 @@ func getClaimFlags() []cli.Flag {
 		&ClaimTimestampFlag,
 		&ProofStoreBaseURLFlag,
 		&flags.VerboseFlag,
+		&flags.SilentFlag,
 	}
 
 	allFlags := append(baseFlags, flags.GetSignerFlags()...)
@@ -373,7 +374,7 @@ func readAndValidateClaimConfig(cCtx *cli.Context, logger logging.Logger) (*Clai
 	splitTokenAddresses := strings.Split(tokenAddresses, ",")
 	validTokenAddresses := getValidHexAddresses(splitTokenAddresses)
 	rewardsCoordinatorAddress := cCtx.String(RewardsCoordinatorAddressFlag.Name)
-	isSilent := cCtx.Bool(SilentFlag.Name)
+	isSilent := cCtx.Bool(flags.SilentFlag.Name)
 
 	var err error
 	if common.IsEmptyString(rewardsCoordinatorAddress) {
