@@ -38,6 +38,9 @@ const (
 	All       ClaimType = "all"
 	Unclaimed ClaimType = "unclaimed"
 	Claimed   ClaimType = "claimed"
+
+	LatestTimestamp       = "latest"
+	LatestActiveTimestamp = "latest_active"
 )
 
 func ShowCmd(p utils.Prompter) *cli.Command {
@@ -213,7 +216,7 @@ func handleRewardsOutput(
 		}
 	} else {
 		fmt.Println()
-		if cfg.ClaimTimestamp == "latest" {
+		if cfg.ClaimTimestamp == LatestTimestamp {
 			fmt.Println("> Showing rewards for latest root (can contain non-claimable rewards)")
 		} else {
 			fmt.Println("> Showing rewards for latest active root (only claimable rewards)")
@@ -308,8 +311,8 @@ func readAndValidateConfig(cCtx *cli.Context, logger logging.Logger) (*ShowConfi
 	logger.Debugf("Claim Type: %s", claimType)
 
 	claimTimestamp := cCtx.String(ClaimTimestampFlag.Name)
-	if claimTimestamp != "latest" && claimTimestamp != "latest_active" {
-		return nil, errors.New("claim timestamp must be 'latest' or 'earliest'")
+	if claimTimestamp != LatestTimestamp && claimTimestamp != LatestActiveTimestamp {
+		return nil, errors.New("claim timestamp must be 'latest' or 'latest_active'")
 	}
 
 	chainID := utils.NetworkNameToChainId(network)

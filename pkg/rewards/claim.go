@@ -277,7 +277,7 @@ func getClaimDistributionRoot(
 	elReader elChainReader,
 	logger logging.Logger,
 ) (string, uint32, error) {
-	if claimTimestamp == "latest" {
+	if claimTimestamp == LatestTimestamp {
 		latestSubmittedTimestamp, err := elReader.CurrRewardsCalculationEndTimestamp(&bind.CallOpts{Context: ctx})
 		if err != nil {
 			return "", 0, eigenSdkUtils.WrapError("failed to get latest submitted timestamp", err)
@@ -292,7 +292,7 @@ func getClaimDistributionRoot(
 		rootIndex := uint32(rootCount.Uint64() - 1)
 		logger.Debugf("Latest active rewards snapshot timestamp: %s, root index: %d", claimDate, rootIndex)
 		return claimDate, rootIndex, nil
-	} else if claimTimestamp == "latest_active" {
+	} else if claimTimestamp == LatestActiveTimestamp {
 		latestClaimableRoot, err := elReader.GetCurrentClaimableDistributionRoot(&bind.CallOpts{Context: ctx})
 		if err != nil {
 			return "", 0, eigenSdkUtils.WrapError("failed to get latest claimable root", err)
