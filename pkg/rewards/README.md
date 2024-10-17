@@ -121,7 +121,7 @@ eigenlayer rewards set-claimer \
 ```bash
 eigenlayer rewards show --help
 NAME:
-   eigenlayer rewards show - Show rewards for an address
+   eigenlayer rewards show - Show rewards for an address against the `DistributionRoot` posted on-chain by the rewards updater
 
 USAGE:
    show
@@ -130,11 +130,15 @@ DESCRIPTION:
 
    Command to show rewards for earners
 
-   Currently supports total rewards (claimed and unclaimed)
+   Helpful flags
+   - claim-type: Type of rewards to show. Can be 'all', 'claimed' or 'unclaimed'
+   - claim-timestamp: Timestamp of the claim distribution root to use. Can be 'latest' or 'latest_active'.
+     - 'latest' will show rewards for the latest root (can contain non-claimable rewards)
+     - 'latest_active' will show rewards for the latest active root (only claimable rewards)
 
 
 OPTIONS:
-   --claim-timestamp value, -c value           Specify the timestamp. Only 'latest' and 'latest_active' are supported. 'latest' can be an inactive root which you can't claim yet. (default: "latest_active") [$CLAIM_TIMESTAMP]
+   --claim-timestamp value, -c value           Specify the timestamp. Only 'latest' and 'latest_active' are supported. 'latest' can be a from an inactive root which you can't claim yet. (default: "latest_active") [$CLAIM_TIMESTAMP]
    --claim-type value, --ct value              Type of claim you want to see. Can be 'all', 'unclaimed', or 'claimed' (default: "all") [$REWARDS_CLAIM_TYPE]
    --earner-address value, --ea value          Address of the earner [$REWARDS_EARNER_ADDRESS]
    --environment value, --env value            Environment to use. Currently supports 'preprod' ,'testnet' and 'prod'. If not provided, it will be inferred based on network [$ENVIRONMENT]

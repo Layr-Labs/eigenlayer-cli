@@ -43,12 +43,16 @@ const (
 func ShowCmd(p utils.Prompter) *cli.Command {
 	showCmd := &cli.Command{
 		Name:      "show",
-		Usage:     "Show rewards for an address",
+		Usage:     "Show rewards for an address against the `DistributionRoot` posted on-chain by the rewards updater",
 		UsageText: "show",
 		Description: `
 Command to show rewards for earners
 
-Currently supports total rewards (claimed and unclaimed)
+Helpful flags
+- claim-type: Type of rewards to show. Can be 'all', 'claimed' or 'unclaimed'
+- claim-timestamp: Timestamp of the claim distribution root to use. Can be 'latest' or 'latest_active'.
+	- 'latest' will show rewards for the latest root (can contain non-claimable rewards)
+	- 'latest_active' will show rewards for the latest active root (only claimable rewards)
 		`,
 		After: telemetry.AfterRunAction(),
 		Flags: getShowFlags(),
