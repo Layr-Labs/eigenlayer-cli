@@ -32,7 +32,7 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 
 	"github.com/urfave/cli/v2"
-	"github.com/wk8/go-ordered-map/v2"
+	orderedmap "github.com/wk8/go-ordered-map/v2"
 )
 
 type elChainReader interface {
@@ -277,7 +277,7 @@ func getClaimDistributionRoot(
 	elReader elChainReader,
 	logger logging.Logger,
 ) (string, uint32, error) {
-	if claimTimestamp == "latest" {
+	if claimTimestamp == LatestTimestamp {
 		latestSubmittedTimestamp, err := elReader.CurrRewardsCalculationEndTimestamp(&bind.CallOpts{Context: ctx})
 		if err != nil {
 			return "", 0, eigenSdkUtils.WrapError("failed to get latest submitted timestamp", err)
@@ -292,12 +292,11 @@ func getClaimDistributionRoot(
 		rootIndex := uint32(rootCount.Uint64() - 1)
 		logger.Debugf("Latest active rewards snapshot timestamp: %s, root index: %d", claimDate, rootIndex)
 		return claimDate, rootIndex, nil
-	} else if claimTimestamp == "latest_active" {
+	} else if claimTimestamp == LatestActiveTimestamp {
 		latestClaimableRoot, err := elReader.GetCurrentClaimableDistributionRoot(&bind.CallOpts{Context: ctx})
 		if err != nil {
 			return "", 0, eigenSdkUtils.WrapError("failed to get latest claimable root", err)
 		}
-
 		rootIndex, err := elReader.GetRootIndexFromHash(&bind.CallOpts{Context: ctx}, latestClaimableRoot.Root)
 		if err != nil {
 			return "", 0, eigenSdkUtils.WrapError("failed to get root index from hash", err)
