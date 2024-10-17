@@ -57,5 +57,6 @@ type ShowConfig struct {
 	Output                    string
 	OutputType                string
 	ProofStoreBaseURL         string
+	ClaimTimestamp            string
 	RewardsCoordinatorAddress gethcommon.Address
 }

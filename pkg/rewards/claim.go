@@ -32,7 +32,7 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 
 	"github.com/urfave/cli/v2"
-	"github.com/wk8/go-ordered-map/v2"
+	orderedmap "github.com/wk8/go-ordered-map/v2"
 )
 
 type elChainReader interface {
@@ -297,7 +297,6 @@ func getClaimDistributionRoot(
 		if err != nil {
 			return "", 0, eigenSdkUtils.WrapError("failed to get latest claimable root", err)
 		}
-
 		rootIndex, err := elReader.GetRootIndexFromHash(&bind.CallOpts{Context: ctx}, latestClaimableRoot.Root)
 		if err != nil {
 			return "", 0, eigenSdkUtils.WrapError("failed to get root index from hash", err)

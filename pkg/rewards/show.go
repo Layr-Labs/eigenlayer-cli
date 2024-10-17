@@ -20,8 +20,8 @@ import (
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
 	"github.com/Layr-Labs/eigensdk-go/logging"
 	eigenSdkUtils "github.com/Layr-Labs/eigensdk-go/utils"
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	gethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 
@@ -48,7 +48,7 @@ func ShowCmd(p utils.Prompter) *cli.Command {
 		Description: `
 Command to show rewards for earners
 
-Currently supports past total rewards (claimed and unclaimed) and past unclaimed rewards
+Currently supports total rewards (claimed and unclaimed)
 		`,
 		After: telemetry.AfterRunAction(),
 		Flags: getShowFlags(),
@@ -71,6 +71,7 @@ func getShowFlags() []cli.Flag {
 		&EnvironmentFlag,
 		&ClaimTypeFlag,
 		&ProofStoreBaseURLFlag,
+		&ClaimTimestampFlag,
 	}
 
 	sort.Sort(cli.FlagsByName(baseFlags))
@@ -109,7 +110,7 @@ func ShowRewards(cCtx *cli.Context) error {
 		http.DefaultClient,
 	)
 
-	claimDate, _, err := getClaimDistributionRoot(ctx, "latest_active", elReader, logger)
+	claimDate, _, err := getClaimDistributionRoot(ctx, config.ClaimTimestamp, elReader, logger)
 	if err != nil {
 		return eigenSdkUtils.WrapError("failed to get claim distribution root", err)
 	}
@@ -125,7 +126,7 @@ func ShowRewards(cCtx *cli.Context) error {
 	}
 
 	allRewards := make(map[gethcommon.Address]*big.Int)
-	msg := "All Rewards"
+	msg := "Lifetime Rewards"
 	for pair := tokenAddressesMap.Oldest(); pair != nil; pair = pair.Next() {
 		amt, _ := new(big.Int).SetString(pair.Value.String(), 10)
 		allRewards[pair.Key] = amt
@@ -145,7 +146,7 @@ func ShowRewards(cCtx *cli.Context) error {
 			msg = "Unclaimed Rewards"
 		}
 	}
-	err = handleRewardsOutput(config.Output, config.OutputType, allRewards, msg)
+	err = handleRewardsOutput(config, allRewards, msg)
 	if err != nil {
 		return err
 	}
@@ -185,13 +186,11 @@ func calculateUnclaimedRewards(
 }
 
 func handleRewardsOutput(
-	outputFile string,
-	outputType string,
+	cfg *ShowConfig,
 	rewards map[gethcommon.Address]*big.Int,
 	msg string,
 ) error {
-	fmt.Println(strings.Repeat("-", 30), msg, strings.Repeat("-", 30))
-	if outputType == "json" {
+	if cfg.OutputType == "json" {
 		allRewards := make(allRewardsJson, 0)
 		for address, amount := range rewards {
 			allRewards = append(allRewards, rewardsJson{
@@ -203,12 +202,20 @@ func handleRewardsOutput(
 		if err != nil {
 			return err
 		}
-		if outputFile != "" {
-			return common.WriteToFile(out, outputFile)
+		if cfg.Output != "" {
+			return common.WriteToFile(out, cfg.Output)
 		} else {
 			fmt.Println(string(out))
 		}
 	} else {
+		fmt.Println()
+		if cfg.ClaimTimestamp == "latest" {
+			fmt.Println("> Showing rewards for latest root (can contain non-claimable rewards)")
+		} else {
+			fmt.Println("> Showing rewards for latest active root (only claimable rewards)")
+		}
+		fmt.Println()
+		fmt.Println(strings.Repeat("-", 30), msg, strings.Repeat("-", 30))
 		printRewards(rewards)
 	}
 	return nil
@@ -295,6 +302,12 @@ func readAndValidateConfig(cCtx *cli.Context, logger logging.Logger) (*ShowConfi
 		return nil, errors.New("claim type must be 'all', 'unclaimed' or 'claimed'")
 	}
 	logger.Debugf("Claim Type: %s", claimType)
+
+	claimTimestamp := cCtx.String(ClaimTimestampFlag.Name)
+	if claimTimestamp != "latest" && claimTimestamp != "latest_active" {
+		return nil, errors.New("claim timestamp must be 'latest' or 'earliest'")
+	}
+
 	chainID := utils.NetworkNameToChainId(network)
 	logger.Debugf("Using chain ID: %s", chainID.String())
 
@@ -313,6 +326,7 @@ func readAndValidateConfig(cCtx *cli.Context, logger logging.Logger) (*ShowConfi
 		OutputType:                outputType,
 		RPCUrl:                    ethRpcUrl,
 		ProofStoreBaseURL:         proofStoreBaseURL,
+		ClaimTimestamp:            claimTimestamp,
 		RewardsCoordinatorAddress: gethcommon.HexToAddress(rewardsCoordinatorAddress),
 	}, nil
 }
