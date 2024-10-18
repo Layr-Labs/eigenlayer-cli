@@ -38,7 +38,7 @@ type elChainReader interface {
 	GetRootIndexFromHash(opts *bind.CallOpts, hash [32]byte) (uint32, error)
 	GetCurrentClaimableDistributionRoot(
 		opts *bind.CallOpts,
-	) (rewardscoordinator.IRewardsCoordinatorDistributionRoot, error)
+	) (rewardscoordinator.IRewardsCoordinatorTypesDistributionRoot, error)
 	CurrRewardsCalculationEndTimestamp(opts *bind.CallOpts) (uint32, error)
 }
 
@@ -131,11 +131,11 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 		return eigenSdkUtils.WrapError("failed to generate claim proof for earner", err)
 	}
 
-	elClaim := rewardscoordinator.IRewardsCoordinatorRewardsMerkleClaim{
+	elClaim := rewardscoordinator.IRewardsCoordinatorTypesRewardsMerkleClaim{
 		RootIndex:       claim.RootIndex,
 		EarnerIndex:     claim.EarnerIndex,
 		EarnerTreeProof: claim.EarnerTreeProof,
-		EarnerLeaf: rewardscoordinator.IRewardsCoordinatorEarnerTreeMerkleLeaf{
+		EarnerLeaf: rewardscoordinator.IRewardsCoordinatorTypesEarnerTreeMerkleLeaf{
 			Earner:          claim.EarnerLeaf.Earner,
 			EarnerTokenRoot: claim.EarnerLeaf.EarnerTokenRoot,
 		},
@@ -294,10 +294,10 @@ func getClaimDistributionRoot(
 
 func convertClaimTokenLeaves(
 	claimTokenLeaves []contractrewardscoordinator.IRewardsCoordinatorTokenTreeMerkleLeaf,
-) []rewardscoordinator.IRewardsCoordinatorTokenTreeMerkleLeaf {
-	var tokenLeaves []rewardscoordinator.IRewardsCoordinatorTokenTreeMerkleLeaf
+) []rewardscoordinator.IRewardsCoordinatorTypesTokenTreeMerkleLeaf {
+	var tokenLeaves []rewardscoordinator.IRewardsCoordinatorTypesTokenTreeMerkleLeaf
 	for _, claimTokenLeaf := range claimTokenLeaves {
-		tokenLeaves = append(tokenLeaves, rewardscoordinator.IRewardsCoordinatorTokenTreeMerkleLeaf{
+		tokenLeaves = append(tokenLeaves, rewardscoordinator.IRewardsCoordinatorTypesTokenTreeMerkleLeaf{
 			Token:              claimTokenLeaf.Token,
 			CumulativeEarnings: claimTokenLeaf.CumulativeEarnings,
 		})

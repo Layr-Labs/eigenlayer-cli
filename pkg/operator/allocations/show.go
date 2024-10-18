@@ -59,7 +59,7 @@ func showAction(cCtx *cli.Context, p utils.Prompter) error {
 	}
 
 	// Temp to test modify allocations
-	config.delegationManagerAddress = gethcommon.HexToAddress("0xa5960a80e91D200794ec699b6aBE920908C0e5C5")
+	config.delegationManagerAddress = gethcommon.HexToAddress("0x3391eBafDD4b2e84Eeecf1711Ff9FC06EF9Ed182")
 
 	elReader, err := elcontracts.NewReaderFromConfig(
 		elcontracts.Config{
@@ -254,7 +254,7 @@ func getSharesFromMagnitude(totalScaledShare *big.Int, magnitude uint64) (*big.I
 	if magnitude == 0 || totalScaledShare.Cmp(big.NewInt(0)) == 0 {
 		return big.NewInt(0), big.NewFloat(0)
 	}
-	
+
 	slashableMagBigInt := big.NewInt(1)
 	slashableMagBigInt = slashableMagBigInt.SetUint64(magnitude)
 
