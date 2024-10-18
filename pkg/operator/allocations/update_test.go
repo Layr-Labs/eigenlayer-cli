@@ -38,7 +38,7 @@ func newFakeElChainReader(
 	}
 }
 
-func (f *fakeElChainReader) GetTotalMagnitudes(
+func (f *fakeElChainReader) GetMaxMagnitudes(
 	opts *bind.CallOpts,
 	operator gethcommon.Address,
 	strategyAddresses []gethcommon.Address,
@@ -98,10 +98,10 @@ func TestGenerateAllocationsParams(t *testing.T) {
 			},
 			expectError: false,
 			expectedAllocations: &BulkModifyAllocations{
-				Allocations: []contractIAllocationManager.IAllocationManagerMagnitudeAllocation{
+				Allocations: []contractIAllocationManager.IAllocationManagerTypesMagnitudeAllocation{
 					{
-						Strategy:               gethcommon.HexToAddress(strategyAddress),
-						ExpectedTotalMagnitude: initialMagnitude,
+						Strategy:             gethcommon.HexToAddress(strategyAddress),
+						ExpectedMaxMagnitude: initialMagnitude,
 						OperatorSets: []contractIAllocationManager.OperatorSet{
 							{
 								OperatorSetId: 1,
@@ -121,10 +121,10 @@ func TestGenerateAllocationsParams(t *testing.T) {
 			},
 			expectError: false,
 			expectedAllocations: &BulkModifyAllocations{
-				Allocations: []contractIAllocationManager.IAllocationManagerMagnitudeAllocation{
+				Allocations: []contractIAllocationManager.IAllocationManagerTypesMagnitudeAllocation{
 					{
-						Strategy:               gethcommon.HexToAddress("0x49989b32351Eb9b8ab2d5623cF22E7F7C23e5630"),
-						ExpectedTotalMagnitude: initialMagnitude,
+						Strategy:             gethcommon.HexToAddress("0x49989b32351Eb9b8ab2d5623cF22E7F7C23e5630"),
+						ExpectedMaxMagnitude: initialMagnitude,
 						OperatorSets: []contractIAllocationManager.OperatorSet{
 							{
 								OperatorSetId: 1,
@@ -138,8 +138,8 @@ func TestGenerateAllocationsParams(t *testing.T) {
 						Magnitudes: []uint64{2e17, 1e17},
 					},
 					{
-						Strategy:               gethcommon.HexToAddress("0x232326fE4F8C2f83E3eB2318F090557b7CD02222"),
-						ExpectedTotalMagnitude: initialMagnitude,
+						Strategy:             gethcommon.HexToAddress("0x232326fE4F8C2f83E3eB2318F090557b7CD02222"),
+						ExpectedMaxMagnitude: initialMagnitude,
 						OperatorSets: []contractIAllocationManager.OperatorSet{
 							{
 								OperatorSetId: 4,
@@ -149,8 +149,8 @@ func TestGenerateAllocationsParams(t *testing.T) {
 						Magnitudes: []uint64{3e17},
 					},
 					{
-						Strategy:               gethcommon.HexToAddress("0x545456fE4F8C2f83E3eB2318F090557b7CD04567"),
-						ExpectedTotalMagnitude: initialMagnitude,
+						Strategy:             gethcommon.HexToAddress("0x545456fE4F8C2f83E3eB2318F090557b7CD04567"),
+						ExpectedMaxMagnitude: initialMagnitude,
 						OperatorSets: []contractIAllocationManager.OperatorSet{
 							{
 								OperatorSetId: 5,

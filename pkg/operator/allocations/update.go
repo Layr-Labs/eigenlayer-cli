@@ -28,7 +28,7 @@ import (
 )
 
 type elChainReader interface {
-	GetTotalMagnitudes(
+	GetMaxMagnitudes(
 		opts *bind.CallOpts,
 		operatorAddress gethcommon.Address,
 		strategyAddresses []gethcommon.Address,
@@ -114,11 +114,7 @@ func updateAllocations(cCtx *cli.Context, p utils.Prompter) error {
 
 		receipt, err := eLWriter.ModifyAllocations(
 			ctx,
-			config.operatorAddress,
 			allocationsToUpdate.Allocations,
-			contractIAllocationManager.ISignatureUtilsSignatureWithSaltAndExpiry{
-				Expiry: big.NewInt(0),
-			},
 			true,
 		)
 		if err != nil {
@@ -144,11 +140,7 @@ func updateAllocations(cCtx *cli.Context, p utils.Prompter) error {
 
 		unsignedTx, err := contractBindings.AllocationManager.ModifyAllocations(
 			noSendTxOpts,
-			config.operatorAddress,
 			allocationsToUpdate.Allocations,
-			contractIAllocationManager.ISignatureUtilsSignatureWithSaltAndExpiry{
-				Expiry: big.NewInt(0),
-			},
 		)
 		if err != nil {
 			return eigenSdkUtils.WrapError("failed to create unsigned tx", err)
@@ -208,12 +200,12 @@ func generateAllocationsParams(
 	config *updateConfig,
 	logger logging.Logger,
 ) (*BulkModifyAllocations, error) {
-	allocations := make([]contractIAllocationManager.IAllocationManagerMagnitudeAllocation, 0)
+	allocations := make([]contractIAllocationManager.IAllocationManagerTypesMagnitudeAllocation, 0)
 	var allocatableMagnitudes map[gethcommon.Address]uint64
 
 	var err error
 	if len(config.csvFilePath) == 0 {
-		magnitude, err := elReader.GetTotalMagnitudes(
+		magnitude, err := elReader.GetMaxMagnitudes(
 			&bind.CallOpts{Context: ctx},
 			config.operatorAddress,
 			[]gethcommon.Address{config.strategyAddress},
@@ -234,9 +226,9 @@ func generateAllocationsParams(
 		logger.Debugf("Bips to allocate: %d", config.bipsToAllocate)
 		magnitudeToUpdate := calculateMagnitudeToUpdate(magnitude[0], config.bipsToAllocate)
 		logger.Debugf("Magnitude to update: %d", magnitudeToUpdate)
-		malloc := contractIAllocationManager.IAllocationManagerMagnitudeAllocation{
-			Strategy:               config.strategyAddress,
-			ExpectedTotalMagnitude: magnitude[0],
+		malloc := contractIAllocationManager.IAllocationManagerTypesMagnitudeAllocation{
+			Strategy:             config.strategyAddress,
+			ExpectedMaxMagnitude: magnitude[0],
 			OperatorSets: []contractIAllocationManager.OperatorSet{
 				{
 					Avs:           config.avsAddress,
@@ -263,7 +255,7 @@ func computeAllocations(
 	filePath string,
 	operatorAddress gethcommon.Address,
 	elReader elChainReader,
-) ([]contractIAllocationManager.IAllocationManagerMagnitudeAllocation, map[gethcommon.Address]uint64, error) {
+) ([]contractIAllocationManager.IAllocationManagerTypesMagnitudeAllocation, map[gethcommon.Address]uint64, error) {
 	allocations, err := parseAllocationsCSV(filePath)
 	if err != nil {
 		return nil, nil, eigenSdkUtils.WrapError("failed to parse allocations csv", err)
@@ -347,7 +339,7 @@ func getMagnitudes(
 	reader elChainReader,
 ) (map[gethcommon.Address]uint64, error) {
 	strategyTotalMagnitudes := make(map[gethcommon.Address]uint64, len(strategies))
-	totalMagnitudes, err := reader.GetTotalMagnitudes(
+	totalMagnitudes, err := reader.GetMaxMagnitudes(
 		&bind.CallOpts{Context: context.Background()},
 		operatorAddress,
 		strategies,
@@ -393,8 +385,8 @@ func parseAllocationsCSV(filePath string) ([]allocation, error) {
 func convertAllocationsToMagnitudeAllocations(
 	allocations []allocation,
 	strategyTotalMagnitudes map[gethcommon.Address]uint64,
-) []contractIAllocationManager.IAllocationManagerMagnitudeAllocation {
-	magnitudeAllocations := make([]contractIAllocationManager.IAllocationManagerMagnitudeAllocation, 0)
+) []contractIAllocationManager.IAllocationManagerTypesMagnitudeAllocation {
+	magnitudeAllocations := make([]contractIAllocationManager.IAllocationManagerTypesMagnitudeAllocation, 0)
 	operatorSetsPerStragyMap := make(map[gethcommon.Address][]contractIAllocationManager.OperatorSet)
 	magnitudeAllocationsPerStrategyMap := make(map[gethcommon.Address][]uint64)
 	for _, a := range allocations {
@@ -419,11 +411,11 @@ func convertAllocationsToMagnitudeAllocations(
 	for strategy, operatorSets := range operatorSetsPerStragyMap {
 		magnitudeAllocations = append(
 			magnitudeAllocations,
-			contractIAllocationManager.IAllocationManagerMagnitudeAllocation{
-				Strategy:               strategy,
-				ExpectedTotalMagnitude: strategyTotalMagnitudes[strategy],
-				OperatorSets:           operatorSets,
-				Magnitudes:             magnitudeAllocationsPerStrategyMap[strategy],
+			contractIAllocationManager.IAllocationManagerTypesMagnitudeAllocation{
+				Strategy:             strategy,
+				ExpectedMaxMagnitude: strategyTotalMagnitudes[strategy],
+				OperatorSets:         operatorSets,
+				Magnitudes:           magnitudeAllocationsPerStrategyMap[strategy],
 			},
 		)
 	}

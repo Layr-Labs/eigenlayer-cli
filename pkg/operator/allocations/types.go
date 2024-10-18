@@ -17,7 +17,7 @@ import (
 )
 
 type BulkModifyAllocations struct {
-	Allocations           []contractIAllocationManager.IAllocationManagerMagnitudeAllocation
+	Allocations           []contractIAllocationManager.IAllocationManagerTypesMagnitudeAllocation
 	AllocatableMagnitudes map[gethcommon.Address]uint64
 }
 
@@ -65,7 +65,7 @@ func (b *BulkModifyAllocations) PrintPretty() {
 				widths[0],
 				common.ShortEthAddress(a.Strategy),
 				widths[1],
-				common.FormatNumberWithUnderscores(common.Uint64ToString(a.ExpectedTotalMagnitude)),
+				common.FormatNumberWithUnderscores(common.Uint64ToString(a.ExpectedMaxMagnitude)),
 				widths[2],
 				common.FormatNumberWithUnderscores(common.Uint64ToString(b.AllocatableMagnitudes[a.Strategy])),
 				widths[3],
