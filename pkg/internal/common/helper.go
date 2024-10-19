@@ -318,6 +318,16 @@ func GetAVSDirectoryAddress(chainID *big.Int) (string, error) {
 	}
 }
 
+func GetDelegationManagerAddress(chainID *big.Int) (string, error) {
+	chainIDInt := chainID.Int64()
+	chainMetadata, ok := ChainMetadataMap[chainIDInt]
+	if !ok {
+		return "", fmt.Errorf("chain ID %d not supported", chainIDInt)
+	} else {
+		return chainMetadata.ELDelegationManagerAddress, nil
+	}
+}
+
 func GetTransactionLink(txHash string, chainId *big.Int) string {
 	chainIDInt := chainId.Int64()
 	chainMetadata, ok := ChainMetadataMap[chainIDInt]
@@ -478,4 +488,15 @@ func GetNoSendTxOpts(from common.Address) *bind.TransactOpts {
 
 func Trim0x(s string) string {
 	return strings.TrimPrefix(s, "0x")
+}
+
+func GetEnvFromNetwork(network string) string {
+	switch network {
+	case utils.HoleskyNetworkName:
+		return "testnet"
+	case utils.MainnetNetworkName:
+		return "mainnet"
+	default:
+		return "local"
+	}
 }
