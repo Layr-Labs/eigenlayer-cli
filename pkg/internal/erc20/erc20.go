@@ -1,8 +1,6 @@
 package erc20
 
 import (
-	"fmt"
-	"log"
 	"strings"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
@@ -36,26 +34,6 @@ func (c *Caller) Name(opts *bind.CallOpts) (string, error) {
 		return "", err
 	}
 	return out[0].(string), err
-}
-
-func main() {
-	client, err := ethclient.Dial("https://mainnet.infura.io/v3/YOUR-PROJECT-ID")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	tokenAddress := common.HexToAddress("0x6B175474E89094C44Da98b954EedeAC495271d0F") // DAI token address
-	instance, err := NewERC20(tokenAddress, client)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	name, err := instance.Name(&bind.CallOpts{})
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Printf("Token Name: %s\n", name)
 }
 
 // NewERC20 creates a new instance of ERC20, bound to a specific deployed contract.
