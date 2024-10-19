@@ -12,6 +12,7 @@ import (
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/erc20"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 
@@ -104,7 +105,8 @@ func ShowRewards(cCtx *cli.Context) error {
 		elcontracts.Config{
 			RewardsCoordinatorAddress: config.RewardsCoordinatorAddress,
 		},
-		ethClient, logger,
+		ethClient,
+		logger,
 	)
 	if err != nil {
 		return eigenSdkUtils.WrapError("failed to create new reader from config", err)
@@ -197,14 +199,19 @@ func handleRewardsOutput(
 	rewards map[gethcommon.Address]*big.Int,
 	msg string,
 ) error {
+	client, err := ethclient.Dial(cfg.RPCUrl)
+	if err != nil {
+		return err
+	}
+	allRewards := make(allRewardsJson, 0)
+	for address, amount := range rewards {
+		allRewards = append(allRewards, rewardsJson{
+			TokenName: erc20.GetTokenName(address, client),
+			Address:   address.Hex(),
+			Amount:    amount.String(),
+		})
+	}
 	if cfg.OutputType == "json" {
-		allRewards := make(allRewardsJson, 0)
-		for address, amount := range rewards {
-			allRewards = append(allRewards, rewardsJson{
-				Address: address.Hex(),
-				Amount:  amount.String(),
-			})
-		}
 		out, err := json.MarshalIndent(allRewards, "", "  ")
 		if err != nil {
 			return err
@@ -223,18 +230,19 @@ func handleRewardsOutput(
 		}
 		fmt.Println()
 		fmt.Println(strings.Repeat("-", 30), msg, strings.Repeat("-", 30))
-		printRewards(rewards)
+		printRewards(allRewards)
 	}
 	return nil
 }
 
-func printRewards(rewards map[gethcommon.Address]*big.Int) {
+func printRewards(allRewards allRewardsJson) {
 	// Define column headers and widths
 	headers := []string{
+		"Token Name",
 		"Token Address",
 		"Amount (Wei)",
 	}
-	widths := []int{46, 30}
+	widths := []int{20, 46, 30}
 
 	// print dashes
 	for _, width := range widths {
@@ -255,10 +263,11 @@ func printRewards(rewards map[gethcommon.Address]*big.Int) {
 	fmt.Println("|")
 
 	// Print data rows
-	for address, amount := range rewards {
-		fmt.Printf("| %-*s| %-*s|\n",
-			widths[0], address.Hex(),
-			widths[1], amount.String(),
+	for _, rewards := range allRewards {
+		fmt.Printf("| %-*s| %-*s| %-*s|\n",
+			widths[0], rewards.TokenName,
+			widths[1], rewards.Address,
+			widths[2], rewards.Amount,
 		)
 	}
 
