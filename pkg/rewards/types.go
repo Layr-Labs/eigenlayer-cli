@@ -8,8 +8,9 @@ import (
 )
 
 type rewardsJson struct {
-	Address string `json:"tokenAddress"`
-	Amount  string `json:"amount"`
+	Address   string `json:"tokenAddress"`
+	TokenName string `json:"tokenName"`
+	Amount    string `json:"amount"`
 }
 
 type allRewardsJson []rewardsJson
