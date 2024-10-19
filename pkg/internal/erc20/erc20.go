@@ -33,7 +33,7 @@ func (c *Caller) Name(opts *bind.CallOpts) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return out[0].(string), err
+	return out[0].(string), nil
 }
 
 // NewERC20 creates a new instance of ERC20, bound to a specific deployed contract.
