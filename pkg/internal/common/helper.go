@@ -2,6 +2,7 @@ package common
 
 import (
 	"context"
+	"crypto/ecdsa"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -11,6 +12,8 @@ import (
 	"os/user"
 	"strings"
 	"time"
+
+	"github.com/ethereum/go-ethereum/accounts/keystore"
 
 	"github.com/urfave/cli/v2"
 
@@ -123,6 +126,7 @@ func getWallet(
 		if err != nil {
 			return nil, common.Address{}, err
 		}
+
 		return keyWallet, sender, nil
 	} else if cfg.SignerType == types.FireBlocksSigner {
 		var secretKey string
@@ -472,4 +476,57 @@ func GetNoSendTxOpts(from common.Address) *bind.TransactOpts {
 
 func Trim0x(s string) string {
 	return strings.TrimPrefix(s, "0x")
+}
+
+func Sign(digest []byte, cfg types.SignerConfig, p utils.Prompter) ([]byte, error) {
+	//var keyWallet wallet.Wallet
+	var privateKey *ecdsa.PrivateKey
+
+	if cfg.SignerType == types.LocalKeystoreSigner {
+		// Check if input is available in the pipe and read the password from it
+		ecdsaPassword, readFromPipe := utils.GetStdInPassword()
+		var err error
+		if !readFromPipe {
+			ecdsaPassword, err = p.InputHiddenString("Enter password to decrypt the ecdsa private key:", "",
+				func(password string) error {
+					return nil
+				},
+			)
+			if err != nil {
+				fmt.Println("Error while reading ecdsa key password")
+				return nil, err
+			}
+		}
+
+		jsonContent, err := os.ReadFile(cfg.PrivateKeyStorePath)
+		if err != nil {
+			return nil, err
+		}
+		key, err := keystore.DecryptKey(jsonContent, ecdsaPassword)
+		if err != nil {
+			return nil, err
+		}
+
+		privateKey = key.PrivateKey
+	} else if cfg.SignerType == types.FireBlocksSigner {
+		return nil, errors.New("FireBlocksSigner is not implemented")
+	} else if cfg.SignerType == types.Web3Signer {
+		return nil, errors.New("Web3Signer is not implemented")
+	} else if cfg.SignerType == types.PrivateKeySigner {
+		privateKey = cfg.PrivateKey
+	} else {
+		return nil, errors.New("signer is not implemented")
+	}
+
+	signed, err := crypto.Sign(digest, privateKey)
+	if err != nil {
+		return nil, err
+	}
+
+	// account for EIP-155 by incrementing V if necessary
+	if signed[crypto.RecoveryIDOffset] < 27 {
+		signed[crypto.RecoveryIDOffset] += 27
+	}
+
+	return signed, nil
 }
