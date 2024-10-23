@@ -128,7 +128,7 @@ func DelegateToCmd(p utils.Prompter) *cli.Command {
 			fmt.Println("--------------------------- delegateTo for the staker ---------------------------")
 			fmt.Println()
 			fmt.Printf("operator: %s\n", operator)
-			fmt.Printf("approverSignatureAndExpiry.signature: %x\n", signed)
+			fmt.Printf("approverSignatureAndExpiry.signature: 0x%x\n", signed)
 			fmt.Printf("approverSignatureAndExpiry.expiry: %d\n", expiry)
 			fmt.Printf("approverSalt: 0x%x\n", salt)
 			fmt.Println()
