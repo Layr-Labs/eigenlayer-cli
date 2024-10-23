@@ -479,11 +479,9 @@ func Trim0x(s string) string {
 }
 
 func Sign(digest []byte, cfg types.SignerConfig, p utils.Prompter) ([]byte, error) {
-	//var keyWallet wallet.Wallet
 	var privateKey *ecdsa.PrivateKey
 
 	if cfg.SignerType == types.LocalKeystoreSigner {
-		// Check if input is available in the pipe and read the password from it
 		ecdsaPassword, readFromPipe := utils.GetStdInPassword()
 		var err error
 		if !readFromPipe {
