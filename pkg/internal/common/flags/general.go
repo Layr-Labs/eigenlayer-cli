@@ -85,7 +85,7 @@ var (
 
 	ExpiryFlag = cli.Int64Flag{
 		Name:    "expiry",
-		Aliases: []string{"e"},
+		Aliases: []string{"exp"},
 		Usage:   "expiry in seconds",
 		EnvVars: []string{"EXPIRY"},
 		Value:   3600,
