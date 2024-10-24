@@ -3,6 +3,7 @@ package operator
 import (
 	"context"
 	"crypto/rand"
+	"encoding/hex"
 	"fmt"
 	"math/big"
 	"time"
@@ -24,19 +25,22 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-func DelegateToCmd(p utils.Prompter) *cli.Command {
-	delegateToCmd := &cli.Command{
-		Name:      "delegate-to",
-		Usage:     "Generate smart contract details for delegateTo method",
-		UsageText: "delegate-to <configuration-file> <staker-address>",
+func GetApprovalCmd(p utils.Prompter) *cli.Command {
+	getApprovalCmd := &cli.Command{
+		Name:      "get-approval",
+		Usage:     "Generate the smart contract approval details for the delegateTo method",
+		UsageText: "get-approval <configuration-file> <staker-address>",
 		Description: `
-		Generate smart contract details for delegateTo method.
+		Generate the smart contract approval details for the delegateTo method.
 
-		It expects the same configuration yaml file as argument to register command and staker address
+		It expects the same configuration yaml file as an argument to the register command, along with the staker address.
+
+		Use the --expiry flag to override the default expiration of 3600 seconds.
 		`,
 		After: telemetry.AfterRunAction(),
 		Flags: []cli.Flag{
 			&flags.VerboseFlag,
+			&flags.ExpiryFlag,
 		},
 		Action: func(cCtx *cli.Context) error {
 			logger := common.GetLogger(cCtx)
@@ -44,6 +48,8 @@ func DelegateToCmd(p utils.Prompter) *cli.Command {
 			if args.Len() != 2 {
 				return fmt.Errorf("%w: accepts 2 arg, received %d", keys.ErrInvalidNumberOfArgs, args.Len())
 			}
+
+			expirySeconds := cCtx.Int64(flags.ExpiryFlag.Name)
 
 			configurationFilePath := args.Get(0)
 			stakerAddress := args.Get(1)
@@ -102,15 +108,15 @@ func DelegateToCmd(p utils.Prompter) *cli.Command {
 				return err
 			}
 
-			var staker gethcommon.Address = gethcommon.HexToAddress(stakerAddress)
-			var operator gethcommon.Address = gethcommon.HexToAddress(operatorCfg.Operator.Address)
-			var delegationApprover gethcommon.Address = gethcommon.HexToAddress(operatorCfg.Operator.DelegationApproverAddress)
+			var staker = gethcommon.HexToAddress(stakerAddress)
+			var operator = gethcommon.HexToAddress(operatorCfg.Operator.Address)
+			var delegationApprover = gethcommon.HexToAddress(operatorCfg.Operator.DelegationApproverAddress)
 			salt := make([]byte, 32)
 
 			if _, err := rand.Read(salt); err != nil {
 				return err
 			}
-			var expiry *big.Int = new(big.Int).SetInt64(time.Now().Unix() + 3600)
+			var expiry = new(big.Int).SetInt64(time.Now().Unix() + expirySeconds)
 
 			callOpts := &bind.CallOpts{Context: context.Background()}
 
@@ -128,19 +134,19 @@ func DelegateToCmd(p utils.Prompter) *cli.Command {
 			fmt.Println("--------------------------- delegateTo for the staker ---------------------------")
 			fmt.Println()
 			fmt.Printf("operator: %s\n", operator)
-			fmt.Printf("approverSignatureAndExpiry.signature: 0x%x\n", signed)
+			fmt.Printf("approverSignatureAndExpiry.signature: %s\n", eigenSdkUtils.Add0x(hex.EncodeToString(signed)))
 			fmt.Printf("approverSignatureAndExpiry.expiry: %d\n", expiry)
-			fmt.Printf("approverSalt: 0x%x\n", salt)
+			fmt.Printf("approverSalt: %s\n", eigenSdkUtils.Add0x(hex.EncodeToString(salt)))
 			fmt.Println()
 			fmt.Println("---------------------------  CalculateDelegationApprovalDigestHash details ---------------------------")
 			fmt.Println()
 			fmt.Printf("staker: %s\n", staker)
 			fmt.Printf("operator: %s\n", operator)
 			fmt.Printf("_delegationApprover: %s\n", delegationApprover)
-			fmt.Printf("approverSalt: 0x%x\n", salt)
+			fmt.Printf("approverSalt: %s\n", eigenSdkUtils.Add0x(hex.EncodeToString(salt)))
 			fmt.Printf("expiry: %d\n", expiry)
 			fmt.Println()
-			fmt.Printf("result: 0x%x\n", hash)
+			fmt.Printf("result: %s\n", eigenSdkUtils.Add0x(hex.EncodeToString(hash[:])))
 			fmt.Println()
 			fmt.Println("------------------------------------------------------------------------")
 			fmt.Println()
@@ -148,5 +154,5 @@ func DelegateToCmd(p utils.Prompter) *cli.Command {
 			return nil
 		},
 	}
-	return delegateToCmd
+	return getApprovalCmd
 }

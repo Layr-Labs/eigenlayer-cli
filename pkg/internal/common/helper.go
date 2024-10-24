@@ -13,8 +13,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ethereum/go-ethereum/accounts/keystore"
-
 	"github.com/urfave/cli/v2"
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
@@ -30,6 +28,7 @@ import (
 	eigenSdkUtils "github.com/Layr-Labs/eigensdk-go/utils"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/ethereum/go-ethereum/common"
 	gethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"

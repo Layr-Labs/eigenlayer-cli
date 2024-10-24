@@ -75,4 +75,12 @@ var (
 		Usage:   "Enable verbose logging",
 		EnvVars: []string{"VERBOSE"},
 	}
+
+	ExpiryFlag = cli.Int64Flag{
+		Name:    "expiry",
+		Aliases: []string{"e"},
+		Usage:   "expiry in seconds",
+		EnvVars: []string{"EXPIRY"},
+		Value:   3600,
+	}
 )
