@@ -82,4 +82,12 @@ var (
 		Usage:   "Suppress unnecessary output",
 		EnvVars: []string{"SILENT"},
 	}
+
+	ExpiryFlag = cli.Int64Flag{
+		Name:    "expiry",
+		Aliases: []string{"e"},
+		Usage:   "expiry in seconds",
+		EnvVars: []string{"EXPIRY"},
+		Value:   3600,
+	}
 )
