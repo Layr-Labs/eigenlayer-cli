@@ -133,7 +133,10 @@ Use the --expiry flag to override the default expiration of 3600 seconds.
 
 			signed, err := common.Sign(hash[:], approvalConfig.SignerConfig, p)
 			if err != nil {
-				fmt.Println("unable to sign with the provided signer config. please sign the hash manually", err)
+				fmt.Println(
+					"unable to sign with the provided signer config. please sign the hash manually with approvers key",
+					err,
+				)
 				fmt.Println(
 					"---------------------------  CalculateDelegationApprovalDigestHash details ---------------------------",
 				)
