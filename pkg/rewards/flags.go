@@ -21,7 +21,7 @@ var (
 	ClaimTimestampFlag = cli.StringFlag{
 		Name:    "claim-timestamp",
 		Aliases: []string{"c"},
-		Usage:   "Specify the timestamp. Only 'latest' and 'latest_active' are supported. 'latest' can be an inactive root which you can't claim yet.",
+		Usage:   "Specify the timestamp. Only 'latest' and 'latest_active' are supported. 'latest' can be a from an inactive root which you can't claim yet.",
 		Value:   "latest_active",
 		EnvVars: []string{"CLAIM_TIMESTAMP"},
 	}

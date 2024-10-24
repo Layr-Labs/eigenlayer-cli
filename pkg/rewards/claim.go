@@ -32,7 +32,7 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 
 	"github.com/urfave/cli/v2"
-	"github.com/wk8/go-ordered-map/v2"
+	orderedmap "github.com/wk8/go-ordered-map/v2"
 )
 
 type elChainReader interface {
@@ -74,6 +74,7 @@ func getClaimFlags() []cli.Flag {
 		&ClaimTimestampFlag,
 		&ProofStoreBaseURLFlag,
 		&flags.VerboseFlag,
+		&flags.SilentFlag,
 	}
 
 	allFlags := append(baseFlags, flags.GetSignerFlags()...)
@@ -229,7 +230,7 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 			solidityClaim := claimgen.FormatProofForSolidity(accounts.Root(), claim)
 			jsonData, err := json.MarshalIndent(solidityClaim, "", "  ")
 			if err != nil {
-				fmt.Println("Error marshaling JSON:", err)
+				logger.Error("Error marshaling JSON:", err)
 				return err
 			}
 			if !common.IsEmptyString(config.Output) {
@@ -249,15 +250,22 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 				fmt.Println()
 			}
 			solidityClaim := claimgen.FormatProofForSolidity(accounts.Root(), claim)
-			fmt.Println("------- Claim generated -------")
+			if !config.IsSilent {
+				fmt.Println("------- Claim generated -------")
+			}
 			common.PrettyPrintStruct(*solidityClaim)
-			fmt.Println("-------------------------------")
-			fmt.Println("To write to a file, use the --output flag")
+			if !config.IsSilent {
+				fmt.Println("-------------------------------")
+				fmt.Println("To write to a file, use the --output flag")
+			}
 		}
-		txFeeDetails := common.GetTxFeeDetails(unsignedTx)
-		fmt.Println()
-		txFeeDetails.Print()
-		fmt.Println("To broadcast the claim, use the --broadcast flag")
+		if !config.IsSilent {
+			txFeeDetails := common.GetTxFeeDetails(unsignedTx)
+			fmt.Println()
+			txFeeDetails.Print()
+
+			fmt.Println("To broadcast the claim, use the --broadcast flag")
+		}
 	}
 
 	return nil
@@ -269,7 +277,7 @@ func getClaimDistributionRoot(
 	elReader elChainReader,
 	logger logging.Logger,
 ) (string, uint32, error) {
-	if claimTimestamp == "latest" {
+	if claimTimestamp == LatestTimestamp {
 		latestSubmittedTimestamp, err := elReader.CurrRewardsCalculationEndTimestamp(&bind.CallOpts{Context: ctx})
 		if err != nil {
 			return "", 0, eigenSdkUtils.WrapError("failed to get latest submitted timestamp", err)
@@ -284,12 +292,11 @@ func getClaimDistributionRoot(
 		rootIndex := uint32(rootCount.Uint64() - 1)
 		logger.Debugf("Latest active rewards snapshot timestamp: %s, root index: %d", claimDate, rootIndex)
 		return claimDate, rootIndex, nil
-	} else if claimTimestamp == "latest_active" {
+	} else if claimTimestamp == LatestActiveTimestamp {
 		latestClaimableRoot, err := elReader.GetCurrentClaimableDistributionRoot(&bind.CallOpts{Context: ctx})
 		if err != nil {
 			return "", 0, eigenSdkUtils.WrapError("failed to get latest claimable root", err)
 		}
-
 		rootIndex, err := elReader.GetRootIndexFromHash(&bind.CallOpts{Context: ctx}, latestClaimableRoot.Root)
 		if err != nil {
 			return "", 0, eigenSdkUtils.WrapError("failed to get root index from hash", err)
@@ -366,6 +373,7 @@ func readAndValidateClaimConfig(cCtx *cli.Context, logger logging.Logger) (*Clai
 	splitTokenAddresses := strings.Split(tokenAddresses, ",")
 	validTokenAddresses := getValidHexAddresses(splitTokenAddresses)
 	rewardsCoordinatorAddress := cCtx.String(RewardsCoordinatorAddressFlag.Name)
+	isSilent := cCtx.Bool(flags.SilentFlag.Name)
 
 	var err error
 	if common.IsEmptyString(rewardsCoordinatorAddress) {
@@ -449,6 +457,7 @@ func readAndValidateClaimConfig(cCtx *cli.Context, logger logging.Logger) (*Clai
 		SignerConfig:              signerConfig,
 		ClaimTimestamp:            claimTimestamp,
 		ClaimerAddress:            claimerAddress,
+		IsSilent:                  isSilent,
 	}, nil
 }
 

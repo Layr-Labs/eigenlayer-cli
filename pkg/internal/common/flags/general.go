@@ -76,6 +76,13 @@ var (
 		EnvVars: []string{"VERBOSE"},
 	}
 
+	SilentFlag = cli.BoolFlag{
+		Name:    "silent",
+		Aliases: []string{"s"},
+		Usage:   "Suppress unnecessary output",
+		EnvVars: []string{"SILENT"},
+	}
+
 	ExpiryFlag = cli.Int64Flag{
 		Name:    "expiry",
 		Aliases: []string{"e"},

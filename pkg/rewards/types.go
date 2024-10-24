@@ -8,8 +8,9 @@ import (
 )
 
 type rewardsJson struct {
-	Address string `json:"tokenAddress"`
-	Amount  string `json:"amount"`
+	Address   string `json:"tokenAddress"`
+	TokenName string `json:"tokenName"`
+	Amount    string `json:"amount"`
 }
 
 type allRewardsJson []rewardsJson
@@ -30,6 +31,7 @@ type ClaimConfig struct {
 	ProofStoreBaseURL         string
 	Environment               string
 	SignerConfig              *types.SignerConfig
+	IsSilent                  bool
 }
 
 type SetClaimerConfig struct {
@@ -56,5 +58,6 @@ type ShowConfig struct {
 	Output                    string
 	OutputType                string
 	ProofStoreBaseURL         string
+	ClaimTimestamp            string
 	RewardsCoordinatorAddress gethcommon.Address
 }
