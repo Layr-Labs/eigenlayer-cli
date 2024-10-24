@@ -120,7 +120,14 @@ func GetApprovalCmd(p utils.Prompter) *cli.Command {
 
 			callOpts := &bind.CallOpts{Context: context.Background()}
 
-			hash, err := reader.CalculateDelegationApprovalDigestHash(callOpts, staker, operator, delegationApprover, [32]byte(salt), expiry)
+			hash, err := reader.CalculateDelegationApprovalDigestHash(
+				callOpts,
+				staker,
+				operator,
+				delegationApprover,
+				[32]byte(salt),
+				expiry,
+			)
 			if err != nil {
 				return err
 			}
@@ -138,7 +145,9 @@ func GetApprovalCmd(p utils.Prompter) *cli.Command {
 			fmt.Printf("approverSignatureAndExpiry.expiry: %d\n", expiry)
 			fmt.Printf("approverSalt: %s\n", eigenSdkUtils.Add0x(hex.EncodeToString(salt)))
 			fmt.Println()
-			fmt.Println("---------------------------  CalculateDelegationApprovalDigestHash details ---------------------------")
+			fmt.Println(
+				"---------------------------  CalculateDelegationApprovalDigestHash details ---------------------------",
+			)
 			fmt.Println()
 			fmt.Printf("staker: %s\n", staker)
 			fmt.Printf("operator: %s\n", operator)
