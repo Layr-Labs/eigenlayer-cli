@@ -6,7 +6,6 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	gethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/assert"
 )
@@ -88,7 +87,7 @@ type FakeELReader struct {
 }
 
 func (f *FakeELReader) GetCumulativeClaimed(
-	opts *bind.CallOpts,
+	ctx context.Context,
 	earnerAddress, tokenAddress gethcommon.Address,
 ) (*big.Int, error) {
 	if f.shouldError {
