@@ -79,7 +79,7 @@ func (f *fakeELReader) GetRootIndexFromHash(opts *bind.CallOpts, hash [32]byte) 
 }
 
 func (f *fakeELReader) GetCurrentClaimableDistributionRoot(
-	opts *bind.CallOpts,
+	ctx context.Context,
 ) (rewardscoordinator.IRewardsCoordinatorDistributionRoot, error) {
 	// iterate from end to start since we want the latest active root
 	// and the roots are sorted in ascending order of activation time

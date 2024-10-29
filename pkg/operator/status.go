@@ -13,7 +13,6 @@ import (
 	elContracts "github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
 	eigensdkTypes "github.com/Layr-Labs/eigensdk-go/types"
 
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	gethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 
@@ -97,9 +96,7 @@ func StatusCmd(p utils.Prompter) *cli.Command {
 				return err
 			}
 
-			callOpts := &bind.CallOpts{Context: context.Background()}
-
-			status, err := reader.IsOperatorRegistered(callOpts, operatorCfg.Operator)
+			status, err := reader.IsOperatorRegistered(context.Background(), operatorCfg.Operator)
 			if err != nil {
 				return err
 			}
@@ -107,7 +104,7 @@ func StatusCmd(p utils.Prompter) *cli.Command {
 			if status {
 				fmt.Println()
 				fmt.Printf("%s Operator is registered on EigenLayer\n", utils.EmojiCheckMark)
-				operatorDetails, err := reader.GetOperatorDetails(callOpts, operatorCfg.Operator)
+				operatorDetails, err := reader.GetOperatorDetails(context.Background(), operatorCfg.Operator)
 				if err != nil {
 					return err
 				}
