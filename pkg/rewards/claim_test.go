@@ -19,7 +19,6 @@ import (
 	rewardscoordinator "github.com/Layr-Labs/eigensdk-go/contracts/bindings/IRewardsCoordinator"
 	"github.com/Layr-Labs/eigensdk-go/logging"
 
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 
 	"github.com/stretchr/testify/assert"
@@ -65,11 +64,11 @@ func newFakeELReader(now time.Time) *fakeELReader {
 	}
 }
 
-func (f *fakeELReader) GetDistributionRootsLength(opts *bind.CallOpts) (*big.Int, error) {
+func (f *fakeELReader) GetDistributionRootsLength(ctx context.Context) (*big.Int, error) {
 	return big.NewInt(int64(len(f.roots))), nil
 }
 
-func (f *fakeELReader) GetRootIndexFromHash(opts *bind.CallOpts, hash [32]byte) (uint32, error) {
+func (f *fakeELReader) GetRootIndexFromHash(ctx context.Context, hash [32]byte) (uint32, error) {
 	for i, root := range f.roots {
 		if root.Root == hash {
 			return uint32(i), nil
@@ -92,8 +91,8 @@ func (f *fakeELReader) GetCurrentClaimableDistributionRoot(
 	return rewardscoordinator.IRewardsCoordinatorDistributionRoot{}, errors.New("no active distribution root found")
 }
 
-func (f *fakeELReader) CurrRewardsCalculationEndTimestamp(opts *bind.CallOpts) (uint32, error) {
-	rootLen, err := f.GetDistributionRootsLength(opts)
+func (f *fakeELReader) CurrRewardsCalculationEndTimestamp(ctx context.Context) (uint32, error) {
+	rootLen, err := f.GetDistributionRootsLength(ctx)
 	if err != nil {
 		return 0, err
 	}
