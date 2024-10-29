@@ -22,7 +22,6 @@ import (
 	"github.com/Layr-Labs/eigensdk-go/logging"
 	eigenSdkUtils "github.com/Layr-Labs/eigensdk-go/utils"
 
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	gethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 
@@ -32,7 +31,7 @@ import (
 type ClaimType string
 
 type ELReader interface {
-	GetCumulativeClaimed(opts *bind.CallOpts, earnerAddress, tokenAddress gethcommon.Address) (*big.Int, error)
+	GetCumulativeClaimed(ctx context.Context, earnerAddress, tokenAddress gethcommon.Address) (*big.Int, error)
 }
 
 const (
@@ -170,7 +169,7 @@ func getClaimedRewards(
 ) (map[gethcommon.Address]*big.Int, error) {
 	claimedRewards := make(map[gethcommon.Address]*big.Int)
 	for address := range allRewards {
-		claimed, err := elReader.GetCumulativeClaimed(&bind.CallOpts{Context: ctx}, earnerAddress, address)
+		claimed, err := elReader.GetCumulativeClaimed(ctx, earnerAddress, address)
 		if err != nil {
 			return nil, err
 		}

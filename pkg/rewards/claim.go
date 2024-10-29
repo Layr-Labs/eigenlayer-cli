@@ -27,7 +27,6 @@ import (
 	"github.com/Layr-Labs/eigensdk-go/logging"
 	eigenSdkUtils "github.com/Layr-Labs/eigensdk-go/utils"
 
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	gethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 
@@ -36,12 +35,12 @@ import (
 )
 
 type elChainReader interface {
-	GetDistributionRootsLength(opts *bind.CallOpts) (*big.Int, error)
-	GetRootIndexFromHash(opts *bind.CallOpts, hash [32]byte) (uint32, error)
+	GetDistributionRootsLength(ctx context.Context) (*big.Int, error)
+	GetRootIndexFromHash(ctx context.Context, hash [32]byte) (uint32, error)
 	GetCurrentClaimableDistributionRoot(
-		opts *bind.CallOpts,
+		ctx context.Context,
 	) (rewardscoordinator.IRewardsCoordinatorDistributionRoot, error)
-	CurrRewardsCalculationEndTimestamp(opts *bind.CallOpts) (uint32, error)
+	CurrRewardsCalculationEndTimestamp(ctx context.Context) (uint32, error)
 }
 
 func ClaimCmd(p utils.Prompter) *cli.Command {
@@ -153,7 +152,7 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 	}
 
 	logger.Info("Validating claim proof...")
-	ok, err := elReader.CheckClaim(&bind.CallOpts{Context: ctx}, elClaim)
+	ok, err := elReader.CheckClaim(ctx, elClaim)
 	if err != nil {
 		return err
 	}
@@ -278,13 +277,13 @@ func getClaimDistributionRoot(
 	logger logging.Logger,
 ) (string, uint32, error) {
 	if claimTimestamp == LatestTimestamp {
-		latestSubmittedTimestamp, err := elReader.CurrRewardsCalculationEndTimestamp(&bind.CallOpts{Context: ctx})
+		latestSubmittedTimestamp, err := elReader.CurrRewardsCalculationEndTimestamp(ctx)
 		if err != nil {
 			return "", 0, eigenSdkUtils.WrapError("failed to get latest submitted timestamp", err)
 		}
 		claimDate := time.Unix(int64(latestSubmittedTimestamp), 0).UTC().Format(time.DateOnly)
 
-		rootCount, err := elReader.GetDistributionRootsLength(&bind.CallOpts{Context: ctx})
+		rootCount, err := elReader.GetDistributionRootsLength(ctx)
 		if err != nil {
 			return "", 0, eigenSdkUtils.WrapError("failed to get number of published roots", err)
 		}
@@ -293,11 +292,11 @@ func getClaimDistributionRoot(
 		logger.Debugf("Latest active rewards snapshot timestamp: %s, root index: %d", claimDate, rootIndex)
 		return claimDate, rootIndex, nil
 	} else if claimTimestamp == LatestActiveTimestamp {
-		latestClaimableRoot, err := elReader.GetCurrentClaimableDistributionRoot(&bind.CallOpts{Context: ctx})
+		latestClaimableRoot, err := elReader.GetCurrentClaimableDistributionRoot(ctx)
 		if err != nil {
 			return "", 0, eigenSdkUtils.WrapError("failed to get latest claimable root", err)
 		}
-		rootIndex, err := elReader.GetRootIndexFromHash(&bind.CallOpts{Context: ctx}, latestClaimableRoot.Root)
+		rootIndex, err := elReader.GetRootIndexFromHash(ctx, latestClaimableRoot.Root)
 		if err != nil {
 			return "", 0, eigenSdkUtils.WrapError("failed to get root index from hash", err)
 		}

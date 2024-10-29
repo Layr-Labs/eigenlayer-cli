@@ -20,7 +20,6 @@ import (
 	elContracts "github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
 	eigenSdkUtils "github.com/Layr-Labs/eigensdk-go/utils"
 
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	gethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -117,10 +116,8 @@ Use the --expiry flag to override the default expiration of 3600 seconds.
 			}
 			expiry := new(big.Int).SetInt64(time.Now().Unix() + approvalConfig.Expiry)
 
-			callOpts := &bind.CallOpts{Context: context.Background()}
-
 			hash, err := reader.CalculateDelegationApprovalDigestHash(
-				callOpts,
+				context.Background(),
 				staker,
 				operator,
 				delegationApprover,
