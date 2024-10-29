@@ -194,7 +194,12 @@ func getApprovalConfig(cCtx *cli.Context) (*ApprovalConfig, error) {
 	privateKeyHex := cCtx.String(flags.EcdsaPrivateKeyFlag.Name)
 	keystoreFilePath := cCtx.String(flags.PathToKeyStoreFlag.Name)
 	if privateKeyHex == "" && keystoreFilePath == "" {
-		return nil, fmt.Errorf("either private key or keystore file path is required. other signer not supported")
+		return &ApprovalConfig{
+			OperatorConfigFilePath: configurationFilePath,
+			StakerAddress:          stakerAddress,
+			Expiry:                 expirySeconds,
+			SignerConfig:           types.SignerConfig{},
+		}, nil
 	}
 
 	if privateKeyHex != "" {
