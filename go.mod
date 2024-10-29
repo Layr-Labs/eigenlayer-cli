@@ -7,7 +7,7 @@ require (
 	github.com/Layr-Labs/eigenlayer-contracts v0.3.2-mainnet-rewards
 	github.com/Layr-Labs/eigenlayer-rewards-proofs v0.2.12
 	github.com/Layr-Labs/eigenpod-proofs-generation v0.0.14-stable.0.20240730152248-5c11a259293e
-	github.com/Layr-Labs/eigensdk-go v0.1.13-0.20240927005004-ed4b05c87610
+	github.com/Layr-Labs/eigensdk-go v0.1.13-0.20241023200243-565bb4438918
 	github.com/blang/semver/v4 v4.0.0
 	github.com/consensys/gnark-crypto v0.12.1
 	github.com/ethereum/go-ethereum v1.14.5
@@ -19,6 +19,7 @@ require (
 	github.com/tyler-smith/go-bip39 v1.1.0
 	github.com/urfave/cli/v2 v2.27.2
 	github.com/wagslane/go-password-validator v0.3.0
+	github.com/wk8/go-ordered-map/v2 v2.1.8
 	go.uber.org/mock v0.4.0
 	gopkg.in/yaml.v2 v2.4.0
 	gopkg.in/yaml.v3 v3.0.1
@@ -100,7 +101,6 @@ require (
 	github.com/tklauser/go-sysconf v0.3.12 // indirect
 	github.com/tklauser/numcpus v0.6.1 // indirect
 	github.com/wealdtech/go-merkletree/v2 v2.5.2-0.20240302222400-69219c450662 // indirect
-	github.com/wk8/go-ordered-map/v2 v2.1.8 // indirect
 	github.com/xrash/smetrics v0.0.0-20240312152122-5f08fbb34913 // indirect
 	go.opentelemetry.io/otel v1.24.0 // indirect
 	go.opentelemetry.io/otel/metric v1.24.0 // indirect
