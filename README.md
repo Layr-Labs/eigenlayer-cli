@@ -2,7 +2,7 @@
 ![Linter](https://github.com/Layr-Labs/eigenlayer-cli/actions/workflows/golangci-lint.yml/badge.svg)
 ![Build](https://github.com/Layr-Labs/eigenlayer-cli/actions/workflows/build.yml/badge.svg)
 
-# EigenLayer CLI
+# EigenLayer CLI 
 
 EigenLayer CLI is used to interact with EigenLayer core contracts.
 
