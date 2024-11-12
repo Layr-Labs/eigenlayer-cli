@@ -80,6 +80,9 @@ func SetClaimer(cCtx *cli.Context, p utils.Prompter) error {
 
 		noSendTxOpts := common.GetNoSendTxOpts(config.EarnerAddress)
 		unsignedTx, err := contractBindings.RewardsCoordinator.SetClaimerFor(noSendTxOpts, config.ClaimerAddress)
+		if err != nil {
+			return eigenSdkUtils.WrapError("failed to create unsigned tx", err)
+		}
 
 		if config.OutputType == string(common.OutputType_Calldata) {
 			if err != nil {
