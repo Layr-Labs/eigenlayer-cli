@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"math/big"
 	"net/http"
+	"os"
 	"sort"
 	"strings"
 	"time"
@@ -15,6 +16,8 @@ import (
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
+	"github.com/wealdtech/go-merkletree/v2"
+	"gopkg.in/yaml.v2"
 
 	contractrewardscoordinator "github.com/Layr-Labs/eigenlayer-contracts/pkg/bindings/IRewardsCoordinator"
 
@@ -74,6 +77,7 @@ func getClaimFlags() []cli.Flag {
 		&ProofStoreBaseURLFlag,
 		&flags.VerboseFlag,
 		&flags.SilentFlag,
+		&flags.BatchClaimFile,
 	}
 
 	allFlags := append(baseFlags, flags.GetSignerFlags()...)
@@ -81,7 +85,7 @@ func getClaimFlags() []cli.Flag {
 	return allFlags
 }
 
-func Claim(cCtx *cli.Context, p utils.Prompter) error {
+func BatchClaim(cCtx *cli.Context, p utils.Prompter) error {
 	ctx := cCtx.Context
 	logger := common.GetLogger(cCtx)
 
@@ -113,29 +117,108 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 		http.DefaultClient,
 	)
 
-	claimDate, rootIndex, err := getClaimDistributionRoot(ctx, config.ClaimTimestamp, elReader, logger)
+	yamlFile, err := os.ReadFile(config.BatchClaimFile)
 	if err != nil {
-		return eigenSdkUtils.WrapError("failed to get claim distribution root", err)
+		return eigenSdkUtils.WrapError("failed to read YAML config file", err)
+	}
+
+	var claimConfigs []struct {
+		EarnerAddress  string   `yaml:"earner_address"`
+		TokenAddresses []string `yaml:"token_addresses"`
+	}
+
+	err = yaml.Unmarshal(yamlFile, &claimConfigs)
+	if err != nil {
+		return eigenSdkUtils.WrapError("failed to parse YAML config", err)
+	}
+
+	var elClaims []rewardscoordinator.IRewardsCoordinatorRewardsMerkleClaim
+
+	for _, claimConfig := range claimConfigs {
+		earnerAddr := gethcommon.HexToAddress(claimConfig.EarnerAddress)
+
+		var tokenAddrs []gethcommon.Address
+		for _, addr := range claimConfig.TokenAddresses {
+			tokenAddrs = append(tokenAddrs, gethcommon.HexToAddress(addr))
+		}
+
+		elClaim, _, _, err := claimHelper(config.ClaimTimestamp, ctx, elReader, logger, earnerAddr, df, tokenAddrs)
+
+		elClaims = append(elClaims, *elClaim)
+
+		if err != nil {
+			logger.Errorf("Failed to process claim for earner %s: %v", earnerAddr.String(), err)
+			continue
+		}
+	}
+
+	if config.Broadcast {
+		eLWriter, err := common.GetELWriter(
+			config.ClaimerAddress,
+			config.SignerConfig,
+			ethClient,
+			elcontracts.Config{
+				RewardsCoordinatorAddress: config.RewardsCoordinatorAddress,
+			},
+			p,
+			config.ChainID,
+			logger,
+		)
+
+		if err != nil {
+			return eigenSdkUtils.WrapError("failed to get EL writer", err)
+		}
+
+		logger.Infof("Broadcasting batch claim transaction...")
+		receipt, err := eLWriter.ProcessClaims(ctx, elClaims, config.RecipientAddress, true)
+		if err != nil {
+			return eigenSdkUtils.WrapError("failed to process claim", err)
+		}
+
+		logger.Infof("Claim transaction submitted successfully")
+		common.PrintTransactionInfo(receipt.TxHash.String(), config.ChainID)
+	} else {
+		return eigenSdkUtils.WrapError("Batch claim currently only supported with broadcast flag", err)
+	}
+	return nil
+}
+
+func claimHelper(
+	claimTimestamp string,
+	ctx context.Context,
+	elReader *elcontracts.ChainReader,
+	logger logging.Logger,
+	earnerAddress gethcommon.Address,
+	df *httpProofDataFetcher.HttpProofDataFetcher,
+	tokenAddresses []gethcommon.Address,
+) (*rewardscoordinator.IRewardsCoordinatorRewardsMerkleClaim, *contractrewardscoordinator.IRewardsCoordinatorRewardsMerkleClaim, *merkletree.MerkleTree, error) {
+	claimDate, rootIndex, err := getClaimDistributionRoot(ctx, claimTimestamp, elReader, logger)
+	if err != nil {
+		return nil, nil, nil, eigenSdkUtils.WrapError("failed to get claim distribution root", err)
 	}
 
 	proofData, err := df.FetchClaimAmountsForDate(ctx, claimDate)
 	if err != nil {
-		return eigenSdkUtils.WrapError("failed to fetch claim amounts for date", err)
+		return nil, nil, nil, eigenSdkUtils.WrapError("failed to fetch claim amounts for date", err)
 	}
 
-	claimableTokens, present := proofData.Distribution.GetTokensForEarner(config.EarnerAddress)
+	claimableTokens, present := proofData.Distribution.GetTokensForEarner(earnerAddress)
 	if !present {
-		return errors.New("no tokens claimable by earner")
+		return nil, nil, nil, errors.New("no tokens claimable by earner")
 	}
 
 	cg := claimgen.NewClaimgen(proofData.Distribution)
 	accounts, claim, err := cg.GenerateClaimProofForEarner(
-		config.EarnerAddress,
-		getTokensToClaim(claimableTokens, config.TokenAddresses),
+		earnerAddress,
+		getTokensToClaim(claimableTokens, tokenAddresses),
 		rootIndex,
 	)
 	if err != nil {
-		return eigenSdkUtils.WrapError("failed to generate claim proof for earner", err)
+		return nil, nil, nil, eigenSdkUtils.WrapError("failed to generate claim proof for earner", err)
+	}
+
+	if err != nil {
+		return nil, nil, nil, eigenSdkUtils.WrapError("failed to generate claim proof for earner", err)
 	}
 
 	elClaim := rewardscoordinator.IRewardsCoordinatorRewardsMerkleClaim{
@@ -154,12 +237,58 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 	logger.Info("Validating claim proof...")
 	ok, err := elReader.CheckClaim(ctx, elClaim)
 	if err != nil {
-		return err
+		return nil, nil, nil, err
 	}
 	if !ok {
-		return errors.New("failed to validate claim")
+		return nil, nil, nil, errors.New("failed to validate claim")
 	}
 	logger.Info("Claim proof validated successfully")
+
+	return &elClaim, claim, accounts, nil
+}
+
+func Claim(cCtx *cli.Context, p utils.Prompter) error {
+	ctx := cCtx.Context
+	logger := common.GetLogger(cCtx)
+
+	config, err := readAndValidateClaimConfig(cCtx, logger)
+	if err != nil {
+		return eigenSdkUtils.WrapError("failed to read and validate claim config", err)
+	}
+
+	if config.BatchClaimFile != "" {
+		return BatchClaim(cCtx, p)
+	}
+
+	cCtx.App.Metadata["network"] = config.ChainID.String()
+
+	ethClient, err := ethclient.Dial(config.RPCUrl)
+	if err != nil {
+		return eigenSdkUtils.WrapError("failed to create new eth client", err)
+	}
+
+	elReader, err := elcontracts.NewReaderFromConfig(
+		elcontracts.Config{
+			RewardsCoordinatorAddress: config.RewardsCoordinatorAddress,
+		},
+		ethClient, logger,
+	)
+	if err != nil {
+		return eigenSdkUtils.WrapError("failed to create new reader from config", err)
+	}
+
+	df := httpProofDataFetcher.NewHttpProofDataFetcher(
+		config.ProofStoreBaseURL,
+		config.Environment,
+		config.Network,
+		http.DefaultClient,
+	)
+
+	elClaim, claim, accounts, err := claimHelper(config.ClaimTimestamp, ctx, elReader, logger, config.EarnerAddress, df, config.TokenAddresses)
+
+	if err != nil {
+		return err
+	}
 
 	if config.Broadcast {
 		eLWriter, err := common.GetELWriter(
@@ -179,7 +308,7 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 		}
 
 		logger.Infof("Broadcasting claim transaction...")
-		receipt, err := eLWriter.ProcessClaim(ctx, elClaim, config.RecipientAddress, true)
+		receipt, err := eLWriter.ProcessClaim(ctx, *elClaim, config.RecipientAddress, true)
 		if err != nil {
 			return eigenSdkUtils.WrapError("failed to process claim", err)
 		}
@@ -208,7 +337,7 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 			noSendTxOpts.GasLimit = 150_000
 		}
 
-		unsignedTx, err := contractBindings.RewardsCoordinator.ProcessClaim(noSendTxOpts, elClaim, config.RecipientAddress)
+		unsignedTx, err := contractBindings.RewardsCoordinator.ProcessClaim(noSendTxOpts, *elClaim, config.RecipientAddress)
 		if err != nil {
 			return eigenSdkUtils.WrapError("failed to create unsigned tx", err)
 		}
@@ -373,6 +502,7 @@ func readAndValidateClaimConfig(cCtx *cli.Context, logger logging.Logger) (*Clai
 	validTokenAddresses := getValidHexAddresses(splitTokenAddresses)
 	rewardsCoordinatorAddress := cCtx.String(RewardsCoordinatorAddressFlag.Name)
 	isSilent := cCtx.Bool(flags.SilentFlag.Name)
+	batchClaimFile := cCtx.String(flags.BatchClaimFile.Name)
 
 	var err error
 	if common.IsEmptyString(rewardsCoordinatorAddress) {
@@ -457,6 +587,7 @@ func readAndValidateClaimConfig(cCtx *cli.Context, logger logging.Logger) (*Clai
 		ClaimTimestamp:            claimTimestamp,
 		ClaimerAddress:            claimerAddress,
 		IsSilent:                  isSilent,
+		BatchClaimFile:            batchClaimFile,
 	}, nil
 }
 

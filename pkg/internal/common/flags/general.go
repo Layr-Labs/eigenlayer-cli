@@ -90,4 +90,11 @@ var (
 		EnvVars: []string{"EXPIRY"},
 		Value:   3600,
 	}
+
+	BatchClaimFile = cli.StringFlag{
+		Name:    "batchClaimFile",
+		Aliases: []string{"bcf"},
+		Usage:   "Input file for batch rewards claim",
+		EnvVars: []string{"BATCH_CLAIM_FILE"},
+	}
 )
