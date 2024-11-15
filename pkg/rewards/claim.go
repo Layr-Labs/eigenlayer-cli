@@ -202,7 +202,7 @@ func generateClaimPayload(
 		TokenLeaves:     convertClaimTokenLeaves(claim.TokenLeaves),
 	}
 
-	logger.Info("Validating claim proof...")
+	logger.Infof("Validating claim proof for earner %s...", earnerAddress)
 	ok, err := elReader.CheckClaim(ctx, elClaim)
 	if err != nil {
 		return nil, nil, nil, err
@@ -210,7 +210,7 @@ func generateClaimPayload(
 	if !ok {
 		return nil, nil, nil, errors.New("failed to validate claim")
 	}
-	logger.Info("Claim proof validated successfully")
+	logger.Infof("Claim proof for earner %s validated successfully", earnerAddress)
 
 	return &elClaim, claim, accounts, nil
 }
