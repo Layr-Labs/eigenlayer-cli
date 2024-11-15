@@ -85,37 +85,9 @@ func getClaimFlags() []cli.Flag {
 	return allFlags
 }
 
-func BatchClaim(cCtx *cli.Context, p utils.Prompter) error {
+func BatchClaim(cCtx *cli.Context, ethClient *ethclient.Client, elReader *elcontracts.ChainReader, df *httpProofDataFetcher.HttpProofDataFetcher, config *ClaimConfig, p utils.Prompter) error {
 	ctx := cCtx.Context
 	logger := common.GetLogger(cCtx)
-
-	config, err := readAndValidateClaimConfig(cCtx, logger)
-	if err != nil {
-		return eigenSdkUtils.WrapError("failed to read and validate claim config", err)
-	}
-	cCtx.App.Metadata["network"] = config.ChainID.String()
-
-	ethClient, err := ethclient.Dial(config.RPCUrl)
-	if err != nil {
-		return eigenSdkUtils.WrapError("failed to create new eth client", err)
-	}
-
-	elReader, err := elcontracts.NewReaderFromConfig(
-		elcontracts.Config{
-			RewardsCoordinatorAddress: config.RewardsCoordinatorAddress,
-		},
-		ethClient, logger,
-	)
-	if err != nil {
-		return eigenSdkUtils.WrapError("failed to create new reader from config", err)
-	}
-
-	df := httpProofDataFetcher.NewHttpProofDataFetcher(
-		config.ProofStoreBaseURL,
-		config.Environment,
-		config.Network,
-		http.DefaultClient,
-	)
 
 	yamlFile, err := os.ReadFile(config.BatchClaimFile)
 	if err != nil {
@@ -256,10 +228,6 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 		return eigenSdkUtils.WrapError("failed to read and validate claim config", err)
 	}
 
-	if config.BatchClaimFile != "" {
-		return BatchClaim(cCtx, p)
-	}
-
 	cCtx.App.Metadata["network"] = config.ChainID.String()
 
 	ethClient, err := ethclient.Dial(config.RPCUrl)
@@ -283,6 +251,10 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 		config.Network,
 		http.DefaultClient,
 	)
+
+	if config.BatchClaimFile != "" {
+		return BatchClaim(cCtx, ethClient, elReader, df, config, p)
+	}
 
 	elClaim, claim, accounts, err := claimHelper(config.ClaimTimestamp, ctx, elReader, logger, config.EarnerAddress, df, config.TokenAddresses)
 
