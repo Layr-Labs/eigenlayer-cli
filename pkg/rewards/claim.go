@@ -197,10 +197,6 @@ func claimHelper(
 		return nil, nil, nil, eigenSdkUtils.WrapError("failed to generate claim proof for earner", err)
 	}
 
-	if err != nil {
-		return nil, nil, nil, eigenSdkUtils.WrapError("failed to generate claim proof for earner", err)
-	}
-
 	elClaim := rewardscoordinator.IRewardsCoordinatorRewardsMerkleClaim{
 		RootIndex:       claim.RootIndex,
 		EarnerIndex:     claim.EarnerIndex,
