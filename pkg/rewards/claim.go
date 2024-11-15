@@ -114,7 +114,7 @@ func BatchClaim(cCtx *cli.Context, ethClient *ethclient.Client, elReader *elcont
 			tokenAddrs = append(tokenAddrs, gethcommon.HexToAddress(addr))
 		}
 
-		elClaim, _, _, err := claimHelper(ctx, config.ClaimTimestamp, elReader, logger, earnerAddr, df, tokenAddrs)
+		elClaim, _, _, err := generateClaimPayload(ctx, config.ClaimTimestamp, elReader, logger, earnerAddr, df, tokenAddrs)
 
 		elClaims = append(elClaims, *elClaim)
 
@@ -155,7 +155,7 @@ func BatchClaim(cCtx *cli.Context, ethClient *ethclient.Client, elReader *elcont
 	return nil
 }
 
-func claimHelper(
+func generateClaimPayload(
 	ctx context.Context,
 	claimTimestamp string,
 	elReader *elcontracts.ChainReader,
@@ -252,7 +252,7 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 		return BatchClaim(cCtx, ethClient, elReader, df, config, p)
 	}
 
-	elClaim, claim, accounts, err := claimHelper(ctx, config.ClaimTimestamp, elReader, logger, config.EarnerAddress, df, config.TokenAddresses)
+	elClaim, claim, accounts, err := generateClaimPayload(ctx, config.ClaimTimestamp, elReader, logger, config.EarnerAddress, df, config.TokenAddresses)
 
 	if err != nil {
 		return err
