@@ -92,7 +92,7 @@ var (
 	}
 
 	BatchClaimFile = cli.StringFlag{
-		Name:    "batchClaimFile",
+		Name:    "batch-claim-file",
 		Aliases: []string{"bcf"},
 		Usage:   "Input file for batch rewards claim",
 		EnvVars: []string{"BATCH_CLAIM_FILE"},
