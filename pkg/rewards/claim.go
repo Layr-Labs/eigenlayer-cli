@@ -41,6 +41,7 @@ type elChainReader interface {
 		ctx context.Context,
 	) (rewardscoordinator.IRewardsCoordinatorDistributionRoot, error)
 	CurrRewardsCalculationEndTimestamp(ctx context.Context) (uint32, error)
+	GetCumulativeClaimed(ctx context.Context, earnerAddress, tokenAddress gethcommon.Address) (*big.Int, error)
 }
 
 func ClaimCmd(p utils.Prompter) *cli.Command {
@@ -123,15 +124,22 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 		return eigenSdkUtils.WrapError("failed to fetch claim amounts for date", err)
 	}
 
-	claimableTokens, present := proofData.Distribution.GetTokensForEarner(config.EarnerAddress)
+	claimableTokensOrderMap, present := proofData.Distribution.GetTokensForEarner(config.EarnerAddress)
 	if !present {
 		return errors.New("no tokens claimable by earner")
+	}
+
+	claimableTokensMap := getTokensToClaim(claimableTokensOrderMap, config.TokenAddresses)
+
+	claimableTokens, err := filterClaimableTokens(ctx, elReader, config.EarnerAddress, claimableTokensMap)
+	if err != nil {
+		return eigenSdkUtils.WrapError("failed to get claimable tokens", err)
 	}
 
 	cg := claimgen.NewClaimgen(proofData.Distribution)
 	accounts, claim, err := cg.GenerateClaimProofForEarner(
 		config.EarnerAddress,
-		getTokensToClaim(claimableTokens, config.TokenAddresses),
+		claimableTokens,
 		rootIndex,
 	)
 	if err != nil {
@@ -270,6 +278,30 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 	return nil
 }
 
+// filterClaimableTokens to filter out tokens that have been fully claimed
+func filterClaimableTokens(
+	ctx context.Context,
+	elReader elChainReader,
+	earnerAddress gethcommon.Address,
+	claimableTokensMap map[gethcommon.Address]*big.Int,
+) ([]gethcommon.Address, error) {
+	claimableTokens := make([]gethcommon.Address, 0)
+	for token, claimedAmount := range claimableTokensMap {
+		amount, err := getCummulativeClaimedRewards(ctx, elReader, earnerAddress, token)
+		if err != nil {
+			return nil, err
+		}
+		// If the token has been claimed fully, we don't need to include it in the claim
+		// This is because contracts reject claims for tokens that have been fully claimed
+		// https://github.com/Layr-Labs/eigenlayer-contracts/blob/ac57bc1b28c83d9d7143c0da19167c148c3596a3/src/contracts/core/RewardsCoordinator.sol#L575-L578
+		if claimedAmount.Cmp(amount) == 0 {
+			continue
+		}
+		claimableTokens = append(claimableTokens, token)
+	}
+	return claimableTokens, nil
+}
+
 func getClaimDistributionRoot(
 	ctx context.Context,
 	claimTimestamp string,
@@ -312,39 +344,40 @@ func getClaimDistributionRoot(
 func getTokensToClaim(
 	claimableTokens *orderedmap.OrderedMap[gethcommon.Address, *distribution.BigInt],
 	tokenAddresses []gethcommon.Address,
-) []gethcommon.Address {
+) map[gethcommon.Address]*big.Int {
+	var tokenMap map[gethcommon.Address]*big.Int
 	if len(tokenAddresses) == 0 {
-		tokenAddresses = getAllClaimableTokenAddresses(claimableTokens)
+		tokenMap = getAllClaimableTokenAddresses(claimableTokens)
 	} else {
-		tokenAddresses = filterClaimableTokenAddresses(claimableTokens, tokenAddresses)
+		tokenMap = filterClaimableTokenAddresses(claimableTokens, tokenAddresses)
 	}
 
-	return tokenAddresses
+	return tokenMap
 }
 
 func getAllClaimableTokenAddresses(
 	addressesMap *orderedmap.OrderedMap[gethcommon.Address, *distribution.BigInt],
-) []gethcommon.Address {
-	var addresses []gethcommon.Address
+) map[gethcommon.Address]*big.Int {
+	tokens := make(map[gethcommon.Address]*big.Int)
 	for pair := addressesMap.Oldest(); pair != nil; pair = pair.Next() {
-		addresses = append(addresses, pair.Key)
+		tokens[pair.Key] = pair.Value.Int
 	}
 
-	return addresses
+	return tokens
 }
 
 func filterClaimableTokenAddresses(
 	addressesMap *orderedmap.OrderedMap[gethcommon.Address, *distribution.BigInt],
 	providedAddresses []gethcommon.Address,
-) []gethcommon.Address {
-	var addresses []gethcommon.Address
+) map[gethcommon.Address]*big.Int {
+	tokens := make(map[gethcommon.Address]*big.Int)
 	for _, address := range providedAddresses {
-		if _, ok := addressesMap.Get(address); ok {
-			addresses = append(addresses, address)
+		if val, ok := addressesMap.Get(address); ok {
+			tokens[address] = val.Int
 		}
 	}
 
-	return addresses
+	return tokens
 }
 
 func convertClaimTokenLeaves(
