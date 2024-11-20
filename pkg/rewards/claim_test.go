@@ -27,10 +27,14 @@ import (
 )
 
 type fakeELReader struct {
-	roots []rewardscoordinator.IRewardsCoordinatorDistributionRoot
+	roots                 []rewardscoordinator.IRewardsCoordinatorDistributionRoot
+	earnerTokenClaimedMap map[common.Address]map[common.Address]*big.Int
 }
 
-func newFakeELReader(now time.Time) *fakeELReader {
+func newFakeELReader(
+	now time.Time,
+	earnerTokenClaimedMap map[common.Address]map[common.Address]*big.Int,
+) *fakeELReader {
 	roots := make([]rewardscoordinator.IRewardsCoordinatorDistributionRoot, 0)
 	rootOne := rewardscoordinator.IRewardsCoordinatorDistributionRoot{
 		Root:                           [32]byte{0x01},
@@ -60,7 +64,8 @@ func newFakeELReader(now time.Time) *fakeELReader {
 		return roots[i].ActivatedAt < roots[j].ActivatedAt
 	})
 	return &fakeELReader{
-		roots: roots,
+		roots:                 roots,
+		earnerTokenClaimedMap: earnerTokenClaimedMap,
 	}
 }
 
@@ -89,6 +94,21 @@ func (f *fakeELReader) GetCurrentClaimableDistributionRoot(
 	}
 
 	return rewardscoordinator.IRewardsCoordinatorDistributionRoot{}, errors.New("no active distribution root found")
+}
+
+func (f *fakeELReader) GetCumulativeClaimed(
+	ctx context.Context,
+	earnerAddress,
+	tokenAddress common.Address,
+) (*big.Int, error) {
+	if f.earnerTokenClaimedMap == nil {
+		return big.NewInt(0), nil
+	}
+	claimed, ok := f.earnerTokenClaimedMap[earnerAddress][tokenAddress]
+	if !ok {
+		return big.NewInt(0), nil
+	}
+	return claimed, nil
 }
 
 func (f *fakeELReader) CurrRewardsCalculationEndTimestamp(ctx context.Context) (uint32, error) {
@@ -246,7 +266,7 @@ func TestGetClaimDistributionRoot(t *testing.T) {
 		},
 	}
 
-	reader := newFakeELReader(now)
+	reader := newFakeELReader(now, nil)
 	logger := logging.NewJsonSLogger(os.Stdout, &logging.SLoggerOptions{})
 
 	for _, tt := range tests {
@@ -280,13 +300,18 @@ func TestGetTokensToClaim(t *testing.T) {
 
 	// Case 1: No token addresses provided, should return all addresses in claimableTokens
 	result := getTokensToClaim(claimableTokens, []common.Address{})
-	expected := []common.Address{addr1, addr2}
-	assert.ElementsMatch(t, result, expected)
+	expected := map[common.Address]*big.Int{
+		addr1: big.NewInt(100),
+		addr2: big.NewInt(200),
+	}
+	assert.Equal(t, result, expected)
 
 	// Case 2: Provided token addresses, should return only those present in claimableTokens
 	result = getTokensToClaim(claimableTokens, []common.Address{addr2, addr3})
-	expected = []common.Address{addr2}
-	assert.ElementsMatch(t, result, expected)
+	expected = map[common.Address]*big.Int{
+		addr2: big.NewInt(200),
+	}
+	assert.Equal(t, result, expected)
 }
 
 func TestGetTokenAddresses(t *testing.T) {
@@ -300,8 +325,11 @@ func TestGetTokenAddresses(t *testing.T) {
 
 	// Test that the function returns all addresses in the map
 	result := getAllClaimableTokenAddresses(addressesMap)
-	expected := []common.Address{addr1, addr2}
-	assert.ElementsMatch(t, result, expected)
+	expected := map[common.Address]*big.Int{
+		addr1: big.NewInt(100),
+		addr2: big.NewInt(200),
+	}
+	assert.Equal(t, result, expected)
 }
 
 func TestFilterClaimableTokenAddresses(t *testing.T) {
@@ -321,8 +349,70 @@ func TestFilterClaimableTokenAddresses(t *testing.T) {
 	}
 
 	result := filterClaimableTokenAddresses(addressesMap, providedAddresses)
-	expected := []common.Address{addr1}
-	assert.ElementsMatch(t, result, expected)
+	expected := map[common.Address]*big.Int{
+		addr1: big.NewInt(100),
+	}
+	assert.Equal(t, result, expected)
+}
+
+func TestFilterClaimableTokens(t *testing.T) {
+	// Set up a mock claimableTokens map
+	earnerAddress := common.HexToAddress(testutils.GenerateRandomEthereumAddressString())
+	tokenAddress1 := common.HexToAddress(testutils.GenerateRandomEthereumAddressString())
+	tokenAddress2 := common.HexToAddress(testutils.GenerateRandomEthereumAddressString())
+	amountClaimed1 := big.NewInt(100)
+	amountClaimed2 := big.NewInt(200)
+	elReaderClaimedMap := map[common.Address]map[common.Address]*big.Int{
+		earnerAddress: {
+			tokenAddress1: amountClaimed1,
+			tokenAddress2: amountClaimed2,
+		},
+	}
+	now := time.Now()
+	reader := newFakeELReader(now, elReaderClaimedMap)
+	tests := []struct {
+		name                    string
+		earnerAddress           common.Address
+		claimableTokensMap      map[common.Address]*big.Int
+		expectedClaimableTokens []common.Address
+	}{
+		{
+			name:          "all tokens are claimable and non zero",
+			earnerAddress: earnerAddress,
+			claimableTokensMap: map[common.Address]*big.Int{
+				tokenAddress1: big.NewInt(2345),
+				tokenAddress2: big.NewInt(3345),
+			},
+			expectedClaimableTokens: []common.Address{
+				tokenAddress1,
+				tokenAddress2,
+			},
+		},
+		{
+			name:          "one token is already claimed",
+			earnerAddress: earnerAddress,
+			claimableTokensMap: map[common.Address]*big.Int{
+				tokenAddress1: amountClaimed1,
+				tokenAddress2: big.NewInt(1234),
+			},
+			expectedClaimableTokens: []common.Address{
+				tokenAddress2,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result, err := filterClaimableTokens(
+				context.Background(),
+				reader,
+				tt.earnerAddress,
+				tt.claimableTokensMap,
+			)
+			assert.NoError(t, err)
+			assert.ElementsMatch(t, tt.expectedClaimableTokens, result)
+		})
+	}
 }
 
 func newBigInt(value int64) *distribution.BigInt {
