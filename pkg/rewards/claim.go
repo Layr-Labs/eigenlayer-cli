@@ -345,7 +345,7 @@ func getTokensToClaim(
 	claimableTokens *orderedmap.OrderedMap[gethcommon.Address, *distribution.BigInt],
 	tokenAddresses []gethcommon.Address,
 ) map[gethcommon.Address]*big.Int {
-	tokenMap := make(map[gethcommon.Address]*big.Int)
+	var tokenMap map[gethcommon.Address]*big.Int
 	if len(tokenAddresses) == 0 {
 		tokenMap = getAllClaimableTokenAddresses(claimableTokens)
 	} else {
