@@ -15,7 +15,6 @@ import (
 	"github.com/Layr-Labs/eigensdk-go/logging"
 	eigenSdkUtils "github.com/Layr-Labs/eigensdk-go/utils"
 
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	gethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 
@@ -77,7 +76,7 @@ func showAction(cCtx *cli.Context, p utils.Prompter) error {
 	*/
 	for _, strategyAddress := range config.strategyAddresses {
 		allocatableMagnitude, err := elReader.GetAllocatableMagnitude(
-			&bind.CallOpts{Context: ctx},
+			ctx,
 			config.operatorAddress,
 			strategyAddress,
 		)
@@ -96,7 +95,7 @@ func showAction(cCtx *cli.Context, p utils.Prompter) error {
 	*/
 	totalMagnitudeMap := make(map[string]uint64)
 	totalMagnitudes, err := elReader.GetMaxMagnitudes(
-		&bind.CallOpts{Context: ctx},
+		ctx,
 		config.operatorAddress,
 		config.strategyAddresses,
 	)
@@ -114,7 +113,7 @@ func showAction(cCtx *cli.Context, p utils.Prompter) error {
 	allAllocations := make(map[string][]elcontracts.AllocationInfo, len(config.strategyAddresses))
 	for _, strategyAddress := range config.strategyAddresses {
 		allocations, err := elReader.GetAllocationInfo(
-			&bind.CallOpts{Context: ctx},
+			ctx,
 			config.operatorAddress,
 			strategyAddress,
 		)
@@ -128,7 +127,7 @@ func showAction(cCtx *cli.Context, p utils.Prompter) error {
 		6. Get the operator scaled shares for all strategies
 	*/
 	operatorDelegatedSharesMap := make(map[string]*big.Int)
-	shares, err := elReader.GetOperatorShares(&bind.CallOpts{}, config.operatorAddress, config.strategyAddresses)
+	shares, err := elReader.GetOperatorShares(ctx, config.operatorAddress, config.strategyAddresses)
 	for i, strategyAddress := range config.strategyAddresses {
 		operatorDelegatedSharesMap[strategyAddress.String()] = shares[i]
 	}
@@ -141,7 +140,10 @@ func showAction(cCtx *cli.Context, p utils.Prompter) error {
 	for strategy, allocations := range allAllocations {
 		strategyShares := operatorDelegatedSharesMap[strategy]
 		for _, alloc := range allocations {
-			currentShares, currentSharesPercentage := getSharesFromMagnitude(strategyShares, alloc.CurrentMagnitude.Uint64())
+			currentShares, currentSharesPercentage := getSharesFromMagnitude(
+				strategyShares,
+				alloc.CurrentMagnitude.Uint64(),
+			)
 			newMagnitudeBigInt := big.NewInt(0)
 			if alloc.PendingDiff.Cmp(big.NewInt(0)) != 0 {
 				newMagnitudeBigInt = big.NewInt(0).Add(alloc.CurrentMagnitude, alloc.PendingDiff)
@@ -155,7 +157,7 @@ func showAction(cCtx *cli.Context, p utils.Prompter) error {
 				Shares:                   currentShares,
 				SharesPercentage:         currentSharesPercentage.String(),
 				NewMagnitude:             newMagnitudeBigInt.Uint64(),
-				NewMagnitudeTimestamp:    alloc.CompletableTimestamp,
+				NewMagnitudeTimestamp:    alloc.EffectBlock,
 				NewAllocationShares:      newShares,
 				UpcomingSharesPercentage: newSharesPercentage.String(),
 			})
@@ -273,7 +275,7 @@ func getSharesFromMagnitude(totalScaledShare *big.Int, magnitude uint64) (*big.I
 }
 
 func getUniqueKey(strategyAddress gethcommon.Address, opSet allocationmanager.OperatorSet) string {
-	return fmt.Sprintf("%s-%s-%d", strategyAddress.String(), opSet.Avs.String(), opSet.OperatorSetId)
+	return fmt.Sprintf("%s-%s-%d", strategyAddress.String(), opSet.Avs.String(), opSet.Id)
 }
 
 func readAndValidateShowConfig(cCtx *cli.Context, logger *logging.Logger) (*showConfig, error) {

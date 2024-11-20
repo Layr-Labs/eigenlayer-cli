@@ -98,7 +98,7 @@ func TestGenerateAllocationsParams(t *testing.T) {
 			},
 			expectError: false,
 			expectedAllocations: &BulkModifyAllocations{
-				Allocations: []allocationmanager.IAllocationManagerTypesMagnitudeAllocation{
+				Allocations: []allocationmanager.IAllocationManagerTypesAllocateParams{
 					{
 						Strategy:             gethcommon.HexToAddress(strategyAddress),
 						ExpectedMaxMagnitude: initialMagnitude,
@@ -121,7 +121,7 @@ func TestGenerateAllocationsParams(t *testing.T) {
 			},
 			expectError: false,
 			expectedAllocations: &BulkModifyAllocations{
-				Allocations: []allocationmanager.IAllocationManagerTypesMagnitudeAllocation{
+				Allocations: []allocationmanager.IAllocationManagerTypesAllocateParams{
 					{
 						Strategy:             gethcommon.HexToAddress("0x49989b32351Eb9b8ab2d5623cF22E7F7C23e5630"),
 						ExpectedMaxMagnitude: initialMagnitude,

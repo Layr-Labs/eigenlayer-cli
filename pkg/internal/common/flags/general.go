@@ -90,7 +90,7 @@ var (
 		EnvVars: []string{"EXPIRY"},
 		Value:   3600,
 	}
-	
+
 	OperatorAddressFlag = cli.StringFlag{
 		Name:    "operator-address",
 		Aliases: []string{"oa", "operator"},

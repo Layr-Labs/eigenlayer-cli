@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
-
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/types"
 
 	allocationmanager "github.com/Layr-Labs/eigensdk-go/contracts/bindings/AllocationManager"
@@ -17,7 +16,7 @@ import (
 )
 
 type BulkModifyAllocations struct {
-	Allocations           []allocationmanager.IAllocationManagerTypesMagnitudeAllocation
+	Allocations           []allocationmanager.IAllocationManagerTypesAllocateParams
 	AllocatableMagnitudes map[gethcommon.Address]uint64
 }
 
@@ -28,13 +27,12 @@ func (b *BulkModifyAllocations) PrintPretty() {
 	allocations := b.Allocations
 	headers := []string{
 		"Strategy",
-		"Expected Total Magnitude",
 		"Allocatable Magnitude",
 		"Operator Set ID",
 		"AVS",
 		"Magnitude",
 	}
-	widths := []int{20, 25, 25, 20, 20, 25}
+	widths := []int{20, 25, 20, 20, 25}
 
 	// print dashes
 	for _, width := range widths {
@@ -59,21 +57,19 @@ func (b *BulkModifyAllocations) PrintPretty() {
 
 	// Print data rows
 	for _, a := range allocations {
-		for i, opSet := range a.OperatorSets {
+		for i, strategy := range a.Strategies {
 			fmt.Printf(
 				"| %-*s| %-*s| %-*s| %-*d| %-*s| %-*s|\n",
 				widths[0],
-				common.ShortEthAddress(a.Strategy),
+				common.ShortEthAddress(strategy),
 				widths[1],
-				common.FormatNumberWithUnderscores(common.Uint64ToString(a.ExpectedMaxMagnitude)),
+				common.FormatNumberWithUnderscores(common.Uint64ToString(b.AllocatableMagnitudes[strategy])),
 				widths[2],
-				common.FormatNumberWithUnderscores(common.Uint64ToString(b.AllocatableMagnitudes[a.Strategy])),
+				a.OperatorSet.Id,
 				widths[3],
-				opSet.OperatorSetId,
+				common.ShortEthAddress(a.OperatorSet.Avs),
 				widths[4],
-				common.ShortEthAddress(opSet.Avs),
-				widths[5],
-				common.FormatNumberWithUnderscores(common.Uint64ToString(a.Magnitudes[i])),
+				common.FormatNumberWithUnderscores(common.Uint64ToString(a.NewMagnitudes[i])),
 			)
 		}
 	}

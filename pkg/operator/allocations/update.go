@@ -9,7 +9,6 @@ import (
 	"sort"
 	"sync"
 
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	gethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 
@@ -29,12 +28,12 @@ import (
 
 type elChainReader interface {
 	GetMaxMagnitudes(
-		opts *bind.CallOpts,
+		ctx context.Context,
 		operatorAddress gethcommon.Address,
 		strategyAddresses []gethcommon.Address,
 	) ([]uint64, error)
 	GetAllocatableMagnitude(
-		opts *bind.CallOpts,
+		ctx context.Context,
 		operator gethcommon.Address,
 		strategy gethcommon.Address,
 	) (uint64, error)
@@ -200,13 +199,13 @@ func generateAllocationsParams(
 	config *updateConfig,
 	logger logging.Logger,
 ) (*BulkModifyAllocations, error) {
-	allocations := make([]allocationmanager.IAllocationManagerTypesMagnitudeAllocation, 0)
+	allocations := make([]allocationmanager.IAllocationManagerTypesAllocateParams, 0)
 	var allocatableMagnitudes map[gethcommon.Address]uint64
 
 	var err error
 	if len(config.csvFilePath) == 0 {
 		magnitude, err := elReader.GetMaxMagnitudes(
-			&bind.CallOpts{Context: ctx},
+			ctx,
 			config.operatorAddress,
 			[]gethcommon.Address{config.strategyAddress},
 		)
@@ -214,7 +213,7 @@ func generateAllocationsParams(
 			return nil, eigenSdkUtils.WrapError("failed to get latest total magnitude", err)
 		}
 		allocatableMagnitude, err := elReader.GetAllocatableMagnitude(
-			&bind.CallOpts{Context: ctx},
+			ctx,
 			config.operatorAddress,
 			config.strategyAddress,
 		)
@@ -226,16 +225,13 @@ func generateAllocationsParams(
 		logger.Debugf("Bips to allocate: %d", config.bipsToAllocate)
 		magnitudeToUpdate := calculateMagnitudeToUpdate(magnitude[0], config.bipsToAllocate)
 		logger.Debugf("Magnitude to update: %d", magnitudeToUpdate)
-		malloc := allocationmanager.IAllocationManagerTypesMagnitudeAllocation{
-			Strategy:             config.strategyAddress,
-			ExpectedMaxMagnitude: magnitude[0],
-			OperatorSets: []allocationmanager.OperatorSet{
-				{
-					Avs:           config.avsAddress,
-					OperatorSetId: config.operatorSetId,
-				},
+		malloc := allocationmanager.IAllocationManagerTypesAllocateParams{
+			Strategies: []gethcommon.Address{config.strategyAddress},
+			OperatorSet: allocationmanager.OperatorSet{
+				Avs: config.avsAddress,
+				Id:  config.operatorSetId,
 			},
-			Magnitudes: []uint64{magnitudeToUpdate},
+			NewMagnitudes: []uint64{magnitudeToUpdate},
 		}
 		allocations = append(allocations, malloc)
 	} else {
@@ -255,7 +251,7 @@ func computeAllocations(
 	filePath string,
 	operatorAddress gethcommon.Address,
 	elReader elChainReader,
-) ([]allocationmanager.IAllocationManagerTypesMagnitudeAllocation, map[gethcommon.Address]uint64, error) {
+) ([]allocationmanager.IAllocationManagerTypesAllocateParams, map[gethcommon.Address]uint64, error) {
 	allocations, err := parseAllocationsCSV(filePath)
 	if err != nil {
 		return nil, nil, eigenSdkUtils.WrapError("failed to parse allocations csv", err)
@@ -314,7 +310,7 @@ func parallelGetAllocatableMagnitudes(
 		wg.Add(1)
 		go func(strategy gethcommon.Address) {
 			defer wg.Done()
-			magnitude, err := elReader.GetAllocatableMagnitude(&bind.CallOpts{}, operatorAddress, strategy)
+			magnitude, err := elReader.GetAllocatableMagnitude(context.Background(), operatorAddress, strategy)
 			if err != nil {
 				errChan <- err
 				return
@@ -340,7 +336,7 @@ func getMagnitudes(
 ) (map[gethcommon.Address]uint64, error) {
 	strategyTotalMagnitudes := make(map[gethcommon.Address]uint64, len(strategies))
 	totalMagnitudes, err := reader.GetMaxMagnitudes(
-		&bind.CallOpts{Context: context.Background()},
+		context.Background(),
 		operatorAddress,
 		strategies,
 	)
@@ -385,40 +381,62 @@ func parseAllocationsCSV(filePath string) ([]allocation, error) {
 func convertAllocationsToMagnitudeAllocations(
 	allocations []allocation,
 	strategyTotalMagnitudes map[gethcommon.Address]uint64,
-) []allocationmanager.IAllocationManagerTypesMagnitudeAllocation {
-	magnitudeAllocations := make([]allocationmanager.IAllocationManagerTypesMagnitudeAllocation, 0)
-	operatorSetsPerStragyMap := make(map[gethcommon.Address][]allocationmanager.OperatorSet)
-	magnitudeAllocationsPerStrategyMap := make(map[gethcommon.Address][]uint64)
+) []allocationmanager.IAllocationManagerTypesAllocateParams {
+	magnitudeAllocations := make([]allocationmanager.IAllocationManagerTypesAllocateParams, 0)
+	//operatorSetsPerStragyMap := make(map[gethcommon.Address][]allocationmanager.OperatorSet)
+	strategiesPerOperatorSetMap := make(map[allocationmanager.OperatorSet][]gethcommon.Address)
+	//magnitudeAllocationsPerStrategyMap := make(map[gethcommon.Address][]uint64)
+	magnitudeAllocationsPerOperatorSetMap := make(map[allocationmanager.OperatorSet][]uint64)
 	for _, a := range allocations {
 		totalMag := strategyTotalMagnitudes[a.StrategyAddress]
 		magnitudeToUpdate := calculateMagnitudeToUpdate(totalMag, a.Bips)
 
-		operatorSets, ok := operatorSetsPerStragyMap[a.StrategyAddress]
+		opSet := allocationmanager.OperatorSet{Avs: a.AvsAddress, Id: a.OperatorSetId}
+		strategies, ok := strategiesPerOperatorSetMap[opSet]
 		if !ok {
-			operatorSets = make([]allocationmanager.OperatorSet, 0)
+			strategies = make([]gethcommon.Address, 0)
 		}
-		operatorSets = append(operatorSets, allocationmanager.OperatorSet{
-			Avs:           a.AvsAddress,
-			OperatorSetId: a.OperatorSetId,
-		})
-		operatorSetsPerStragyMap[a.StrategyAddress] = operatorSets
 
-		magnitudes := magnitudeAllocationsPerStrategyMap[a.StrategyAddress]
+		strategies = append(strategies, a.StrategyAddress)
+		strategiesPerOperatorSetMap[opSet] = strategies
+
+		//operatorSets, ok := operatorSetsPerStragyMap[a.StrategyAddress]
+		//if !ok {
+		//	operatorSets = make([]allocationmanager.OperatorSet, 0)
+		//}
+		//operatorSets = append(operatorSets, allocationmanager.OperatorSet{
+		//	Avs: a.AvsAddress,
+		//	Id:  a.OperatorSetId,
+		//})
+		//operatorSetsPerStragyMap[a.StrategyAddress] = operatorSets
+
+		magnitudes := magnitudeAllocationsPerOperatorSetMap[opSet]
 		magnitudes = append(magnitudes, magnitudeToUpdate)
-		magnitudeAllocationsPerStrategyMap[a.StrategyAddress] = magnitudes
+		magnitudeAllocationsPerOperatorSetMap[opSet] = magnitudes
 	}
 
-	for strategy, operatorSets := range operatorSetsPerStragyMap {
+	for opSet, strategies := range strategiesPerOperatorSetMap {
 		magnitudeAllocations = append(
 			magnitudeAllocations,
-			allocationmanager.IAllocationManagerTypesMagnitudeAllocation{
-				Strategy:             strategy,
-				ExpectedMaxMagnitude: strategyTotalMagnitudes[strategy],
-				OperatorSets:         operatorSets,
-				Magnitudes:           magnitudeAllocationsPerStrategyMap[strategy],
+			allocationmanager.IAllocationManagerTypesAllocateParams{
+				OperatorSet:   opSet,
+				Strategies:    strategies,
+				NewMagnitudes: magnitudeAllocationsPerOperatorSetMap[opSet],
 			},
 		)
 	}
+
+	//for strategy, operatorSets := range operatorSetsPerStragyMap {
+	//	magnitudeAllocations = append(
+	//		magnitudeAllocations,
+	//		allocationmanager.IAllocationManagerTypesAllocateParams{
+	//			Strategy:             strategy,
+	//			ExpectedMaxMagnitude: strategyTotalMagnitudes[strategy],
+	//			OperatorSets:         operatorSets,
+	//			Magnitudes:           magnitudeAllocationsPerStrategyMap[strategy],
+	//		},
+	//	)
+	//}
 	return magnitudeAllocations
 }
 
