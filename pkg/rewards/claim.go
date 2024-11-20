@@ -156,7 +156,7 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 		},
 		TokenIndices:    claim.TokenIndices,
 		TokenTreeProofs: claim.TokenTreeProofs,
-		TokenLeaves:     convertAndFilterClaimTokenLeaves(claim.TokenLeaves),
+		TokenLeaves:     convertClaimTokenLeaves(claim.TokenLeaves),
 	}
 
 	logger.Info("Validating claim proof...")
@@ -380,7 +380,7 @@ func filterClaimableTokenAddresses(
 	return tokens
 }
 
-func convertAndFilterClaimTokenLeaves(
+func convertClaimTokenLeaves(
 	claimTokenLeaves []contractrewardscoordinator.IRewardsCoordinatorTokenTreeMerkleLeaf,
 ) []rewardscoordinator.IRewardsCoordinatorTokenTreeMerkleLeaf {
 	var tokenLeaves []rewardscoordinator.IRewardsCoordinatorTokenTreeMerkleLeaf
