@@ -169,16 +169,29 @@ func getClaimedRewards(
 ) (map[gethcommon.Address]*big.Int, error) {
 	claimedRewards := make(map[gethcommon.Address]*big.Int)
 	for address := range allRewards {
-		claimed, err := elReader.GetCumulativeClaimed(ctx, earnerAddress, address)
+		claimed, err := getCummulativeClaimedRewards(ctx, elReader, earnerAddress, address)
 		if err != nil {
 			return nil, err
-		}
-		if claimed == nil {
-			claimed = big.NewInt(0)
 		}
 		claimedRewards[address] = claimed
 	}
 	return claimedRewards, nil
+}
+
+func getCummulativeClaimedRewards(
+	ctx context.Context,
+	elReader ELReader,
+	earnerAddress gethcommon.Address,
+	tokenAddress gethcommon.Address,
+) (*big.Int, error) {
+	claimed, err := elReader.GetCumulativeClaimed(ctx, earnerAddress, tokenAddress)
+	if err != nil {
+		return nil, err
+	}
+	if claimed == nil {
+		claimed = big.NewInt(0)
+	}
+	return claimed, nil
 }
 
 func calculateUnclaimedRewards(
