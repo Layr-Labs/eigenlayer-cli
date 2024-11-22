@@ -13,7 +13,7 @@ func AllocationsCmd(p utils.Prompter) *cli.Command {
 		Subcommands: []*cli.Command{
 			allocations.ShowCmd(p),
 			allocations.UpdateCmd(p),
-			allocations.InitializeDelayCmd(p),
+			allocations.SetDelayCmd(p),
 		},
 	}
 

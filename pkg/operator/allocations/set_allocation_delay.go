@@ -20,23 +20,23 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-func InitializeDelayCmd(p utils.Prompter) *cli.Command {
-	initializeDelayCmd := &cli.Command{
-		Name:        "initialize-delay",
-		UsageText:   "initialize-delay [flags] <delay>",
-		Usage:       "Initialize the allocation delay for operator",
-		Description: "Initializes the allocation delay for operator. This is a one time command. You can not change the allocation delay once",
-		Flags:       getInitializeAllocationDelayFlags(),
+func SetDelayCmd(p utils.Prompter) *cli.Command {
+	setDelayCmd := &cli.Command{
+		Name:        "set-delay",
+		UsageText:   "set-delay [flags] <delay>",
+		Usage:       "Set the allocation delay for operator in blocks",
+		Description: "Set the allocation delay for operator. It will take effect after the delay period",
+		Flags:       getSetAllocationDelayFlags(),
 		After:       telemetry.AfterRunAction(),
 		Action: func(c *cli.Context) error {
-			return initializeDelayAction(c, p)
+			return setDelayAction(c, p)
 		},
 	}
 
-	return initializeDelayCmd
+	return setDelayCmd
 }
 
-func initializeDelayAction(cCtx *cli.Context, p utils.Prompter) error {
+func setDelayAction(cCtx *cli.Context, p utils.Prompter) error {
 	ctx := cCtx.Context
 	logger := common.GetLogger(cCtx)
 
@@ -52,7 +52,7 @@ func initializeDelayAction(cCtx *cli.Context, p utils.Prompter) error {
 
 	if config.broadcast {
 		confirm, err := p.Confirm(
-			"This will initialize the allocation delay for operator. You won't be able to set or change it again. Do you want to continue?",
+			"This will set the allocation delay for operator. Do you want to continue?",
 		)
 		if err != nil {
 			return err
@@ -77,7 +77,7 @@ func initializeDelayAction(cCtx *cli.Context, p utils.Prompter) error {
 			return eigenSdkUtils.WrapError("failed to get EL writer", err)
 		}
 
-		receipt, err := eLWriter.InitializeAllocationDelay(ctx, config.operatorAddress, config.allocationDelay, true)
+		receipt, err := eLWriter.SetAllocationDelay(ctx, config.operatorAddress, config.allocationDelay, true)
 		if err != nil {
 			return err
 		}
@@ -131,7 +131,7 @@ func initializeDelayAction(cCtx *cli.Context, p utils.Prompter) error {
 	return nil
 }
 
-func getInitializeAllocationDelayFlags() []cli.Flag {
+func getSetAllocationDelayFlags() []cli.Flag {
 	baseFlags := []cli.Flag{
 		&flags.NetworkFlag,
 		&flags.EnvironmentFlag,
