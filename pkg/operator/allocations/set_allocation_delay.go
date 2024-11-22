@@ -77,7 +77,7 @@ func setDelayAction(cCtx *cli.Context, p utils.Prompter) error {
 			return eigenSdkUtils.WrapError("failed to get EL writer", err)
 		}
 
-		receipt, err := eLWriter.SetAllocationDelay(ctx, config.operatorAddress, config.allocationDelay, true)
+		receipt, err := eLWriter.SetAllocationDelay(ctx, config.allocationDelay, true)
 		if err != nil {
 			return err
 		}
@@ -99,7 +99,7 @@ func setDelayAction(cCtx *cli.Context, p utils.Prompter) error {
 			noSendTxOpts.GasLimit = 150_000
 		}
 
-		unsignedTx, err := contractBindings.AllocationManager.SetAllocationDelay(noSendTxOpts, config.operatorAddress, config.allocationDelay)
+		unsignedTx, err := contractBindings.AllocationManager.SetAllocationDelay0(noSendTxOpts, config.allocationDelay)
 		if err != nil {
 			return eigenSdkUtils.WrapError("failed to create unsigned tx", err)
 		}
