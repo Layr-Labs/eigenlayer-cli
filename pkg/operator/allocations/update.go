@@ -72,9 +72,6 @@ func updateAllocations(cCtx *cli.Context, p utils.Prompter) error {
 		return eigenSdkUtils.WrapError("failed to create new eth client", err)
 	}
 
-	// Temp to test modify Allocations
-	config.delegationManagerAddress = gethcommon.HexToAddress("0x3391eBafDD4b2e84Eeecf1711Ff9FC06EF9Ed182")
-
 	elReader, err := elcontracts.NewReaderFromConfig(
 		elcontracts.Config{
 			DelegationManagerAddress: config.delegationManagerAddress,
@@ -186,6 +183,7 @@ func getUpdateFlags() []cli.Flag {
 		&flags.OperatorAddressFlag,
 		&flags.OperatorSetIdFlag,
 		&flags.CSVFileFlag,
+		&flags.DelegationManagerAddressFlag,
 		&BipsToAllocateFlag,
 	}
 	allFlags := append(baseFlags, flags.GetSignerFlags()...)
@@ -383,9 +381,7 @@ func convertAllocationsToMagnitudeAllocations(
 	strategyTotalMagnitudes map[gethcommon.Address]uint64,
 ) []allocationmanager.IAllocationManagerTypesAllocateParams {
 	magnitudeAllocations := make([]allocationmanager.IAllocationManagerTypesAllocateParams, 0)
-	//operatorSetsPerStragyMap := make(map[gethcommon.Address][]allocationmanager.OperatorSet)
 	strategiesPerOperatorSetMap := make(map[allocationmanager.OperatorSet][]gethcommon.Address)
-	//magnitudeAllocationsPerStrategyMap := make(map[gethcommon.Address][]uint64)
 	magnitudeAllocationsPerOperatorSetMap := make(map[allocationmanager.OperatorSet][]uint64)
 	for _, a := range allocations {
 		totalMag := strategyTotalMagnitudes[a.StrategyAddress]
@@ -399,16 +395,6 @@ func convertAllocationsToMagnitudeAllocations(
 
 		strategies = append(strategies, a.StrategyAddress)
 		strategiesPerOperatorSetMap[opSet] = strategies
-
-		//operatorSets, ok := operatorSetsPerStragyMap[a.StrategyAddress]
-		//if !ok {
-		//	operatorSets = make([]allocationmanager.OperatorSet, 0)
-		//}
-		//operatorSets = append(operatorSets, allocationmanager.OperatorSet{
-		//	Avs: a.AvsAddress,
-		//	Id:  a.OperatorSetId,
-		//})
-		//operatorSetsPerStragyMap[a.StrategyAddress] = operatorSets
 
 		magnitudes := magnitudeAllocationsPerOperatorSetMap[opSet]
 		magnitudes = append(magnitudes, magnitudeToUpdate)
@@ -426,17 +412,6 @@ func convertAllocationsToMagnitudeAllocations(
 		)
 	}
 
-	//for strategy, operatorSets := range operatorSetsPerStragyMap {
-	//	magnitudeAllocations = append(
-	//		magnitudeAllocations,
-	//		allocationmanager.IAllocationManagerTypesAllocateParams{
-	//			Strategy:             strategy,
-	//			ExpectedMaxMagnitude: strategyTotalMagnitudes[strategy],
-	//			OperatorSets:         operatorSets,
-	//			Magnitudes:           magnitudeAllocationsPerStrategyMap[strategy],
-	//		},
-	//	)
-	//}
 	return magnitudeAllocations
 }
 
@@ -482,9 +457,12 @@ func readAndValidateUpdateFlags(cCtx *cli.Context, logger logging.Logger) (*upda
 	csvFilePath := cCtx.String(flags.CSVFileFlag.Name)
 	chainId := utils.NetworkNameToChainId(network)
 
-	delegationManagerAddress, err := common.GetDelegationManagerAddress(chainId)
-	if err != nil {
-		return nil, err
+	delegationManagerAddress := cCtx.String(flags.DelegationManagerAddressFlag.Name)
+	if delegationManagerAddress == "" {
+		delegationManagerAddress, err = common.GetDelegationManagerAddress(chainId)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return &updateConfig{

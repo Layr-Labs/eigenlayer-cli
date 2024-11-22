@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"math/big"
 	"strings"
-	"time"
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/types"
@@ -59,7 +58,7 @@ func (b *BulkModifyAllocations) PrintPretty() {
 	for _, a := range allocations {
 		for i, strategy := range a.Strategies {
 			fmt.Printf(
-				"| %-*s| %-*s| %-*s| %-*d| %-*s| %-*s|\n",
+				"| %-*s| %-*s| %-*d| %-*s| %-*s|\n",
 				widths[0],
 				common.ShortEthAddress(strategy),
 				widths[1],
@@ -143,7 +142,7 @@ type SlashableMagnitudesHolder struct {
 	SlashableMagnitude       uint64
 	NewMagnitude             uint64
 	NewAllocationShares      *big.Int
-	NewMagnitudeTimestamp    uint32
+	UpdateBlock              uint32
 	Shares                   *big.Int
 	SharesPercentage         string
 	UpcomingSharesPercentage string
@@ -159,7 +158,7 @@ func (s SlashableMagnitudeHolders) PrintPretty() {
 		"Shares %",
 		"Upcoming Shares (Wei)",
 		"Upcoming Shares %",
-		"Update Time",
+		"Update Block",
 	}
 	widths := []int{len(headers[0]) + 1, len(headers[1]) + 3, 15, 30, 25, 30, 25, 25}
 
@@ -183,22 +182,10 @@ func (s SlashableMagnitudeHolders) PrintPretty() {
 
 	// Print data rows
 	for _, holder := range s {
-		// Example timestamp (Unix timestamp in seconds)
-		timestamp := int64(holder.NewMagnitudeTimestamp)
-
-		// Convert timestamp to time.Time
-		t := time.Unix(timestamp, 0)
 
 		upcomingSharesDisplay := common.FormatNumberWithUnderscores(holder.NewAllocationShares.String())
 
-		// Format the time as a string
-		formattedTime := t.Format("2006-01-02 15:04:05")
-		if holder.NewMagnitudeTimestamp == 0 && holder.NewMagnitude == 0 {
-			formattedTime = "N/A"
-			upcomingSharesDisplay = "N/A"
-			holder.UpcomingSharesPercentage = "N/A"
-		}
-		fmt.Printf("| %-*s| %-*s| %-*d| %-*s| %-*s| %-*s| %-*s| %-*s|\n",
+		fmt.Printf("| %-*s| %-*s| %-*d| %-*s| %-*s| %-*s| %-*s| %-*d|\n",
 			widths[0], common.ShortEthAddress(holder.StrategyAddress),
 			widths[1], common.ShortEthAddress(holder.AVSAddress),
 			widths[2], holder.OperatorSetId,
@@ -206,7 +193,7 @@ func (s SlashableMagnitudeHolders) PrintPretty() {
 			widths[4], holder.SharesPercentage+" %",
 			widths[5], upcomingSharesDisplay,
 			widths[6], holder.UpcomingSharesPercentage+" %",
-			widths[7], formattedTime,
+			widths[7], holder.UpdateBlock,
 		)
 	}
 

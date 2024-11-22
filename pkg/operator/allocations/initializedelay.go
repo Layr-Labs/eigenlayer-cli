@@ -50,9 +50,6 @@ func initializeDelayAction(cCtx *cli.Context, p utils.Prompter) error {
 		return eigenSdkUtils.WrapError("failed to create new eth client", err)
 	}
 
-	// Temp to test modify Allocations
-	config.delegationManagerAddress = gethcommon.HexToAddress("0x3391eBafDD4b2e84Eeecf1711Ff9FC06EF9Ed182")
-
 	if config.broadcast {
 		confirm, err := p.Confirm(
 			"This will initialize the allocation delay for operator. You won't be able to set or change it again. Do you want to continue?",
@@ -144,6 +141,7 @@ func getInitializeAllocationDelayFlags() []cli.Flag {
 		&flags.BroadcastFlag,
 		&flags.VerboseFlag,
 		&flags.OperatorAddressFlag,
+		&flags.DelegationManagerAddressFlag,
 	}
 	allFlags := append(baseFlags, flags.GetSignerFlags()...)
 	sort.Sort(cli.FlagsByName(allFlags))
@@ -186,9 +184,12 @@ func readAndValidateAllocationDelayConfig(c *cli.Context, logger logging.Logger)
 		logger.Debugf("Failed to get signer config: %s", err)
 	}
 
-	delegationManagerAddress, err := common.GetDelegationManagerAddress(chainID)
-	if err != nil {
-		return nil, err
+	delegationManagerAddress := c.String(flags.DelegationManagerAddressFlag.Name)
+	if delegationManagerAddress == "" {
+		delegationManagerAddress, err = common.GetDelegationManagerAddress(chainID)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return &allocationDelayConfig{

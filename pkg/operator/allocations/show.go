@@ -57,9 +57,6 @@ func showAction(cCtx *cli.Context, p utils.Prompter) error {
 		return eigenSdkUtils.WrapError("failed to create new eth client", err)
 	}
 
-	// Temp to test modify allocations
-	config.delegationManagerAddress = gethcommon.HexToAddress("0x3391eBafDD4b2e84Eeecf1711Ff9FC06EF9Ed182")
-
 	elReader, err := elcontracts.NewReaderFromConfig(
 		elcontracts.Config{
 			DelegationManagerAddress: config.delegationManagerAddress,
@@ -157,86 +154,27 @@ func showAction(cCtx *cli.Context, p utils.Prompter) error {
 				Shares:                   currentShares,
 				SharesPercentage:         currentSharesPercentage.String(),
 				NewMagnitude:             newMagnitudeBigInt.Uint64(),
-				NewMagnitudeTimestamp:    alloc.EffectBlock,
+				UpdateBlock:              alloc.EffectBlock,
 				NewAllocationShares:      newShares,
 				UpcomingSharesPercentage: newSharesPercentage.String(),
 			})
 		}
 	}
-	//for i, strategyAddress := range config.strategyAddresses {
-	//	slashableMagnitude := slashableMagnitudes[i]
-	//	for j, opSet := range opSets {
-	//		newAllocation := uint64(0)
-	//		newTimestamp := uint32(0)
-	//		currSlashableMag := slashableMagnitude[j]
-	//		someKey := getUniqueKey(strategyAddress, opSet)
-	//
-	//		/*
-	//			1. Check if there's a pending allocation for this opera
-	//		*/
-	//		if _, ok := pendingAllocationMap[someKey]; ok {
-	//			newAllocation = pendingAllocationMap[someKey].Magnitude
-	//			newTimestamp = pendingAllocationMap[someKey].Timestamp
-	//		}
-	//
-	//		/*
-	//			2. Check if there's a pending deallocation for this operator
-	//		*/
-	//		if _, ok := pendingdeAllocationMap[someKey]; ok {
-	//			// pendingdeAllocationMap has the magnitude diff for deallocations so we have to
-	//			// do some extra math to get the new magnitude
-	//			newAllocationDiff := pendingdeAllocationMap[someKey].Magnitude
-	//			newTimestamp = pendingdeAllocationMap[someKey].Timestamp
-	//			newAllocation = currSlashableMag
-	//			currSlashableMag = currSlashableMag + newAllocationDiff
-	//		}
-	//
-	//		operatorScaledShares := operatorDelegatedSharesMap[strategyAddress.String()]
-	//
-	//		/*
-	//			3. Calculate the current shares and percentage shares for the operator
-	//		*/
-	//		shares, percentShares := getSharesFromMagnitude(operatorScaledShares, currSlashableMag)
-	//
-	//		/*
-	//			4. Calculate the new shares and percentage shares for the operator if any
-	//		*/
-	//		newShares, newSharesPercentage := getSharesFromMagnitude(operatorScaledShares, newAllocation)
-	//
-	//		/*
-	//			5. Append the SlashableMagnitudeHolder object to the list
-	//		*/
-	//		slashableMagnitudeHolders = append(slashableMagnitudeHolders, SlashableMagnitudesHolder{
-	//			StrategyAddress:          strategyAddress,
-	//			AVSAddress:               opSet.Avs,
-	//			OperatorSetId:            opSet.OperatorSetId,
-	//			SlashableMagnitude:       currSlashableMag,
-	//			NewMagnitude:             newAllocation,
-	//			NewMagnitudeTimestamp:    newTimestamp,
-	//			Shares:                   shares,
-	//			SharesPercentage:         percentShares.String(),
-	//			NewAllocationShares:      newShares,
-	//			UpcomingSharesPercentage: newSharesPercentage.String(),
-	//		})
-	//	}
-	//}
-
-	// Get Operator Shares
-	//operatorSharesMap := make(map[string]*big.Int)
-	//for _, strategyAddress := range config.strategyAddresses {
-	//	shares, err := elReader.GetOperatorShares(&bind.CallOpts{}, config.operatorAddress, strategyAddress)
-	//	if err != nil {
-	//		return err
-	//	}
-	//	operatorSharesMap[strategyAddress.String()] = shares
-	//}
 
 	for key, val := range operatorDelegatedSharesMap {
 		fmt.Printf("Strategy Address: %s, Shares %s\n", key, val.String())
 	}
 
+	currBlockNumber, err := ethClient.BlockNumber(ctx)
+	if err != nil {
+		return eigenSdkUtils.WrapError("failed to get current block number", err)
+	}
 	fmt.Println()
-	fmt.Printf("------------------ Allocation State for %s ---------------------\n", config.operatorAddress.String())
+	fmt.Printf(
+		"------------------ Allocation State for %s (Block: %d) ---------------------\n",
+		config.operatorAddress.String(),
+		currBlockNumber,
+	)
 	if config.outputType == string(common.OutputType_Json) {
 		slashableMagnitudeHolders.PrintJSON()
 	} else {
@@ -289,9 +227,13 @@ func readAndValidateShowConfig(cCtx *cli.Context, logger *logging.Logger) (*show
 	outputType := cCtx.String(flags.OutputTypeFlag.Name)
 
 	chainId := utils.NetworkNameToChainId(network)
-	delegationManagerAddress, err := common.GetDelegationManagerAddress(chainId)
-	if err != nil {
-		return nil, err
+	delegationManagerAddress := cCtx.String(flags.DelegationManagerAddressFlag.Name)
+	var err error
+	if delegationManagerAddress == "" {
+		delegationManagerAddress, err = common.GetDelegationManagerAddress(chainId)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return &showConfig{
@@ -318,6 +260,7 @@ func getShowFlags() []cli.Flag {
 		&flags.VerboseFlag,
 		&flags.OutputFileFlag,
 		&flags.OutputTypeFlag,
+		&flags.DelegationManagerAddressFlag,
 	}
 
 	sort.Sort(cli.FlagsByName(baseFlags))

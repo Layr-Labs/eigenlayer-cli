@@ -12,7 +12,6 @@ import (
 	allocationmanager "github.com/Layr-Labs/eigensdk-go/contracts/bindings/AllocationManager"
 	"github.com/Layr-Labs/eigensdk-go/logging"
 
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	gethcommon "github.com/ethereum/go-ethereum/common"
 
 	"github.com/stretchr/testify/assert"
@@ -39,7 +38,7 @@ func newFakeElChainReader(
 }
 
 func (f *fakeElChainReader) GetMaxMagnitudes(
-	opts *bind.CallOpts,
+	ctx context.Context,
 	operator gethcommon.Address,
 	strategyAddresses []gethcommon.Address,
 ) ([]uint64, error) {
@@ -61,7 +60,7 @@ func (f *fakeElChainReader) GetMaxMagnitudes(
 }
 
 func (f *fakeElChainReader) GetAllocatableMagnitude(
-	opts *bind.CallOpts,
+	ctx context.Context,
 	operator gethcommon.Address,
 	strategy gethcommon.Address,
 ) (uint64, error) {
@@ -100,15 +99,12 @@ func TestGenerateAllocationsParams(t *testing.T) {
 			expectedAllocations: &BulkModifyAllocations{
 				Allocations: []allocationmanager.IAllocationManagerTypesAllocateParams{
 					{
-						Strategy:             gethcommon.HexToAddress(strategyAddress),
-						ExpectedMaxMagnitude: initialMagnitude,
-						OperatorSets: []allocationmanager.OperatorSet{
-							{
-								OperatorSetId: 1,
-								Avs:           gethcommon.HexToAddress(avsAddress),
-							},
+						Strategies: []gethcommon.Address{gethcommon.HexToAddress(strategyAddress)},
+						OperatorSet: allocationmanager.OperatorSet{
+							Avs: gethcommon.HexToAddress(avsAddress),
+							Id:  1,
 						},
-						Magnitudes: []uint64{1e17},
+						NewMagnitudes: []uint64{1e17},
 					},
 				},
 			},
@@ -123,41 +119,44 @@ func TestGenerateAllocationsParams(t *testing.T) {
 			expectedAllocations: &BulkModifyAllocations{
 				Allocations: []allocationmanager.IAllocationManagerTypesAllocateParams{
 					{
-						Strategy:             gethcommon.HexToAddress("0x49989b32351Eb9b8ab2d5623cF22E7F7C23e5630"),
-						ExpectedMaxMagnitude: initialMagnitude,
-						OperatorSets: []allocationmanager.OperatorSet{
-							{
-								OperatorSetId: 1,
-								Avs:           gethcommon.HexToAddress("0x2222AAC0C980Cc029624b7ff55B88Bc6F63C538f"),
-							},
-							{
-								OperatorSetId: 3,
-								Avs:           gethcommon.HexToAddress("0x2222AAC0C980Cc029624b7ff55B88Bc6F63C538f"),
-							},
+						Strategies: []gethcommon.Address{
+							gethcommon.HexToAddress("0x49989b32351Eb9b8ab2d5623cF22E7F7C23e5630"),
 						},
-						Magnitudes: []uint64{2e17, 1e17},
+						OperatorSet: allocationmanager.OperatorSet{
+							Avs: gethcommon.HexToAddress("0x2222AAC0C980Cc029624b7ff55B88Bc6F63C538f"),
+							Id:  1,
+						},
+						NewMagnitudes: []uint64{2e17},
 					},
 					{
-						Strategy:             gethcommon.HexToAddress("0x232326fE4F8C2f83E3eB2318F090557b7CD02222"),
-						ExpectedMaxMagnitude: initialMagnitude,
-						OperatorSets: []allocationmanager.OperatorSet{
-							{
-								OperatorSetId: 4,
-								Avs:           gethcommon.HexToAddress("0x111116fE4F8C2f83E3eB2318F090557b7CD0BF76"),
-							},
+						Strategies: []gethcommon.Address{
+							gethcommon.HexToAddress("0x49989b32351Eb9b8ab2d5623cF22E7F7C23e5630"),
 						},
-						Magnitudes: []uint64{3e17},
+						OperatorSet: allocationmanager.OperatorSet{
+							Avs: gethcommon.HexToAddress("0x2222AAC0C980Cc029624b7ff55B88Bc6F63C538f"),
+							Id:  3,
+						},
+						NewMagnitudes: []uint64{1e17},
 					},
 					{
-						Strategy:             gethcommon.HexToAddress("0x545456fE4F8C2f83E3eB2318F090557b7CD04567"),
-						ExpectedMaxMagnitude: initialMagnitude,
-						OperatorSets: []allocationmanager.OperatorSet{
-							{
-								OperatorSetId: 5,
-								Avs:           gethcommon.HexToAddress("0x111116fE4F8C2f83E3eB2318F090557b7CD0BF76"),
-							},
+						Strategies: []gethcommon.Address{
+							gethcommon.HexToAddress("0x232326fE4F8C2f83E3eB2318F090557b7CD02222"),
 						},
-						Magnitudes: []uint64{4e17},
+						OperatorSet: allocationmanager.OperatorSet{
+							Avs: gethcommon.HexToAddress("0x111116fE4F8C2f83E3eB2318F090557b7CD0BF76"),
+							Id:  4,
+						},
+						NewMagnitudes: []uint64{3e17},
+					},
+					{
+						Strategies: []gethcommon.Address{
+							gethcommon.HexToAddress("0x545456fE4F8C2f83E3eB2318F090557b7CD04567"),
+						},
+						OperatorSet: allocationmanager.OperatorSet{
+							Avs: gethcommon.HexToAddress("0x111116fE4F8C2f83E3eB2318F090557b7CD0BF76"),
+							Id:  5,
+						},
+						NewMagnitudes: []uint64{4e17},
 					},
 				},
 				AllocatableMagnitudes: map[gethcommon.Address]uint64{

@@ -111,4 +111,11 @@ var (
 		Usage:   "environment to use. Currently supports 'preprod' ,'testnet' and 'prod'. If not provided, it will be inferred based on network",
 		EnvVars: []string{"ENVIRONMENT"},
 	}
+
+	DelegationManagerAddressFlag = cli.StringFlag{
+		Name:    "delegation-manager-address",
+		Aliases: []string{"dma"},
+		Usage:   "Optional delegation manager address. This can be used if you are testing against your own deployment of eigenlayer contracts",
+		EnvVars: []string{"DELEGATION_MANAGER_ADDRESS"},
+	}
 )
