@@ -37,4 +37,11 @@ var (
 		Aliases: []string{"osid"},
 		EnvVars: []string{"OPERATOR_SET_ID"},
 	}
+
+	OperatorSetIdsFlag = cli.Uint64SliceFlag{
+		Name:    "operator-set-ids",
+		Usage:   "Operator set IDs. Comma separated list of operator set IDs",
+		Aliases: []string{"osids"},
+		EnvVars: []string{"OPERATOR_SET_IDS"},
+	}
 )

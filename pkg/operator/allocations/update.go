@@ -45,7 +45,7 @@ func UpdateCmd(p utils.Prompter) *cli.Command {
 		Usage:     "Update allocations",
 		UsageText: "update",
 		Description: `
-		Command to update allocations
+Command to update allocations of slashable stake
 		`,
 		Flags: getUpdateFlags(),
 		After: telemetry.AfterRunAction(),
@@ -160,10 +160,12 @@ func updateAllocations(cCtx *cli.Context, p utils.Prompter) error {
 			}
 			allocationsToUpdate.PrintPretty()
 		}
-		txFeeDetails := common.GetTxFeeDetails(unsignedTx)
-		fmt.Println()
-		txFeeDetails.Print()
-		fmt.Println("To broadcast the transaction, use the --broadcast flag")
+		if !config.isSilent {
+			txFeeDetails := common.GetTxFeeDetails(unsignedTx)
+			fmt.Println()
+			txFeeDetails.Print()
+			fmt.Println("To broadcast the transaction, use the --broadcast flag")
+		}
 	}
 
 	return nil
@@ -184,6 +186,7 @@ func getUpdateFlags() []cli.Flag {
 		&flags.OperatorSetIdFlag,
 		&flags.CSVFileFlag,
 		&flags.DelegationManagerAddressFlag,
+		&flags.SilentFlag,
 		&BipsToAllocateFlag,
 	}
 	allFlags := append(baseFlags, flags.GetSignerFlags()...)
@@ -432,6 +435,7 @@ func readAndValidateUpdateFlags(cCtx *cli.Context, logger logging.Logger) (*upda
 	output := cCtx.String(flags.OutputFileFlag.Name)
 	outputType := cCtx.String(flags.OutputTypeFlag.Name)
 	broadcast := cCtx.Bool(flags.BroadcastFlag.Name)
+	isSilent := cCtx.Bool(flags.SilentFlag.Name)
 
 	operatorAddress := gethcommon.HexToAddress(cCtx.String(flags.OperatorAddressFlag.Name))
 	avsAddress := gethcommon.HexToAddress(cCtx.String(flags.AVSAddressFlag.Name))
@@ -481,5 +485,6 @@ func readAndValidateUpdateFlags(cCtx *cli.Context, logger logging.Logger) (*upda
 		operatorSetId:            operatorSetId,
 		chainID:                  chainId,
 		delegationManagerAddress: gethcommon.HexToAddress(delegationManagerAddress),
+		isSilent:                 isSilent,
 	}, nil
 }

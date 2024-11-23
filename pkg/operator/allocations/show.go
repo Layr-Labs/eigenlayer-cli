@@ -106,7 +106,6 @@ func showAction(cCtx *cli.Context, p utils.Prompter) error {
 	/*
 		3. Get allocation info for the operator
 	*/
-
 	allAllocations := make(map[string][]elcontracts.AllocationInfo, len(config.strategyAddresses))
 	for _, strategyAddress := range config.strategyAddresses {
 		allocations, err := elReader.GetAllocationInfo(
@@ -121,7 +120,19 @@ func showAction(cCtx *cli.Context, p utils.Prompter) error {
 	}
 
 	/*
-		6. Get the operator scaled shares for all strategies
+		4. Get the operator's registered operator sets
+	*/
+	registeredOperatorSets, err := elReader.GetRegisteredSets(ctx, config.operatorAddress)
+	if err != nil {
+		return eigenSdkUtils.WrapError("failed to get registered operator sets", err)
+	}
+	registeredOperatorSetsMap := make(map[string]allocationmanager.OperatorSet)
+	for _, opSet := range registeredOperatorSets {
+		registeredOperatorSetsMap[getUniqueKey(opSet.Avs, opSet.Id)] = opSet
+	}
+
+	/*
+		5. Get the operator scaled shares for all strategies
 	*/
 	operatorDelegatedSharesMap := make(map[string]*big.Int)
 	shares, err := elReader.GetOperatorShares(ctx, config.operatorAddress, config.strategyAddresses)
@@ -130,10 +141,11 @@ func showAction(cCtx *cli.Context, p utils.Prompter) error {
 	}
 
 	/*
-		7. Using all of the above, calculate SlashableMagnitudeHolders object
+		6. Using all of the above, calculate SlashableMagnitudeHolders object
 		   for displaying the allocation state of the operator
 	*/
 	slashableMagnitudeHolders := make(SlashableMagnitudeHolders, 0)
+	dergisteredOpsets := make(DeregsiteredOperatorSets, 0)
 	for strategy, allocations := range allAllocations {
 		strategyShares := operatorDelegatedSharesMap[strategy]
 		for _, alloc := range allocations {
@@ -146,6 +158,22 @@ func showAction(cCtx *cli.Context, p utils.Prompter) error {
 				newMagnitudeBigInt = big.NewInt(0).Add(alloc.CurrentMagnitude, alloc.PendingDiff)
 			}
 			newShares, newSharesPercentage := getSharesFromMagnitude(strategyShares, newMagnitudeBigInt.Uint64())
+
+			// Check if the operator set is not registered and add it to the unregistered list
+			// Then skip the rest of the loop
+			if _, ok := registeredOperatorSetsMap[getUniqueKey(alloc.AvsAddress, alloc.OperatorSetId)]; !ok {
+				dergisteredOpsets = append(dergisteredOpsets, DeregisteredOperatorSet{
+					StrategyAddress:    gethcommon.HexToAddress(strategy),
+					AVSAddress:         alloc.AvsAddress,
+					OperatorSetId:      alloc.OperatorSetId,
+					SlashableMagnitude: alloc.CurrentMagnitude.Uint64(),
+					Shares:             currentShares,
+					SharesPercentage:   currentSharesPercentage.String(),
+				})
+				continue
+			}
+
+			// Add the operator set to the registered list
 			slashableMagnitudeHolders = append(slashableMagnitudeHolders, SlashableMagnitudesHolder{
 				StrategyAddress:          gethcommon.HexToAddress(strategy),
 				AVSAddress:               alloc.AvsAddress,
@@ -169,6 +197,12 @@ func showAction(cCtx *cli.Context, p utils.Prompter) error {
 	if err != nil {
 		return eigenSdkUtils.WrapError("failed to get current block number", err)
 	}
+	delay, err := elReader.GetAllocationDelay(ctx, config.operatorAddress)
+	if err != nil {
+		return err
+	}
+	fmt.Println()
+	fmt.Printf("Current allocation delay: %d blocks\n", delay)
 	fmt.Println()
 	fmt.Printf(
 		"------------------ Allocation State for %s (Block: %d) ---------------------\n",
@@ -179,6 +213,17 @@ func showAction(cCtx *cli.Context, p utils.Prompter) error {
 		slashableMagnitudeHolders.PrintJSON()
 	} else {
 		slashableMagnitudeHolders.PrintPretty()
+	}
+
+	fmt.Println()
+	fmt.Printf(
+		"NOTE: You have %d deregistered operator sets which have nonzero allocations as listed below. Please deallocate to use those funds.\n",
+		len(dergisteredOpsets),
+	)
+	if config.outputType == string(common.OutputType_Json) {
+		dergisteredOpsets.PrintJSON()
+	} else {
+		dergisteredOpsets.PrintPretty()
 	}
 
 	return nil
@@ -212,8 +257,8 @@ func getSharesFromMagnitude(totalScaledShare *big.Int, magnitude uint64) (*big.I
 	return shares, percentageSharesFloat
 }
 
-func getUniqueKey(strategyAddress gethcommon.Address, opSet allocationmanager.OperatorSet) string {
-	return fmt.Sprintf("%s-%s-%d", strategyAddress.String(), opSet.Avs.String(), opSet.Id)
+func getUniqueKey(strategyAddress gethcommon.Address, opSetId uint32) string {
+	return fmt.Sprintf("%s-%d", strategyAddress.String(), opSetId)
 }
 
 func readAndValidateShowConfig(cCtx *cli.Context, logger *logging.Logger) (*showConfig, error) {

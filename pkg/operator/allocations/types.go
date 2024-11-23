@@ -97,6 +97,7 @@ type updateConfig struct {
 	bipsToAllocate           uint64
 	signerConfig             *types.SignerConfig
 	csvFilePath              string
+	isSilent                 bool
 }
 
 type allocation struct {
@@ -205,6 +206,72 @@ func (s SlashableMagnitudeHolders) PrintPretty() {
 }
 
 func (s SlashableMagnitudeHolders) PrintJSON() {
+	obj, err := json.MarshalIndent(s, "", "  ")
+	if err != nil {
+		fmt.Println("Error marshalling to JSON:", err)
+		return
+	}
+	fmt.Println(string(obj))
+}
+
+type DeregsiteredOperatorSets []DeregisteredOperatorSet
+type DeregisteredOperatorSet struct {
+	StrategyAddress    gethcommon.Address
+	AVSAddress         gethcommon.Address
+	OperatorSetId      uint32
+	SlashableMagnitude uint64
+	Shares             *big.Int
+	SharesPercentage   string
+}
+
+func (s DeregsiteredOperatorSets) PrintPretty() {
+	// Define column headers and widths
+	headers := []string{
+		"Strategy Address",
+		"AVS Address",
+		"OperatorSet ID",
+		"Slashable Shares (Wei)",
+		"Shares %",
+	}
+	widths := []int{len(headers[0]) + 1, len(headers[1]) + 3, 15, 30, 25}
+
+	// print dashes
+	for _, width := range widths {
+		fmt.Print("+" + strings.Repeat("-", width+1))
+	}
+	fmt.Println("+")
+
+	// Print header
+	for i, header := range headers {
+		fmt.Printf("| %-*s", widths[i], header)
+	}
+	fmt.Println("|")
+
+	// Print separator
+	for _, width := range widths {
+		fmt.Print("|", strings.Repeat("-", width+1))
+	}
+	fmt.Println("|")
+
+	// Print data rows
+	for _, holder := range s {
+		fmt.Printf("| %-*s| %-*s| %-*d| %-*s| %-*s|\n",
+			widths[0], common.ShortEthAddress(holder.StrategyAddress),
+			widths[1], common.ShortEthAddress(holder.AVSAddress),
+			widths[2], holder.OperatorSetId,
+			widths[3], common.FormatNumberWithUnderscores(holder.Shares.String()),
+			widths[4], holder.SharesPercentage+" %",
+		)
+	}
+
+	// print dashes
+	for _, width := range widths {
+		fmt.Print("+" + strings.Repeat("-", width+1))
+	}
+	fmt.Println("+")
+}
+
+func (s DeregsiteredOperatorSets) PrintJSON() {
 	obj, err := json.MarshalIndent(s, "", "  ")
 	if err != nil {
 		fmt.Println("Error marshalling to JSON:", err)
