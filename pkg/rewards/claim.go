@@ -86,7 +86,14 @@ func getClaimFlags() []cli.Flag {
 	return allFlags
 }
 
-func BatchClaim(cCtx *cli.Context, ethClient *ethclient.Client, elReader *elcontracts.ChainReader, df *httpProofDataFetcher.HttpProofDataFetcher, config *ClaimConfig, p utils.Prompter) error {
+func BatchClaim(
+	cCtx *cli.Context,
+	ethClient *ethclient.Client,
+	elReader *elcontracts.ChainReader,
+	df *httpProofDataFetcher.HttpProofDataFetcher,
+	config *ClaimConfig,
+	p utils.Prompter,
+) error {
 	ctx := cCtx.Context
 	logger := common.GetLogger(cCtx)
 
@@ -115,7 +122,15 @@ func BatchClaim(cCtx *cli.Context, ethClient *ethclient.Client, elReader *elcont
 			tokenAddrs = append(tokenAddrs, gethcommon.HexToAddress(addr))
 		}
 
-		elClaim, _, _, err := generateClaimPayload(ctx, config.ClaimTimestamp, elReader, logger, earnerAddr, df, tokenAddrs)
+		elClaim, _, _, err := generateClaimPayload(
+			ctx,
+			config.ClaimTimestamp,
+			elReader,
+			logger,
+			earnerAddr,
+			df,
+			tokenAddrs,
+		)
 
 		elClaims = append(elClaims, *elClaim)
 
@@ -260,7 +275,15 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 		return BatchClaim(cCtx, ethClient, elReader, df, config, p)
 	}
 
-	elClaim, claim, accounts, err := generateClaimPayload(ctx, config.ClaimTimestamp, elReader, logger, config.EarnerAddress, df, config.TokenAddresses)
+	elClaim, claim, accounts, err := generateClaimPayload(
+		ctx,
+		config.ClaimTimestamp,
+		elReader,
+		logger,
+		config.EarnerAddress,
+		df,
+		config.TokenAddresses,
+	)
 
 	if err != nil {
 		return err
