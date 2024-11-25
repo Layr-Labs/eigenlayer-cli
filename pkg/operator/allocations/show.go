@@ -215,15 +215,17 @@ func showAction(cCtx *cli.Context, p utils.Prompter) error {
 		slashableMagnitudeHolders.PrintPretty()
 	}
 
-	fmt.Println()
-	fmt.Printf(
-		"NOTE: You have %d deregistered operator sets which have nonzero allocations as listed below. Please deallocate to use those funds.\n",
-		len(dergisteredOpsets),
-	)
-	if config.outputType == string(common.OutputType_Json) {
-		dergisteredOpsets.PrintJSON()
-	} else {
-		dergisteredOpsets.PrintPretty()
+	if len(dergisteredOpsets) > 0 {
+		fmt.Println()
+		fmt.Printf(
+			"NOTE: You have %d deregistered operator sets which have nonzero allocations as listed below. Please deallocate to use those funds.\n",
+			len(dergisteredOpsets),
+		)
+		if config.outputType == string(common.OutputType_Json) {
+			dergisteredOpsets.PrintJSON()
+		} else {
+			dergisteredOpsets.PrintPretty()
+		}
 	}
 
 	return nil
