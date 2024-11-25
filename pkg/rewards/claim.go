@@ -118,8 +118,15 @@ func BatchClaim(
 		earnerAddr := gethcommon.HexToAddress(claimConfig.EarnerAddress)
 
 		var tokenAddrs []gethcommon.Address
-		for _, addr := range claimConfig.TokenAddresses {
-			tokenAddrs = append(tokenAddrs, gethcommon.HexToAddress(addr))
+
+		// Empty token addresses list will create a claim for all tokens claimable
+		// by the earner address.
+		if len(claimConfig.TokenAddresses) == 0 {
+			tokenAddrs = nil
+		} else {
+			for _, addr := range claimConfig.TokenAddresses {
+				tokenAddrs = append(tokenAddrs, gethcommon.HexToAddress(addr))
+			}
 		}
 
 		elClaim, _, _, err := generateClaimPayload(
