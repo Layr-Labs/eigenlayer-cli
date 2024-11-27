@@ -95,6 +95,9 @@ func BatchClaim(
 	df *httpProofDataFetcher.HttpProofDataFetcher,
 	config *ClaimConfig,
 	p utils.Prompter,
+	claimDate string,
+	rootIndex uint32,
+	proofData *proofDataFetcher.RewardProofData,
 ) error {
 	ctx := cCtx.Context
 	logger := common.GetLogger(cCtx)
@@ -112,16 +115,6 @@ func BatchClaim(
 	err = yaml.Unmarshal(yamlFile, &claimConfigs)
 	if err != nil {
 		return eigenSdkUtils.WrapError("failed to parse YAML config", err)
-	}
-
-	claimDate, rootIndex, err := getClaimDistributionRoot(ctx, config.ClaimTimestamp, elReader, logger)
-	if err != nil {
-		return eigenSdkUtils.WrapError("failed to get claim distribution root", err)
-	}
-
-	proofData, err := df.FetchClaimAmountsForDate(ctx, claimDate)
-	if err != nil {
-		return eigenSdkUtils.WrapError("failed to fetch claim amounts for date", err)
 	}
 
 	var elClaims []rewardscoordinator.IRewardsCoordinatorRewardsMerkleClaim
@@ -267,7 +260,7 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 	}
 
 	if config.BatchClaimFile != "" {
-		return BatchClaim(cCtx, ethClient, elReader, df, config, p)
+		return BatchClaim(cCtx, ethClient, elReader, df, config, p, claimDate, rootIndex, proofData)
 	}
 
 	elClaim, claim, account, err := generateClaimPayload(
