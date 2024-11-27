@@ -23,6 +23,7 @@ import (
 
 	"github.com/Layr-Labs/eigenlayer-rewards-proofs/pkg/claimgen"
 	"github.com/Layr-Labs/eigenlayer-rewards-proofs/pkg/distribution"
+	"github.com/Layr-Labs/eigenlayer-rewards-proofs/pkg/proofDataFetcher"
 	"github.com/Layr-Labs/eigenlayer-rewards-proofs/pkg/proofDataFetcher/httpProofDataFetcher"
 
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
@@ -31,6 +32,7 @@ import (
 	eigenSdkUtils "github.com/Layr-Labs/eigensdk-go/utils"
 
 	gethcommon "github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 
 	"github.com/urfave/cli/v2"
@@ -112,7 +114,19 @@ func BatchClaim(
 		return eigenSdkUtils.WrapError("failed to parse YAML config", err)
 	}
 
+	claimDate, rootIndex, err := getClaimDistributionRoot(ctx, config.ClaimTimestamp, elReader, logger)
+	if err != nil {
+		return eigenSdkUtils.WrapError("failed to get claim distribution root", err)
+	}
+
+	proofData, err := df.FetchClaimAmountsForDate(ctx, claimDate)
+	if err != nil {
+		return eigenSdkUtils.WrapError("failed to fetch claim amounts for date", err)
+	}
+
 	var elClaims []rewardscoordinator.IRewardsCoordinatorRewardsMerkleClaim
+	var claims []contractrewardscoordinator.IRewardsCoordinatorRewardsMerkleClaim
+	var accounts []merkletree.MerkleTree
 
 	for _, claimConfig := range claimConfigs {
 		earnerAddr := gethcommon.HexToAddress(claimConfig.EarnerAddress)
@@ -121,25 +135,25 @@ func BatchClaim(
 
 		// Empty token addresses list will create a claim for all tokens claimable
 		// by the earner address.
-		if len(claimConfig.TokenAddresses) == 0 {
-			tokenAddrs = nil
-		} else {
+		if len(claimConfig.TokenAddresses) != 0 {
 			for _, addr := range claimConfig.TokenAddresses {
 				tokenAddrs = append(tokenAddrs, gethcommon.HexToAddress(addr))
 			}
 		}
 
-		elClaim, _, _, err := generateClaimPayload(
+		elClaim, claim, account, err := generateClaimPayload(
 			ctx,
-			config.ClaimTimestamp,
+			rootIndex,
+			proofData,
 			elReader,
 			logger,
 			earnerAddr,
-			df,
 			tokenAddrs,
 		)
 
 		elClaims = append(elClaims, *elClaim)
+		claims = append(claims, *claim)
+		accounts = append(accounts, *account)
 
 		if err != nil {
 			logger.Errorf("Failed to process claim for earner %s: %v", earnerAddr.String(), err)
@@ -147,55 +161,19 @@ func BatchClaim(
 		}
 	}
 
-	if config.Broadcast {
-		eLWriter, err := common.GetELWriter(
-			config.ClaimerAddress,
-			config.SignerConfig,
-			ethClient,
-			elcontracts.Config{
-				RewardsCoordinatorAddress: config.RewardsCoordinatorAddress,
-			},
-			p,
-			config.ChainID,
-			logger,
-		)
-
-		if err != nil {
-			return eigenSdkUtils.WrapError("failed to get EL writer", err)
-		}
-
-		logger.Infof("Broadcasting batch claim transaction...")
-		receipt, err := eLWriter.ProcessClaims(ctx, elClaims, config.RecipientAddress, true)
-		if err != nil {
-			return eigenSdkUtils.WrapError("failed to process claim", err)
-		}
-
-		logger.Infof("Claim transaction submitted successfully")
-		common.PrintTransactionInfo(receipt.TxHash.String(), config.ChainID)
-	} else {
-		return eigenSdkUtils.WrapError("Batch claim currently only supported with broadcast flag", err)
-	}
-	return nil
+	err = broadcastClaims(config, ethClient, logger, p, ctx, &elClaims, &claims, &accounts)
+	return err
 }
 
 func generateClaimPayload(
 	ctx context.Context,
-	claimTimestamp string,
+	rootIndex uint32,
+	proofData *proofDataFetcher.RewardProofData,
 	elReader *elcontracts.ChainReader,
 	logger logging.Logger,
 	earnerAddress gethcommon.Address,
-	df *httpProofDataFetcher.HttpProofDataFetcher,
 	tokenAddresses []gethcommon.Address,
 ) (*rewardscoordinator.IRewardsCoordinatorRewardsMerkleClaim, *contractrewardscoordinator.IRewardsCoordinatorRewardsMerkleClaim, *merkletree.MerkleTree, error) {
-	claimDate, rootIndex, err := getClaimDistributionRoot(ctx, claimTimestamp, elReader, logger)
-	if err != nil {
-		return nil, nil, nil, eigenSdkUtils.WrapError("failed to get claim distribution root", err)
-	}
-
-	proofData, err := df.FetchClaimAmountsForDate(ctx, claimDate)
-	if err != nil {
-		return nil, nil, nil, eigenSdkUtils.WrapError("failed to fetch claim amounts for date", err)
-	}
 
 	claimableTokensOrderMap, present := proofData.Distribution.GetTokensForEarner(earnerAddress)
 	if !present {
@@ -278,17 +256,27 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 		http.DefaultClient,
 	)
 
+	claimDate, rootIndex, err := getClaimDistributionRoot(ctx, config.ClaimTimestamp, elReader, logger)
+	if err != nil {
+		return eigenSdkUtils.WrapError("failed to get claim distribution root", err)
+	}
+
+	proofData, err := df.FetchClaimAmountsForDate(ctx, claimDate)
+	if err != nil {
+		return eigenSdkUtils.WrapError("failed to fetch claim amounts for date", err)
+	}
+
 	if config.BatchClaimFile != "" {
 		return BatchClaim(cCtx, ethClient, elReader, df, config, p)
 	}
 
-	elClaim, claim, accounts, err := generateClaimPayload(
+	elClaim, claim, account, err := generateClaimPayload(
 		ctx,
-		config.ClaimTimestamp,
+		rootIndex,
+		proofData,
 		elReader,
 		logger,
 		config.EarnerAddress,
-		df,
 		config.TokenAddresses,
 	)
 
@@ -296,6 +284,23 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 		return err
 	}
 
+	elClaims := &[]rewardscoordinator.IRewardsCoordinatorRewardsMerkleClaim{*elClaim}
+	claims := &[]contractrewardscoordinator.IRewardsCoordinatorRewardsMerkleClaim{*claim}
+	accounts := &[]merkletree.MerkleTree{*account}
+	err = broadcastClaims(config, ethClient, logger, p, ctx, elClaims, claims, accounts)
+
+	return err
+}
+
+func broadcastClaims(config *ClaimConfig,
+	ethClient *ethclient.Client,
+	logger logging.Logger,
+	p utils.Prompter,
+	ctx context.Context,
+	elClaims *[]rewardscoordinator.IRewardsCoordinatorRewardsMerkleClaim,
+	claims *[]contractrewardscoordinator.IRewardsCoordinatorRewardsMerkleClaim,
+	accounts *[]merkletree.MerkleTree,
+) error {
 	if config.Broadcast {
 		eLWriter, err := common.GetELWriter(
 			config.ClaimerAddress,
@@ -314,7 +319,15 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 		}
 
 		logger.Infof("Broadcasting claim transaction...")
-		receipt, err := eLWriter.ProcessClaim(ctx, *elClaim, config.RecipientAddress, true)
+
+		var receipt *types.Receipt
+
+		if len(*elClaims) > 0 {
+			receipt, err = eLWriter.ProcessClaims(ctx, *elClaims, config.RecipientAddress, true)
+		} else {
+			receipt, err = eLWriter.ProcessClaim(ctx, (*elClaims)[0], config.RecipientAddress, true)
+		}
+
 		if err != nil {
 			return eigenSdkUtils.WrapError("failed to process claim", err)
 		}
@@ -342,8 +355,12 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 			// Claimer is a smart contract
 			noSendTxOpts.GasLimit = 150_000
 		}
-
-		unsignedTx, err := contractBindings.RewardsCoordinator.ProcessClaim(noSendTxOpts, *elClaim, config.RecipientAddress)
+		var unsignedTx *types.Transaction
+		if len(*elClaims) > 0 {
+			unsignedTx, err = contractBindings.RewardsCoordinator.ProcessClaims(noSendTxOpts, *elClaims, config.RecipientAddress)
+		} else {
+			unsignedTx, err = contractBindings.RewardsCoordinator.ProcessClaim(noSendTxOpts, (*elClaims)[0], config.RecipientAddress)
+		}
 		if err != nil {
 			return eigenSdkUtils.WrapError("failed to create unsigned tx", err)
 		}
@@ -361,7 +378,7 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 				fmt.Println(calldataHex)
 			}
 		} else if config.OutputType == string(common.OutputType_Json) {
-			solidityClaim := claimgen.FormatProofForSolidity(accounts.Root(), claim)
+			solidityClaim := claimgen.FormatProofForSolidity((*accounts)[0].Root(), &(*claims)[0])
 			jsonData, err := json.MarshalIndent(solidityClaim, "", "  ")
 			if err != nil {
 				logger.Error("Error marshaling JSON:", err)
@@ -383,7 +400,7 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 				fmt.Println("output file not supported for pretty output type")
 				fmt.Println()
 			}
-			solidityClaim := claimgen.FormatProofForSolidity(accounts.Root(), claim)
+			solidityClaim := claimgen.FormatProofForSolidity((*accounts)[0].Root(), &(*claims)[0])
 			if !config.IsSilent {
 				fmt.Println("------- Claim generated -------")
 			}
