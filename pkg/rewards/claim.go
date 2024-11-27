@@ -372,33 +372,37 @@ func broadcastClaims(config *ClaimConfig,
 				fmt.Println(calldataHex)
 			}
 		} else if config.OutputType == string(common.OutputType_Json) {
-			solidityClaim := claimgen.FormatProofForSolidity((*accounts)[0].Root(), &(*claims)[0])
-			jsonData, err := json.MarshalIndent(solidityClaim, "", "  ")
-			if err != nil {
-				logger.Error("Error marshaling JSON:", err)
-				return err
-			}
-			if !common.IsEmptyString(config.Output) {
-				err = common.WriteToFile(jsonData, config.Output)
+			for idx, claim := range *claims {
+				solidityClaim := claimgen.FormatProofForSolidity((*accounts)[idx].Root(), &claim)
+				jsonData, err := json.MarshalIndent(solidityClaim, "", "  ")
 				if err != nil {
+					logger.Error("Error marshaling JSON:", err)
 					return err
 				}
-				logger.Infof("Claim written to file: %s", config.Output)
-			} else {
-				fmt.Println(string(jsonData))
-				fmt.Println()
-				fmt.Println("To write to a file, use the --output flag")
+				if !common.IsEmptyString(config.Output) {
+					err = common.WriteToFile(jsonData, config.Output)
+					if err != nil {
+						return err
+					}
+					logger.Infof("Claim written to file: %s", config.Output)
+				} else {
+					fmt.Println(string(jsonData))
+					fmt.Println()
+					fmt.Println("To write to a file, use the --output flag")
+				}
 			}
 		} else {
 			if !common.IsEmptyString(config.Output) {
 				fmt.Println("output file not supported for pretty output type")
 				fmt.Println()
 			}
-			solidityClaim := claimgen.FormatProofForSolidity((*accounts)[0].Root(), &(*claims)[0])
-			if !config.IsSilent {
-				fmt.Println("------- Claim generated -------")
+			for idx, claim := range *claims {
+				solidityClaim := claimgen.FormatProofForSolidity((*accounts)[idx].Root(), &claim)
+				if !config.IsSilent {
+					fmt.Println("------- Claim generated -------")
+				}
+				common.PrettyPrintStruct(*solidityClaim)
 			}
-			common.PrettyPrintStruct(*solidityClaim)
 			if !config.IsSilent {
 				fmt.Println("-------------------------------")
 				fmt.Println("To write to a file, use the --output flag")
