@@ -145,7 +145,7 @@ func BatchClaim(
 		)
 
 		if err != nil {
-			logger.Errorf("Failed to process claim for earner %s: %v", earnerAddr.String(), err)
+			logger.Warnf("Failed to process claim for earner %s: %v", earnerAddr.String(), err)
 			continue
 		}
 
