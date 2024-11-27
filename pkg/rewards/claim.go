@@ -89,7 +89,8 @@ func getClaimFlags() []cli.Flag {
 }
 
 func BatchClaim(
-	cCtx *cli.Context,
+	ctx context.Context,
+	logger logging.Logger,
 	ethClient *ethclient.Client,
 	elReader *elcontracts.ChainReader,
 	df *httpProofDataFetcher.HttpProofDataFetcher,
@@ -99,8 +100,6 @@ func BatchClaim(
 	rootIndex uint32,
 	proofData *proofDataFetcher.RewardProofData,
 ) error {
-	ctx := cCtx.Context
-	logger := common.GetLogger(cCtx)
 
 	yamlFile, err := os.ReadFile(config.BatchClaimFile)
 	if err != nil {
@@ -261,7 +260,7 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 	}
 
 	if config.BatchClaimFile != "" {
-		return BatchClaim(cCtx, ethClient, elReader, df, config, p, claimDate, rootIndex, proofData)
+		return BatchClaim(ctx, logger, ethClient, elReader, df, config, p, claimDate, rootIndex, proofData)
 	}
 
 	elClaim, claim, account, err := generateClaimPayload(
