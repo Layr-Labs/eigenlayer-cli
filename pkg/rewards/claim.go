@@ -236,7 +236,8 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 		elcontracts.Config{
 			RewardsCoordinatorAddress: config.RewardsCoordinatorAddress,
 		},
-		ethClient, logger,
+		ethClient,
+		logger,
 	)
 	if err != nil {
 		return eigenSdkUtils.WrapError("failed to create new reader from config", err)
