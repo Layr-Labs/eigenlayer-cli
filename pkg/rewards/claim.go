@@ -144,14 +144,15 @@ func BatchClaim(
 			tokenAddrs,
 		)
 
-		elClaims = append(elClaims, *elClaim)
-		claims = append(claims, *claim)
-		accounts = append(accounts, *account)
-
 		if err != nil {
 			logger.Errorf("Failed to process claim for earner %s: %v", earnerAddr.String(), err)
 			continue
 		}
+
+		elClaims = append(elClaims, *elClaim)
+		claims = append(claims, *claim)
+		accounts = append(accounts, *account)
+
 	}
 
 	err = broadcastClaims(config, ethClient, logger, p, ctx, &elClaims, &claims, &accounts)
