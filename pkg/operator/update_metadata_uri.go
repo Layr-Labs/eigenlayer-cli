@@ -77,7 +77,7 @@ Requires the same file used for registration as argument
 				return eigenSdkUtils.WrapError("failed to get EL writer", err)
 			}
 
-			receipt, err := elWriter.UpdateMetadataURI(context.Background(), operatorCfg.Operator.MetadataUrl, true)
+			receipt, err := elWriter.UpdateMetadataURI(context.Background(), operatorCfg.Operator.MetadataUrl, operatorCfg.Operator.Address, true)
 			if err != nil {
 				fmt.Printf("%s Error while updating operator metadata uri\n", utils.EmojiCrossMark)
 				return err

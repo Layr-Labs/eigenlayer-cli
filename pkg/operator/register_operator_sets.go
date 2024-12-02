@@ -77,6 +77,7 @@ func registerOperatorSetsAction(cCtx *cli.Context, p utils.Prompter) error {
 		}
 		receipt, err := eLWriter.RegisterForOperatorSets(
 			ctx,
+			config.operatorAddress,
 			elcontracts.RegistrationRequest{
 				AVSAddress:     config.avsAddress,
 				OperatorSetIds: config.operatorSetIds,
@@ -104,6 +105,7 @@ func registerOperatorSetsAction(cCtx *cli.Context, p utils.Prompter) error {
 		}
 		unsignedTx, err := contractBindings.AllocationManager.RegisterForOperatorSets(
 			noSendTxOpts,
+			config.operatorAddress,
 			allocationmanager.IAllocationManagerTypesRegisterParams{
 				Avs:            config.avsAddress,
 				OperatorSetIds: config.operatorSetIds,

@@ -44,6 +44,7 @@ var ChainMetadataMap = map[int64]types.ChainMetadata{
 		ELDelegationManagerAddress:  "0x39053D51B77DC0d36036Fc1fCc8Cb819df8Ef37A",
 		ELAVSDirectoryAddress:       "0x135dda560e946695d6f155dacafc6f1f25c1f5af",
 		ELRewardsCoordinatorAddress: "0x7750d328b314EfFa365A0402CcfD489B80B0adda",
+		ELPermissionManagerAddress:  "",
 		WebAppUrl:                   "https://app.eigenlayer.xyz/operator",
 		ProofStoreBaseURL:           "https://eigenlabs-rewards-mainnet-ethereum.s3.amazonaws.com",
 	},
@@ -52,6 +53,7 @@ var ChainMetadataMap = map[int64]types.ChainMetadata{
 		ELDelegationManagerAddress:  "0xA44151489861Fe9e3055d95adC98FbD462B948e7",
 		ELAVSDirectoryAddress:       "0x055733000064333CaDDbC92763c58BF0192fFeBf",
 		ELRewardsCoordinatorAddress: "0xAcc1fb458a1317E886dB376Fc8141540537E68fE",
+		ELPermissionManagerAddress:  "",
 		WebAppUrl:                   "https://holesky.eigenlayer.xyz/operator",
 		ProofStoreBaseURL:           "https://eigenlabs-rewards-testnet-holesky.s3.amazonaws.com",
 	},
@@ -60,6 +62,7 @@ var ChainMetadataMap = map[int64]types.ChainMetadata{
 		ELDelegationManagerAddress:  "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
 		ELAVSDirectoryAddress:       "0x0165878A594ca255338adfa4d48449f69242Eb8F",
 		ELRewardsCoordinatorAddress: "0x610178dA211FEF7D417bC0e6FeD39F05609AD788",
+		ELPermissionManagerAddress:  "",
 		WebAppUrl:                   "",
 		ProofStoreBaseURL:           "",
 	},
@@ -322,6 +325,16 @@ func GetAVSDirectoryAddress(chainID *big.Int) (string, error) {
 }
 
 func GetDelegationManagerAddress(chainID *big.Int) (string, error) {
+	chainIDInt := chainID.Int64()
+	chainMetadata, ok := ChainMetadataMap[chainIDInt]
+	if !ok {
+		return "", fmt.Errorf("chain ID %d not supported", chainIDInt)
+	} else {
+		return chainMetadata.ELDelegationManagerAddress, nil
+	}
+}
+
+func GetPermissionManagerAddress(chainID *big.Int) (string, error) {
 	chainIDInt := chainID.Int64()
 	chainMetadata, ok := ChainMetadataMap[chainIDInt]
 	if !ok {
