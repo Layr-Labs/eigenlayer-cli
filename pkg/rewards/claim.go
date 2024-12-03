@@ -88,7 +88,7 @@ func getClaimFlags() []cli.Flag {
 	return allFlags
 }
 
-func BatchClaim(
+func batchClaim(
 	ctx context.Context,
 	logger logging.Logger,
 	ethClient *ethclient.Client,
@@ -260,7 +260,7 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 	}
 
 	if config.BatchClaimFile != "" {
-		return BatchClaim(ctx, logger, ethClient, elReader, df, config, p, claimDate, rootIndex, proofData)
+		return batchClaim(ctx, logger, ethClient, elReader, df, config, p, claimDate, rootIndex, proofData)
 	}
 
 	elClaim, claim, account, err := generateClaimPayload(
