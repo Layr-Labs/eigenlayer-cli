@@ -293,6 +293,9 @@ func broadcastClaims(
 	claims []contractrewardscoordinator.IRewardsCoordinatorRewardsMerkleClaim,
 	accounts []merkletree.MerkleTree,
 ) error {
+	if len(elClaims) == 0 {
+		return fmt.Errorf("at least one claim is required")
+	}
 	if config.Broadcast {
 		eLWriter, err := common.GetELWriter(
 			config.ClaimerAddress,
