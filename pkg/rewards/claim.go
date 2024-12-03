@@ -154,8 +154,7 @@ func BatchClaim(
 
 	}
 
-	err = broadcastClaims(config, ethClient, logger, p, ctx, &elClaims, &claims, &accounts)
-	return err
+	return broadcastClaims(config, ethClient, logger, p, ctx, elClaims, claims, accounts)
 }
 
 func generateClaimPayload(
@@ -278,9 +277,9 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 		return err
 	}
 
-	elClaims := &[]rewardscoordinator.IRewardsCoordinatorRewardsMerkleClaim{*elClaim}
-	claims := &[]contractrewardscoordinator.IRewardsCoordinatorRewardsMerkleClaim{*claim}
-	accounts := &[]merkletree.MerkleTree{*account}
+	elClaims := []rewardscoordinator.IRewardsCoordinatorRewardsMerkleClaim{*elClaim}
+	claims := []contractrewardscoordinator.IRewardsCoordinatorRewardsMerkleClaim{*claim}
+	accounts := []merkletree.MerkleTree{*account}
 	err = broadcastClaims(config, ethClient, logger, p, ctx, elClaims, claims, accounts)
 
 	return err
@@ -291,9 +290,9 @@ func broadcastClaims(config *ClaimConfig,
 	logger logging.Logger,
 	p utils.Prompter,
 	ctx context.Context,
-	elClaims *[]rewardscoordinator.IRewardsCoordinatorRewardsMerkleClaim,
-	claims *[]contractrewardscoordinator.IRewardsCoordinatorRewardsMerkleClaim,
-	accounts *[]merkletree.MerkleTree,
+	elClaims []rewardscoordinator.IRewardsCoordinatorRewardsMerkleClaim,
+	claims []contractrewardscoordinator.IRewardsCoordinatorRewardsMerkleClaim,
+	accounts []merkletree.MerkleTree,
 ) error {
 	if config.Broadcast {
 		eLWriter, err := common.GetELWriter(
@@ -316,10 +315,10 @@ func broadcastClaims(config *ClaimConfig,
 
 		var receipt *types.Receipt
 
-		if len(*elClaims) > 1 {
-			receipt, err = eLWriter.ProcessClaims(ctx, *elClaims, config.RecipientAddress, true)
+		if len(elClaims) > 1 {
+			receipt, err = eLWriter.ProcessClaims(ctx, elClaims, config.RecipientAddress, true)
 		} else {
-			receipt, err = eLWriter.ProcessClaim(ctx, (*elClaims)[0], config.RecipientAddress, true)
+			receipt, err = eLWriter.ProcessClaim(ctx, elClaims[0], config.RecipientAddress, true)
 		}
 
 		if err != nil {
@@ -350,10 +349,10 @@ func broadcastClaims(config *ClaimConfig,
 			noSendTxOpts.GasLimit = 150_000
 		}
 		var unsignedTx *types.Transaction
-		if len(*elClaims) > 0 {
-			unsignedTx, err = contractBindings.RewardsCoordinator.ProcessClaims(noSendTxOpts, *elClaims, config.RecipientAddress)
+		if len(elClaims) > 0 {
+			unsignedTx, err = contractBindings.RewardsCoordinator.ProcessClaims(noSendTxOpts, elClaims, config.RecipientAddress)
 		} else {
-			unsignedTx, err = contractBindings.RewardsCoordinator.ProcessClaim(noSendTxOpts, (*elClaims)[0], config.RecipientAddress)
+			unsignedTx, err = contractBindings.RewardsCoordinator.ProcessClaim(noSendTxOpts, elClaims[0], config.RecipientAddress)
 		}
 		if err != nil {
 			return eigenSdkUtils.WrapError("failed to create unsigned tx", err)
@@ -372,8 +371,8 @@ func broadcastClaims(config *ClaimConfig,
 				fmt.Println(calldataHex)
 			}
 		} else if config.OutputType == string(common.OutputType_Json) {
-			for idx, claim := range *claims {
-				solidityClaim := claimgen.FormatProofForSolidity((*accounts)[idx].Root(), &claim)
+			for idx, claim := range claims {
+				solidityClaim := claimgen.FormatProofForSolidity(accounts[idx].Root(), &claim)
 				jsonData, err := json.MarshalIndent(solidityClaim, "", "  ")
 				if err != nil {
 					logger.Error("Error marshaling JSON:", err)
@@ -396,8 +395,8 @@ func broadcastClaims(config *ClaimConfig,
 				fmt.Println("output file not supported for pretty output type")
 				fmt.Println()
 			}
-			for idx, claim := range *claims {
-				solidityClaim := claimgen.FormatProofForSolidity((*accounts)[idx].Root(), &claim)
+			for idx, claim := range claims {
+				solidityClaim := claimgen.FormatProofForSolidity(accounts[idx].Root(), &claim)
 				if !config.IsSilent {
 					fmt.Println("------- Claim generated -------")
 				}
