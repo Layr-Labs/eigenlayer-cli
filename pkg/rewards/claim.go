@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"math/big"
 	"net/http"
+	"os"
 	"sort"
 	"strings"
 	"time"
@@ -15,11 +16,14 @@ import (
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
+	"github.com/wealdtech/go-merkletree/v2"
+	"gopkg.in/yaml.v2"
 
 	contractrewardscoordinator "github.com/Layr-Labs/eigenlayer-contracts/pkg/bindings/IRewardsCoordinator"
 
 	"github.com/Layr-Labs/eigenlayer-rewards-proofs/pkg/claimgen"
 	"github.com/Layr-Labs/eigenlayer-rewards-proofs/pkg/distribution"
+	"github.com/Layr-Labs/eigenlayer-rewards-proofs/pkg/proofDataFetcher"
 	"github.com/Layr-Labs/eigenlayer-rewards-proofs/pkg/proofDataFetcher/httpProofDataFetcher"
 
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
@@ -28,6 +32,7 @@ import (
 	eigenSdkUtils "github.com/Layr-Labs/eigensdk-go/utils"
 
 	gethcommon "github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 
 	"github.com/urfave/cli/v2"
@@ -75,11 +80,137 @@ func getClaimFlags() []cli.Flag {
 		&ProofStoreBaseURLFlag,
 		&flags.VerboseFlag,
 		&flags.SilentFlag,
+		&flags.BatchClaimFile,
 	}
 
 	allFlags := append(baseFlags, flags.GetSignerFlags()...)
 	sort.Sort(cli.FlagsByName(allFlags))
 	return allFlags
+}
+
+func batchClaim(
+	ctx context.Context,
+	logger logging.Logger,
+	ethClient *ethclient.Client,
+	elReader *elcontracts.ChainReader,
+	config *ClaimConfig,
+	p utils.Prompter,
+	rootIndex uint32,
+	proofData *proofDataFetcher.RewardProofData,
+) error {
+
+	yamlFile, err := os.ReadFile(config.BatchClaimFile)
+	if err != nil {
+		return eigenSdkUtils.WrapError("failed to read YAML config file", err)
+	}
+
+	var claimConfigs []struct {
+		EarnerAddress  string   `yaml:"earner_address"`
+		TokenAddresses []string `yaml:"token_addresses"`
+	}
+
+	err = yaml.Unmarshal(yamlFile, &claimConfigs)
+	if err != nil {
+		return eigenSdkUtils.WrapError("failed to parse YAML config", err)
+	}
+
+	var elClaims []rewardscoordinator.IRewardsCoordinatorRewardsMerkleClaim
+	var claims []contractrewardscoordinator.IRewardsCoordinatorRewardsMerkleClaim
+	var accounts []merkletree.MerkleTree
+
+	for _, claimConfig := range claimConfigs {
+		earnerAddr := gethcommon.HexToAddress(claimConfig.EarnerAddress)
+
+		var tokenAddrs []gethcommon.Address
+
+		// Empty token addresses list will create a claim for all tokens claimable
+		// by the earner address.
+		if len(claimConfig.TokenAddresses) != 0 {
+			for _, addr := range claimConfig.TokenAddresses {
+				tokenAddrs = append(tokenAddrs, gethcommon.HexToAddress(addr))
+			}
+		}
+
+		elClaim, claim, account, err := generateClaimPayload(
+			ctx,
+			rootIndex,
+			proofData,
+			elReader,
+			logger,
+			earnerAddr,
+			tokenAddrs,
+		)
+
+		if err != nil {
+			logger.Warnf("Failed to process claim for earner %s: %v", earnerAddr.String(), err)
+			continue
+		}
+
+		elClaims = append(elClaims, *elClaim)
+		claims = append(claims, *claim)
+		accounts = append(accounts, *account)
+
+	}
+
+	return broadcastClaims(config, ethClient, logger, p, ctx, elClaims, claims, accounts)
+}
+
+func generateClaimPayload(
+	ctx context.Context,
+	rootIndex uint32,
+	proofData *proofDataFetcher.RewardProofData,
+	elReader *elcontracts.ChainReader,
+	logger logging.Logger,
+	earnerAddress gethcommon.Address,
+	tokenAddresses []gethcommon.Address,
+) (*rewardscoordinator.IRewardsCoordinatorRewardsMerkleClaim, *contractrewardscoordinator.IRewardsCoordinatorRewardsMerkleClaim, *merkletree.MerkleTree, error) {
+
+	claimableTokensOrderMap, present := proofData.Distribution.GetTokensForEarner(earnerAddress)
+	if !present {
+		return nil, nil, nil, errors.New("no tokens claimable by earner")
+	}
+
+	claimableTokensMap := getTokensToClaim(claimableTokensOrderMap, tokenAddresses)
+
+	claimableTokens, err := filterClaimableTokens(ctx, elReader, earnerAddress, claimableTokensMap)
+	if err != nil {
+		return nil, nil, nil, eigenSdkUtils.WrapError("failed to get claimable tokens", err)
+	}
+
+	cg := claimgen.NewClaimgen(proofData.Distribution)
+	accounts, claim, err := cg.GenerateClaimProofForEarner(
+		earnerAddress,
+		claimableTokens,
+		rootIndex,
+	)
+	if err != nil {
+		return nil, nil, nil, eigenSdkUtils.WrapError("failed to generate claim proof for earner", err)
+	}
+
+	elClaim := rewardscoordinator.IRewardsCoordinatorRewardsMerkleClaim{
+		RootIndex:       claim.RootIndex,
+		EarnerIndex:     claim.EarnerIndex,
+		EarnerTreeProof: claim.EarnerTreeProof,
+		EarnerLeaf: rewardscoordinator.IRewardsCoordinatorEarnerTreeMerkleLeaf{
+			Earner:          claim.EarnerLeaf.Earner,
+			EarnerTokenRoot: claim.EarnerLeaf.EarnerTokenRoot,
+		},
+		TokenIndices:    claim.TokenIndices,
+		TokenTreeProofs: claim.TokenTreeProofs,
+		TokenLeaves:     convertClaimTokenLeaves(claim.TokenLeaves),
+	}
+
+	logger.Infof("Validating claim proof for earner %s...", earnerAddress)
+	ok, err := elReader.CheckClaim(ctx, elClaim)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	if !ok {
+		return nil, nil, nil, errors.New("failed to validate claim")
+	}
+	logger.Infof("Claim proof for earner %s validated successfully", earnerAddress)
+
+	return &elClaim, claim, accounts, nil
 }
 
 func Claim(cCtx *cli.Context, p utils.Prompter) error {
@@ -90,6 +221,7 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 	if err != nil {
 		return eigenSdkUtils.WrapError("failed to read and validate claim config", err)
 	}
+
 	cCtx.App.Metadata["network"] = config.ChainID.String()
 
 	ethClient, err := ethclient.Dial(config.RPCUrl)
@@ -101,7 +233,8 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 		elcontracts.Config{
 			RewardsCoordinatorAddress: config.RewardsCoordinatorAddress,
 		},
-		ethClient, logger,
+		ethClient,
+		logger,
 	)
 	if err != nil {
 		return eigenSdkUtils.WrapError("failed to create new reader from config", err)
@@ -124,51 +257,45 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 		return eigenSdkUtils.WrapError("failed to fetch claim amounts for date", err)
 	}
 
-	claimableTokensOrderMap, present := proofData.Distribution.GetTokensForEarner(config.EarnerAddress)
-	if !present {
-		return errors.New("no tokens claimable by earner")
+	if config.BatchClaimFile != "" {
+		return batchClaim(ctx, logger, ethClient, elReader, config, p, rootIndex, proofData)
 	}
 
-	claimableTokensMap := getTokensToClaim(claimableTokensOrderMap, config.TokenAddresses)
-
-	claimableTokens, err := filterClaimableTokens(ctx, elReader, config.EarnerAddress, claimableTokensMap)
-	if err != nil {
-		return eigenSdkUtils.WrapError("failed to get claimable tokens", err)
-	}
-
-	cg := claimgen.NewClaimgen(proofData.Distribution)
-	accounts, claim, err := cg.GenerateClaimProofForEarner(
-		config.EarnerAddress,
-		claimableTokens,
+	elClaim, claim, account, err := generateClaimPayload(
+		ctx,
 		rootIndex,
+		proofData,
+		elReader,
+		logger,
+		config.EarnerAddress,
+		config.TokenAddresses,
 	)
-	if err != nil {
-		return eigenSdkUtils.WrapError("failed to generate claim proof for earner", err)
-	}
 
-	elClaim := rewardscoordinator.IRewardsCoordinatorRewardsMerkleClaim{
-		RootIndex:       claim.RootIndex,
-		EarnerIndex:     claim.EarnerIndex,
-		EarnerTreeProof: claim.EarnerTreeProof,
-		EarnerLeaf: rewardscoordinator.IRewardsCoordinatorEarnerTreeMerkleLeaf{
-			Earner:          claim.EarnerLeaf.Earner,
-			EarnerTokenRoot: claim.EarnerLeaf.EarnerTokenRoot,
-		},
-		TokenIndices:    claim.TokenIndices,
-		TokenTreeProofs: claim.TokenTreeProofs,
-		TokenLeaves:     convertClaimTokenLeaves(claim.TokenLeaves),
-	}
-
-	logger.Info("Validating claim proof...")
-	ok, err := elReader.CheckClaim(ctx, elClaim)
 	if err != nil {
 		return err
 	}
-	if !ok {
-		return errors.New("failed to validate claim")
-	}
-	logger.Info("Claim proof validated successfully")
 
+	elClaims := []rewardscoordinator.IRewardsCoordinatorRewardsMerkleClaim{*elClaim}
+	claims := []contractrewardscoordinator.IRewardsCoordinatorRewardsMerkleClaim{*claim}
+	accounts := []merkletree.MerkleTree{*account}
+	err = broadcastClaims(config, ethClient, logger, p, ctx, elClaims, claims, accounts)
+
+	return err
+}
+
+func broadcastClaims(
+	config *ClaimConfig,
+	ethClient *ethclient.Client,
+	logger logging.Logger,
+	p utils.Prompter,
+	ctx context.Context,
+	elClaims []rewardscoordinator.IRewardsCoordinatorRewardsMerkleClaim,
+	claims []contractrewardscoordinator.IRewardsCoordinatorRewardsMerkleClaim,
+	accounts []merkletree.MerkleTree,
+) error {
+	if len(elClaims) == 0 {
+		return fmt.Errorf("at least one claim is required")
+	}
 	if config.Broadcast {
 		eLWriter, err := common.GetELWriter(
 			config.ClaimerAddress,
@@ -187,7 +314,15 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 		}
 
 		logger.Infof("Broadcasting claim transaction...")
-		receipt, err := eLWriter.ProcessClaim(ctx, elClaim, config.RecipientAddress, true)
+
+		var receipt *types.Receipt
+
+		if len(elClaims) > 1 {
+			receipt, err = eLWriter.ProcessClaims(ctx, elClaims, config.RecipientAddress, true)
+		} else {
+			receipt, err = eLWriter.ProcessClaim(ctx, elClaims[0], config.RecipientAddress, true)
+		}
+
 		if err != nil {
 			return eigenSdkUtils.WrapError("failed to process claim", err)
 		}
@@ -215,8 +350,12 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 			// Claimer is a smart contract
 			noSendTxOpts.GasLimit = 150_000
 		}
-
-		unsignedTx, err := contractBindings.RewardsCoordinator.ProcessClaim(noSendTxOpts, elClaim, config.RecipientAddress)
+		var unsignedTx *types.Transaction
+		if len(elClaims) > 1 {
+			unsignedTx, err = contractBindings.RewardsCoordinator.ProcessClaims(noSendTxOpts, elClaims, config.RecipientAddress)
+		} else {
+			unsignedTx, err = contractBindings.RewardsCoordinator.ProcessClaim(noSendTxOpts, elClaims[0], config.RecipientAddress)
+		}
 		if err != nil {
 			return eigenSdkUtils.WrapError("failed to create unsigned tx", err)
 		}
@@ -234,33 +373,36 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 				fmt.Println(calldataHex)
 			}
 		} else if config.OutputType == string(common.OutputType_Json) {
-			solidityClaim := claimgen.FormatProofForSolidity(accounts.Root(), claim)
-			jsonData, err := json.MarshalIndent(solidityClaim, "", "  ")
-			if err != nil {
-				logger.Error("Error marshaling JSON:", err)
-				return err
-			}
-			if !common.IsEmptyString(config.Output) {
-				err = common.WriteToFile(jsonData, config.Output)
+			for idx, claim := range claims {
+				solidityClaim := claimgen.FormatProofForSolidity(accounts[idx].Root(), &claim)
+				jsonData, err := json.MarshalIndent(solidityClaim, "", "  ")
 				if err != nil {
 					return err
 				}
-				logger.Infof("Claim written to file: %s", config.Output)
-			} else {
-				fmt.Println(string(jsonData))
-				fmt.Println()
-				fmt.Println("To write to a file, use the --output flag")
+				if !common.IsEmptyString(config.Output) {
+					err = common.WriteToFile(jsonData, config.Output)
+					if err != nil {
+						return err
+					}
+					logger.Infof("Claim written to file: %s", config.Output)
+				} else {
+					fmt.Println(string(jsonData))
+					fmt.Println()
+					fmt.Println("To write to a file, use the --output flag")
+				}
 			}
 		} else {
 			if !common.IsEmptyString(config.Output) {
 				fmt.Println("output file not supported for pretty output type")
 				fmt.Println()
 			}
-			solidityClaim := claimgen.FormatProofForSolidity(accounts.Root(), claim)
-			if !config.IsSilent {
-				fmt.Println("------- Claim generated -------")
+			for idx, claim := range claims {
+				solidityClaim := claimgen.FormatProofForSolidity(accounts[idx].Root(), &claim)
+				if !config.IsSilent {
+					fmt.Println("------- Claim generated -------")
+				}
+				common.PrettyPrintStruct(*solidityClaim)
 			}
-			common.PrettyPrintStruct(*solidityClaim)
 			if !config.IsSilent {
 				fmt.Println("-------------------------------")
 				fmt.Println("To write to a file, use the --output flag")
@@ -406,6 +548,7 @@ func readAndValidateClaimConfig(cCtx *cli.Context, logger logging.Logger) (*Clai
 	validTokenAddresses := getValidHexAddresses(splitTokenAddresses)
 	rewardsCoordinatorAddress := cCtx.String(RewardsCoordinatorAddressFlag.Name)
 	isSilent := cCtx.Bool(flags.SilentFlag.Name)
+	batchClaimFile := cCtx.String(flags.BatchClaimFile.Name)
 
 	var err error
 	if common.IsEmptyString(rewardsCoordinatorAddress) {
@@ -490,6 +633,7 @@ func readAndValidateClaimConfig(cCtx *cli.Context, logger logging.Logger) (*Clai
 		ClaimTimestamp:            claimTimestamp,
 		ClaimerAddress:            claimerAddress,
 		IsSilent:                  isSilent,
+		BatchClaimFile:            batchClaimFile,
 	}, nil
 }
 
