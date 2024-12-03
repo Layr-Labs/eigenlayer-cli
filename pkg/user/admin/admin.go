@@ -23,6 +23,7 @@ func AdminCmd() *cli.Command {
 			AddPendingCmd(),
 			IsAdminCmd(),
 			IsPendingCmd(),
+			ListCmd(),
 			ListPendingCmd(),
 			RemoveCmd(),
 			RemovePendingCmd(),

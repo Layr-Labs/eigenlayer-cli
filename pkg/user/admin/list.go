@@ -12,7 +12,7 @@ func ListCmd() *cli.Command {
 		Usage:     "user admin list-admins <AccountAddress>",
 		UsageText: "List all users who are admins.",
 		Description: `
-		The list command allows you to view all admin users.
+		List all users who are admins.
 		`,
 		After: telemetry.AfterRunAction(),
 		Flags: []cli.Flag{

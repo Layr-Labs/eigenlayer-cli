@@ -12,7 +12,7 @@ func ListPendingCmd() *cli.Command {
 		Usage:     "user admin list-pending-admins <AccountAddress>",
 		UsageText: "List all users who are pending admin acceptance.",
 		Description: `
-		The list command allows you to view all admin users.
+		List all users who are pending admin acceptance.
 		`,
 		After: telemetry.AfterRunAction(),
 		Flags: []cli.Flag{

@@ -10,9 +10,9 @@ func AppointeeCmd() *cli.Command {
 	appointeeCmd := &cli.Command{
 		Name:      "appointee",
 		Usage:     "user appointee <command>",
-		UsageText: "Manage user permissions.",
+		UsageText: "User permission management operations.",
 		Description: `
-		The appointee command allows you to manage user permissions.
+		User permission management operations.
 		`,
 		After: telemetry.AfterRunAction(),
 		Flags: []cli.Flag{

@@ -2,7 +2,6 @@ package appointee
 
 import (
 	"context"
-	"fmt"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
@@ -13,7 +12,6 @@ import (
 	gethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/urfave/cli/v2"
-	"unicode/utf8"
 )
 
 type UserCanCallReader interface {
@@ -30,9 +28,9 @@ func CanCallCmd() *cli.Command {
 	canCallCmd := &cli.Command{
 		Name:      "can-call",
 		Usage:     "user appointee can-call <AccountsAddress> <CallerAddress> <TargetAddress> <Selector>",
-		UsageText: "Check if a user can call a contract function.",
+		UsageText: "CThe can-call command checks if a user has a specific permission.",
 		Description: `
-		The can-call command allows you to check if a user has a specific permission.
+		The can-call command checks if a user has a specific permission.
 		`,
 		Action: func(c *cli.Context) error {
 			return canCall(c)
@@ -43,6 +41,7 @@ func CanCallCmd() *cli.Command {
 			&CallerAddressFlag,
 			&TargetAddressFlag,
 			&SelectorFlag,
+			&PermissionManagerAddressFlag,
 			&flags.NetworkFlag,
 		},
 	}
@@ -72,20 +71,19 @@ func readAndValidateUserConfig(cliContext *cli.Context, logger logging.Logger) (
 	callerAddress := gethcommon.HexToAddress(cliContext.String(CallerAddressFlag.Name))
 	ethRpcUrl := cliContext.String(flags.ETHRpcUrlFlag.Name)
 	network := cliContext.String(flags.NetworkFlag.Name)
-	env := cliContext.String(flags.EnvironmentFlag.Name)
+	environment := cliContext.String(flags.EnvironmentFlag.Name)
 	target := gethcommon.HexToAddress(cliContext.String(TargetAddressFlag.Name))
 	selector := cliContext.String(SelectorFlag.Name)
-	selectorBytes, err := validateAndConvertSelectorString(selector)
-
+	selectorBytes, err := common.ValidateAndConvertSelectorString(selector)
 	if err != nil {
 		return nil, err
 	}
 
-	if env == "" {
-		env = getEnvFromNetwork(network)
+	if environment == "" {
+		environment = common.GetEnvFromNetwork(network)
 	}
 
-	logger.Debugf("Network: %s, Env: %s", network, env)
+	chainID := utils.NetworkNameToChainId(network)
 	permissionManagerAddress := cliContext.String(PermissionManagerAddressFlag.Name)
 
 	if common.IsEmptyString(permissionManagerAddress) {
@@ -94,11 +92,14 @@ func readAndValidateUserConfig(cliContext *cli.Context, logger logging.Logger) (
 			return nil, err
 		}
 	}
-	logger.Debugf("Using PermissionsManager address: %s", permissionManagerAddress)
 
-	chainID := utils.NetworkNameToChainId(network)
-	logger.Debugf("Using chain ID: %s", chainID.String())
-	logger.Debugf("Using network: %s", network)
+	logger.Debugf(
+		"Env: %s, network: %s, chain ID: %s, PermissionManager address: %s",
+		environment,
+		network,
+		chainID,
+		permissionManagerAddress,
+	)
 
 	return &CanCallConfig{
 		Network:                  network,
@@ -109,17 +110,8 @@ func readAndValidateUserConfig(cliContext *cli.Context, logger logging.Logger) (
 		Selector:                 selectorBytes,
 		PermissionManagerAddress: gethcommon.HexToAddress(permissionManagerAddress),
 		ChainID:                  chainID,
-		Environment:              env,
+		Environment:              environment,
 	}, nil
-}
-
-func validateAndConvertSelectorString(selector string) ([4]byte, error) {
-	if utf8.RuneCountInString(selector) != 4 {
-		return [4]byte{}, fmt.Errorf("selector must be 4 characters long")
-	}
-	var selectorBytes [4]byte
-	copy(selectorBytes[:], selector)
-	return selectorBytes, nil
 }
 
 func getEigenLayerReader(cliContext *cli.Context, logger logging.Logger, config *CanCallConfig) (UserCanCallReader, error) {
@@ -145,15 +137,4 @@ func createDefaultEigenLayerReader(cliContext *cli.Context, config *CanCallConfi
 		logger,
 	)
 	return elReader, err
-}
-
-func getEnvFromNetwork(network string) string {
-	switch network {
-	case utils.HoleskyNetworkName:
-		return "testnet"
-	case utils.MainnetNetworkName:
-		return "mainnet"
-	default:
-		return "local"
-	}
 }

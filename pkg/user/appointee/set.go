@@ -9,8 +9,8 @@ import (
 func SetCmd() *cli.Command {
 	setCmd := &cli.Command{
 		Name:      "set",
-		Usage:     "set",
-		UsageText: "user appointee set <AccountAddress> <AppointeeAddress> <TargetAddress> <Selector>",
+		Usage:     "user appointee set <AccountAddress> <AppointeeAddress> <TargetAddress> <Selector>",
+		UsageText: "The set command allows you to give a user a permission.",
 		Description: `
 		The set command allows you to give a user a permission.'.
 		`,

@@ -12,7 +12,7 @@ func AddPendingCmd() *cli.Command {
 		Usage:     "user admin add-pending-admin <AccountAddress> <AdminAddress>",
 		UsageText: "Add an admin to be pending until accepted.",
 		Description: `
-		Moves a user to pending admin status -- the user must be accepted to be an admin.
+		Add an admin to be pending until accepted.
 		`,
 		After: telemetry.AfterRunAction(),
 		Flags: []cli.Flag{

@@ -10,9 +10,9 @@ func ListPermissionsCmd() *cli.Command {
 	listPermissions := &cli.Command{
 		Name:      "list-permissions",
 		Usage:     "user appointee list-permissions <AccountAddress> <AppointeeAddress>",
-		UsageText: "List permissions for a user.",
+		UsageText: "List all permissions for a user.",
 		Description: `
-		The list-permissions command allows you to view all permissions of a user.
+		List all permissions of a user.
 		`,
 		After: telemetry.AfterRunAction(),
 		Flags: []cli.Flag{

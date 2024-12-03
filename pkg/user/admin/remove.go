@@ -10,7 +10,7 @@ func RemoveCmd() *cli.Command {
 	removeCmd := &cli.Command{
 		Name:      "remove-admin",
 		Usage:     "user admin remove-admin <AccountAddress> <AdminAddress>",
-		UsageText: "Remove a user's admin distinction.",
+		UsageText: "The remove command allows you to remove an admin user.",
 		Description: `
 		The remove command allows you to remove an admin user.
 		`,

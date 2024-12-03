@@ -13,6 +13,7 @@ import (
 	"os/user"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/urfave/cli/v2"
 
@@ -555,6 +556,15 @@ func Sign(digest []byte, cfg types.SignerConfig, p utils.Prompter) ([]byte, erro
 	}
 
 	return signed, nil
+}
+
+func ValidateAndConvertSelectorString(selector string) ([4]byte, error) {
+	if utf8.RuneCountInString(selector) != 4 {
+		return [4]byte{}, fmt.Errorf("selector must be 4 characters long")
+	}
+	var selectorBytes [4]byte
+	copy(selectorBytes[:], selector)
+	return selectorBytes, nil
 }
 
 func GetEnvFromNetwork(network string) string {

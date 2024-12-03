@@ -9,8 +9,8 @@ import (
 func RemoveCmd() *cli.Command {
 	removeCmd := &cli.Command{
 		Name:      "remove",
-		Usage:     "remove",
-		UsageText: "user appointee remove <AccountAddress> <AppointeeAddress> <TargetAddress> <Selector>",
+		Usage:     "user appointee remove <AccountAddress> <AppointeeAddress> <TargetAddress> <Selector>",
+		UsageText: "The remove command allows you to check remove for a user's permission",
 		Description: `
 		The remove command allows you to check remove for a user's permission'.
 		`,

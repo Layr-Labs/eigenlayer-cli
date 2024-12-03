@@ -12,7 +12,7 @@ func AcceptCmd() *cli.Command {
 		Usage:     "user admin accept-admin <AccountAddress>",
 		UsageText: "Accepts a user to become admin who is currently pending admin acceptance.",
 		Description: `
-		Accepts a user who is currently in pending admin state.
+		Accepts a user to become admin who is currently pending admin acceptance.
 		`,
 		After: telemetry.AfterRunAction(),
 		Flags: []cli.Flag{

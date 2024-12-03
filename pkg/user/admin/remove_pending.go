@@ -12,7 +12,7 @@ func RemovePendingCmd() *cli.Command {
 		Usage:     "user admin remove-pending-admin <AccountAddress> <AdminAddress>",
 		UsageText: "Remove a user who is pending admin acceptance.",
 		Description: `
-		The remove command allows you to remove an admin user currently pending acceptance.
+		Remove a user who is pending admin acceptance.
 		`,
 		After: telemetry.AfterRunAction(),
 		Flags: []cli.Flag{

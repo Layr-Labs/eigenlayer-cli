@@ -10,9 +10,9 @@ func IsAdminCmd() *cli.Command {
 	isAdmin := &cli.Command{
 		Name:      "is-admin",
 		Usage:     "user admin is-admin <AccountAddress> <CallerAddress>",
-		UsageText: "is-admin checks if a user is an admin.",
+		UsageText: "Checks if a user is an admin.",
 		Description: `
-		The is-admin command allows you to check if a user is an admin.
+		Checks if a user is an admin.
 		`,
 		After: telemetry.AfterRunAction(),
 		Flags: []cli.Flag{

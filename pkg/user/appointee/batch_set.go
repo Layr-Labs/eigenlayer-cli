@@ -10,9 +10,9 @@ func BatchSetCmd() *cli.Command {
 	batchSetCmd := &cli.Command{
 		Name:      "batch set",
 		Usage:     "user appointee batch-set <BatchSetFile>",
-		UsageText: "Set permissions for multiple users in on operation.",
+		UsageText: "Appoint multiple users permissions at a time.",
 		Description: `
-		The batch-set command allows you to appoint multiple users permissions at a time.
+		TAppoint multiple users permissions at a time.
 		`,
 		After: telemetry.AfterRunAction(),
 		Flags: []cli.Flag{

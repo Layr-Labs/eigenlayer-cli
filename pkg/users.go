@@ -3,11 +3,10 @@ package pkg
 import (
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/user/admin"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/user/appointee"
-	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 	"github.com/urfave/cli/v2"
 )
 
-func UsersCmd(p utils.Prompter) *cli.Command {
+func UsersCmd() *cli.Command {
 	var userCmd = &cli.Command{
 		Name:  "user",
 		Usage: "Manage user permissions",
