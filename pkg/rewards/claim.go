@@ -374,7 +374,6 @@ func broadcastClaims(
 				solidityClaim := claimgen.FormatProofForSolidity(accounts[idx].Root(), &claim)
 				jsonData, err := json.MarshalIndent(solidityClaim, "", "  ")
 				if err != nil {
-					logger.Error("Error marshaling JSON:", err)
 					return err
 				}
 				if !common.IsEmptyString(config.Output) {
