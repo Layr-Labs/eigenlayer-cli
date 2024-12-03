@@ -10,9 +10,9 @@ func ListCmd() *cli.Command {
 	listCmd := &cli.Command{
 		Name:      "list",
 		Usage:     "user appointee list <AccountAddress> <TargetAddress> <Selector>",
-		UsageText: "Lists all appointee users for an account with the provided permissions.",
+		UsageText: "Lists all appointed users for an account with the provided permissions.",
 		Description: `
-		Lists all appointee users for an account with the provided permissions.
+		Lists all appointed users for an account with the provided permissions.
 		`,
 		After: telemetry.AfterRunAction(),
 		Flags: []cli.Flag{

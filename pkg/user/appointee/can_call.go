@@ -28,9 +28,9 @@ func CanCallCmd() *cli.Command {
 	canCallCmd := &cli.Command{
 		Name:      "can-call",
 		Usage:     "user appointee can-call <AccountsAddress> <CallerAddress> <TargetAddress> <Selector>",
-		UsageText: "CThe can-call command checks if a user has a specific permission.",
+		UsageText: "Checks if a user has a specific permission.",
 		Description: `
-		The can-call command checks if a user has a specific permission.
+		Checks if a user has a specific permission.
 		`,
 		Action: func(c *cli.Context) error {
 			return canCall(c)
