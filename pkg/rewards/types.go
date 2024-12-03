@@ -32,6 +32,7 @@ type ClaimConfig struct {
 	Environment               string
 	SignerConfig              *types.SignerConfig
 	IsSilent                  bool
+	BatchClaimFile            string
 }
 
 type SetClaimerConfig struct {
