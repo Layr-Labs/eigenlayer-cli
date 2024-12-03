@@ -283,7 +283,8 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 	return err
 }
 
-func broadcastClaims(config *ClaimConfig,
+func broadcastClaims(
+	config *ClaimConfig,
 	ethClient *ethclient.Client,
 	logger logging.Logger,
 	p utils.Prompter,
