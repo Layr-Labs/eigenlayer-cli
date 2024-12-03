@@ -55,9 +55,9 @@ func TestCanCallCmd_Success(t *testing.T) {
 	args := []string{
 		"TestCanCallCmd_Success",
 		"can-call",
-		"--user-address", "0x1234567890abcdef1234567890abcdef12345678",
+		"--account-address", "0x1234567890abcdef1234567890abcdef12345678",
 		"--caller-address", "0x9876543210fedcba9876543210fedcba98765432",
-		"--target", "0xabcdef1234567890abcdef1234567890abcdef12",
+		"--target-address", "0xabcdef1234567890abcdef1234567890abcdef12",
 		"--selector", "test",
 		"--network", "holesky",
 	}
@@ -78,9 +78,9 @@ func TestCanCallCmd_UserCanCallError(t *testing.T) {
 	args := []string{
 		"TestCanCallCmd_UserCanCallError",
 		"can-call",
-		"--user-address", "0x1234567890abcdef1234567890abcdef12345678",
+		"--account-address", "0x1234567890abcdef1234567890abcdef12345678",
 		"--caller-address", "0x9876543210fedcba9876543210fedcba98765432",
-		"--target", "0xabcdef1234567890abcdef1234567890abcdef12",
+		"--target-address", "0xabcdef1234567890abcdef1234567890abcdef12",
 		"--selector", "test",
 	}
 
@@ -100,9 +100,9 @@ func TestCanCallCmd_InvalidSelector(t *testing.T) {
 	args := []string{
 		"TestCanCallCmd_InvalidSelector",
 		"can-call",
-		"--user-address", "0x1234567890abcdef1234567890abcdef12345678",
+		"--account-address", "0x1234567890abcdef1234567890abcdef12345678",
 		"--caller-address", "0x9876543210fedcba9876543210fedcba98765432",
-		"--target", "0xabcdef1234567890abcdef1234567890abcdef12",
+		"--target-address", "0xabcdef1234567890abcdef1234567890abcdef12",
 		"--selector", "too-long",
 	}
 
