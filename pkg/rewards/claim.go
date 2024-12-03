@@ -316,7 +316,7 @@ func broadcastClaims(config *ClaimConfig,
 
 		var receipt *types.Receipt
 
-		if len(*elClaims) > 0 {
+		if len(*elClaims) > 1 {
 			receipt, err = eLWriter.ProcessClaims(ctx, *elClaims, config.RecipientAddress, true)
 		} else {
 			receipt, err = eLWriter.ProcessClaim(ctx, (*elClaims)[0], config.RecipientAddress, true)
