@@ -348,7 +348,7 @@ func broadcastClaims(
 			noSendTxOpts.GasLimit = 150_000
 		}
 		var unsignedTx *types.Transaction
-		if len(elClaims) > 0 {
+		if len(elClaims) > 1 {
 			unsignedTx, err = contractBindings.RewardsCoordinator.ProcessClaims(noSendTxOpts, elClaims, config.RecipientAddress)
 		} else {
 			unsignedTx, err = contractBindings.RewardsCoordinator.ProcessClaim(noSendTxOpts, elClaims[0], config.RecipientAddress)
