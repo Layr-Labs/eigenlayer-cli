@@ -12,7 +12,7 @@ func AdminCmd() *cli.Command {
 		Usage:     "user admin <command>",
 		UsageText: "Manage admin users.",
 		Description: `
-		The admin command allows you to manage admin users.
+		Manage admin users.
 		`,
 		After: telemetry.AfterRunAction(),
 		Flags: []cli.Flag{
