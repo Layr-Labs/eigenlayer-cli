@@ -93,10 +93,8 @@ func batchClaim(
 	logger logging.Logger,
 	ethClient *ethclient.Client,
 	elReader *elcontracts.ChainReader,
-	df *httpProofDataFetcher.HttpProofDataFetcher,
 	config *ClaimConfig,
 	p utils.Prompter,
-	claimDate string,
 	rootIndex uint32,
 	proofData *proofDataFetcher.RewardProofData,
 ) error {
@@ -260,7 +258,7 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 	}
 
 	if config.BatchClaimFile != "" {
-		return batchClaim(ctx, logger, ethClient, elReader, df, config, p, claimDate, rootIndex, proofData)
+		return batchClaim(ctx, logger, ethClient, elReader, config, p, rootIndex, proofData)
 	}
 
 	elClaim, claim, account, err := generateClaimPayload(
