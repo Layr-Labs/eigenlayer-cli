@@ -3,6 +3,7 @@ package common
 import (
 	"context"
 	"crypto/ecdsa"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -13,9 +14,6 @@ import (
 	"os/user"
 	"strings"
 	"time"
-	"unicode/utf8"
-
-	"github.com/urfave/cli/v2"
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/types"
@@ -37,6 +35,15 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 
 	"github.com/fatih/color"
+	"github.com/urfave/cli/v2"
+)
+
+const (
+	mainnet             = "mainnet"
+	testnet             = "testnet"
+	local               = "local"
+	selectorHexIdLength = 10
+	addressPrefix       = "0x"
 )
 
 var ChainMetadataMap = map[int64]types.ChainMetadata{
@@ -504,7 +511,7 @@ func GetNoSendTxOpts(from common.Address) *bind.TransactOpts {
 }
 
 func Trim0x(s string) string {
-	return strings.TrimPrefix(s, "0x")
+	return strings.TrimPrefix(s, addressPrefix)
 }
 
 func Sign(digest []byte, cfg types.SignerConfig, p utils.Prompter) ([]byte, error) {
@@ -559,21 +566,32 @@ func Sign(digest []byte, cfg types.SignerConfig, p utils.Prompter) ([]byte, erro
 }
 
 func ValidateAndConvertSelectorString(selector string) ([4]byte, error) {
-	if utf8.RuneCountInString(selector) != 4 {
-		return [4]byte{}, fmt.Errorf("selector must be 4 characters long")
+	if len(selector) != selectorHexIdLength || selector[:2] != addressPrefix {
+		return [4]byte{}, errors.New("selector must be a 4-byte hex string prefixed with '0x'")
 	}
+
+	decoded, err := hex.DecodeString(selector[2:])
+	if err != nil {
+		return [4]byte{}, eigenSdkUtils.WrapError("invalid hex encoding: %v", err)
+	}
+
+	if len(decoded) != 4 {
+		return [4]byte{}, fmt.Errorf("decoded selector must be 4 bytes, got %d bytes", len(decoded))
+	}
+
 	var selectorBytes [4]byte
-	copy(selectorBytes[:], selector)
+	copy(selectorBytes[:], decoded)
+
 	return selectorBytes, nil
 }
 
 func GetEnvFromNetwork(network string) string {
 	switch network {
 	case utils.HoleskyNetworkName:
-		return "testnet"
+		return testnet
 	case utils.MainnetNetworkName:
-		return "mainnet"
+		return mainnet
 	default:
-		return "local"
+		return local
 	}
 }
