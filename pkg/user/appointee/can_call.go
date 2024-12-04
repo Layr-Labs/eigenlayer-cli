@@ -114,14 +114,22 @@ func readAndValidateUserConfig(cliContext *cli.Context, logger logging.Logger) (
 	}, nil
 }
 
-func getEigenLayerReader(cliContext *cli.Context, logger logging.Logger, config *CanCallConfig) (UserCanCallReader, error) {
+func getEigenLayerReader(
+	cliContext *cli.Context,
+	logger logging.Logger,
+	config *CanCallConfig,
+) (UserCanCallReader, error) {
 	if reader, ok := cliContext.App.Metadata["elReader"].(UserCanCallReader); ok {
 		return reader, nil
 	}
 	return createDefaultEigenLayerReader(cliContext, config, logger)
 }
 
-func createDefaultEigenLayerReader(cliContext *cli.Context, config *CanCallConfig, logger logging.Logger) (UserCanCallReader, error) {
+func createDefaultEigenLayerReader(
+	cliContext *cli.Context,
+	config *CanCallConfig,
+	logger logging.Logger,
+) (UserCanCallReader, error) {
 	cliContext.App.Metadata["network"] = config.ChainID.String()
 
 	ethClient, err := ethclient.Dial(config.RPCUrl)

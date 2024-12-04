@@ -6,7 +6,7 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-func UsersCmd() *cli.Command {
+func UserCmd() *cli.Command {
 	var userCmd = &cli.Command{
 		Name:  "user",
 		Usage: "Manage user permissions",
