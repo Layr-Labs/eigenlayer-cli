@@ -58,7 +58,7 @@ func TestCanCallCmd_Success(t *testing.T) {
 		"--account-address", "0x1234567890abcdef1234567890abcdef12345678",
 		"--caller-address", "0x9876543210fedcba9876543210fedcba98765432",
 		"--target-address", "0xabcdef1234567890abcdef1234567890abcdef12",
-		"--selector", "test",
+		"--selector", "0x1A2B3C4D",
 		"--network", "holesky",
 	}
 
@@ -81,7 +81,8 @@ func TestCanCallCmd_UserCanCallError(t *testing.T) {
 		"--account-address", "0x1234567890abcdef1234567890abcdef12345678",
 		"--caller-address", "0x9876543210fedcba9876543210fedcba98765432",
 		"--target-address", "0xabcdef1234567890abcdef1234567890abcdef12",
-		"--selector", "test",
+		"--selector", "0x1A2B3C4D",
+		"--network", "holesky",
 	}
 
 	err := app.Run(args)
@@ -103,10 +104,23 @@ func TestCanCallCmd_InvalidSelector(t *testing.T) {
 		"--account-address", "0x1234567890abcdef1234567890abcdef12345678",
 		"--caller-address", "0x9876543210fedcba9876543210fedcba98765432",
 		"--target-address", "0xabcdef1234567890abcdef1234567890abcdef12",
-		"--selector", "too-long",
+		"--selector", "incorrect-format",
 	}
 
 	err := app.Run(args)
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "failed to read and validate user can call config: selector must be 4 characters long")
+	assert.Contains(t, err.Error(), "selector must be a 4-byte hex string prefixed with '0x'")
+
+	args = []string{
+		"TestCanCallCmd_InvalidSelector",
+		"can-call",
+		"--account-address", "0x1234567890abcdef1234567890abcdef12345678",
+		"--caller-address", "0x9876543210fedcba9876543210fedcba98765432",
+		"--target-address", "0xabcdef1234567890abcdef1234567890abcdef12",
+		"--selector", "0xincorrect-format",
+	}
+
+	err = app.Run(args)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "selector must be a 4-byte hex string prefixed with '0x'")
 }
