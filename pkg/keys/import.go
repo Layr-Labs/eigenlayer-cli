@@ -44,18 +44,35 @@ This command will import keys in $HOME/.eigenlayer/operator_keys/ location
 		After: telemetry.AfterRunAction(),
 		Action: func(ctx *cli.Context) error {
 			args := ctx.Args()
-			if args.Len() != 2 {
-				return fmt.Errorf("%w: accepts 2 arg, received %d", ErrInvalidNumberOfArgs, args.Len())
+			if args.Len() != 1 && args.Len() != 2 {
+				return fmt.Errorf("%w: accepts 1 or 2 arg, received %d", ErrInvalidNumberOfArgs, args.Len())
 			}
 
+			var err error
 			keyName := args.Get(0)
-			if err := validateKeyName(keyName); err != nil {
+			if err = validateKeyName(keyName); err != nil {
 				return err
 			}
 
 			privateKey := args.Get(1)
-			if privateKey == "" {
-				return ErrEmptyPrivateKey
+
+			// In case user doesn't provide private key, prompt for it
+			// This is to ensure backward compatibility
+			if len(privateKey) == 0 {
+				privateKey, err = p.InputString(
+					"Enter private key or Mnemonic (mnemonic only work for ecdsa right now): ",
+					"",
+					"Please provide private key or Mnemonic to import key",
+					func(s string) error {
+						if len(s) == 0 {
+							return ErrEmptyPrivateKey
+						}
+						return nil
+					},
+				)
+				if err != nil {
+					return err
+				}
 			}
 
 			pkSlice := strings.Split(privateKey, " ")
