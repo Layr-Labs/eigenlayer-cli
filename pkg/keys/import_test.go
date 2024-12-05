@@ -38,15 +38,9 @@ func TestImportCmd(t *testing.T) {
 			err:  errors.New("Required flag \"key-type\" not set"),
 		},
 		{
-			name: "one argument",
-			args: []string{"--key-type", "ecdsa", "arg1"},
-			err:  fmt.Errorf("%w: accepts 2 arg, received 1", ErrInvalidNumberOfArgs),
-		},
-
-		{
 			name: "more than two argument",
 			args: []string{"--key-type", "ecdsa", "arg1", "arg2", "arg3"},
-			err:  fmt.Errorf("%w: accepts 2 arg, received 3", ErrInvalidNumberOfArgs),
+			err:  fmt.Errorf("%w: accepts 1 or 2 arg, received 3", ErrInvalidNumberOfArgs),
 		},
 		{
 			name: "empty key name argument",
@@ -57,11 +51,6 @@ func TestImportCmd(t *testing.T) {
 			name: "keyname with whitespaces",
 			args: []string{"--key-type", "ecdsa", "hello world", ""},
 			err:  ErrKeyContainsWhitespaces,
-		},
-		{
-			name: "empty private key argument",
-			args: []string{"--key-type", "ecdsa", "hello", ""},
-			err:  ErrEmptyPrivateKey,
 		},
 		{
 			name: "keyname with whitespaces",
@@ -111,6 +100,24 @@ func TestImportCmd(t *testing.T) {
 			keyPath:         filepath.Join(homePath, OperatorKeystoreSubFolder, "/test.ecdsa.key.json"),
 		},
 		{
+			name: "valid ecdsa key import with prompt",
+			args: []string{
+				"--key-type",
+				"ecdsa",
+				"test",
+			},
+			err: nil,
+			promptMock: func(p *prompterMock.MockPrompter) {
+				p.EXPECT().
+					InputString(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+					Return("6842fb8f5fa574d0482818b8a825a15c4d68f542693197f2c2497e3562f335f6", nil)
+				p.EXPECT().InputHiddenString(gomock.Any(), gomock.Any(), gomock.Any()).Return("", nil)
+				p.EXPECT().InputHiddenString(gomock.Any(), gomock.Any(), gomock.Any()).Return("", nil)
+			},
+			expectedPrivKey: "6842fb8f5fa574d0482818b8a825a15c4d68f542693197f2c2497e3562f335f6",
+			keyPath:         filepath.Join(homePath, OperatorKeystoreSubFolder, "/test.ecdsa.key.json"),
+		},
+		{
 			name: "valid ecdsa key import with 0x prefix",
 			args: []string{
 				"--key-type",
@@ -152,6 +159,24 @@ func TestImportCmd(t *testing.T) {
 			},
 			err: nil,
 			promptMock: func(p *prompterMock.MockPrompter) {
+				p.EXPECT().InputHiddenString(gomock.Any(), gomock.Any(), gomock.Any()).Return("", nil)
+				p.EXPECT().InputHiddenString(gomock.Any(), gomock.Any(), gomock.Any()).Return("", nil)
+			},
+			expectedPrivKey: "20030410000080487431431153104351076122223465926814327806350179952713280726583",
+			keyPath:         filepath.Join(homePath, OperatorKeystoreSubFolder, "/test.bls.key.json"),
+		},
+		{
+			name: "valid bls key import with prompt",
+			args: []string{
+				"--key-type",
+				"bls",
+				"test",
+			},
+			err: nil,
+			promptMock: func(p *prompterMock.MockPrompter) {
+				p.EXPECT().
+					InputString(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+					Return("20030410000080487431431153104351076122223465926814327806350179952713280726583", nil)
 				p.EXPECT().InputHiddenString(gomock.Any(), gomock.Any(), gomock.Any()).Return("", nil)
 				p.EXPECT().InputHiddenString(gomock.Any(), gomock.Any(), gomock.Any()).Return("", nil)
 			},
