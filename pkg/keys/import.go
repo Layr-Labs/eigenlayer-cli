@@ -58,13 +58,13 @@ This command will import keys in $HOME/.eigenlayer/operator_keys/ location
 
 			// In case user doesn't provide private key, prompt for it
 			// This is to ensure backward compatibility
-			if len(privateKey) == 0 {
+			if privateKey == "" {
 				privateKey, err = p.InputString(
 					"Enter private key or Mnemonic (mnemonic only work for ecdsa right now): ",
 					"",
 					"Please provide private key or Mnemonic to import key",
 					func(s string) error {
-						if len(s) == 0 {
+						if s == "" {
 							return ErrEmptyPrivateKey
 						}
 						return nil
