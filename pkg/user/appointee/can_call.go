@@ -65,7 +65,10 @@ func canCall(cliCtx *cli.Context) error {
 		return err
 	}
 
-	_, err = elReader.UserCanCall(ctx, config.UserAddress, config.CallerAddress, config.Target, config.Selector)
+	var result bool
+	result, err = elReader.UserCanCall(ctx, config.UserAddress, config.CallerAddress, config.Target, config.Selector)
+	logger.Infof("CanCall Result: %v", result)
+	logger.Infof("Selector, Target and User: %s, %x, %s", config.Target, string(config.Selector[:]), config.UserAddress)
 	return err
 }
 
@@ -139,7 +142,6 @@ func createDefaultEigenLayerReader(
 	if err != nil {
 		return nil, eigenSdkUtils.WrapError("failed to create new eth client", err)
 	}
-	logger.Infof("PERMISSION_ADDRESS: %s", config.PermissionManagerAddress)
 	elReader, err := elcontracts.NewReaderFromConfig(
 		elcontracts.Config{
 			PermissionsControllerAddress: config.PermissionManagerAddress,
