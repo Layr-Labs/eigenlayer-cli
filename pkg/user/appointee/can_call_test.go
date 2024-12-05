@@ -60,6 +60,8 @@ func TestCanCallCmd_Success(t *testing.T) {
 		"--target-address", "0xabcdef1234567890abcdef1234567890abcdef12",
 		"--selector", "0x1A2B3C4D",
 		"--network", "holesky",
+		"--permission-controller-address", "0xe4dB7125ef7a9D99F809B6b7788f75c8D84d8455",
+		"--eth-rpc-url", "https://ethereum-holesky.publicnode.com/",
 	}
 
 	err := app.Run(args)
@@ -83,6 +85,8 @@ func TestCanCallCmd_UserCanCallError(t *testing.T) {
 		"--target-address", "0xabcdef1234567890abcdef1234567890abcdef12",
 		"--selector", "0x1A2B3C4D",
 		"--network", "holesky",
+		"--permission-controller-address", "0xe4dB7125ef7a9D99F809B6b7788f75c8D84d8455",
+		"--eth-rpc-url", "https://ethereum-holesky.publicnode.com/",
 	}
 
 	err := app.Run(args)
@@ -105,6 +109,8 @@ func TestCanCallCmd_InvalidSelector(t *testing.T) {
 		"--caller-address", "0x9876543210fedcba9876543210fedcba98765432",
 		"--target-address", "0xabcdef1234567890abcdef1234567890abcdef12",
 		"--selector", "incorrect-format",
+		"--permission-controller-address", "0xe4dB7125ef7a9D99F809B6b7788f75c8D84d8455",
+		"--eth-rpc-url", "https://ethereum-holesky.publicnode.com/",
 	}
 
 	err := app.Run(args)
@@ -118,6 +124,8 @@ func TestCanCallCmd_InvalidSelector(t *testing.T) {
 		"--caller-address", "0x9876543210fedcba9876543210fedcba98765432",
 		"--target-address", "0xabcdef1234567890abcdef1234567890abcdef12",
 		"--selector", "0xincorrect-format",
+		"--permission-controller-address", "0xe4dB7125ef7a9D99F809B6b7788f75c8D84d8455",
+		"--eth-rpc-url", "https://ethereum-holesky.publicnode.com/",
 	}
 
 	err = app.Run(args)

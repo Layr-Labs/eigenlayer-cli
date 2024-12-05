@@ -39,10 +39,10 @@ var (
 )
 
 var (
-	PermissionManagerAddressFlag = cli.StringFlag{
-		Name:    "permission-manager-address",
-		Aliases: []string{"pma"},
-		Usage:   "user admin ... --permission-manager-address \"0x...\"",
-		EnvVars: []string{"PERMISSION_MANAGER_ADDRESS"},
+	PermissionControllerAddressFlag = cli.StringFlag{
+		Name:    "permission-controller-address",
+		Aliases: []string{"pca"},
+		Usage:   "user admin ... --permission-controller-address \"0x...\"",
+		EnvVars: []string{"PERMISSION_CONTROLLER_ADDRESS"},
 	}
 )

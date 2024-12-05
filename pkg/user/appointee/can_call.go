@@ -41,8 +41,10 @@ func CanCallCmd() *cli.Command {
 			&CallerAddressFlag,
 			&TargetAddressFlag,
 			&SelectorFlag,
-			&PermissionManagerAddressFlag,
+			&PermissionControllerAddressFlag,
 			&flags.NetworkFlag,
+			&flags.EnvironmentFlag,
+			&flags.ETHRpcUrlFlag,
 		},
 	}
 
@@ -62,6 +64,7 @@ func canCall(cliCtx *cli.Context) error {
 	if err != nil {
 		return err
 	}
+
 	_, err = elReader.UserCanCall(ctx, config.UserAddress, config.CallerAddress, config.Target, config.Selector)
 	return err
 }
@@ -84,7 +87,7 @@ func readAndValidateUserConfig(cliContext *cli.Context, logger logging.Logger) (
 	}
 
 	chainID := utils.NetworkNameToChainId(network)
-	permissionManagerAddress := cliContext.String(PermissionManagerAddressFlag.Name)
+	permissionManagerAddress := cliContext.String(PermissionControllerAddressFlag.Name)
 
 	if common.IsEmptyString(permissionManagerAddress) {
 		permissionManagerAddress, err = common.GetPermissionManagerAddress(utils.NetworkNameToChainId(network))
@@ -136,10 +139,10 @@ func createDefaultEigenLayerReader(
 	if err != nil {
 		return nil, eigenSdkUtils.WrapError("failed to create new eth client", err)
 	}
-
+	logger.Infof("PERMISSION_ADDRESS: %s", config.PermissionManagerAddress)
 	elReader, err := elcontracts.NewReaderFromConfig(
 		elcontracts.Config{
-			PermissionManagerAddress: config.PermissionManagerAddress,
+			PermissionsControllerAddress: config.PermissionManagerAddress,
 		},
 		ethClient,
 		logger,

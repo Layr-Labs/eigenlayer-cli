@@ -32,7 +32,7 @@ var (
 var (
 	SelectorFlag = cli.StringFlag{
 		Name:    "selector",
-		Aliases: []string{"sa"},
+		Aliases: []string{"s"},
 		Usage:   "The selector for managing permissions to protocol operations. A selector is a smart contract method.",
 		EnvVars: []string{"SELECTOR"},
 	}
@@ -57,10 +57,10 @@ var (
 )
 
 var (
-	PermissionManagerAddressFlag = cli.StringFlag{
-		Name:    "permission-manager-address",
-		Aliases: []string{"pma"},
-		Usage:   "The Ethereum address of the Permission Manager. Example: --permission-manager-address \"0x...\"",
-		EnvVars: []string{"PERMISSION_MANAGER_ADDRESS"},
+	PermissionControllerAddressFlag = cli.StringFlag{
+		Name:    "permission-controller-address",
+		Aliases: []string{"pca"},
+		Usage:   "The Ethereum address of the Permission Manager. Example: --permission-controller-address \"0x...\"",
+		EnvVars: []string{"PERMISSION_CONTROLLER_ADDRESS"},
 	}
 )
