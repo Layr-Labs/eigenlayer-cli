@@ -136,6 +136,9 @@ func showAction(cCtx *cli.Context, p utils.Prompter) error {
 	*/
 	operatorDelegatedSharesMap := make(map[string]*big.Int)
 	shares, err := elReader.GetOperatorShares(ctx, config.operatorAddress, config.strategyAddresses)
+	if err != nil {
+		return eigenSdkUtils.WrapError("failed to get operator shares", err)
+	}
 	for i, strategyAddress := range config.strategyAddresses {
 		operatorDelegatedSharesMap[strategyAddress.String()] = shares[i]
 	}

@@ -110,6 +110,7 @@ func updateAllocations(cCtx *cli.Context, p utils.Prompter) error {
 
 		receipt, err := eLWriter.ModifyAllocations(
 			ctx,
+			config.operatorAddress,
 			allocationsToUpdate.Allocations,
 			true,
 		)
@@ -136,6 +137,7 @@ func updateAllocations(cCtx *cli.Context, p utils.Prompter) error {
 
 		unsignedTx, err := contractBindings.AllocationManager.ModifyAllocations(
 			noSendTxOpts,
+			config.operatorAddress,
 			allocationsToUpdate.Allocations,
 		)
 		if err != nil {

@@ -5,6 +5,7 @@ type ChainMetadata struct {
 	ELDelegationManagerAddress  string
 	ELAVSDirectoryAddress       string
 	ELRewardsCoordinatorAddress string
+	ELPermissionManagerAddress  string
 	WebAppUrl                   string
 	ProofStoreBaseURL           string
 }
