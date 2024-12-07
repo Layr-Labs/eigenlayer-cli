@@ -9,7 +9,7 @@ import (
 func ListPendingCmd() *cli.Command {
 	listPendingCmd := &cli.Command{
 		Name:      "list-pending-admins",
-		Usage:     "user admin list-pending-admins <AccountAddress>",
+		Usage:     "user admin list-pending-admins --account-address <AccountAddress>",
 		UsageText: "List all users who are pending admin acceptance.",
 		Description: `
 		List all users who are pending admin acceptance.

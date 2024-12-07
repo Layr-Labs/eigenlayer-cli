@@ -48,7 +48,7 @@ func TestCanCallCmd_Success(t *testing.T) {
 	mockReader := newMockElChainReader()
 
 	app := cli.NewApp()
-	app.Commands = []*cli.Command{CanCallCmd()}
+	app.Commands = []*cli.Command{canCallCmd()}
 	app.Metadata = make(map[string]interface{})
 	app.Metadata["elReader"] = UserCanCallReader(&mockReader)
 
@@ -73,7 +73,7 @@ func TestCanCallCmd_UserCanCallError(t *testing.T) {
 	mockReader := newErrorMockElChainReader(errString)
 
 	app := cli.NewApp()
-	app.Commands = []*cli.Command{CanCallCmd()}
+	app.Commands = []*cli.Command{canCallCmd()}
 	app.Metadata = make(map[string]interface{})
 	app.Metadata["elReader"] = UserCanCallReader(&mockReader)
 
@@ -98,7 +98,7 @@ func TestCanCallCmd_InvalidSelector(t *testing.T) {
 	mockReader := newMockElChainReader()
 
 	app := cli.NewApp()
-	app.Commands = []*cli.Command{CanCallCmd()}
+	app.Commands = []*cli.Command{canCallCmd()}
 	app.Metadata = make(map[string]interface{})
 	app.Metadata["elReader"] = UserCanCallReader(&mockReader)
 

@@ -9,7 +9,7 @@ import (
 func IsPendingCmd() *cli.Command {
 	isPendingCmd := &cli.Command{
 		Name:      "is-pending-admin",
-		Usage:     "user admin is-pending-admin <AccountAddress> <PendingAdminAddress>",
+		Usage:     "user admin is-pending-admin --account-address <AccountAddress> --pending-admin-address <PendingAdminAddress>",
 		UsageText: "Checks if a user is pending acceptance to admin.",
 		Description: `
 		Checks if a user is pending acceptance to admin.

@@ -9,7 +9,7 @@ import (
 func ListCmd() *cli.Command {
 	listCmd := &cli.Command{
 		Name:      "list-admins",
-		Usage:     "user admin list-admins <AccountAddress>",
+		Usage:     "user admin list-admins --account-address <AccountAddress>",
 		UsageText: "List all users who are admins.",
 		Description: `
 		List all users who are admins.

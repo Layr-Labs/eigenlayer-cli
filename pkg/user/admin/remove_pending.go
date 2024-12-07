@@ -9,18 +9,23 @@ import (
 func RemovePendingCmd() *cli.Command {
 	removeCmd := &cli.Command{
 		Name:      "remove-pending-admin",
-		Usage:     "user admin remove-pending-admin <AccountAddress> <AdminAddress>",
+		Usage:     "user admin remove-pending-admin --account-address <AccountAddress> --admin-address <AdminAddress>",
 		UsageText: "Remove a user who is pending admin acceptance.",
 		Description: `
 		Remove a user who is pending admin acceptance.
 		`,
 		After: telemetry.AfterRunAction(),
-		Flags: []cli.Flag{
-			&flags.VerboseFlag,
-			&AccountAddressFlag,
-			&AdminAddressFlag,
-		},
+		Flags: removePendingFlags(),
 	}
 
 	return removeCmd
+}
+
+func removePendingFlags() []cli.Flag {
+	cmdFlags := []cli.Flag{
+		&flags.VerboseFlag,
+		&AccountAddressFlag,
+		&AdminAddressFlag,
+	}
+	return append(cmdFlags, flags.GetSignerFlags()...)
 }

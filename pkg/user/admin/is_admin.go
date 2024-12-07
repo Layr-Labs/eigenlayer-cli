@@ -9,7 +9,7 @@ import (
 func IsAdminCmd() *cli.Command {
 	isAdmin := &cli.Command{
 		Name:      "is-admin",
-		Usage:     "user admin is-admin <AccountAddress> <CallerAddress>",
+		Usage:     "user admin is-admin --account-address <AccountAddress> --caller-address <CallerAddress>",
 		UsageText: "Checks if a user is an admin.",
 		Description: `
 		Checks if a user is an admin.

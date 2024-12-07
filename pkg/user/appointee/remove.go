@@ -9,20 +9,25 @@ import (
 func RemoveCmd() *cli.Command {
 	removeCmd := &cli.Command{
 		Name:      "remove",
-		Usage:     "user appointee remove <AccountAddress> <AppointeeAddress> <TargetAddress> <Selector>",
+		Usage:     "user appointee remove --account-address <AccountAddress> --appointee-address <AppointeeAddress> --target-address <TargetAddress> --selector <Selector>",
 		UsageText: "Remove a user's permission",
 		Description: `
 		Remove a user's permission'.
 		`,
 		After: telemetry.AfterRunAction(),
-		Flags: []cli.Flag{
-			&flags.VerboseFlag,
-			&AccountAddressFlag,
-			&AppointeeAddressFlag,
-			&TargetAddressFlag,
-			&SelectorFlag,
-		},
+		Flags: removeCommandFlags(),
 	}
 
 	return removeCmd
+}
+
+func removeCommandFlags() []cli.Flag {
+	cmdFlags := []cli.Flag{
+		&flags.VerboseFlag,
+		&AccountAddressFlag,
+		&AppointeeAddressFlag,
+		&TargetAddressFlag,
+		&SelectorFlag,
+	}
+	return append(cmdFlags, flags.GetSignerFlags()...)
 }

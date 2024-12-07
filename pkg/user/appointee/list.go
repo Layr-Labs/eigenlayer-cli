@@ -9,7 +9,7 @@ import (
 func ListCmd() *cli.Command {
 	listCmd := &cli.Command{
 		Name:      "list",
-		Usage:     "user appointee list <AccountAddress> <TargetAddress> <Selector>",
+		Usage:     "user appointee list --account-address <AccountAddress> --target-address <TargetAddress> --selector <Selector>",
 		UsageText: "Lists all appointed users for an account with the provided permissions.",
 		Description: `
 		Lists all appointed users for an account with the provided permissions.

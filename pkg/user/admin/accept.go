@@ -9,17 +9,22 @@ import (
 func AcceptCmd() *cli.Command {
 	acceptCmd := &cli.Command{
 		Name:      "accept-admin",
-		Usage:     "user admin accept-admin <AccountAddress>",
+		Usage:     "user admin accept-admin --account-address <AccountAddress>",
 		UsageText: "Accepts a user to become admin who is currently pending admin acceptance.",
 		Description: `
 		Accepts a user to become admin who is currently pending admin acceptance.
 		`,
 		After: telemetry.AfterRunAction(),
-		Flags: []cli.Flag{
-			&flags.VerboseFlag,
-			&AccountAddressFlag,
-		},
+		Flags: acceptFlags(),
 	}
 
 	return acceptCmd
+}
+
+func acceptFlags() []cli.Flag {
+	cmdFlags := []cli.Flag{
+		&flags.VerboseFlag,
+		&AccountAddressFlag,
+	}
+	return append(cmdFlags, flags.GetSignerFlags()...)
 }

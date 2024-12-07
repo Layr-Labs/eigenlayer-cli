@@ -9,18 +9,23 @@ import (
 func AddPendingCmd() *cli.Command {
 	addPendingCmd := &cli.Command{
 		Name:      "add-pending-admin",
-		Usage:     "user admin add-pending-admin <AccountAddress> <AdminAddress>",
+		Usage:     "user admin add-pending-admin --account-address <AccountAddress> --admin-address <AdminAddress>",
 		UsageText: "Add an admin to be pending until accepted.",
 		Description: `
 		Add an admin to be pending until accepted.
 		`,
 		After: telemetry.AfterRunAction(),
-		Flags: []cli.Flag{
-			&flags.VerboseFlag,
-			&AccountAddressFlag,
-			&AdminAddressFlag,
-		},
+		Flags: addPendingFlags(),
 	}
 
 	return addPendingCmd
+}
+
+func addPendingFlags() []cli.Flag {
+	cmdFlags := []cli.Flag{
+		&flags.VerboseFlag,
+		&AccountAddressFlag,
+		&AdminAddressFlag,
+	}
+	return append(cmdFlags, flags.GetSignerFlags()...)
 }

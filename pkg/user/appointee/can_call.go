@@ -24,10 +24,10 @@ type UserCanCallReader interface {
 	) (bool, error)
 }
 
-func CanCallCmd() *cli.Command {
-	canCallCmd := &cli.Command{
+func canCallCmd() *cli.Command {
+	cmd := &cli.Command{
 		Name:      "can-call",
-		Usage:     "user appointee can-call <AccountsAddress> <CallerAddress> <TargetAddress> <Selector>",
+		Usage:     "user appointee can-call --account-address <AccountsAddress> --caller-address <CallerAddress> --taget-address <TargetAddress> --selector <Selector>",
 		UsageText: "Checks if a user has a specific permission.",
 		Description: `
 		Checks if a user has a specific permission.
@@ -48,7 +48,7 @@ func CanCallCmd() *cli.Command {
 		},
 	}
 
-	return canCallCmd
+	return cmd
 }
 
 func canCall(cliCtx *cli.Context) error {
@@ -65,8 +65,7 @@ func canCall(cliCtx *cli.Context) error {
 		return err
 	}
 
-	var result bool
-	result, err = elReader.UserCanCall(ctx, config.UserAddress, config.CallerAddress, config.Target, config.Selector)
+	result, err := elReader.UserCanCall(ctx, config.UserAddress, config.CallerAddress, config.Target, config.Selector)
 	logger.Infof("CanCall Result: %v", result)
 	logger.Infof("Selector, Target and User: %s, %x, %s", config.Target, string(config.Selector[:]), config.UserAddress)
 	return err

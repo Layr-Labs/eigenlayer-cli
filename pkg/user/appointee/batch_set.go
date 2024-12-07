@@ -9,17 +9,22 @@ import (
 func BatchSetCmd() *cli.Command {
 	batchSetCmd := &cli.Command{
 		Name:      "batch set",
-		Usage:     "user appointee batch-set <BatchSetFile>",
+		Usage:     "user appointee batch-set --batch-set-file <BatchSetFile>",
 		UsageText: "Appoint multiple users permissions at a time.",
 		Description: `
 		Appoint multiple users permissions at a time.
 		`,
 		After: telemetry.AfterRunAction(),
-		Flags: []cli.Flag{
-			&flags.VerboseFlag,
-			&BatchSetFileFlag,
-		},
+		Flags: batchSetFlags(),
 	}
 
 	return batchSetCmd
+}
+
+func batchSetFlags() []cli.Flag {
+	cmdFlags := []cli.Flag{
+		&flags.VerboseFlag,
+		&BatchSetFileFlag,
+	}
+	return append(cmdFlags, flags.GetSignerFlags()...)
 }

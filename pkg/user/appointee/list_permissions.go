@@ -9,7 +9,7 @@ import (
 func ListPermissionsCmd() *cli.Command {
 	listPermissions := &cli.Command{
 		Name:      "list-permissions",
-		Usage:     "user appointee list-permissions <AccountAddress> <AppointeeAddress>",
+		Usage:     "user appointee list-permissions --account-address <AccountAddress> --appointee-address <AppointeeAddress>",
 		UsageText: "List all permissions for a user.",
 		Description: `
 		List all permissions of a user.
