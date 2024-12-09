@@ -21,8 +21,8 @@ func AppointeeCmd() *cli.Command {
 		Subcommands: []*cli.Command{
 			BatchSetCmd(),
 			canCallCmd(generateUserCanCallReader),
-			ListCmd(),
-			ListPermissionsCmd(),
+			ListCmd(generateListUsersReader),
+			ListPermissionsCmd(generateListUserPermissionsReader),
 			RemoveCmd(),
 			SetCmd(),
 		},
