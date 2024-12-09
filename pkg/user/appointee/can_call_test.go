@@ -70,9 +70,11 @@ func TestCanCallCmd_UserCanCallError(t *testing.T) {
 	mockReader := newErrorMockElChainReader(errString)
 
 	app := cli.NewApp()
-	app.Commands = []*cli.Command{canCallCmd(func(logger logging.Logger, config *canCallConfig) (UserCanCallReader, error) {
-		return UserCanCallReader(&mockReader), nil
-	})}
+	app.Commands = []*cli.Command{
+		canCallCmd(func(logger logging.Logger, config *canCallConfig) (UserCanCallReader, error) {
+			return UserCanCallReader(&mockReader), nil
+		}),
+	}
 
 	args := []string{
 		"TestCanCallCmd_UserCanCallError",

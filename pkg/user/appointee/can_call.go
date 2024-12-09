@@ -2,6 +2,7 @@ package appointee
 
 import (
 	"context"
+	"fmt"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
@@ -66,8 +67,8 @@ func canCall(cliCtx *cli.Context, generator func(logging.Logger, *canCallConfig)
 	}
 
 	result, err := elReader.UserCanCall(ctx, config.UserAddress, config.CallerAddress, config.Target, config.Selector)
-	logger.Infof("CanCall Result: %v", result)
-	logger.Infof("Selector, Target and User: %s, %x, %s", config.Target, string(config.Selector[:]), config.UserAddress)
+	fmt.Printf("CanCall Result: %v", result)
+	fmt.Printf("Selector, Target and User: %s, %x, %s", config.Target, string(config.Selector[:]), config.UserAddress)
 	return err
 }
 
@@ -119,10 +120,7 @@ func readAndValidateUserConfig(cliContext *cli.Context, logger logging.Logger) (
 	}, nil
 }
 
-func generateUserCanCallReader(
-	logger logging.Logger,
-	config *canCallConfig,
-) (UserCanCallReader, error) {
+func generateUserCanCallReader(logger logging.Logger, config *canCallConfig) (UserCanCallReader, error) {
 	ethClient, err := ethclient.Dial(config.RPCUrl)
 	if err != nil {
 		return nil, eigenSdkUtils.WrapError("failed to create new eth client", err)

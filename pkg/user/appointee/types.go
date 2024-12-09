@@ -16,3 +16,16 @@ type canCallConfig struct {
 	ChainID                  *big.Int
 	Environment              string
 }
+
+type listUsersConfig struct {
+	Network                  string
+	RPCUrl                   string
+	UserAddress              gethcommon.Address
+	Target                   gethcommon.Address
+	Selector                 [4]byte
+	PermissionManagerAddress gethcommon.Address
+	ChainID                  *big.Int
+	Environment              string
+}
+
+// coreweave and cruzo

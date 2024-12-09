@@ -16,9 +16,9 @@ func ListPermissionsCmd() *cli.Command {
 		`,
 		After: telemetry.AfterRunAction(),
 		Flags: []cli.Flag{
-			&flags.VerboseFlag,
 			&AccountAddressFlag,
 			&AppointeeAddressFlag,
+			&flags.VerboseFlag,
 		},
 	}
 
