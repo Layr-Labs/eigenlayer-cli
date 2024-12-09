@@ -24,7 +24,7 @@ type UserCanCallReader interface {
 	) (bool, error)
 }
 
-func canCallCmd() *cli.Command {
+func canCallCmd(readerGenerator func(logging.Logger, *CanCallConfig) (UserCanCallReader, error)) *cli.Command {
 	cmd := &cli.Command{
 		Name:      "can-call",
 		Usage:     "user appointee can-call --account-address <AccountsAddress> --caller-address <CallerAddress> --taget-address <TargetAddress> --selector <Selector>",
@@ -33,7 +33,7 @@ func canCallCmd() *cli.Command {
 		Checks if a user has a specific permission.
 		`,
 		Action: func(c *cli.Context) error {
-			return canCall(c)
+			return canCall(c, readerGenerator)
 		},
 		After: telemetry.AfterRunAction(),
 		Flags: []cli.Flag{
@@ -51,7 +51,7 @@ func canCallCmd() *cli.Command {
 	return cmd
 }
 
-func canCall(cliCtx *cli.Context) error {
+func canCall(cliCtx *cli.Context, generator func(logging.Logger, *CanCallConfig) (UserCanCallReader, error)) error {
 	ctx := cliCtx.Context
 	logger := common.GetLogger(cliCtx)
 
@@ -60,7 +60,7 @@ func canCall(cliCtx *cli.Context) error {
 		return eigenSdkUtils.WrapError("failed to read and validate user can call config", err)
 	}
 
-	elReader, err := getEigenLayerReader(cliCtx, logger, config)
+	elReader, err := generator(logger, config)
 	if err != nil {
 		return err
 	}
@@ -119,24 +119,10 @@ func readAndValidateUserConfig(cliContext *cli.Context, logger logging.Logger) (
 	}, nil
 }
 
-func getEigenLayerReader(
-	cliContext *cli.Context,
+func generateUserCanCallReader(
 	logger logging.Logger,
 	config *CanCallConfig,
 ) (UserCanCallReader, error) {
-	if reader, ok := cliContext.App.Metadata["elReader"].(UserCanCallReader); ok {
-		return reader, nil
-	}
-	return createDefaultEigenLayerReader(cliContext, config, logger)
-}
-
-func createDefaultEigenLayerReader(
-	cliContext *cli.Context,
-	config *CanCallConfig,
-	logger logging.Logger,
-) (UserCanCallReader, error) {
-	cliContext.App.Metadata["network"] = config.ChainID.String()
-
 	ethClient, err := ethclient.Dial(config.RPCUrl)
 	if err != nil {
 		return nil, eigenSdkUtils.WrapError("failed to create new eth client", err)

@@ -3,6 +3,7 @@ package appointee
 import (
 	"context"
 	"errors"
+	"github.com/Layr-Labs/eigensdk-go/logging"
 	gethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/assert"
 	"github.com/urfave/cli/v2"
@@ -45,12 +46,8 @@ func (m *mockElChainReader) UserCanCall(
 }
 
 func TestCanCallCmd_Success(t *testing.T) {
-	mockReader := newMockElChainReader()
-
 	app := cli.NewApp()
-	app.Commands = []*cli.Command{canCallCmd()}
-	app.Metadata = make(map[string]interface{})
-	app.Metadata["elReader"] = UserCanCallReader(&mockReader)
+	app.Commands = []*cli.Command{canCallCmd(generateMockReader())}
 
 	args := []string{
 		"TestCanCallCmd_Success",
@@ -73,9 +70,9 @@ func TestCanCallCmd_UserCanCallError(t *testing.T) {
 	mockReader := newErrorMockElChainReader(errString)
 
 	app := cli.NewApp()
-	app.Commands = []*cli.Command{canCallCmd()}
-	app.Metadata = make(map[string]interface{})
-	app.Metadata["elReader"] = UserCanCallReader(&mockReader)
+	app.Commands = []*cli.Command{canCallCmd(func(logger logging.Logger, config *CanCallConfig) (UserCanCallReader, error) {
+		return UserCanCallReader(&mockReader), nil
+	})}
 
 	args := []string{
 		"TestCanCallCmd_UserCanCallError",
@@ -95,12 +92,8 @@ func TestCanCallCmd_UserCanCallError(t *testing.T) {
 }
 
 func TestCanCallCmd_InvalidSelector(t *testing.T) {
-	mockReader := newMockElChainReader()
-
 	app := cli.NewApp()
-	app.Commands = []*cli.Command{canCallCmd()}
-	app.Metadata = make(map[string]interface{})
-	app.Metadata["elReader"] = UserCanCallReader(&mockReader)
+	app.Commands = []*cli.Command{canCallCmd(generateMockReader())}
 
 	args := []string{
 		"TestCanCallCmd_InvalidSelector",
@@ -131,4 +124,11 @@ func TestCanCallCmd_InvalidSelector(t *testing.T) {
 	err = app.Run(args)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "selector must be a 4-byte hex string prefixed with '0x'")
+}
+
+func generateMockReader() func(logger logging.Logger, config *CanCallConfig) (UserCanCallReader, error) {
+	return func(logger logging.Logger, config *CanCallConfig) (UserCanCallReader, error) {
+		mockReader := newMockElChainReader()
+		return UserCanCallReader(&mockReader), nil
+	}
 }
