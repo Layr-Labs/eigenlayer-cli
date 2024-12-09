@@ -15,6 +15,18 @@ type rewardsJson struct {
 
 type allRewardsJson []rewardsJson
 
+type SetOperatorAVSSplitConfig struct {
+	Network                   string
+	RPCUrl                    string
+	Broadcast                 bool
+	RewardsCoordinatorAddress gethcommon.Address
+	ChainID                   *big.Int
+	SignerConfig              *types.SignerConfig
+
+	OperatorAddress gethcommon.Address
+	AVSAddress      gethcommon.Address
+	Split           uint16
+}
 type ClaimConfig struct {
 	Network                   string
 	RPCUrl                    string
