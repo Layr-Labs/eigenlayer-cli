@@ -4,6 +4,7 @@ import (
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
 	"github.com/urfave/cli/v2"
+	"sort"
 )
 
 func AcceptCmd() *cli.Command {
@@ -26,5 +27,6 @@ func acceptFlags() []cli.Flag {
 		&flags.VerboseFlag,
 		&AccountAddressFlag,
 	}
+	sort.Sort(cli.FlagsByName(cmdFlags))
 	return append(cmdFlags, flags.GetSignerFlags()...)
 }

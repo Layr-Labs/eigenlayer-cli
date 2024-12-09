@@ -4,6 +4,7 @@ import (
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
 	"github.com/urfave/cli/v2"
+	"sort"
 )
 
 func RemoveCmd() *cli.Command {
@@ -27,5 +28,6 @@ func removeFlags() []cli.Flag {
 		&AccountAddressFlag,
 		&AdminAddressFlag,
 	}
+	sort.Sort(cli.FlagsByName(cmdFlags))
 	return append(cmdFlags, flags.GetSignerFlags()...)
 }
