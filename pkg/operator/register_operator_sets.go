@@ -104,6 +104,7 @@ func registerOperatorSetsAction(cCtx *cli.Context, p utils.Prompter) error {
 		}
 		unsignedTx, err := contractBindings.AllocationManager.RegisterForOperatorSets(
 			noSendTxOpts,
+			config.operatorAddress,
 			allocationmanager.IAllocationManagerTypesRegisterParams{
 				Avs:            config.avsAddress,
 				OperatorSetIds: config.operatorSetIds,
