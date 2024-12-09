@@ -5,7 +5,7 @@ import (
 	"math/big"
 )
 
-type CanCallConfig struct {
+type canCallConfig struct {
 	Network                  string
 	RPCUrl                   string
 	UserAddress              gethcommon.Address

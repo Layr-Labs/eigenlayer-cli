@@ -24,7 +24,7 @@ type UserCanCallReader interface {
 	) (bool, error)
 }
 
-func canCallCmd(readerGenerator func(logging.Logger, *CanCallConfig) (UserCanCallReader, error)) *cli.Command {
+func canCallCmd(readerGenerator func(logging.Logger, *canCallConfig) (UserCanCallReader, error)) *cli.Command {
 	cmd := &cli.Command{
 		Name:      "can-call",
 		Usage:     "user appointee can-call --account-address <AccountsAddress> --caller-address <CallerAddress> --taget-address <TargetAddress> --selector <Selector>",
@@ -51,7 +51,7 @@ func canCallCmd(readerGenerator func(logging.Logger, *CanCallConfig) (UserCanCal
 	return cmd
 }
 
-func canCall(cliCtx *cli.Context, generator func(logging.Logger, *CanCallConfig) (UserCanCallReader, error)) error {
+func canCall(cliCtx *cli.Context, generator func(logging.Logger, *canCallConfig) (UserCanCallReader, error)) error {
 	ctx := cliCtx.Context
 	logger := common.GetLogger(cliCtx)
 
@@ -71,7 +71,7 @@ func canCall(cliCtx *cli.Context, generator func(logging.Logger, *CanCallConfig)
 	return err
 }
 
-func readAndValidateUserConfig(cliContext *cli.Context, logger logging.Logger) (*CanCallConfig, error) {
+func readAndValidateUserConfig(cliContext *cli.Context, logger logging.Logger) (*canCallConfig, error) {
 	userAddress := gethcommon.HexToAddress(cliContext.String(AccountAddressFlag.Name))
 	callerAddress := gethcommon.HexToAddress(cliContext.String(CallerAddressFlag.Name))
 	ethRpcUrl := cliContext.String(flags.ETHRpcUrlFlag.Name)
@@ -106,7 +106,7 @@ func readAndValidateUserConfig(cliContext *cli.Context, logger logging.Logger) (
 		permissionManagerAddress,
 	)
 
-	return &CanCallConfig{
+	return &canCallConfig{
 		Network:                  network,
 		RPCUrl:                   ethRpcUrl,
 		UserAddress:              userAddress,
@@ -121,7 +121,7 @@ func readAndValidateUserConfig(cliContext *cli.Context, logger logging.Logger) (
 
 func generateUserCanCallReader(
 	logger logging.Logger,
-	config *CanCallConfig,
+	config *canCallConfig,
 ) (UserCanCallReader, error) {
 	ethClient, err := ethclient.Dial(config.RPCUrl)
 	if err != nil {

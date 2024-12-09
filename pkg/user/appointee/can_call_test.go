@@ -70,7 +70,7 @@ func TestCanCallCmd_UserCanCallError(t *testing.T) {
 	mockReader := newErrorMockElChainReader(errString)
 
 	app := cli.NewApp()
-	app.Commands = []*cli.Command{canCallCmd(func(logger logging.Logger, config *CanCallConfig) (UserCanCallReader, error) {
+	app.Commands = []*cli.Command{canCallCmd(func(logger logging.Logger, config *canCallConfig) (UserCanCallReader, error) {
 		return UserCanCallReader(&mockReader), nil
 	})}
 
@@ -126,8 +126,8 @@ func TestCanCallCmd_InvalidSelector(t *testing.T) {
 	assert.Contains(t, err.Error(), "selector must be a 4-byte hex string prefixed with '0x'")
 }
 
-func generateMockReader() func(logger logging.Logger, config *CanCallConfig) (UserCanCallReader, error) {
-	return func(logger logging.Logger, config *CanCallConfig) (UserCanCallReader, error) {
+func generateMockReader() func(logger logging.Logger, config *canCallConfig) (UserCanCallReader, error) {
+	return func(logger logging.Logger, config *canCallConfig) (UserCanCallReader, error) {
 		mockReader := newMockElChainReader()
 		return UserCanCallReader(&mockReader), nil
 	}
