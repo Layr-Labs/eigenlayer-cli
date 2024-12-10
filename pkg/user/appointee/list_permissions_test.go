@@ -8,6 +8,7 @@ import (
 	"github.com/Layr-Labs/eigensdk-go/logging"
 	gethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/assert"
+	
 	"github.com/urfave/cli/v2"
 )
 

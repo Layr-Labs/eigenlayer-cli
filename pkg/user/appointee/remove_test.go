@@ -3,11 +3,12 @@ package appointee
 import (
 	"context"
 	"errors"
-	"github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
 	"testing"
 
+	"github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
 	"github.com/Layr-Labs/eigensdk-go/logging"
 	"github.com/stretchr/testify/assert"
+
 	"github.com/urfave/cli/v2"
 )
 
