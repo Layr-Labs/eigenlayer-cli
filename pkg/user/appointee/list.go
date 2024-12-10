@@ -3,6 +3,9 @@ package appointee
 import (
 	"context"
 	"fmt"
+	"sort"
+	"strings"
+
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
@@ -13,7 +16,6 @@ import (
 	gethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/urfave/cli/v2"
-	"sort"
 )
 
 type ListUsersReader interface {
@@ -75,7 +77,7 @@ func printResults(config *listUsersConfig, users []gethcommon.Address) {
 		string(config.Selector[:]),
 		config.UserAddress,
 	)
-	fmt.Println("====================================================================================")
+	fmt.Println(strings.Repeat("-", 80))
 
 	for _, user := range users {
 		fmt.Printf("User Id: 0x%b\n", user)

@@ -3,6 +3,8 @@ package appointee
 import (
 	"context"
 	"fmt"
+	"sort"
+
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
@@ -13,7 +15,6 @@ import (
 	gethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/urfave/cli/v2"
-	"sort"
 )
 
 type UserCanCallReader interface {
@@ -59,9 +60,8 @@ func canCall(cliCtx *cli.Context, generator func(logging.Logger, *canCallConfig)
 	}
 
 	result, err := elReader.UserCanCall(ctx, config.UserAddress, config.CallerAddress, config.Target, config.Selector)
-	fmt.Printf("CanCall Result: %v", result)
-	fmt.Println()
-	fmt.Printf("Selector, Target and User: %s, %x, %s", config.Target, string(config.Selector[:]), config.UserAddress)
+	fmt.Printf("CanCall Result: %v\n", result)
+	fmt.Printf("Selector, Target and User: %s, %x, %s\n", config.Target, string(config.Selector[:]), config.UserAddress)
 	return err
 }
 

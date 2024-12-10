@@ -3,6 +3,8 @@ package appointee
 import (
 	"context"
 	"fmt"
+	"sort"
+
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
@@ -13,7 +15,6 @@ import (
 	gethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/urfave/cli/v2"
-	"sort"
 )
 
 type PermissionsReader interface {
