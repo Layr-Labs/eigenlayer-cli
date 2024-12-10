@@ -99,6 +99,7 @@ func readAndValidateListUsersConfig(cliContext *cli.Context, logger logging.Logg
 	}
 
 	chainID := utils.NetworkNameToChainId(network)
+	cliContext.App.Metadata["network"] = chainID.String()
 	permissionManagerAddress := cliContext.String(PermissionControllerAddressFlag.Name)
 
 	if common.IsEmptyString(permissionManagerAddress) {

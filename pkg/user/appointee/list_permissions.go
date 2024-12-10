@@ -56,6 +56,7 @@ func listPermissions(
 		return eigenSdkUtils.WrapError("failed to read and validate list user permissions config", err)
 	}
 
+	cliCtx.App.Metadata["network"] = config.ChainID.String()
 	reader, err := generator(logger, config)
 	if err != nil {
 		return err

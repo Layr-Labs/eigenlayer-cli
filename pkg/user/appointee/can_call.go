@@ -52,7 +52,7 @@ func canCall(cliCtx *cli.Context, generator func(logging.Logger, *canCallConfig)
 	if err != nil {
 		return eigenSdkUtils.WrapError("failed to read and validate user can call config", err)
 	}
-
+	cliCtx.App.Metadata["network"] = config.ChainID.String()
 	elReader, err := generator(logger, config)
 	if err != nil {
 		return err
