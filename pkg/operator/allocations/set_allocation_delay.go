@@ -155,7 +155,7 @@ func readAndValidateAllocationDelayConfig(c *cli.Context, logger logging.Logger)
 	}
 
 	allocationDelayString := c.Args().First()
-	allocationDelayInt, err := strconv.Atoi(allocationDelayString)
+	allocationDelayUint, err := strconv.ParseUint(allocationDelayString, 10, 32)
 	if err != nil {
 		return nil, eigenSdkUtils.WrapError("failed to convert allocation delay to int", err)
 	}
@@ -203,6 +203,6 @@ func readAndValidateAllocationDelayConfig(c *cli.Context, logger logging.Logger)
 		operatorAddress:          gethcommon.HexToAddress(operatorAddress),
 		signerConfig:             signerConfig,
 		delegationManagerAddress: gethcommon.HexToAddress(delegationManagerAddress),
-		allocationDelay:          uint32(allocationDelayInt),
+		allocationDelay:          uint32(allocationDelayUint),
 	}, nil
 }
