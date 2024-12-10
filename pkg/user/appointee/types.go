@@ -1,8 +1,9 @@
 package appointee
 
 import (
-	gethcommon "github.com/ethereum/go-ethereum/common"
 	"math/big"
+
+	gethcommon "github.com/ethereum/go-ethereum/common"
 )
 
 type canCallConfig struct {

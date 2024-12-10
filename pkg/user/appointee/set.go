@@ -1,10 +1,11 @@
 package appointee
 
 import (
+	"sort"
+
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
 	"github.com/urfave/cli/v2"
-	"sort"
 )
 
 func SetCmd() *cli.Command {

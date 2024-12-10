@@ -188,13 +188,14 @@ func TestGenerateAllocationsParams(t *testing.T) {
 			},
 		},
 		map[gethcommon.Address]map[gethcommon.Address]uint64{
-			gethcommon.HexToAddress("0x111116fE4F8C2f83E3eB2318F090557b7CD0BF76"): {
+			gethcommon.HexToAddress("0x2222AAC0C980Cc029624b7ff55B88Bc6F63C538f"): {
 				gethcommon.HexToAddress(strategyAddress): initialMagnitude,
 			},
 			gethcommon.HexToAddress(operatorAddress): {
 				gethcommon.HexToAddress("0x49989b32351Eb9b8ab2d5623cF22E7F7C23e5630"): initialMagnitude,
 				gethcommon.HexToAddress("0x111116fE4F8C2f83E3eB2318F090557b7CD0BF76"): initialMagnitude,
 				gethcommon.HexToAddress("0x545456fE4F8C2f83E3eB2318F090557b7CD04567"): initialMagnitude,
+				gethcommon.HexToAddress("0x232326fE4F8C2f83E3eB2318F090557b7CD02222"): initialMagnitude,
 			},
 		},
 	)
