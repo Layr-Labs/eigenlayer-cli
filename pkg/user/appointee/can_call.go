@@ -13,6 +13,7 @@ import (
 	gethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/urfave/cli/v2"
+	"sort"
 )
 
 type UserCanCallReader interface {
@@ -37,16 +38,7 @@ func canCallCmd(readerGenerator func(logging.Logger, *canCallConfig) (UserCanCal
 			return canCall(c, readerGenerator)
 		},
 		After: telemetry.AfterRunAction(),
-		Flags: []cli.Flag{
-			&AccountAddressFlag,
-			&CallerAddressFlag,
-			&TargetAddressFlag,
-			&SelectorFlag,
-			&PermissionControllerAddressFlag,
-			&flags.NetworkFlag,
-			&flags.EnvironmentFlag,
-			&flags.ETHRpcUrlFlag,
-		},
+		Flags: canCallFlags(),
 	}
 
 	return cmd
@@ -137,4 +129,19 @@ func generateUserCanCallReader(
 		logger,
 	)
 	return elReader, err
+}
+
+func canCallFlags() []cli.Flag {
+	cmdFlags := []cli.Flag{
+		&AccountAddressFlag,
+		&CallerAddressFlag,
+		&TargetAddressFlag,
+		&SelectorFlag,
+		&PermissionControllerAddressFlag,
+		&flags.NetworkFlag,
+		&flags.EnvironmentFlag,
+		&flags.ETHRpcUrlFlag,
+	}
+	sort.Sort(cli.FlagsByName(cmdFlags))
+	return cmdFlags
 }

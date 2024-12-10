@@ -13,6 +13,7 @@ import (
 	gethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/urfave/cli/v2"
+	"sort"
 )
 
 type ListUsersReader interface {
@@ -36,15 +37,7 @@ func ListCmd(readerGenerator func(logging.Logger, *listUsersConfig) (ListUsersRe
 			return listAppointees(c, readerGenerator)
 		},
 		After: telemetry.AfterRunAction(),
-		Flags: []cli.Flag{
-			&flags.VerboseFlag,
-			&AccountAddressFlag,
-			&TargetAddressFlag,
-			&SelectorFlag,
-			&flags.NetworkFlag,
-			&flags.EnvironmentFlag,
-			&flags.ETHRpcUrlFlag,
-		},
+		Flags: listFlags(),
 	}
 
 	return listCmd
@@ -148,4 +141,18 @@ func generateListUsersReader(logger logging.Logger, config *listUsersConfig) (Li
 		logger,
 	)
 	return elReader, err
+}
+
+func listFlags() []cli.Flag {
+	cmdFlags := []cli.Flag{
+		&flags.VerboseFlag,
+		&AccountAddressFlag,
+		&TargetAddressFlag,
+		&SelectorFlag,
+		&flags.NetworkFlag,
+		&flags.EnvironmentFlag,
+		&flags.ETHRpcUrlFlag,
+	}
+	sort.Sort(cli.FlagsByName(cmdFlags))
+	return cmdFlags
 }
