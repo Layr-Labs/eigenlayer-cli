@@ -43,7 +43,7 @@ func main() {
 	app.Commands = append(app.Commands, pkg.RewardsCmd(prompter))
 	app.Commands = append(app.Commands, pkg.KeysCmd(prompter))
 	app.Commands = append(app.Commands, pkg.EigenPodCmd(prompter))
-	app.Commands = append(app.Commands, pkg.UserCmd())
+	app.Commands = append(app.Commands, pkg.UserCmd(prompter))
 
 	if err := app.Run(os.Args); err != nil {
 		_, err := fmt.Fprintln(os.Stderr, err)

@@ -1,6 +1,7 @@
 package appointee
 
 import (
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/types"
 	"math/big"
 
 	gethcommon "github.com/ethereum/go-ethereum/common"
@@ -35,6 +36,32 @@ type listUserPermissionsConfig struct {
 	RPCUrl                   string
 	AccountAddress           gethcommon.Address
 	UserAddress              gethcommon.Address
+	PermissionManagerAddress gethcommon.Address
+	ChainID                  *big.Int
+	Environment              string
+}
+
+type removeConfig struct {
+	Network                  string
+	RPCUrl                   string
+	AccountAddress           gethcommon.Address
+	UserAddress              gethcommon.Address
+	Target                   gethcommon.Address
+	SignerConfig             types.SignerConfig
+	Selector                 [4]byte
+	PermissionManagerAddress gethcommon.Address
+	ChainID                  *big.Int
+	Environment              string
+}
+
+type setConfig struct {
+	Network                  string
+	RPCUrl                   string
+	AccountAddress           gethcommon.Address
+	UserAddress              gethcommon.Address
+	Target                   gethcommon.Address
+	SignerConfig             types.SignerConfig
+	Selector                 [4]byte
 	PermissionManagerAddress gethcommon.Address
 	ChainID                  *big.Int
 	Environment              string
