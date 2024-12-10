@@ -12,6 +12,7 @@ import (
 	"github.com/Layr-Labs/eigensdk-go/logging"
 	eigenSdkUtils "github.com/Layr-Labs/eigensdk-go/utils"
 	gethcommon "github.com/ethereum/go-ethereum/common"
+	gethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 
 	"github.com/urfave/cli/v2"
@@ -21,7 +22,7 @@ type SetUserPermissionWriter interface {
 	SetPermission(
 		ctx context.Context,
 		request elcontracts.SetPermissionRequest,
-	) error
+	) (*gethtypes.Receipt, error)
 }
 
 func SetCmd(generator func(logging.Logger, *setConfig) (SetUserPermissionWriter, error)) *cli.Command {
@@ -58,7 +59,7 @@ func setUserPermission(
 	if err != nil {
 		return err
 	}
-	return permissionWriter.SetPermission(
+	receipt, err := permissionWriter.SetPermission(
 		ctx,
 		elcontracts.SetPermissionRequest{
 			Account:        config.AccountAddress,
@@ -68,6 +69,11 @@ func setUserPermission(
 			WaitForReceipt: true,
 		},
 	)
+	if err != nil {
+		return err
+	}
+	common.PrintTransactionInfo(receipt.TxHash.String(), config.ChainID)
+	return nil
 }
 
 func generateSetUserPermissionWriter(

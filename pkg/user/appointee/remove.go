@@ -12,6 +12,7 @@ import (
 	"github.com/Layr-Labs/eigensdk-go/logging"
 	eigenSdkUtils "github.com/Layr-Labs/eigensdk-go/utils"
 	gethcommon "github.com/ethereum/go-ethereum/common"
+	gethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 
 	"github.com/urfave/cli/v2"
@@ -21,7 +22,7 @@ type RemoveUserPermissionWriter interface {
 	RemovePermission(
 		ctx context.Context,
 		request elcontracts.RemovePermissionRequest,
-	) error
+	) (*gethtypes.Receipt, error)
 }
 
 func RemoveCmd(readerGenerator func(logging.Logger, *removeConfig) (RemoveUserPermissionWriter, error)) *cli.Command {
@@ -58,7 +59,7 @@ func removeUserPermission(
 	if err != nil {
 		return err
 	}
-	return permissionWriter.RemovePermission(
+	receipt, err := permissionWriter.RemovePermission(
 		ctx,
 		elcontracts.RemovePermissionRequest{
 			Account:        config.AccountAddress,
@@ -68,6 +69,11 @@ func removeUserPermission(
 			WaitForReceipt: true,
 		},
 	)
+	if err != nil {
+		return err
+	}
+	common.PrintTransactionInfo(receipt.TxHash.String(), config.ChainID)
+	return nil
 }
 
 func generateRemoveUserPermissionWriter(
