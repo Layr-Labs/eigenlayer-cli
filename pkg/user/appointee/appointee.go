@@ -3,10 +3,11 @@ package appointee
 import (
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 	"github.com/urfave/cli/v2"
 )
 
-func AppointeeCmd() *cli.Command {
+func AppointeeCmd(prompter utils.Prompter) *cli.Command {
 	appointeeCmd := &cli.Command{
 		Name:      "appointee",
 		Usage:     "user appointee <command>",
@@ -23,8 +24,8 @@ func AppointeeCmd() *cli.Command {
 			canCallCmd(generateUserCanCallReader),
 			ListCmd(generateListUsersReader),
 			ListPermissionsCmd(generateListUserPermissionsReader),
-			RemoveCmd(),
-			SetCmd(),
+			RemoveCmd(generateRemoveUserPermissionWriter(prompter)),
+			SetCmd(generateSetUserPermissionWriter(prompter)),
 		},
 	}
 
