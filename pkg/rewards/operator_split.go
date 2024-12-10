@@ -17,12 +17,12 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-func OperatorSplitCmd(p utils.Prompter) *cli.Command {
+func SetOperatorSplitCmd(p utils.Prompter) *cli.Command {
 	var operatorSplitCmd = &cli.Command{
 		Name:  "set-operator-split",
 		Usage: "Set operator split",
 		Action: func(cCtx *cli.Context) error {
-			return OperatorSplit(cCtx, p)
+			return SetOperatorSplit(cCtx, p)
 		},
 		After: telemetry.AfterRunAction(),
 		Flags: getOperatorSplitFlags(),
@@ -31,13 +31,68 @@ func OperatorSplitCmd(p utils.Prompter) *cli.Command {
 	return operatorSplitCmd
 }
 
-func OperatorSplit(cCtx *cli.Context, p utils.Prompter) error {
+func GetOperatorSplitCmd(p utils.Prompter) *cli.Command {
+	var operatorSplitCmd = &cli.Command{
+		Name:  "get-operator-split",
+		Usage: "Get operator split",
+		Action: func(cCtx *cli.Context) error {
+			return GetOperatorSplit(cCtx, p)
+		},
+		After: telemetry.AfterRunAction(),
+		Flags: getOperatorSplitFlags(),
+	}
+
+	return operatorSplitCmd
+}
+
+func GetOperatorSplit(cCtx *cli.Context, p utils.Prompter) error {
 	ctx := cCtx.Context
 	logger := common.GetLogger(cCtx)
 
 	config, err := readAndValidateOperatorSplitConfig(cCtx, logger)
 	if err != nil {
-		return eigenSdkUtils.WrapError("failed to read and validate claim config", err)
+		return eigenSdkUtils.WrapError("failed to read and validate operator split config", err)
+	}
+
+	cCtx.App.Metadata["network"] = config.ChainID.String()
+
+	ethClient, err := ethclient.Dial(config.RPCUrl)
+	if err != nil {
+		return eigenSdkUtils.WrapError("failed to create new eth client", err)
+	}
+
+	elReader, err := elcontracts.NewReaderFromConfig(
+		elcontracts.Config{
+			RewardsCoordinatorAddress: config.RewardsCoordinatorAddress,
+		},
+		ethClient,
+		logger,
+	)
+
+	if err != nil {
+		return eigenSdkUtils.WrapError("failed to get EL writer", err)
+	}
+
+	logger.Infof("Getting operator split...")
+
+	split, err := elReader.GetOperatorAVSSplit(ctx, config.OperatorAddress, config.AVSAddress)
+
+	if err != nil || split == nil {
+		return eigenSdkUtils.WrapError("failed to get operator split", err)
+	}
+
+	logger.Infof("Operator split is %d", *split)
+
+	return nil
+}
+
+func SetOperatorSplit(cCtx *cli.Context, p utils.Prompter) error {
+	ctx := cCtx.Context
+	logger := common.GetLogger(cCtx)
+
+	config, err := readAndValidateOperatorSplitConfig(cCtx, logger)
+	if err != nil {
+		return eigenSdkUtils.WrapError("failed to read and validate operator split config", err)
 	}
 
 	cCtx.App.Metadata["network"] = config.ChainID.String()
