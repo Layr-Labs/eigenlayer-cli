@@ -3,11 +3,12 @@ package appointee
 import (
 	"context"
 	"errors"
+	"testing"
+
 	"github.com/Layr-Labs/eigensdk-go/logging"
 	gethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/assert"
 	"github.com/urfave/cli/v2"
-	"testing"
 )
 
 type mockElChainReader struct {
@@ -70,9 +71,11 @@ func TestCanCallCmd_UserCanCallError(t *testing.T) {
 	mockReader := newErrorMockElChainReader(errString)
 
 	app := cli.NewApp()
-	app.Commands = []*cli.Command{canCallCmd(func(logger logging.Logger, config *canCallConfig) (UserCanCallReader, error) {
-		return UserCanCallReader(&mockReader), nil
-	})}
+	app.Commands = []*cli.Command{
+		canCallCmd(func(logger logging.Logger, config *canCallConfig) (UserCanCallReader, error) {
+			return UserCanCallReader(&mockReader), nil
+		}),
+	}
 
 	args := []string{
 		"TestCanCallCmd_UserCanCallError",
