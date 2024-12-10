@@ -36,7 +36,10 @@ func (m *mockListUsersReader) ListUsers(
 	return m.listUsersFunc(ctx, userAddress, target, selector)
 }
 
-func generateMockListReader(users []gethcommon.Address, err error) func(logging.Logger, *listUsersConfig) (ListUsersReader, error) {
+func generateMockListReader(
+	users []gethcommon.Address,
+	err error,
+) func(logging.Logger, *listUsersConfig) (ListUsersReader, error) {
 	return func(logger logging.Logger, config *listUsersConfig) (ListUsersReader, error) {
 		return newMockListUsersReader(users, err), nil
 	}

@@ -24,7 +24,9 @@ type PermissionsReader interface {
 	) ([]gethcommon.Address, [][4]byte, error)
 }
 
-func ListPermissionsCmd(readerGenerator func(logging.Logger, *listUserPermissionsConfig) (PermissionsReader, error)) *cli.Command {
+func ListPermissionsCmd(
+	readerGenerator func(logging.Logger, *listUserPermissionsConfig) (PermissionsReader, error),
+) *cli.Command {
 	cmd := &cli.Command{
 		Name:      "list-permissions",
 		Usage:     "user appointee list-permissions --account-address <AccountAddress> --appointee-address <AppointeeAddress>",
@@ -42,7 +44,10 @@ func ListPermissionsCmd(readerGenerator func(logging.Logger, *listUserPermission
 	return cmd
 }
 
-func listPermissions(cliCtx *cli.Context, generator func(logging.Logger, *listUserPermissionsConfig) (PermissionsReader, error)) error {
+func listPermissions(
+	cliCtx *cli.Context,
+	generator func(logging.Logger, *listUserPermissionsConfig) (PermissionsReader, error),
+) error {
 	ctx := cliCtx.Context
 	logger := common.GetLogger(cliCtx)
 
@@ -64,7 +69,10 @@ func listPermissions(cliCtx *cli.Context, generator func(logging.Logger, *listUs
 	return nil
 }
 
-func readAndValidateListUserPermissionsConfig(cliContext *cli.Context, logger logging.Logger) (*listUserPermissionsConfig, error) {
+func readAndValidateListUserPermissionsConfig(
+	cliContext *cli.Context,
+	logger logging.Logger,
+) (*listUserPermissionsConfig, error) {
 	accountAddress := gethcommon.HexToAddress(cliContext.String(AccountAddressFlag.Name))
 	userAddress := gethcommon.HexToAddress(cliContext.String(AppointeeAddressFlag.Name))
 	ethRpcUrl := cliContext.String(flags.ETHRpcUrlFlag.Name)
