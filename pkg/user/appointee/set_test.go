@@ -3,6 +3,7 @@ package appointee
 import (
 	"context"
 	"errors"
+	gethtypes "github.com/ethereum/go-ethereum/core/types"
 	"testing"
 
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
@@ -13,21 +14,21 @@ import (
 )
 
 type mockSetUserPermissionWriter struct {
-	setPermissionFunc func(ctx context.Context, request elcontracts.SetPermissionRequest) error
+	setPermissionFunc func(ctx context.Context, request elcontracts.SetPermissionRequest) (*gethtypes.Receipt, error)
 }
 
 func (m *mockSetUserPermissionWriter) SetPermission(
 	ctx context.Context,
 	request elcontracts.SetPermissionRequest,
-) error {
+) (*gethtypes.Receipt, error) {
 	return m.setPermissionFunc(ctx, request)
 }
 
 func generateMockSetWriter(err error) func(logging.Logger, *setConfig) (SetUserPermissionWriter, error) {
 	return func(logger logging.Logger, config *setConfig) (SetUserPermissionWriter, error) {
 		return &mockSetUserPermissionWriter{
-			setPermissionFunc: func(ctx context.Context, request elcontracts.SetPermissionRequest) error {
-				return err
+			setPermissionFunc: func(ctx context.Context, request elcontracts.SetPermissionRequest) (*gethtypes.Receipt, error) {
+				return &gethtypes.Receipt{}, err
 			},
 		}, nil
 	}

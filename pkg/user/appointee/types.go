@@ -1,9 +1,9 @@
 package appointee
 
 import (
-	"github.com/Layr-Labs/eigenlayer-cli/pkg/types"
 	"math/big"
 
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/types"
 	gethcommon "github.com/ethereum/go-ethereum/common"
 )
 

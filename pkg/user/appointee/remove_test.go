@@ -3,6 +3,7 @@ package appointee
 import (
 	"context"
 	"errors"
+	gethtypes "github.com/ethereum/go-ethereum/core/types"
 	"testing"
 
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
@@ -13,21 +14,21 @@ import (
 )
 
 type mockRemoveUserPermissionWriter struct {
-	removePermissionFunc func(ctx context.Context, request elcontracts.RemovePermissionRequest) error
+	removePermissionFunc func(ctx context.Context, request elcontracts.RemovePermissionRequest) (*gethtypes.Receipt, error)
 }
 
 func (m *mockRemoveUserPermissionWriter) RemovePermission(
 	ctx context.Context,
 	request elcontracts.RemovePermissionRequest,
-) error {
+) (*gethtypes.Receipt, error) {
 	return m.removePermissionFunc(ctx, request)
 }
 
 func generateMockRemoveWriter(err error) func(logging.Logger, *removeConfig) (RemoveUserPermissionWriter, error) {
 	return func(logger logging.Logger, config *removeConfig) (RemoveUserPermissionWriter, error) {
 		return &mockRemoveUserPermissionWriter{
-			removePermissionFunc: func(ctx context.Context, request elcontracts.RemovePermissionRequest) error {
-				return err
+			removePermissionFunc: func(ctx context.Context, request elcontracts.RemovePermissionRequest) (*gethtypes.Receipt, error) {
+				return &gethtypes.Receipt{}, err
 			},
 		}, nil
 	}
