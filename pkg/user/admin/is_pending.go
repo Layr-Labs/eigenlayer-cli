@@ -142,8 +142,6 @@ func isPendingAdminFlags() []cli.Flag {
 		&flags.VerboseFlag,
 		&AccountAddressFlag,
 		&PendingAdminAddressFlag,
-		&flags.OutputTypeFlag,
-		&flags.OutputFileFlag,
 		&PermissionControllerAddressFlag,
 		&flags.NetworkFlag,
 		&flags.EnvironmentFlag,
