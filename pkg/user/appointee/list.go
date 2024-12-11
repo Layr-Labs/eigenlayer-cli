@@ -77,7 +77,7 @@ func printResults(config *listUsersConfig, users []gethcommon.Address) {
 		string(config.Selector[:]),
 		config.UserAddress,
 	)
-	fmt.Println(strings.Repeat("-", 80))
+	fmt.Println(strings.Repeat("=", 80))
 
 	for _, user := range users {
 		fmt.Printf("User Id: 0x%b\n", user)

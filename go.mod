@@ -10,7 +10,7 @@ require (
 	//<<<<<<< HEAD
 	//	github.com/Layr-Labs/eigensdk-go v0.1.14-0.20241212190947-9985122d81fe
 	//=======
-	github.com/Layr-Labs/eigensdk-go v0.1.14-0.20241210222107-c2ed40624db7
+	github.com/Layr-Labs/eigensdk-go v0.1.14-0.20241210234612-fdae59339a81
 	github.com/blang/semver/v4 v4.0.0
 	github.com/consensys/gnark-crypto v0.12.1
 	github.com/ethereum/go-ethereum v1.14.5
