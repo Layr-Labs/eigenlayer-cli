@@ -153,13 +153,15 @@ func removePendingAdminFlags() []cli.Flag {
 		&flags.VerboseFlag,
 		&AccountAddressFlag,
 		&AdminAddressFlag,
+		&PermissionControllerAddressFlag,
+		&flags.BroadcastFlag,
 		&flags.OutputTypeFlag,
 		&flags.OutputFileFlag,
 		&flags.NetworkFlag,
 		&flags.EnvironmentFlag,
 		&flags.ETHRpcUrlFlag,
-		&PermissionControllerAddressFlag,
 	}
+	cmdFlags = append(cmdFlags, flags.GetSignerFlags()...)
 	sort.Sort(cli.FlagsByName(cmdFlags))
-	return append(cmdFlags, flags.GetSignerFlags()...)
+	return cmdFlags
 }

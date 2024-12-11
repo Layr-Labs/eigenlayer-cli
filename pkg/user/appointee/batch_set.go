@@ -27,7 +27,14 @@ func batchSetFlags() []cli.Flag {
 	cmdFlags := []cli.Flag{
 		&flags.VerboseFlag,
 		&BatchSetFileFlag,
+		// TODO: any other flags related to command inputs.
+		&PermissionControllerAddressFlag,
+		&flags.NetworkFlag,
+		&flags.EnvironmentFlag,
+		&flags.ETHRpcUrlFlag,
+		&flags.BroadcastFlag,
 	}
+	cmdFlags = append(cmdFlags, flags.GetSignerFlags()...)
 	sort.Sort(cli.FlagsByName(cmdFlags))
-	return append(cmdFlags, flags.GetSignerFlags()...)
+	return cmdFlags
 }
