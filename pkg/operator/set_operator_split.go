@@ -95,7 +95,10 @@ func getOperatorSplitFlags() []cli.Flag {
 	return allFlags
 }
 
-func readAndValidateSetOperatorSplitConfig(cCtx *cli.Context, logger logging.Logger) (*split.SetOperatorAVSSplitConfig, error) {
+func readAndValidateSetOperatorSplitConfig(
+	cCtx *cli.Context,
+	logger logging.Logger,
+) (*split.SetOperatorAVSSplitConfig, error) {
 	network := cCtx.String(flags.NetworkFlag.Name)
 	rpcUrl := cCtx.String(flags.ETHRpcUrlFlag.Name)
 	opSplit := cCtx.Int(split.OperatorSplitFlag.Name)

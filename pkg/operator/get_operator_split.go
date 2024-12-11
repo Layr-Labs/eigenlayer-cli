@@ -70,7 +70,10 @@ func GetOperatorSplit(cCtx *cli.Context) error {
 	return nil
 }
 
-func readAndValidateGetOperatorSplitConfig(cCtx *cli.Context, logger logging.Logger) (*split.GetOperatorAVSSplitConfig, error) {
+func readAndValidateGetOperatorSplitConfig(
+	cCtx *cli.Context,
+	logger logging.Logger,
+) (*split.GetOperatorAVSSplitConfig, error) {
 	network := cCtx.String(flags.NetworkFlag.Name)
 	rpcUrl := cCtx.String(flags.ETHRpcUrlFlag.Name)
 
