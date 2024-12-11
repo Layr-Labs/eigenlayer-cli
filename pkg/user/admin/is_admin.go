@@ -50,7 +50,7 @@ func isAdmin(cliCtx *cli.Context, generator func(logging.Logger, *isAdminConfig)
 
 	config, err := readAndValidateIsAdminConfig(cliCtx, logger)
 	if err != nil {
-		return eigenSdkUtils.WrapError("failed to read and validate user can call config", err)
+		return eigenSdkUtils.WrapError("failed to read and validate user admin is admin config", err)
 	}
 	cliCtx.App.Metadata["network"] = config.ChainID.String()
 	elReader, err := generator(logger, config)

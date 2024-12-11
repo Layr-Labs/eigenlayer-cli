@@ -53,7 +53,7 @@ func listAdmins(
 
 	config, err := readAndValidateListAdminsConfig(cliCtx, logger)
 	if err != nil {
-		return eigenSdkUtils.WrapError("failed to read and validate user can call config", err)
+		return eigenSdkUtils.WrapError("failed to read and validate user admin list config", err)
 	}
 	cliCtx.App.Metadata["network"] = config.ChainID.String()
 	elReader, err := generator(logger, config)
@@ -70,7 +70,7 @@ func listAdmins(
 }
 
 func printAdmins(account gethcommon.Address, admins []gethcommon.Address) {
-	fmt.Printf("Admins for Account: %s \n", account)
+	fmt.Printf("Admins for AccountAddress: %s \n", account)
 	fmt.Println(strings.Repeat("=", 60))
 	for _, admin := range admins {
 		fmt.Printf("%s \n", admin.String())
