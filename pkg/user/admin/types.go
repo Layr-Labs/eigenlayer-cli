@@ -1,6 +1,7 @@
 package admin
 
 import (
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/types"
 	gethcommon "github.com/ethereum/go-ethereum/common"
 	"math/big"
 )
@@ -39,6 +40,49 @@ type isAdminConfig struct {
 	AccountAddress           gethcommon.Address
 	AdminAddress             gethcommon.Address
 	PermissionManagerAddress gethcommon.Address
+	ChainID                  *big.Int
+	Environment              string
+}
+
+type acceptAdminConfig struct {
+	Network                  string
+	RPCUrl                   string
+	AccountAddress           gethcommon.Address
+	PermissionManagerAddress gethcommon.Address
+	SignerConfig             types.SignerConfig
+	ChainID                  *big.Int
+	Environment              string
+}
+
+type addPendingAdminConfig struct {
+	Network                  string
+	RPCUrl                   string
+	AccountAddress           gethcommon.Address
+	AdminAddress             gethcommon.Address
+	PermissionManagerAddress gethcommon.Address
+	SignerConfig             types.SignerConfig
+	ChainID                  *big.Int
+	Environment              string
+}
+
+type removeAdminConfig struct {
+	Network                  string
+	RPCUrl                   string
+	AccountAddress           gethcommon.Address
+	AdminAddress             gethcommon.Address
+	PermissionManagerAddress gethcommon.Address
+	SignerConfig             types.SignerConfig
+	ChainID                  *big.Int
+	Environment              string
+}
+
+type removePendingAdminConfig struct {
+	Network                  string
+	RPCUrl                   string
+	AccountAddress           gethcommon.Address
+	AdminAddress             gethcommon.Address
+	PermissionManagerAddress gethcommon.Address
+	SignerConfig             types.SignerConfig
 	ChainID                  *big.Int
 	Environment              string
 }

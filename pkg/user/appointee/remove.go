@@ -25,7 +25,7 @@ type RemoveUserPermissionWriter interface {
 	) (*gethtypes.Receipt, error)
 }
 
-func RemoveCmd(readerGenerator func(logging.Logger, *removeConfig) (RemoveUserPermissionWriter, error)) *cli.Command {
+func RemoveCmd(generator func(logging.Logger, *removeConfig) (RemoveUserPermissionWriter, error)) *cli.Command {
 	removeCmd := &cli.Command{
 		Name:      "remove",
 		Usage:     "user appointee remove --account-address <AccountAddress> --appointee-address <AppointeeAddress> --target-address <TargetAddress> --selector <Selector>",
@@ -35,7 +35,7 @@ func RemoveCmd(readerGenerator func(logging.Logger, *removeConfig) (RemoveUserPe
 		`,
 		After: telemetry.AfterRunAction(),
 		Action: func(c *cli.Context) error {
-			return removeUserPermission(c, readerGenerator)
+			return removeUserPermission(c, generator)
 		},
 		Flags: removeCommandFlags(),
 	}
@@ -52,7 +52,7 @@ func removeUserPermission(
 
 	config, err := readAndValidateRemoveConfig(cliCtx, logger)
 	if err != nil {
-		return eigenSdkUtils.WrapError("failed to read and validate user can call config", err)
+		return eigenSdkUtils.WrapError("failed to read and validate user appointee remove config", err)
 	}
 	cliCtx.App.Metadata["network"] = config.ChainID.String()
 	permissionWriter, err := generator(logger, config)
@@ -62,7 +62,7 @@ func removeUserPermission(
 	receipt, err := permissionWriter.RemovePermission(
 		ctx,
 		elcontracts.RemovePermissionRequest{
-			Account:        config.AccountAddress,
+			AccountAddress: config.AccountAddress,
 			UserAddress:    config.UserAddress,
 			Target:         config.Target,
 			Selector:       config.Selector,

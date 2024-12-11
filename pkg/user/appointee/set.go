@@ -52,7 +52,7 @@ func setUserPermission(
 
 	config, err := readAndValidateSetConfig(cliCtx, logger)
 	if err != nil {
-		return eigenSdkUtils.WrapError("failed to read and validate user can call config", err)
+		return eigenSdkUtils.WrapError("failed to read and validate user appointee set config", err)
 	}
 	cliCtx.App.Metadata["network"] = config.ChainID.String()
 	permissionWriter, err := generator(logger, config)
@@ -62,7 +62,7 @@ func setUserPermission(
 	receipt, err := permissionWriter.SetPermission(
 		ctx,
 		elcontracts.SetPermissionRequest{
-			Account:        config.AccountAddress,
+			AccountAddress: config.AccountAddress,
 			UserAddress:    config.UserAddress,
 			Target:         config.Target,
 			Selector:       config.Selector,
