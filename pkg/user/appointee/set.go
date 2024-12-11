@@ -165,10 +165,13 @@ func setCommandFlags() []cli.Flag {
 		&AppointeeAddressFlag,
 		&TargetAddressFlag,
 		&SelectorFlag,
+		&PermissionControllerAddressFlag,
 		&flags.NetworkFlag,
 		&flags.EnvironmentFlag,
 		&flags.ETHRpcUrlFlag,
+		&flags.BroadcastFlag,
 	}
+	cmdFlags = append(cmdFlags, flags.GetSignerFlags()...)
 	sort.Sort(cli.FlagsByName(cmdFlags))
-	return append(cmdFlags, flags.GetSignerFlags()...)
+	return cmdFlags
 }

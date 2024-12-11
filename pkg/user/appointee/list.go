@@ -152,6 +152,7 @@ func listFlags() []cli.Flag {
 		&AccountAddressFlag,
 		&TargetAddressFlag,
 		&SelectorFlag,
+		&PermissionControllerAddressFlag,
 		&flags.NetworkFlag,
 		&flags.EnvironmentFlag,
 		&flags.ETHRpcUrlFlag,

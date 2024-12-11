@@ -151,6 +151,7 @@ func listPermissionFlags() []cli.Flag {
 		&flags.VerboseFlag,
 		&AccountAddressFlag,
 		&AppointeeAddressFlag,
+		&PermissionControllerAddressFlag,
 		&flags.NetworkFlag,
 		&flags.EnvironmentFlag,
 		&flags.ETHRpcUrlFlag,

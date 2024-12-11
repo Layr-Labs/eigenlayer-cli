@@ -134,8 +134,6 @@ func IsAdminFlags() []cli.Flag {
 		&flags.VerboseFlag,
 		&AccountAddressFlag,
 		&CallerAddressFlag,
-		&flags.OutputTypeFlag,
-		&flags.OutputFileFlag,
 		&PermissionControllerAddressFlag,
 		&flags.NetworkFlag,
 		&flags.EnvironmentFlag,

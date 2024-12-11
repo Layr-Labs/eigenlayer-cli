@@ -142,8 +142,6 @@ func listPendingAdminsFlags() []cli.Flag {
 	cmdFlags := []cli.Flag{
 		&flags.VerboseFlag,
 		&AccountAddressFlag,
-		&flags.OutputTypeFlag,
-		&flags.OutputFileFlag,
 		&PermissionControllerAddressFlag,
 		&flags.NetworkFlag,
 		&flags.EnvironmentFlag,
