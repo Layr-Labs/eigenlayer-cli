@@ -67,7 +67,7 @@ func isPendingAdmin(
 	if err != nil {
 		return err
 	}
-	fmt.Printf("IsPendingAdmin Result: %v\n", result)
+	printIsPendingAdminResult(result)
 	return nil
 }
 
@@ -112,6 +112,14 @@ func readAndValidateIsPendingAdminConfig(
 		ChainID:                  chainID,
 		Environment:              environment,
 	}, nil
+}
+
+func printIsPendingAdminResult(result bool) {
+	if result {
+		fmt.Printf("Address provided is a pending admin.")
+	} else {
+		fmt.Printf("Address provided is not a pending admin.")
+	}
 }
 
 func generateIsPendingAdminReader(logger logging.Logger, config *isPendingAdminConfig) (IsPendingAdminReader, error) {

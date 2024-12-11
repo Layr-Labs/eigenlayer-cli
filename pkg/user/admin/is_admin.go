@@ -62,7 +62,7 @@ func isAdmin(cliCtx *cli.Context, generator func(logging.Logger, *isAdminConfig)
 	if err != nil {
 		return err
 	}
-	fmt.Printf("IsAdmin Result: %v\n", result)
+	printIsAdminResult(result)
 	return nil
 }
 
@@ -104,6 +104,14 @@ func readAndValidateIsAdminConfig(cliContext *cli.Context, logger logging.Logger
 		ChainID:                  chainID,
 		Environment:              environment,
 	}, nil
+}
+
+func printIsAdminResult(result bool) {
+	if result {
+		fmt.Printf("Address provided is an admin.")
+	} else {
+		fmt.Printf("Address provided is not an admin.")
+	}
 }
 
 func generateIsAdminReader(logger logging.Logger, config *isAdminConfig) (IsAdminReader, error) {
