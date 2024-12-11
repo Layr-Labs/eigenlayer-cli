@@ -20,7 +20,7 @@ func GetOperatorSplitCmd(p utils.Prompter) *cli.Command {
 		Name:  "get-rewards-split",
 		Usage: "Get operator rewards split",
 		Action: func(cCtx *cli.Context) error {
-			return GetOperatorSplit(cCtx, p)
+			return GetOperatorSplit(cCtx)
 		},
 		After: telemetry.AfterRunAction(),
 		Flags: getOperatorSplitFlags(),
@@ -29,7 +29,7 @@ func GetOperatorSplitCmd(p utils.Prompter) *cli.Command {
 	return operatorSplitCmd
 }
 
-func GetOperatorSplit(cCtx *cli.Context, p utils.Prompter) error {
+func GetOperatorSplit(cCtx *cli.Context) error {
 	ctx := cCtx.Context
 	logger := common.GetLogger(cCtx)
 
