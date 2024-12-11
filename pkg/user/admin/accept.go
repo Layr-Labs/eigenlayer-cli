@@ -122,15 +122,17 @@ func acceptFlags() []cli.Flag {
 	cmdFlags := []cli.Flag{
 		&flags.VerboseFlag,
 		&AccountAddressFlag,
+		&PermissionControllerAddressFlag,
 		&flags.OutputTypeFlag,
 		&flags.OutputFileFlag,
+		&flags.BroadcastFlag,
 		&flags.NetworkFlag,
 		&flags.EnvironmentFlag,
 		&flags.ETHRpcUrlFlag,
-		&PermissionControllerAddressFlag,
 	}
+	cmdFlags = append(cmdFlags, flags.GetSignerFlags()...)
 	sort.Sort(cli.FlagsByName(cmdFlags))
-	return append(cmdFlags, flags.GetSignerFlags()...)
+	return cmdFlags
 }
 
 func generateAcceptAdminWriter(
