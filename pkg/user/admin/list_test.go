@@ -8,6 +8,7 @@ import (
 	"github.com/Layr-Labs/eigensdk-go/logging"
 	gethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/assert"
+	
 	"github.com/urfave/cli/v2"
 )
 
@@ -15,11 +16,17 @@ type mockListAdminsReader struct {
 	listAdminsFunc func(ctx context.Context, userAddress gethcommon.Address) ([]gethcommon.Address, error)
 }
 
-func (m *mockListAdminsReader) ListAdmins(ctx context.Context, userAddress gethcommon.Address) ([]gethcommon.Address, error) {
+func (m *mockListAdminsReader) ListAdmins(
+	ctx context.Context,
+	userAddress gethcommon.Address,
+) ([]gethcommon.Address, error) {
 	return m.listAdminsFunc(ctx, userAddress)
 }
 
-func generateMockListAdminsReader(admins []gethcommon.Address, err error) func(logging.Logger, *listAdminsConfig) (ListAdminsReader, error) {
+func generateMockListAdminsReader(
+	admins []gethcommon.Address,
+	err error,
+) func(logging.Logger, *listAdminsConfig) (ListAdminsReader, error) {
 	return func(logger logging.Logger, config *listAdminsConfig) (ListAdminsReader, error) {
 		return &mockListAdminsReader{
 			listAdminsFunc: func(ctx context.Context, userAddress gethcommon.Address) ([]gethcommon.Address, error) {

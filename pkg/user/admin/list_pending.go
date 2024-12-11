@@ -26,7 +26,9 @@ type ListPendingAdminsReader interface {
 	) ([]gethcommon.Address, error)
 }
 
-func ListPendingCmd(readerGenerator func(logging.Logger, *listPendingAdminsConfig) (ListPendingAdminsReader, error)) *cli.Command {
+func ListPendingCmd(
+	readerGenerator func(logging.Logger, *listPendingAdminsConfig) (ListPendingAdminsReader, error),
+) *cli.Command {
 	listPendingCmd := &cli.Command{
 		Name:      "list-pending-admins",
 		Usage:     "user admin list-pending-admins --account-address <AccountAddress>",
@@ -44,7 +46,10 @@ func ListPendingCmd(readerGenerator func(logging.Logger, *listPendingAdminsConfi
 	return listPendingCmd
 }
 
-func listPendingAdmins(cliCtx *cli.Context, generator func(logging.Logger, *listPendingAdminsConfig) (ListPendingAdminsReader, error)) error {
+func listPendingAdmins(
+	cliCtx *cli.Context,
+	generator func(logging.Logger, *listPendingAdminsConfig) (ListPendingAdminsReader, error),
+) error {
 	ctx := cliCtx.Context
 	logger := common.GetLogger(cliCtx)
 
@@ -74,7 +79,10 @@ func printPendingAdmins(account gethcommon.Address, admins []gethcommon.Address)
 	}
 }
 
-func readAndValidateListPendingAdminsConfig(cliContext *cli.Context, logger logging.Logger) (*listPendingAdminsConfig, error) {
+func readAndValidateListPendingAdminsConfig(
+	cliContext *cli.Context,
+	logger logging.Logger,
+) (*listPendingAdminsConfig, error) {
 	accountAddress := gethcommon.HexToAddress(cliContext.String(AccountAddressFlag.Name))
 	ethRpcUrl := cliContext.String(flags.ETHRpcUrlFlag.Name)
 	network := cliContext.String(flags.NetworkFlag.Name)

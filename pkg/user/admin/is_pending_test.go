@@ -8,6 +8,7 @@ import (
 	"github.com/Layr-Labs/eigensdk-go/logging"
 	gethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/assert"
+
 	"github.com/urfave/cli/v2"
 )
 
@@ -23,7 +24,10 @@ func (m *mockIsPendingAdminReader) IsPendingAdmin(
 	return m.isPendingAdminFunc(ctx, accountAddress, pendingAdminAddress)
 }
 
-func generateMockIsPendingAdminReader(result bool, err error) func(logging.Logger, *isPendingAdminConfig) (IsPendingAdminReader, error) {
+func generateMockIsPendingAdminReader(
+	result bool,
+	err error,
+) func(logging.Logger, *isPendingAdminConfig) (IsPendingAdminReader, error) {
 	return func(logger logging.Logger, config *isPendingAdminConfig) (IsPendingAdminReader, error) {
 		return &mockIsPendingAdminReader{
 			isPendingAdminFunc: func(ctx context.Context, accountAddress gethcommon.Address, pendingAdminAddress gethcommon.Address) (bool, error) {

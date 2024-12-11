@@ -16,11 +16,17 @@ type mockListPendingAdminsReader struct {
 	listPendingAdminsFunc func(ctx context.Context, userAddress gethcommon.Address) ([]gethcommon.Address, error)
 }
 
-func (m *mockListPendingAdminsReader) ListPendingAdmins(ctx context.Context, userAddress gethcommon.Address) ([]gethcommon.Address, error) {
+func (m *mockListPendingAdminsReader) ListPendingAdmins(
+	ctx context.Context,
+	userAddress gethcommon.Address,
+) ([]gethcommon.Address, error) {
 	return m.listPendingAdminsFunc(ctx, userAddress)
 }
 
-func generateMockListPendingAdminsReader(admins []gethcommon.Address, err error) func(logging.Logger, *listPendingAdminsConfig) (ListPendingAdminsReader, error) {
+func generateMockListPendingAdminsReader(
+	admins []gethcommon.Address,
+	err error,
+) func(logging.Logger, *listPendingAdminsConfig) (ListPendingAdminsReader, error) {
 	return func(logger logging.Logger, config *listPendingAdminsConfig) (ListPendingAdminsReader, error) {
 		return &mockListPendingAdminsReader{
 			listPendingAdminsFunc: func(ctx context.Context, userAddress gethcommon.Address) ([]gethcommon.Address, error) {

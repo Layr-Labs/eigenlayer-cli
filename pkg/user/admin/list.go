@@ -44,7 +44,10 @@ func ListCmd(readerGenerator func(logging.Logger, *listAdminsConfig) (ListAdmins
 	return listCmd
 }
 
-func listAdmins(cliCtx *cli.Context, generator func(logging.Logger, *listAdminsConfig) (ListAdminsReader, error)) error {
+func listAdmins(
+	cliCtx *cli.Context,
+	generator func(logging.Logger, *listAdminsConfig) (ListAdminsReader, error),
+) error {
 	ctx := cliCtx.Context
 	logger := common.GetLogger(cliCtx)
 

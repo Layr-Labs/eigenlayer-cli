@@ -26,7 +26,9 @@ type IsPendingAdminReader interface {
 	) (bool, error)
 }
 
-func IsPendingCmd(readerGenerator func(logging.Logger, *isPendingAdminConfig) (IsPendingAdminReader, error)) *cli.Command {
+func IsPendingCmd(
+	readerGenerator func(logging.Logger, *isPendingAdminConfig) (IsPendingAdminReader, error),
+) *cli.Command {
 	isPendingCmd := &cli.Command{
 		Name:      "is-pending-admin",
 		Usage:     "user admin is-pending-admin --account-address <AccountAddress> --pending-admin-address <PendingAdminAddress>",
@@ -44,7 +46,10 @@ func IsPendingCmd(readerGenerator func(logging.Logger, *isPendingAdminConfig) (I
 	return isPendingCmd
 }
 
-func isPendingAdmin(cliCtx *cli.Context, generator func(logging.Logger, *isPendingAdminConfig) (IsPendingAdminReader, error)) error {
+func isPendingAdmin(
+	cliCtx *cli.Context,
+	generator func(logging.Logger, *isPendingAdminConfig) (IsPendingAdminReader, error),
+) error {
 	ctx := cliCtx.Context
 	logger := common.GetLogger(cliCtx)
 
@@ -66,7 +71,10 @@ func isPendingAdmin(cliCtx *cli.Context, generator func(logging.Logger, *isPendi
 	return nil
 }
 
-func readAndValidateIsPendingAdminConfig(cliContext *cli.Context, logger logging.Logger) (*isPendingAdminConfig, error) {
+func readAndValidateIsPendingAdminConfig(
+	cliContext *cli.Context,
+	logger logging.Logger,
+) (*isPendingAdminConfig, error) {
 	accountAddress := gethcommon.HexToAddress(cliContext.String(AccountAddressFlag.Name))
 	pendingAdminAddress := gethcommon.HexToAddress(cliContext.String(PendingAdminAddressFlag.Name))
 	ethRpcUrl := cliContext.String(flags.ETHRpcUrlFlag.Name)
