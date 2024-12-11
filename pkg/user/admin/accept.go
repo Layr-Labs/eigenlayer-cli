@@ -52,7 +52,7 @@ func acceptAdmin(
 
 	config, err := readAndValidateAcceptAdminConfig(cliCtx, logger)
 	if err != nil {
-		return eigenSdkUtils.WrapError("failed to read and validate user can call config", err)
+		return eigenSdkUtils.WrapError("failed to read and validate user admin accept config", err)
 	}
 	cliCtx.App.Metadata["network"] = config.ChainID.String()
 	elWriter, err := generator(logger, config)
@@ -141,7 +141,7 @@ func generateAcceptAdminWriter(
 		if err != nil {
 			return nil, eigenSdkUtils.WrapError("failed to create new eth client", err)
 		}
-		elWriter, err := common.GetELWriter(
+		return common.GetELWriter(
 			config.AccountAddress,
 			&config.SignerConfig,
 			ethClient,
@@ -152,6 +152,5 @@ func generateAcceptAdminWriter(
 			config.ChainID,
 			logger,
 		)
-		return elWriter, err
 	}
 }

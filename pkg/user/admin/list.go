@@ -53,7 +53,7 @@ func listAdmins(
 
 	config, err := readAndValidateListAdminsConfig(cliCtx, logger)
 	if err != nil {
-		return eigenSdkUtils.WrapError("failed to read and validate user can call config", err)
+		return eigenSdkUtils.WrapError("failed to read and validate user admin list config", err)
 	}
 	cliCtx.App.Metadata["network"] = config.ChainID.String()
 	elReader, err := generator(logger, config)

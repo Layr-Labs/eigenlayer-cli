@@ -52,7 +52,7 @@ func removeUserPermission(
 
 	config, err := readAndValidateRemoveConfig(cliCtx, logger)
 	if err != nil {
-		return eigenSdkUtils.WrapError("failed to read and validate user can call config", err)
+		return eigenSdkUtils.WrapError("failed to read and validate user appointee remove config", err)
 	}
 	cliCtx.App.Metadata["network"] = config.ChainID.String()
 	permissionWriter, err := generator(logger, config)

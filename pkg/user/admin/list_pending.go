@@ -55,7 +55,7 @@ func listPendingAdmins(
 
 	config, err := readAndValidateListPendingAdminsConfig(cliCtx, logger)
 	if err != nil {
-		return eigenSdkUtils.WrapError("failed to read and validate user can call config", err)
+		return eigenSdkUtils.WrapError("failed to read and validate user admin list pending config", err)
 	}
 	cliCtx.App.Metadata["network"] = config.ChainID.String()
 	elReader, err := generator(logger, config)

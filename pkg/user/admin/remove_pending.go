@@ -54,7 +54,7 @@ func removePendingAdmin(
 
 	config, err := readAndValidateRemovePendingAdminConfig(cliCtx, logger)
 	if err != nil {
-		return eigenSdkUtils.WrapError("failed to read and validate user can call config", err)
+		return eigenSdkUtils.WrapError("failed to read and validate user admin remove pending config", err)
 	}
 	cliCtx.App.Metadata["network"] = config.ChainID.String()
 	elWriter, err := generator(logger, config)
@@ -134,7 +134,7 @@ func generateRemovePendingAdminWriter(
 		if err != nil {
 			return nil, eigenSdkUtils.WrapError("failed to create new eth client", err)
 		}
-		elWriter, err := common.GetELWriter(
+		return common.GetELWriter(
 			config.AccountAddress,
 			&config.SignerConfig,
 			ethClient,
@@ -145,7 +145,6 @@ func generateRemovePendingAdminWriter(
 			config.ChainID,
 			logger,
 		)
-		return elWriter, err
 	}
 }
 

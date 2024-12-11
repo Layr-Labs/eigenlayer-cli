@@ -52,7 +52,7 @@ func removeAdmin(
 
 	config, err := readAndValidateRemoveAdminConfig(cliCtx, logger)
 	if err != nil {
-		return eigenSdkUtils.WrapError("failed to read and validate user can call config", err)
+		return eigenSdkUtils.WrapError("failed to read and validate user admin remove config", err)
 	}
 	cliCtx.App.Metadata["network"] = config.ChainID.String()
 	elWriter, err := generator(logger, config)
@@ -132,7 +132,7 @@ func generateRemoveAdminWriter(
 		if err != nil {
 			return nil, eigenSdkUtils.WrapError("failed to create new eth client", err)
 		}
-		elWriter, err := common.GetELWriter(
+		return common.GetELWriter(
 			config.AccountAddress,
 			&config.SignerConfig,
 			ethClient,
@@ -143,7 +143,6 @@ func generateRemoveAdminWriter(
 			config.ChainID,
 			logger,
 		)
-		return elWriter, err
 	}
 }
 
