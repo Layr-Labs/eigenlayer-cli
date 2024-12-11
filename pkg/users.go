@@ -12,7 +12,7 @@ func UserCmd(prompter utils.Prompter) *cli.Command {
 		Name:  "user",
 		Usage: "Manage user permissions",
 		Subcommands: []*cli.Command{
-			admin.AdminCmd(),
+			admin.AdminCmd(prompter),
 			appointee.AppointeeCmd(prompter),
 		},
 	}

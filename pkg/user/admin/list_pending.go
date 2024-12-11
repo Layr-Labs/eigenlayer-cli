@@ -72,7 +72,7 @@ func listPendingAdmins(
 }
 
 func printPendingAdmins(account gethcommon.Address, admins []gethcommon.Address) {
-	fmt.Printf("Pending Admins\n for Account: %s", account)
+	fmt.Printf("Pending Admins\n for AccountAddress: %s", account)
 	fmt.Println(strings.Repeat("=", 60))
 	for _, admin := range admins {
 		fmt.Printf("%s \n", admin.String())

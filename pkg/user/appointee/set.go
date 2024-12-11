@@ -62,7 +62,7 @@ func setUserPermission(
 	receipt, err := permissionWriter.SetPermission(
 		ctx,
 		elcontracts.SetPermissionRequest{
-			Account:        config.AccountAddress,
+			AccountAddress: config.AccountAddress,
 			UserAddress:    config.UserAddress,
 			Target:         config.Target,
 			Selector:       config.Selector,

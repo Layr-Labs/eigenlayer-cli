@@ -70,7 +70,7 @@ func listAdmins(
 }
 
 func printAdmins(account gethcommon.Address, admins []gethcommon.Address) {
-	fmt.Printf("Admins for Account: %s \n", account)
+	fmt.Printf("Admins for AccountAddress: %s \n", account)
 	fmt.Println(strings.Repeat("=", 60))
 	for _, admin := range admins {
 		fmt.Printf("%s \n", admin.String())
