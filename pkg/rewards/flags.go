@@ -91,20 +91,4 @@ var (
 		Value:   "all",
 		EnvVars: []string{"REWARDS_CLAIM_TYPE"},
 	}
-
-	OperatorAddressFlag = cli.StringFlag{
-		Name:     "operator-address",
-		Aliases:  []string{"a"},
-		Usage:    "Address of the operator",
-		Required: false,
-		EnvVars:  []string{"REWARDS_OPERATOR_ADDRESS"},
-	}
-
-	OperatorSplitFlag = cli.IntFlag{
-		Name:     "operator-split",
-		Aliases:  []string{"os"},
-		Usage:    "Split for the operator in bips (e.g. 1000 = 10%)",
-		Required: false,
-		EnvVars:  []string{"REWARDS_OPERATOR_SPLIT"},
-	}
 )

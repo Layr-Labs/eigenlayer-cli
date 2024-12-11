@@ -278,6 +278,7 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 	elClaims := []rewardscoordinator.IRewardsCoordinatorRewardsMerkleClaim{*elClaim}
 	claims := []contractrewardscoordinator.IRewardsCoordinatorRewardsMerkleClaim{*claim}
 	accounts := []merkletree.MerkleTree{*account}
+
 	err = broadcastClaims(config, ethClient, logger, p, ctx, elClaims, claims, accounts)
 
 	return err
