@@ -3,10 +3,11 @@ package admin
 import (
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 	"github.com/urfave/cli/v2"
 )
 
-func AdminCmd() *cli.Command {
+func AdminCmd(prompter utils.Prompter) *cli.Command {
 	adminCmd := &cli.Command{
 		Name:      "admin",
 		Usage:     "user admin <command>",
@@ -19,14 +20,14 @@ func AdminCmd() *cli.Command {
 			&flags.VerboseFlag,
 		},
 		Subcommands: []*cli.Command{
-			AcceptCmd(),
-			AddPendingCmd(),
+			AcceptCmd(generateAcceptAdminWriter(prompter)),
+			AddPendingCmd(generateAddPendingAdminWriter(prompter)),
 			IsAdminCmd(generateIsAdminReader),
 			IsPendingCmd(generateIsPendingAdminReader),
 			ListCmd(generateListAdminsReader),
 			ListPendingCmd(generateListPendingAdminsReader),
-			RemoveCmd(),
-			RemovePendingCmd(),
+			RemoveCmd(generateRemoveAdminWriter(prompter)),
+			RemovePendingCmd(generateRemovePendingAdminWriter(prompter)),
 		},
 	}
 

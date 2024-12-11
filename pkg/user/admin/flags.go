@@ -11,7 +11,7 @@ var (
 	}
 	AdminAddressFlag = cli.StringFlag{
 		Name:    "admin-address",
-		Aliases: []string{"aa"},
+		Aliases: []string{"ada"},
 		Usage:   "user admin ... --admin-address \"0x...\"",
 		EnvVars: []string{"ADMIN_ADDRESS"},
 	}

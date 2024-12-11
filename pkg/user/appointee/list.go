@@ -54,7 +54,7 @@ func listAppointees(
 
 	config, err := readAndValidateListUsersConfig(cliCtx, logger)
 	if err != nil {
-		return eigenSdkUtils.WrapError("failed to read and validate user can call config", err)
+		return eigenSdkUtils.WrapError("failed to read and validate user appointee list config", err)
 	}
 
 	elReader, err := generator(logger, config)
