@@ -15,12 +15,6 @@ var (
 		Usage:   "The Ethereum address of the user. Example: --appointee-address \"0x...\"",
 		EnvVars: []string{"APPOINTEE_ADDRESS"},
 	}
-	CallerAddressFlag = cli.StringFlag{
-		Name:    "caller-address",
-		Aliases: []string{"ca"},
-		Usage:   "The Ethereum address of the caller. Example: --caller-address \"0x...\"",
-		EnvVars: []string{"CALLER_ADDRESS"},
-	}
 	SelectorFlag = cli.StringFlag{
 		Name:    "selector",
 		Aliases: []string{"s"},

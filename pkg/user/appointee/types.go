@@ -10,8 +10,8 @@ import (
 type canCallConfig struct {
 	Network                  string
 	RPCUrl                   string
-	UserAddress              gethcommon.Address
-	CallerAddress            gethcommon.Address
+	AccountAddress           gethcommon.Address
+	AppointeeAddress         gethcommon.Address
 	Target                   gethcommon.Address
 	Selector                 [4]byte
 	PermissionManagerAddress gethcommon.Address
@@ -19,11 +19,10 @@ type canCallConfig struct {
 	Environment              string
 }
 
-type listUsersConfig struct {
+type listAppointeesConfig struct {
 	Network                  string
 	RPCUrl                   string
 	AccountAddress           gethcommon.Address
-	UserAddress              gethcommon.Address
 	Target                   gethcommon.Address
 	Selector                 [4]byte
 	PermissionManagerAddress gethcommon.Address
@@ -31,11 +30,11 @@ type listUsersConfig struct {
 	Environment              string
 }
 
-type listUserPermissionsConfig struct {
+type listAppointeePermissionsConfig struct {
 	Network                  string
 	RPCUrl                   string
 	AccountAddress           gethcommon.Address
-	UserAddress              gethcommon.Address
+	AppointeeAddress         gethcommon.Address
 	PermissionManagerAddress gethcommon.Address
 	ChainID                  *big.Int
 	Environment              string
@@ -45,7 +44,7 @@ type removeConfig struct {
 	Network                  string
 	RPCUrl                   string
 	AccountAddress           gethcommon.Address
-	UserAddress              gethcommon.Address
+	AppointeeAddress         gethcommon.Address
 	Target                   gethcommon.Address
 	SignerConfig             types.SignerConfig
 	Selector                 [4]byte
@@ -58,7 +57,7 @@ type setConfig struct {
 	Network                  string
 	RPCUrl                   string
 	AccountAddress           gethcommon.Address
-	UserAddress              gethcommon.Address
+	AppointeeAddress         gethcommon.Address
 	Target                   gethcommon.Address
 	SignerConfig             types.SignerConfig
 	Selector                 [4]byte

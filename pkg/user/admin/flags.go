@@ -15,12 +15,6 @@ var (
 		Usage:   "user admin ... --admin-address \"0x...\"",
 		EnvVars: []string{"ADMIN_ADDRESS"},
 	}
-	CallerAddressFlag = cli.StringFlag{
-		Name:    "caller-address",
-		Aliases: []string{"ca"},
-		Usage:   "user admin ... --caller-address \"0x...\"",
-		EnvVars: []string{"CALLER_ADDRESS"},
-	}
 	PendingAdminAddressFlag = cli.StringFlag{
 		Name:    "pending-admin-address",
 		Aliases: []string{"paa"},

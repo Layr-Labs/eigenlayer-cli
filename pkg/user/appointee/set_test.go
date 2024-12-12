@@ -13,20 +13,20 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-type mockSetUserPermissionWriter struct {
+type mockSetAppointeePermissionWriter struct {
 	setPermissionFunc func(ctx context.Context, request elcontracts.SetPermissionRequest) (*gethtypes.Receipt, error)
 }
 
-func (m *mockSetUserPermissionWriter) SetPermission(
+func (m *mockSetAppointeePermissionWriter) SetPermission(
 	ctx context.Context,
 	request elcontracts.SetPermissionRequest,
 ) (*gethtypes.Receipt, error) {
 	return m.setPermissionFunc(ctx, request)
 }
 
-func generateMockSetWriter(err error) func(logging.Logger, *setConfig) (SetUserPermissionWriter, error) {
-	return func(logger logging.Logger, config *setConfig) (SetUserPermissionWriter, error) {
-		return &mockSetUserPermissionWriter{
+func generateMockSetWriter(err error) func(logging.Logger, *setConfig) (SetAppointeePermissionWriter, error) {
+	return func(logger logging.Logger, config *setConfig) (SetAppointeePermissionWriter, error) {
+		return &mockSetAppointeePermissionWriter{
 			setPermissionFunc: func(ctx context.Context, request elcontracts.SetPermissionRequest) (*gethtypes.Receipt, error) {
 				return &gethtypes.Receipt{}, err
 			},
@@ -60,7 +60,7 @@ func TestSetCmd_GeneratorError(t *testing.T) {
 	expectedError := "failed to create permission writer"
 	app := cli.NewApp()
 	app.Commands = []*cli.Command{
-		SetCmd(func(logger logging.Logger, config *setConfig) (SetUserPermissionWriter, error) {
+		SetCmd(func(logger logging.Logger, config *setConfig) (SetAppointeePermissionWriter, error) {
 			return nil, errors.New(expectedError)
 		}),
 	}
