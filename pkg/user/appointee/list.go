@@ -84,7 +84,10 @@ func printResults(config *listAppointeesConfig, appointees []gethcommon.Address)
 	}
 }
 
-func readAndValidateListAppointeesConfig(cliContext *cli.Context, logger logging.Logger) (*listAppointeesConfig, error) {
+func readAndValidateListAppointeesConfig(
+	cliContext *cli.Context,
+	logger logging.Logger,
+) (*listAppointeesConfig, error) {
 	accountAddress := gethcommon.HexToAddress(cliContext.String(AccountAddressFlag.Name))
 	ethRpcUrl := cliContext.String(flags.ETHRpcUrlFlag.Name)
 	network := cliContext.String(flags.NetworkFlag.Name)
