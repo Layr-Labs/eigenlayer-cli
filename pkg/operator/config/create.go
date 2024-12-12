@@ -119,36 +119,31 @@ func promptOperatorInfo(config *types.OperatorConfig, p utils.Prompter) (types.O
 	}
 	config.Operator.Address = operatorAddress
 
-	// TODO(madhur): Disabling this for now as the feature doesn't work but
-	// we need to keep the code around for future
 	// Prompt to gate stakers approval
-	//gateApproval, err := p.Confirm("Do you want to gate stakers approval?")
-	//if err != nil {
-	//	return types.OperatorConfig{}, err
-	//}
+	gateApproval, err := p.Confirm("Do you want to gate stakers approval?")
+	if err != nil {
+		return types.OperatorConfig{}, err
+	}
 	// Prompt for address if operator wants to gate approvals
-	//if gateApproval {
-	//	delegationApprover, err := p.InputString("Enter your staker approver address:", "", "",
-	//		func(s string) error {
-	//			isValidAddress := eigenSdkUtils.IsValidEthereumAddress(s)
-	//
-	//			if !isValidAddress {
-	//				return errors.New("address is invalid")
-	//			}
-	//
-	//			return nil
-	//		},
-	//	)
-	//	if err != nil {
-	//		return types.OperatorConfig{}, err
-	//	}
-	//	config.Operator.DelegationApproverAddress = delegationApprover
-	//} else {
-	//	config.Operator.DelegationApproverAddress = eigensdkTypes.ZeroAddress
-	//}
+	if gateApproval {
+		delegationApprover, err := p.InputString("Enter your staker approver address:", "", "",
+			func(s string) error {
+				isValidAddress := eigenSdkUtils.IsValidEthereumAddress(s)
 
-	// TODO(madhur): Remove this once we have the feature working and want to prompt users for this address
-	config.Operator.DelegationApproverAddress = eigensdkTypes.ZeroAddress
+				if !isValidAddress {
+					return errors.New("address is invalid")
+				}
+
+				return nil
+			},
+		)
+		if err != nil {
+			return types.OperatorConfig{}, err
+		}
+		config.Operator.DelegationApproverAddress = delegationApprover
+	} else {
+		config.Operator.DelegationApproverAddress = eigensdkTypes.ZeroAddress
+	}
 
 	// Prompt for eth node
 	rpcUrl, err := p.InputString("Enter your ETH rpc url:", "http://localhost:8545", "",
@@ -161,8 +156,8 @@ func promptOperatorInfo(config *types.OperatorConfig, p utils.Prompter) (types.O
 
 	// Prompt for allocation delay
 	allocationDelay, err := p.InputInteger(
-		"Enter your allocation delay (in seconds, default is 17.5 days):",
-		"1512000",
+		"Enter your allocation delay (in blocks, default is 1200):",
+		"1200",
 		"",
 		func(i int64) error {
 			if i < 0 {
@@ -180,7 +175,7 @@ func promptOperatorInfo(config *types.OperatorConfig, p utils.Prompter) (types.O
 		"Are you sure you want to set the allocation delay to " + strconv.FormatInt(
 			allocationDelay,
 			10,
-		) + " seconds? This cannot be changed once set.",
+		) + " blocks?",
 	)
 	if err != nil {
 		return types.OperatorConfig{}, err
