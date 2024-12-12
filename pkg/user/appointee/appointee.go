@@ -21,11 +21,11 @@ func AppointeeCmd(prompter utils.Prompter) *cli.Command {
 		},
 		Subcommands: []*cli.Command{
 			BatchSetCmd(),
-			canCallCmd(generateUserCanCallReader),
-			ListCmd(generateListUsersReader),
-			ListPermissionsCmd(generateListUserPermissionsReader),
-			RemoveCmd(generateRemoveUserPermissionWriter(prompter)),
-			SetCmd(generateSetUserPermissionWriter(prompter)),
+			canCallCmd(generateCanCallReader),
+			ListCmd(generateListAppointeesReader),
+			ListPermissionsCmd(generateListAppointeePermissionsReader),
+			RemoveCmd(generateRemoveAppointeePermissionWriter(prompter)),
+			SetCmd(generateSetAppointeePermissionWriter(prompter)),
 		},
 	}
 

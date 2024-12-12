@@ -18,15 +18,15 @@ import (
 )
 
 type PermissionsReader interface {
-	ListUserPermissions(
+	ListAppointeePermissions(
 		ctx context.Context,
-		appointed gethcommon.Address,
-		userAddress gethcommon.Address,
+		accountAddress gethcommon.Address,
+		appointeeAddress gethcommon.Address,
 	) ([]gethcommon.Address, [][4]byte, error)
 }
 
 func ListPermissionsCmd(
-	readerGenerator func(logging.Logger, *listUserPermissionsConfig) (PermissionsReader, error),
+	readerGenerator func(logging.Logger, *listAppointeePermissionsConfig) (PermissionsReader, error),
 ) *cli.Command {
 	cmd := &cli.Command{
 		Name:      "list-permissions",
@@ -47,12 +47,12 @@ func ListPermissionsCmd(
 
 func listPermissions(
 	cliCtx *cli.Context,
-	generator func(logging.Logger, *listUserPermissionsConfig) (PermissionsReader, error),
+	generator func(logging.Logger, *listAppointeePermissionsConfig) (PermissionsReader, error),
 ) error {
 	ctx := cliCtx.Context
 	logger := common.GetLogger(cliCtx)
 
-	config, err := readAndValidateListUserPermissionsConfig(cliCtx, logger)
+	config, err := readAndValidateListAppointeePermissionsConfig(cliCtx, logger)
 	if err != nil {
 		return eigenSdkUtils.WrapError("failed to read and validate list user permissions config", err)
 	}
@@ -63,20 +63,20 @@ func listPermissions(
 		return err
 	}
 
-	users, permissions, err := reader.ListUserPermissions(ctx, config.AccountAddress, config.UserAddress)
+	appointees, permissions, err := reader.ListAppointeePermissions(ctx, config.AccountAddress, config.AppointeeAddress)
 	if err != nil {
 		return err
 	}
-	printPermissions(config, users, permissions)
+	printPermissions(config, appointees, permissions)
 	return nil
 }
 
-func readAndValidateListUserPermissionsConfig(
+func readAndValidateListAppointeePermissionsConfig(
 	cliContext *cli.Context,
 	logger logging.Logger,
-) (*listUserPermissionsConfig, error) {
+) (*listAppointeePermissionsConfig, error) {
 	accountAddress := gethcommon.HexToAddress(cliContext.String(AccountAddressFlag.Name))
-	userAddress := gethcommon.HexToAddress(cliContext.String(AppointeeAddressFlag.Name))
+	appointeeAddress := gethcommon.HexToAddress(cliContext.String(AppointeeAddressFlag.Name))
 	ethRpcUrl := cliContext.String(flags.ETHRpcUrlFlag.Name)
 	network := cliContext.String(flags.NetworkFlag.Name)
 	environment := cliContext.String(flags.EnvironmentFlag.Name)
@@ -104,19 +104,19 @@ func readAndValidateListUserPermissionsConfig(
 		permissionManagerAddress,
 	)
 
-	return &listUserPermissionsConfig{
+	return &listAppointeePermissionsConfig{
 		Network:                  network,
 		RPCUrl:                   ethRpcUrl,
 		AccountAddress:           accountAddress,
-		UserAddress:              userAddress,
+		AppointeeAddress:         appointeeAddress,
 		PermissionManagerAddress: gethcommon.HexToAddress(permissionManagerAddress),
 		ChainID:                  chainID,
 		Environment:              environment,
 	}, nil
 }
 
-func printPermissions(config *listUserPermissionsConfig, targets []gethcommon.Address, selectors [][4]byte) {
-	fmt.Printf("User: %s\n", config.UserAddress)
+func printPermissions(config *listAppointeePermissionsConfig, targets []gethcommon.Address, selectors [][4]byte) {
+	fmt.Printf("Appointee address: %s\n", config.AppointeeAddress)
 	fmt.Printf("Appointed by: %s\n", config.AccountAddress)
 	fmt.Println("====================================================================================")
 
@@ -128,9 +128,9 @@ func printPermissions(config *listUserPermissionsConfig, targets []gethcommon.Ad
 	}
 }
 
-func generateListUserPermissionsReader(
+func generateListAppointeePermissionsReader(
 	logger logging.Logger,
-	config *listUserPermissionsConfig,
+	config *listAppointeePermissionsConfig,
 ) (PermissionsReader, error) {
 	ethClient, err := ethclient.Dial(config.RPCUrl)
 	if err != nil {

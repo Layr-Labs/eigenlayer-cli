@@ -13,20 +13,20 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-type mockRemoveUserPermissionWriter struct {
+type mockRemoveAppointeePermissionWriter struct {
 	removePermissionFunc func(ctx context.Context, request elcontracts.RemovePermissionRequest) (*gethtypes.Receipt, error)
 }
 
-func (m *mockRemoveUserPermissionWriter) RemovePermission(
+func (m *mockRemoveAppointeePermissionWriter) RemovePermission(
 	ctx context.Context,
 	request elcontracts.RemovePermissionRequest,
 ) (*gethtypes.Receipt, error) {
 	return m.removePermissionFunc(ctx, request)
 }
 
-func generateMockRemoveWriter(err error) func(logging.Logger, *removeConfig) (RemoveUserPermissionWriter, error) {
-	return func(logger logging.Logger, config *removeConfig) (RemoveUserPermissionWriter, error) {
-		return &mockRemoveUserPermissionWriter{
+func generateMockRemoveWriter(err error) func(logging.Logger, *removeConfig) (RemoveAppointeePermissionWriter, error) {
+	return func(logger logging.Logger, config *removeConfig) (RemoveAppointeePermissionWriter, error) {
+		return &mockRemoveAppointeePermissionWriter{
 			removePermissionFunc: func(ctx context.Context, request elcontracts.RemovePermissionRequest) (*gethtypes.Receipt, error) {
 				return &gethtypes.Receipt{}, err
 			},
@@ -60,7 +60,7 @@ func TestRemoveCmd_GeneratorError(t *testing.T) {
 	expectedError := "failed to create permission writer"
 	app := cli.NewApp()
 	app.Commands = []*cli.Command{
-		RemoveCmd(func(logger logging.Logger, config *removeConfig) (RemoveUserPermissionWriter, error) {
+		RemoveCmd(func(logger logging.Logger, config *removeConfig) (RemoveAppointeePermissionWriter, error) {
 			return nil, errors.New(expectedError)
 		}),
 	}

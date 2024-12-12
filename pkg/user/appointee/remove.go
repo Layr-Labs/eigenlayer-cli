@@ -18,24 +18,24 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-type RemoveUserPermissionWriter interface {
+type RemoveAppointeePermissionWriter interface {
 	RemovePermission(
 		ctx context.Context,
 		request elcontracts.RemovePermissionRequest,
 	) (*gethtypes.Receipt, error)
 }
 
-func RemoveCmd(generator func(logging.Logger, *removeConfig) (RemoveUserPermissionWriter, error)) *cli.Command {
+func RemoveCmd(generator func(logging.Logger, *removeConfig) (RemoveAppointeePermissionWriter, error)) *cli.Command {
 	removeCmd := &cli.Command{
 		Name:      "remove",
 		Usage:     "user appointee remove --account-address <AccountAddress> --appointee-address <AppointeeAddress> --target-address <TargetAddress> --selector <Selector>",
-		UsageText: "Remove a user's permission",
+		UsageText: "Remove an appointee's permission",
 		Description: `
-		Remove a user's permission'.
+		Remove an appointee's permission'.
 		`,
 		After: telemetry.AfterRunAction(),
 		Action: func(c *cli.Context) error {
-			return removeUserPermission(c, generator)
+			return removeAppointeePermission(c, generator)
 		},
 		Flags: removeCommandFlags(),
 	}
@@ -43,9 +43,9 @@ func RemoveCmd(generator func(logging.Logger, *removeConfig) (RemoveUserPermissi
 	return removeCmd
 }
 
-func removeUserPermission(
+func removeAppointeePermission(
 	cliCtx *cli.Context,
-	generator func(logging.Logger, *removeConfig) (RemoveUserPermissionWriter, error),
+	generator func(logging.Logger, *removeConfig) (RemoveAppointeePermissionWriter, error),
 ) error {
 	ctx := cliCtx.Context
 	logger := common.GetLogger(cliCtx)
@@ -62,11 +62,11 @@ func removeUserPermission(
 	receipt, err := permissionWriter.RemovePermission(
 		ctx,
 		elcontracts.RemovePermissionRequest{
-			AccountAddress: config.AccountAddress,
-			UserAddress:    config.UserAddress,
-			Target:         config.Target,
-			Selector:       config.Selector,
-			WaitForReceipt: true,
+			AccountAddress:   config.AccountAddress,
+			AppointeeAddress: config.AppointeeAddress,
+			Target:           config.Target,
+			Selector:         config.Selector,
+			WaitForReceipt:   true,
 		},
 	)
 	if err != nil {
@@ -76,13 +76,13 @@ func removeUserPermission(
 	return nil
 }
 
-func generateRemoveUserPermissionWriter(
+func generateRemoveAppointeePermissionWriter(
 	prompter utils.Prompter,
 ) func(
 	logger logging.Logger,
 	config *removeConfig,
-) (RemoveUserPermissionWriter, error) {
-	return func(logger logging.Logger, config *removeConfig) (RemoveUserPermissionWriter, error) {
+) (RemoveAppointeePermissionWriter, error) {
+	return func(logger logging.Logger, config *removeConfig) (RemoveAppointeePermissionWriter, error) {
 		ethClient, err := ethclient.Dial(config.RPCUrl)
 		if err != nil {
 			return nil, eigenSdkUtils.WrapError("failed to create new eth client", err)
@@ -104,7 +104,7 @@ func generateRemoveUserPermissionWriter(
 
 func readAndValidateRemoveConfig(cliContext *cli.Context, logger logging.Logger) (*removeConfig, error) {
 	accountAddress := gethcommon.HexToAddress(cliContext.String(AccountAddressFlag.Name))
-	userAddress := gethcommon.HexToAddress(cliContext.String(AppointeeAddressFlag.Name))
+	appointeeAddress := gethcommon.HexToAddress(cliContext.String(AppointeeAddressFlag.Name))
 	ethRpcUrl := cliContext.String(flags.ETHRpcUrlFlag.Name)
 	network := cliContext.String(flags.NetworkFlag.Name)
 	environment := cliContext.String(flags.EnvironmentFlag.Name)
@@ -148,7 +148,7 @@ func readAndValidateRemoveConfig(cliContext *cli.Context, logger logging.Logger)
 		Network:                  network,
 		RPCUrl:                   ethRpcUrl,
 		AccountAddress:           accountAddress,
-		UserAddress:              userAddress,
+		AppointeeAddress:         appointeeAddress,
 		Target:                   target,
 		Selector:                 selectorBytes,
 		SignerConfig:             *signerConfig,

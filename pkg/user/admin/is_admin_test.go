@@ -44,7 +44,7 @@ func TestIsAdminCmd_Success(t *testing.T) {
 		"TestIsAdminCmd_Success",
 		"is-admin",
 		"--account-address", "0xabcdef1234567890abcdef1234567890abcdef12",
-		"--caller-address", "0x1234567890abcdef1234567890abcdef12345678",
+		"--admin-address", "0x1234567890abcdef1234567890abcdef12345678",
 		"--eth-rpc-url", "https://ethereum-holesky.publicnode.com/",
 		"--network", "holesky",
 	}
@@ -63,7 +63,7 @@ func TestIsAdminCmd_NotAdmin(t *testing.T) {
 		"TestIsAdminCmd_NotAdmin",
 		"is-admin",
 		"--account-address", "0xabcdef1234567890abcdef1234567890abcdef12",
-		"--caller-address", "0x1234567890abcdef1234567890abcdef12345678",
+		"--admin-address", "0x1234567890abcdef1234567890abcdef12345678",
 		"--eth-rpc-url", "https://ethereum-holesky.publicnode.com/",
 		"--network", "holesky",
 	}
@@ -85,7 +85,7 @@ func TestIsAdminCmd_GeneratorError(t *testing.T) {
 		"TestIsAdminCmd_GeneratorError",
 		"is-admin",
 		"--account-address", "0xabcdef1234567890abcdef1234567890abcdef12",
-		"--caller-address", "0x1234567890abcdef1234567890abcdef12345678",
+		"--admin-address", "0x1234567890abcdef1234567890abcdef12345678",
 		"--eth-rpc-url", "https://ethereum-holesky.publicnode.com/",
 		"--network", "holesky",
 	}
@@ -106,7 +106,7 @@ func TestIsAdminCmd_IsAdminError(t *testing.T) {
 		"TestIsAdminCmd_IsAdminError",
 		"is-admin",
 		"--account-address", "0xabcdef1234567890abcdef1234567890abcdef12",
-		"--caller-address", "0x1234567890abcdef1234567890abcdef12345678",
+		"--admin-address", "0x1234567890abcdef1234567890abcdef12345678",
 		"--eth-rpc-url", "https://ethereum-holesky.publicnode.com/",
 		"--network", "holesky",
 	}
