@@ -13,10 +13,12 @@ type SetOperatorAVSSplitConfig struct {
 	RewardsCoordinatorAddress gethcommon.Address
 	ChainID                   *big.Int
 	SignerConfig              *types.SignerConfig
-
-	OperatorAddress gethcommon.Address
-	AVSAddress      gethcommon.Address
-	Split           uint16
+	Broadcast                 bool
+	OperatorAddress           gethcommon.Address
+	AVSAddress                gethcommon.Address
+	Split                     uint16
+	OutputType                string
+	OutputFile                string
 }
 
 type GetOperatorAVSSplitConfig struct {

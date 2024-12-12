@@ -1,6 +1,7 @@
 package operator
 
 import (
+	"fmt"
 	"sort"
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
@@ -48,35 +49,78 @@ func SetOperatorSplit(cCtx *cli.Context, p utils.Prompter) error {
 		return eigenSdkUtils.WrapError("failed to create new eth client", err)
 	}
 
-	eLWriter, err := common.GetELWriter(
-		config.OperatorAddress,
-		config.SignerConfig,
-		ethClient,
-		elcontracts.Config{
+	if config.Broadcast {
+
+		eLWriter, err := common.GetELWriter(
+			config.OperatorAddress,
+			config.SignerConfig,
+			ethClient,
+			elcontracts.Config{
+				RewardsCoordinatorAddress: config.RewardsCoordinatorAddress,
+			},
+			p,
+			config.ChainID,
+			logger,
+		)
+
+		if err != nil {
+			return eigenSdkUtils.WrapError("failed to get EL writer", err)
+		}
+
+		logger.Infof("Broadcasting set operator transaction...")
+
+		var receipt *types.Receipt
+
+		receipt, err = eLWriter.SetOperatorAVSSplit(ctx, config.OperatorAddress, config.AVSAddress, config.Split, true)
+
+		if err != nil {
+			return eigenSdkUtils.WrapError("failed to process claim", err)
+		}
+
+		logger.Infof("Set operator transaction submitted successfully")
+		common.PrintTransactionInfo(receipt.TxHash.String(), config.ChainID)
+	} else {
+		noSendTxOpts := common.GetNoSendTxOpts(config.OperatorAddress)
+		_, _, contractBindings, err := elcontracts.BuildClients(elcontracts.Config{
 			RewardsCoordinatorAddress: config.RewardsCoordinatorAddress,
-		},
-		p,
-		config.ChainID,
-		logger,
-	)
+		}, ethClient, nil, logger, nil)
+		if err != nil {
+			return err
+		}
 
-	if err != nil {
-		return eigenSdkUtils.WrapError("failed to get EL writer", err)
+		code, err := ethClient.CodeAt(ctx, config.OperatorAddress, nil)
+		if err != nil {
+			return eigenSdkUtils.WrapError("failed to get code at address", err)
+		}
+		if len(code) > 0 {
+			// Claimer is a smart contract
+			noSendTxOpts.GasLimit = 150_000
+		}
+		var unsignedTx *types.Transaction
+		unsignedTx, err = contractBindings.RewardsCoordinator.SetOperatorAVSSplit(noSendTxOpts, config.OperatorAddress, config.AVSAddress, config.Split)
+
+		if err != nil {
+			return eigenSdkUtils.WrapError("failed to create unsigned tx", err)
+		}
+		if config.OutputType == string(common.OutputType_Calldata) {
+			calldataHex := gethcommon.Bytes2Hex(unsignedTx.Data())
+
+			if !common.IsEmptyString(config.OutputFile) {
+				err = common.WriteToFile([]byte(calldataHex), config.OutputFile)
+				if err != nil {
+					return err
+				}
+				logger.Infof("Call data written to file: %s", config.OutputFile)
+			} else {
+				fmt.Println(calldataHex)
+			}
+		}
+		txFeeDetails := common.GetTxFeeDetails(unsignedTx)
+		fmt.Println()
+		txFeeDetails.Print()
+
+		fmt.Println("To broadcast the operator set split, use the --broadcast flag")
 	}
-
-	logger.Infof("Broadcasting set operator transaction...")
-
-	var receipt *types.Receipt
-
-	receipt, err = eLWriter.SetOperatorAVSSplit(ctx, config.OperatorAddress, config.AVSAddress, config.Split, true)
-
-	if err != nil {
-		return eigenSdkUtils.WrapError("failed to process claim", err)
-	}
-
-	logger.Infof("Set operator transaction submitted successfully")
-	common.PrintTransactionInfo(receipt.TxHash.String(), config.ChainID)
-
 	return nil
 }
 
@@ -88,6 +132,9 @@ func getSetOperatorSplitFlags() []cli.Flag {
 		&split.OperatorSplitFlag,
 		&rewards.RewardsCoordinatorAddressFlag,
 		&split.AVSAddressFlag,
+		&flags.BroadcastFlag,
+		&flags.OutputTypeFlag,
+		&flags.OutputFileFlag,
 	}
 
 	allFlags := append(baseFlags, flags.GetSignerFlags()...)
@@ -102,6 +149,10 @@ func readAndValidateSetOperatorSplitConfig(
 	network := cCtx.String(flags.NetworkFlag.Name)
 	rpcUrl := cCtx.String(flags.ETHRpcUrlFlag.Name)
 	opSplit := cCtx.Int(split.OperatorSplitFlag.Name)
+	broadcast := cCtx.Bool(flags.BroadcastFlag.Name)
+	outputType := cCtx.String(flags.OutputTypeFlag.Name)
+	outputFile := cCtx.String(flags.OutputFileFlag.Name)
+
 	rewardsCoordinatorAddress := cCtx.String(rewards.RewardsCoordinatorAddressFlag.Name)
 
 	var err error
@@ -139,5 +190,8 @@ func readAndValidateSetOperatorSplitConfig(
 		OperatorAddress:           operatorAddress,
 		AVSAddress:                avsAddress,
 		Split:                     uint16(opSplit),
+		Broadcast:                 broadcast,
+		OutputType:                outputType,
+		OutputFile:                outputFile,
 	}, nil
 }
