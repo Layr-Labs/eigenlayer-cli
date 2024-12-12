@@ -18,22 +18,22 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-type ListUsersReader interface {
-	ListUsers(
+type ListAppointeesReader interface {
+	ListAppointees(
 		ctx context.Context,
-		userAddress gethcommon.Address,
+		accountAddress gethcommon.Address,
 		target gethcommon.Address,
 		selector [4]byte,
 	) ([]gethcommon.Address, error)
 }
 
-func ListCmd(readerGenerator func(logging.Logger, *listUsersConfig) (ListUsersReader, error)) *cli.Command {
+func ListCmd(readerGenerator func(logging.Logger, *listAppointeesConfig) (ListAppointeesReader, error)) *cli.Command {
 	listCmd := &cli.Command{
 		Name:      "list",
 		Usage:     "user appointee list --account-address <AccountAddress> --target-address <TargetAddress> --selector <Selector>",
-		UsageText: "Lists all appointed users for an account with the provided permissions.",
+		UsageText: "Lists all appointed addresses for an account with the provided permissions.",
 		Description: `
-		Lists all appointed users for an account with the provided permissions.
+		Lists all appointed addresses for an account with the provided permissions.
 		`,
 		Action: func(c *cli.Context) error {
 			return listAppointees(c, readerGenerator)
@@ -47,12 +47,12 @@ func ListCmd(readerGenerator func(logging.Logger, *listUsersConfig) (ListUsersRe
 
 func listAppointees(
 	cliCtx *cli.Context,
-	generator func(logging.Logger, *listUsersConfig) (ListUsersReader, error),
+	generator func(logging.Logger, *listAppointeesConfig) (ListAppointeesReader, error),
 ) error {
 	ctx := cliCtx.Context
 	logger := common.GetLogger(cliCtx)
 
-	config, err := readAndValidateListUsersConfig(cliCtx, logger)
+	config, err := readAndValidateListAppointeesConfig(cliCtx, logger)
 	if err != nil {
 		return eigenSdkUtils.WrapError("failed to read and validate user appointee list config", err)
 	}
@@ -62,30 +62,33 @@ func listAppointees(
 		return err
 	}
 
-	users, err := elReader.ListUsers(ctx, config.UserAddress, config.Target, config.Selector)
+	appointees, err := elReader.ListAppointees(ctx, config.AccountAddress, config.Target, config.Selector)
 	if err != nil {
 		return err
 	}
-	printResults(config, users)
+	printResults(config, appointees)
 	return nil
 }
 
-func printResults(config *listUsersConfig, users []gethcommon.Address) {
+func printResults(config *listAppointeesConfig, appointees []gethcommon.Address) {
 	fmt.Printf(
-		"Selector, Target and Appointer: %s, %x, %s",
+		"Target, Selector and Appointer: %s, %x, %s",
 		config.Target,
 		string(config.Selector[:]),
-		config.UserAddress,
+		config.AccountAddress,
 	)
-	fmt.Println(strings.Repeat("=", 80))
+	fmt.Println(strings.Repeat("=", 60))
 
-	for _, user := range users {
-		fmt.Printf("User Id: 0x%b\n", user)
+	for _, appointee := range appointees {
+		fmt.Printf("Appointee address: %s\n", appointee)
 	}
 }
 
-func readAndValidateListUsersConfig(cliContext *cli.Context, logger logging.Logger) (*listUsersConfig, error) {
-	userAddress := gethcommon.HexToAddress(cliContext.String(AccountAddressFlag.Name))
+func readAndValidateListAppointeesConfig(
+	cliContext *cli.Context,
+	logger logging.Logger,
+) (*listAppointeesConfig, error) {
+	accountAddress := gethcommon.HexToAddress(cliContext.String(AccountAddressFlag.Name))
 	ethRpcUrl := cliContext.String(flags.ETHRpcUrlFlag.Name)
 	network := cliContext.String(flags.NetworkFlag.Name)
 	environment := cliContext.String(flags.EnvironmentFlag.Name)
@@ -119,10 +122,10 @@ func readAndValidateListUsersConfig(cliContext *cli.Context, logger logging.Logg
 		permissionManagerAddress,
 	)
 
-	return &listUsersConfig{
+	return &listAppointeesConfig{
 		Network:                  network,
 		RPCUrl:                   ethRpcUrl,
-		UserAddress:              userAddress,
+		AccountAddress:           accountAddress,
 		Target:                   target,
 		Selector:                 selectorBytes,
 		PermissionManagerAddress: gethcommon.HexToAddress(permissionManagerAddress),
@@ -131,7 +134,7 @@ func readAndValidateListUsersConfig(cliContext *cli.Context, logger logging.Logg
 	}, nil
 }
 
-func generateListUsersReader(logger logging.Logger, config *listUsersConfig) (ListUsersReader, error) {
+func generateListAppointeesReader(logger logging.Logger, config *listAppointeesConfig) (ListAppointeesReader, error) {
 	ethClient, err := ethclient.Dial(config.RPCUrl)
 	if err != nil {
 		return nil, eigenSdkUtils.WrapError("failed to create new eth client", err)

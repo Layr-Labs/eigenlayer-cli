@@ -18,23 +18,23 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-type SetUserPermissionWriter interface {
+type SetAppointeePermissionWriter interface {
 	SetPermission(
 		ctx context.Context,
 		request elcontracts.SetPermissionRequest,
 	) (*gethtypes.Receipt, error)
 }
 
-func SetCmd(generator func(logging.Logger, *setConfig) (SetUserPermissionWriter, error)) *cli.Command {
+func SetCmd(generator func(logging.Logger, *setConfig) (SetAppointeePermissionWriter, error)) *cli.Command {
 	setCmd := &cli.Command{
 		Name:      "set",
 		Usage:     "user appointee set --account-address <AccountAddress> --appointee-address <AppointeeAddress> --target-address <TargetAddress> --selector <Selector>",
-		UsageText: "Grant a user a permission.",
+		UsageText: "Grant an appointee a permission.",
 		Description: `
-		Grant a user a permission.'.
+		Grant an appointee a permission.'.
 		`,
 		Action: func(c *cli.Context) error {
-			return setUserPermission(c, generator)
+			return setAppointeePermission(c, generator)
 		},
 		After: telemetry.AfterRunAction(),
 		Flags: setCommandFlags(),
@@ -43,9 +43,9 @@ func SetCmd(generator func(logging.Logger, *setConfig) (SetUserPermissionWriter,
 	return setCmd
 }
 
-func setUserPermission(
+func setAppointeePermission(
 	cliCtx *cli.Context,
-	generator func(logging.Logger, *setConfig) (SetUserPermissionWriter, error),
+	generator func(logging.Logger, *setConfig) (SetAppointeePermissionWriter, error),
 ) error {
 	ctx := cliCtx.Context
 	logger := common.GetLogger(cliCtx)
@@ -62,11 +62,11 @@ func setUserPermission(
 	receipt, err := permissionWriter.SetPermission(
 		ctx,
 		elcontracts.SetPermissionRequest{
-			AccountAddress: config.AccountAddress,
-			UserAddress:    config.UserAddress,
-			Target:         config.Target,
-			Selector:       config.Selector,
-			WaitForReceipt: true,
+			AccountAddress:   config.AccountAddress,
+			AppointeeAddress: config.AppointeeAddress,
+			Target:           config.Target,
+			Selector:         config.Selector,
+			WaitForReceipt:   true,
 		},
 	)
 	if err != nil {
@@ -76,13 +76,13 @@ func setUserPermission(
 	return nil
 }
 
-func generateSetUserPermissionWriter(
+func generateSetAppointeePermissionWriter(
 	prompter utils.Prompter,
 ) func(
 	logger logging.Logger,
 	config *setConfig,
-) (SetUserPermissionWriter, error) {
-	return func(logger logging.Logger, config *setConfig) (SetUserPermissionWriter, error) {
+) (SetAppointeePermissionWriter, error) {
+	return func(logger logging.Logger, config *setConfig) (SetAppointeePermissionWriter, error) {
 		ethClient, err := ethclient.Dial(config.RPCUrl)
 		if err != nil {
 			return nil, eigenSdkUtils.WrapError("failed to create new eth client", err)
@@ -104,7 +104,7 @@ func generateSetUserPermissionWriter(
 
 func readAndValidateSetConfig(cliContext *cli.Context, logger logging.Logger) (*setConfig, error) {
 	accountAddress := gethcommon.HexToAddress(cliContext.String(AccountAddressFlag.Name))
-	userAddress := gethcommon.HexToAddress(cliContext.String(AppointeeAddressFlag.Name))
+	appointeeAddress := gethcommon.HexToAddress(cliContext.String(AppointeeAddressFlag.Name))
 	ethRpcUrl := cliContext.String(flags.ETHRpcUrlFlag.Name)
 	network := cliContext.String(flags.NetworkFlag.Name)
 	environment := cliContext.String(flags.EnvironmentFlag.Name)
@@ -148,7 +148,7 @@ func readAndValidateSetConfig(cliContext *cli.Context, logger logging.Logger) (*
 		Network:                  network,
 		RPCUrl:                   ethRpcUrl,
 		AccountAddress:           accountAddress,
-		UserAddress:              userAddress,
+		AppointeeAddress:         appointeeAddress,
 		Target:                   target,
 		Selector:                 selectorBytes,
 		SignerConfig:             *signerConfig,
