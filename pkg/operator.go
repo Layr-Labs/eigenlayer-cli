@@ -18,6 +18,8 @@ func OperatorCmd(p utils.Prompter) *cli.Command {
 			operator.UpdateCmd(p),
 			operator.UpdateMetadataURICmd(p),
 			operator.GetApprovalCmd(p),
+			operator.SetOperatorSplitCmd(p),
+			operator.GetOperatorSplitCmd(p),
 		},
 	}
 
