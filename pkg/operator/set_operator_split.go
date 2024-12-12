@@ -14,7 +14,6 @@ import (
 	"github.com/Layr-Labs/eigensdk-go/logging"
 	eigenSdkUtils "github.com/Layr-Labs/eigensdk-go/utils"
 	gethcommon "github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/urfave/cli/v2"
 )
@@ -69,9 +68,7 @@ func SetOperatorSplit(cCtx *cli.Context, p utils.Prompter) error {
 
 		logger.Infof("Broadcasting set operator transaction...")
 
-		var receipt *types.Receipt
-
-		receipt, err = eLWriter.SetOperatorAVSSplit(ctx, config.OperatorAddress, config.AVSAddress, config.Split, true)
+		receipt, err := eLWriter.SetOperatorAVSSplit(ctx, config.OperatorAddress, config.AVSAddress, config.Split, true)
 
 		if err != nil {
 			return eigenSdkUtils.WrapError("failed to process claim", err)
@@ -93,11 +90,11 @@ func SetOperatorSplit(cCtx *cli.Context, p utils.Prompter) error {
 			return eigenSdkUtils.WrapError("failed to get code at address", err)
 		}
 		if len(code) > 0 {
-			// Claimer is a smart contract
+			// Operator is a smart contract
 			noSendTxOpts.GasLimit = 150_000
 		}
-		var unsignedTx *types.Transaction
-		unsignedTx, err = contractBindings.RewardsCoordinator.SetOperatorAVSSplit(noSendTxOpts, config.OperatorAddress, config.AVSAddress, config.Split)
+
+		unsignedTx, err := contractBindings.RewardsCoordinator.SetOperatorAVSSplit(noSendTxOpts, config.OperatorAddress, config.AVSAddress, config.Split)
 
 		if err != nil {
 			return eigenSdkUtils.WrapError("failed to create unsigned tx", err)
@@ -114,10 +111,15 @@ func SetOperatorSplit(cCtx *cli.Context, p utils.Prompter) error {
 			} else {
 				fmt.Println(calldataHex)
 			}
+		} else {
+			logger.Infof("This transaction would set the operator split to %d", config.Split)
 		}
-		txFeeDetails := common.GetTxFeeDetails(unsignedTx)
-		fmt.Println()
-		txFeeDetails.Print()
+
+		if !config.IsSilent {
+			txFeeDetails := common.GetTxFeeDetails(unsignedTx)
+			fmt.Println()
+			txFeeDetails.Print()
+		}
 
 		fmt.Println("To broadcast the operator set split, use the --broadcast flag")
 	}
@@ -135,6 +137,7 @@ func getSetOperatorSplitFlags() []cli.Flag {
 		&flags.BroadcastFlag,
 		&flags.OutputTypeFlag,
 		&flags.OutputFileFlag,
+		&flags.SilentFlag,
 	}
 
 	allFlags := append(baseFlags, flags.GetSignerFlags()...)
@@ -152,6 +155,7 @@ func readAndValidateSetOperatorSplitConfig(
 	broadcast := cCtx.Bool(flags.BroadcastFlag.Name)
 	outputType := cCtx.String(flags.OutputTypeFlag.Name)
 	outputFile := cCtx.String(flags.OutputFileFlag.Name)
+	isSilent := cCtx.Bool(flags.SilentFlag.Name)
 
 	rewardsCoordinatorAddress := cCtx.String(rewards.RewardsCoordinatorAddressFlag.Name)
 
@@ -193,5 +197,6 @@ func readAndValidateSetOperatorSplitConfig(
 		Broadcast:                 broadcast,
 		OutputType:                outputType,
 		OutputFile:                outputFile,
+		IsSilent:                  isSilent,
 	}, nil
 }

@@ -19,6 +19,7 @@ type SetOperatorAVSSplitConfig struct {
 	Split                     uint16
 	OutputType                string
 	OutputFile                string
+	IsSilent                  bool
 }
 
 type GetOperatorAVSSplitConfig struct {
