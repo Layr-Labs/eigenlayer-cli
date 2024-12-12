@@ -17,23 +17,23 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-type UserCanCallReader interface {
-	UserCanCall(
+type CanCallReader interface {
+	CanCall(
 		ctx context.Context,
-		userAddress gethcommon.Address,
-		callerAddress gethcommon.Address,
+		accountAddress gethcommon.Address,
+		appointeeAddress gethcommon.Address,
 		target gethcommon.Address,
 		selector [4]byte,
 	) (bool, error)
 }
 
-func canCallCmd(readerGenerator func(logging.Logger, *canCallConfig) (UserCanCallReader, error)) *cli.Command {
+func canCallCmd(readerGenerator func(logging.Logger, *canCallConfig) (CanCallReader, error)) *cli.Command {
 	cmd := &cli.Command{
 		Name:      "can-call",
-		Usage:     "user appointee can-call --account-address <AccountsAddress> --caller-address <CallerAddress> --taget-address <TargetAddress> --selector <Selector>",
-		UsageText: "Checks if a user has a specific permission.",
+		Usage:     "user appointee can-call --account-address <AccountsAddress> --appointee-address <AppointeeAddress> --target-address <TargetAddress> --selector <Selector>",
+		UsageText: "Checks if an appointee has a specific permission.",
 		Description: `
-		Checks if a user has a specific permission.
+		Checks if an appointee has a specific permission.
 		`,
 		Action: func(c *cli.Context) error {
 			return canCall(c, readerGenerator)
@@ -45,11 +45,11 @@ func canCallCmd(readerGenerator func(logging.Logger, *canCallConfig) (UserCanCal
 	return cmd
 }
 
-func canCall(cliCtx *cli.Context, generator func(logging.Logger, *canCallConfig) (UserCanCallReader, error)) error {
+func canCall(cliCtx *cli.Context, generator func(logging.Logger, *canCallConfig) (CanCallReader, error)) error {
 	ctx := cliCtx.Context
 	logger := common.GetLogger(cliCtx)
 
-	config, err := readAndValidateUserConfig(cliCtx, logger)
+	config, err := readAndValidateCanCallConfig(cliCtx, logger)
 	if err != nil {
 		return eigenSdkUtils.WrapError("failed to read and validate user can call config", err)
 	}
@@ -59,15 +59,20 @@ func canCall(cliCtx *cli.Context, generator func(logging.Logger, *canCallConfig)
 		return err
 	}
 
-	result, err := elReader.UserCanCall(ctx, config.UserAddress, config.CallerAddress, config.Target, config.Selector)
+	result, err := elReader.CanCall(ctx, config.AppointeeAddress, config.AccountAddress, config.Target, config.Selector)
 	fmt.Printf("CanCall Result: %v\n", result)
-	fmt.Printf("Selector, Target and User: %s, %x, %s\n", config.Target, string(config.Selector[:]), config.UserAddress)
+	fmt.Printf(
+		"Selector, Target and Appointee: %s, %x, %s\n",
+		config.Target,
+		string(config.Selector[:]),
+		config.AppointeeAddress,
+	)
 	return err
 }
 
-func readAndValidateUserConfig(cliContext *cli.Context, logger logging.Logger) (*canCallConfig, error) {
-	userAddress := gethcommon.HexToAddress(cliContext.String(AccountAddressFlag.Name))
-	callerAddress := gethcommon.HexToAddress(cliContext.String(CallerAddressFlag.Name))
+func readAndValidateCanCallConfig(cliContext *cli.Context, logger logging.Logger) (*canCallConfig, error) {
+	accountAddress := gethcommon.HexToAddress(cliContext.String(AccountAddressFlag.Name))
+	appointeeAddress := gethcommon.HexToAddress(cliContext.String(AppointeeAddressFlag.Name))
 	ethRpcUrl := cliContext.String(flags.ETHRpcUrlFlag.Name)
 	network := cliContext.String(flags.NetworkFlag.Name)
 	environment := cliContext.String(flags.EnvironmentFlag.Name)
@@ -103,8 +108,8 @@ func readAndValidateUserConfig(cliContext *cli.Context, logger logging.Logger) (
 	return &canCallConfig{
 		Network:                  network,
 		RPCUrl:                   ethRpcUrl,
-		UserAddress:              userAddress,
-		CallerAddress:            callerAddress,
+		AccountAddress:           accountAddress,
+		AppointeeAddress:         appointeeAddress,
 		Target:                   target,
 		Selector:                 selectorBytes,
 		PermissionManagerAddress: gethcommon.HexToAddress(permissionManagerAddress),
@@ -113,10 +118,10 @@ func readAndValidateUserConfig(cliContext *cli.Context, logger logging.Logger) (
 	}, nil
 }
 
-func generateUserCanCallReader(
+func generateCanCallReader(
 	logger logging.Logger,
 	config *canCallConfig,
-) (UserCanCallReader, error) {
+) (CanCallReader, error) {
 	ethClient, err := ethclient.Dial(config.RPCUrl)
 	if err != nil {
 		return nil, eigenSdkUtils.WrapError("failed to create new eth client", err)
@@ -134,7 +139,7 @@ func generateUserCanCallReader(
 func canCallFlags() []cli.Flag {
 	cmdFlags := []cli.Flag{
 		&AccountAddressFlag,
-		&CallerAddressFlag,
+		&AppointeeAddressFlag,
 		&TargetAddressFlag,
 		&SelectorFlag,
 		&PermissionControllerAddressFlag,

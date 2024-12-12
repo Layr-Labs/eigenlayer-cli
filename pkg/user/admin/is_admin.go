@@ -29,7 +29,7 @@ type IsAdminReader interface {
 func IsAdminCmd(readerGenerator func(logging.Logger, *isAdminConfig) (IsAdminReader, error)) *cli.Command {
 	cmd := &cli.Command{
 		Name:      "is-admin",
-		Usage:     "user admin is-admin --account-address <AccountAddress> --caller-address <CallerAddress>",
+		Usage:     "user admin is-admin --account-address <AccountAddress> --admin-address <AdminAddress>",
 		UsageText: "Checks if a user is an admin.",
 		Description: `
 		Checks if a user is an admin.
@@ -133,7 +133,7 @@ func IsAdminFlags() []cli.Flag {
 	cmdFlags := []cli.Flag{
 		&flags.VerboseFlag,
 		&AccountAddressFlag,
-		&CallerAddressFlag,
+		&AdminAddressFlag,
 		&PermissionControllerAddressFlag,
 		&flags.NetworkFlag,
 		&flags.EnvironmentFlag,

@@ -15,43 +15,43 @@ import (
 type mockListPermissionsReader struct {
 	listPermissionsFunc func(
 		ctx context.Context,
-		appointed gethcommon.Address,
-		userAddress gethcommon.Address,
+		accountAddress gethcommon.Address,
+		appointeeAddress gethcommon.Address,
 	) ([]gethcommon.Address, [][4]byte, error)
 }
 
 func newMockListPermissionsReader(
-	users []gethcommon.Address,
+	appointeeAddresses []gethcommon.Address,
 	permissions [][4]byte,
 	err error,
 ) *mockListPermissionsReader {
 	return &mockListPermissionsReader{
-		listPermissionsFunc: func(ctx context.Context, appointed, userAddress gethcommon.Address) ([]gethcommon.Address, [][4]byte, error) {
-			return users, permissions, err
+		listPermissionsFunc: func(ctx context.Context, accountAddress, appointeeAddress gethcommon.Address) ([]gethcommon.Address, [][4]byte, error) {
+			return appointeeAddresses, permissions, err
 		},
 	}
 }
 
-func (m *mockListPermissionsReader) ListUserPermissions(
+func (m *mockListPermissionsReader) ListAppointeePermissions(
 	ctx context.Context,
-	appointed gethcommon.Address,
-	userAddress gethcommon.Address,
+	accountAddress gethcommon.Address,
+	appointeeAddress gethcommon.Address,
 ) ([]gethcommon.Address, [][4]byte, error) {
-	return m.listPermissionsFunc(ctx, appointed, userAddress)
+	return m.listPermissionsFunc(ctx, accountAddress, appointeeAddress)
 }
 
 func generateMockListPermissionsReader(
-	users []gethcommon.Address,
+	appointeeAddresses []gethcommon.Address,
 	permissions [][4]byte,
 	err error,
-) func(logging.Logger, *listUserPermissionsConfig) (PermissionsReader, error) {
-	return func(logger logging.Logger, config *listUserPermissionsConfig) (PermissionsReader, error) {
-		return newMockListPermissionsReader(users, permissions, err), nil
+) func(logging.Logger, *listAppointeePermissionsConfig) (PermissionsReader, error) {
+	return func(logger logging.Logger, config *listAppointeePermissionsConfig) (PermissionsReader, error) {
+		return newMockListPermissionsReader(appointeeAddresses, permissions, err), nil
 	}
 }
 
 func TestListPermissions_Success(t *testing.T) {
-	expectedUsers := []gethcommon.Address{
+	expectedAppointees := []gethcommon.Address{
 		gethcommon.HexToAddress("0x1234567890abcdef1234567890abcdef12345678"),
 	}
 	expectedPermissions := [][4]byte{
@@ -60,7 +60,7 @@ func TestListPermissions_Success(t *testing.T) {
 
 	app := cli.NewApp()
 	app.Commands = []*cli.Command{
-		ListPermissionsCmd(generateMockListPermissionsReader(expectedUsers, expectedPermissions, nil)),
+		ListPermissionsCmd(generateMockListPermissionsReader(expectedAppointees, expectedPermissions, nil)),
 	}
 
 	args := []string{
