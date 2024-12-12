@@ -119,9 +119,9 @@ func SetOperatorSplit(cCtx *cli.Context, p utils.Prompter) error {
 			txFeeDetails := common.GetTxFeeDetails(unsignedTx)
 			fmt.Println()
 			txFeeDetails.Print()
-		}
 
-		fmt.Println("To broadcast the operator set split, use the --broadcast flag")
+			fmt.Println("To broadcast the operator set split, use the --broadcast flag")
+		}
 	}
 	return nil
 }
