@@ -1,6 +1,8 @@
 package operator
 
 import (
+	"sort"
+
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/operator/split"
@@ -23,10 +25,24 @@ func GetOperatorSplitCmd(p utils.Prompter) *cli.Command {
 			return GetOperatorSplit(cCtx)
 		},
 		After: telemetry.AfterRunAction(),
-		Flags: getOperatorSplitFlags(),
+		Flags: getGetOperatorSplitFlags(),
 	}
 
 	return operatorSplitCmd
+}
+
+func getGetOperatorSplitFlags() []cli.Flag {
+	baseFlags := []cli.Flag{
+		&flags.NetworkFlag,
+		&flags.ETHRpcUrlFlag,
+		&flags.OperatorAddressFlag,
+		&split.OperatorSplitFlag,
+		&rewards.RewardsCoordinatorAddressFlag,
+		&split.AVSAddressFlag,
+	}
+
+	sort.Sort(cli.FlagsByName(baseFlags))
+	return baseFlags
 }
 
 func GetOperatorSplit(cCtx *cli.Context) error {

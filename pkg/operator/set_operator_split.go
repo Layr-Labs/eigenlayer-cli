@@ -26,7 +26,7 @@ func SetOperatorSplitCmd(p utils.Prompter) *cli.Command {
 			return SetOperatorSplit(cCtx, p)
 		},
 		After: telemetry.AfterRunAction(),
-		Flags: getOperatorSplitFlags(),
+		Flags: getSetOperatorSplitFlags(),
 	}
 
 	return operatorSplitCmd
@@ -80,7 +80,7 @@ func SetOperatorSplit(cCtx *cli.Context, p utils.Prompter) error {
 	return nil
 }
 
-func getOperatorSplitFlags() []cli.Flag {
+func getSetOperatorSplitFlags() []cli.Flag {
 	baseFlags := []cli.Flag{
 		&flags.NetworkFlag,
 		&flags.ETHRpcUrlFlag,
