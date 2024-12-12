@@ -3,6 +3,7 @@ operator:
   delegation_approver_address: 0xcaB1b44dd1f1C265405878Ac1179cd94D0dBA634
   staker_opt_out_window_blocks: 0
   metadata_url: https://madhur-test-public.s3.us-east-2.amazonaws.com/metadata.json
+  allocation_delay: 1200
 el_delegation_manager_address: 0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9
 eth_rpc_url: http://localhost:8545
 private_key_store_path:
