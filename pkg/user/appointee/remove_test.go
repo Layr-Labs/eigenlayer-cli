@@ -3,8 +3,9 @@ package appointee
 import (
 	"context"
 	"errors"
-	gethtypes "github.com/ethereum/go-ethereum/core/types"
 	"testing"
+
+	gethtypes "github.com/ethereum/go-ethereum/core/types"
 
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
 	"github.com/Layr-Labs/eigensdk-go/logging"
