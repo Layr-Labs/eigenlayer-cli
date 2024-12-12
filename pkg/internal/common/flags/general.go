@@ -91,6 +91,13 @@ var (
 		Value:   3600,
 	}
 
+	OperatorAddressFlag = cli.StringFlag{
+		Name:    "operator-address",
+		Aliases: []string{"oa", "operator"},
+		Usage:   "Operator address",
+		EnvVars: []string{"OPERATOR_ADDRESS"},
+	}
+
 	BatchClaimFile = cli.StringFlag{
 		Name:    "batch-claim-file",
 		Aliases: []string{"bcf"},
