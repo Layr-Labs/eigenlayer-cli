@@ -77,11 +77,11 @@ func GetOperatorSplit(cCtx *cli.Context) error {
 
 	split, err := elReader.GetOperatorAVSSplit(ctx, config.OperatorAddress, config.AVSAddress)
 
-	if err != nil || split == nil {
+	if err != nil {
 		return eigenSdkUtils.WrapError("failed to get operator split", err)
 	}
 
-	logger.Infof("Operator split is %d", *split)
+	logger.Infof("Operator split is %d", split)
 
 	return nil
 }
