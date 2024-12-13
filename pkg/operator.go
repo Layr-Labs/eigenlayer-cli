@@ -20,6 +20,8 @@ func OperatorCmd(p utils.Prompter) *cli.Command {
 			operator.GetApprovalCmd(p),
 			operator.SetOperatorSplitCmd(p),
 			operator.GetOperatorSplitCmd(p),
+			operator.GetOperatorPISplitCmd(p),
+			operator.SetOperatorPISplitCmd(p),
 		},
 	}
 

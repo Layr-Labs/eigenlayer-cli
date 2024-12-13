@@ -14,6 +14,7 @@ import (
 	"github.com/Layr-Labs/eigensdk-go/logging"
 	eigenSdkUtils "github.com/Layr-Labs/eigensdk-go/utils"
 	gethcommon "github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/urfave/cli/v2"
 )
@@ -23,7 +24,7 @@ func SetOperatorSplitCmd(p utils.Prompter) *cli.Command {
 		Name:  "set-rewards-split",
 		Usage: "Set operator rewards split",
 		Action: func(cCtx *cli.Context) error {
-			return SetOperatorSplit(cCtx, p)
+			return SetOperatorSplit(cCtx, p, false)
 		},
 		After: telemetry.AfterRunAction(),
 		Flags: getSetOperatorSplitFlags(),
@@ -32,11 +33,11 @@ func SetOperatorSplitCmd(p utils.Prompter) *cli.Command {
 	return operatorSplitCmd
 }
 
-func SetOperatorSplit(cCtx *cli.Context, p utils.Prompter) error {
+func SetOperatorSplit(cCtx *cli.Context, p utils.Prompter, isProgrammaticIncentive bool) error {
 	ctx := cCtx.Context
 	logger := common.GetLogger(cCtx)
 
-	config, err := readAndValidateSetOperatorSplitConfig(cCtx, logger)
+	config, err := readAndValidateSetOperatorSplitConfig(cCtx, logger, isProgrammaticIncentive)
 	if err != nil {
 		return eigenSdkUtils.WrapError("failed to read and validate operator split config", err)
 	}
@@ -68,8 +69,13 @@ func SetOperatorSplit(cCtx *cli.Context, p utils.Prompter) error {
 
 		logger.Infof("Broadcasting set operator transaction...")
 
-		receipt, err := eLWriter.SetOperatorAVSSplit(ctx, config.OperatorAddress, config.AVSAddress, config.Split, true)
+		var receipt *types.Receipt
+		if isProgrammaticIncentive {
+			receipt, err = eLWriter.SetOperatorPISplit(ctx, config.OperatorAddress, config.Split, true)
 
+		} else {
+			receipt, err = eLWriter.SetOperatorAVSSplit(ctx, config.OperatorAddress, config.AVSAddress, config.Split, true)
+		}
 		if err != nil {
 			return eigenSdkUtils.WrapError("failed to process claim", err)
 		}
@@ -94,7 +100,12 @@ func SetOperatorSplit(cCtx *cli.Context, p utils.Prompter) error {
 			noSendTxOpts.GasLimit = 150_000
 		}
 
-		unsignedTx, err := contractBindings.RewardsCoordinator.SetOperatorAVSSplit(noSendTxOpts, config.OperatorAddress, config.AVSAddress, config.Split)
+		var unsignedTx *types.Transaction
+		if isProgrammaticIncentive {
+			unsignedTx, err = contractBindings.RewardsCoordinator.SetOperatorPISplit(noSendTxOpts, config.OperatorAddress, config.Split)
+		} else {
+			unsignedTx, err = contractBindings.RewardsCoordinator.SetOperatorAVSSplit(noSendTxOpts, config.OperatorAddress, config.AVSAddress, config.Split)
+		}
 
 		if err != nil {
 			return eigenSdkUtils.WrapError("failed to create unsigned tx", err)
@@ -148,6 +159,7 @@ func getSetOperatorSplitFlags() []cli.Flag {
 func readAndValidateSetOperatorSplitConfig(
 	cCtx *cli.Context,
 	logger logging.Logger,
+	isProgrammaticIncentive bool,
 ) (*split.SetOperatorAVSSplitConfig, error) {
 	network := cCtx.String(flags.NetworkFlag.Name)
 	rpcUrl := cCtx.String(flags.ETHRpcUrlFlag.Name)
@@ -172,7 +184,10 @@ func readAndValidateSetOperatorSplitConfig(
 	logger.Infof("Using operator address: %s", operatorAddress.String())
 
 	avsAddress := gethcommon.HexToAddress(cCtx.String(split.AVSAddressFlag.Name))
-	logger.Infof("Using AVS address: %s", avsAddress.String())
+
+	if !isProgrammaticIncentive {
+		logger.Infof("Using AVS address: %s", avsAddress.String())
+	}
 
 	chainID := utils.NetworkNameToChainId(network)
 	logger.Debugf("Using chain ID: %s", chainID.String())

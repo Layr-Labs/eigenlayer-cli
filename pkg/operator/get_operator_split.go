@@ -22,7 +22,7 @@ func GetOperatorSplitCmd(p utils.Prompter) *cli.Command {
 		Name:  "get-rewards-split",
 		Usage: "Get operator rewards split",
 		Action: func(cCtx *cli.Context) error {
-			return GetOperatorSplit(cCtx)
+			return GetOperatorSplit(cCtx, false)
 		},
 		After: telemetry.AfterRunAction(),
 		Flags: getGetOperatorSplitFlags(),
@@ -45,11 +45,11 @@ func getGetOperatorSplitFlags() []cli.Flag {
 	return baseFlags
 }
 
-func GetOperatorSplit(cCtx *cli.Context) error {
+func GetOperatorSplit(cCtx *cli.Context, isProgrammaticIncentive bool) error {
 	ctx := cCtx.Context
 	logger := common.GetLogger(cCtx)
 
-	config, err := readAndValidateGetOperatorSplitConfig(cCtx, logger)
+	config, err := readAndValidateGetOperatorSplitConfig(cCtx, logger, isProgrammaticIncentive)
 	if err != nil {
 		return eigenSdkUtils.WrapError("failed to read and validate operator split config", err)
 	}
@@ -75,8 +75,12 @@ func GetOperatorSplit(cCtx *cli.Context) error {
 
 	logger.Infof("Getting operator split...")
 
-	split, err := elReader.GetOperatorAVSSplit(ctx, config.OperatorAddress, config.AVSAddress)
-
+	var split uint16
+	if isProgrammaticIncentive {
+		split, err = elReader.GetOperatorPISplit(ctx, config.OperatorAddress)
+	} else {
+		split, err = elReader.GetOperatorAVSSplit(ctx, config.OperatorAddress, config.AVSAddress)
+	}
 	if err != nil {
 		return eigenSdkUtils.WrapError("failed to get operator split", err)
 	}
@@ -89,6 +93,7 @@ func GetOperatorSplit(cCtx *cli.Context) error {
 func readAndValidateGetOperatorSplitConfig(
 	cCtx *cli.Context,
 	logger logging.Logger,
+	isProgrammaticIncentive bool,
 ) (*split.GetOperatorAVSSplitConfig, error) {
 	network := cCtx.String(flags.NetworkFlag.Name)
 	rpcUrl := cCtx.String(flags.ETHRpcUrlFlag.Name)
@@ -108,7 +113,9 @@ func readAndValidateGetOperatorSplitConfig(
 	logger.Infof("Using operator address: %s", operatorAddress.String())
 
 	avsAddress := gethcommon.HexToAddress(cCtx.String(split.AVSAddressFlag.Name))
-	logger.Infof("Using AVS address: %s", avsAddress.String())
+	if !isProgrammaticIncentive {
+		logger.Infof("Using AVS address: %s", avsAddress.String())
+	}
 
 	chainID := utils.NetworkNameToChainId(network)
 	logger.Debugf("Using chain ID: %s", chainID.String())
