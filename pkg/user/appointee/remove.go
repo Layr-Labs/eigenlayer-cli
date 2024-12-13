@@ -2,6 +2,7 @@ package appointee
 
 import (
 	"context"
+	"fmt"
 	"sort"
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
@@ -23,6 +24,9 @@ type RemoveAppointeePermissionWriter interface {
 		ctx context.Context,
 		request elcontracts.RemovePermissionRequest,
 	) (*gethtypes.Receipt, error)
+	NewRemovePermissionTx(
+		request elcontracts.RemovePermissionRequest,
+	) (*gethtypes.Transaction, error)
 }
 
 func RemoveCmd(generator func(logging.Logger, *removeConfig) (RemoveAppointeePermissionWriter, error)) *cli.Command {
@@ -56,18 +60,88 @@ func removeAppointeePermission(
 	}
 	cliCtx.App.Metadata["network"] = config.ChainID.String()
 	permissionWriter, err := generator(logger, config)
+	removePermissionRequest := elcontracts.RemovePermissionRequest{
+		AccountAddress:   config.AccountAddress,
+		AppointeeAddress: config.AppointeeAddress,
+		Target:           config.Target,
+		Selector:         config.Selector,
+		WaitForReceipt:   true,
+	}
+	if config.Broadcast {
+
+		if err != nil {
+			return err
+		}
+		err = broadcastRemoveAppointeeCallData(ctx, permissionWriter, config, removePermissionRequest)
+		if err != nil {
+			return err
+		}
+	} else {
+		err = printRemoveAppointeeCallData(logger, permissionWriter, config, removePermissionRequest)
+	}
+	return err
+}
+
+func printRemoveAppointeeCallData(
+	logger logging.Logger,
+	permissionWriter RemoveAppointeePermissionWriter,
+	config *removeConfig,
+	request elcontracts.RemovePermissionRequest,
+) error {
+	ethClient, err := ethclient.Dial(config.RPCUrl)
 	if err != nil {
 		return err
 	}
+	noSendTxOpts := common.GetNoSendTxOpts(config.AccountAddress)
+	if common.IsSmartContractAddress(config.AccountAddress, ethClient) {
+		// address is a smart contract
+		noSendTxOpts.GasLimit = 150_000
+	}
+	unsignedTx, err := permissionWriter.NewRemovePermissionTx(request)
+	if err != nil {
+		return eigenSdkUtils.WrapError("failed to create unsigned tx", err)
+	}
+
+	if config.OutputType == string(common.OutputType_Calldata) {
+		calldataHex := gethcommon.Bytes2Hex(unsignedTx.Data())
+		if !common.IsEmptyString(config.OutputFile) {
+			err = common.WriteToFile([]byte(calldataHex), config.OutputFile)
+			if err != nil {
+				return err
+			}
+			logger.Infof("Call data written to file: %s", config.OutputFile)
+		} else {
+			fmt.Println(calldataHex)
+		}
+	} else {
+		if !common.IsEmptyString(config.OutputType) {
+			fmt.Println("output file not supported for pretty output type")
+			fmt.Println()
+		}
+		fmt.Printf(
+			"Appointee %s will be lose permission to target %s selector %s by account %s\n",
+			config.AppointeeAddress,
+			config.Target,
+			config.Selector,
+			config.AccountAddress,
+		)
+	}
+	txFeeDetails := common.GetTxFeeDetails(unsignedTx)
+	fmt.Println()
+	txFeeDetails.Print()
+	fmt.Println("To broadcast the transaction, use the --broadcast flag")
+	return nil
+}
+
+func broadcastRemoveAppointeeCallData(
+	ctx context.Context,
+	permissionWriter RemoveAppointeePermissionWriter,
+	config *removeConfig,
+	request elcontracts.RemovePermissionRequest,
+) error {
 	receipt, err := permissionWriter.RemovePermission(
 		ctx,
-		elcontracts.RemovePermissionRequest{
-			AccountAddress:   config.AccountAddress,
-			AppointeeAddress: config.AppointeeAddress,
-			Target:           config.Target,
-			Selector:         config.Selector,
-			WaitForReceipt:   true,
-		},
+		request,
 	)
 	if err != nil {
 		return err
@@ -108,6 +182,9 @@ func readAndValidateRemoveConfig(cliContext *cli.Context, logger logging.Logger)
 	ethRpcUrl := cliContext.String(flags.ETHRpcUrlFlag.Name)
 	network := cliContext.String(flags.NetworkFlag.Name)
 	environment := cliContext.String(flags.EnvironmentFlag.Name)
+	outputFile := cliContext.String(flags.OutputFileFlag.Name)
+	outputType := cliContext.String(flags.OutputTypeFlag.Name)
+	broadcast := cliContext.Bool(flags.BroadcastFlag.Name)
 	target := gethcommon.HexToAddress(cliContext.String(TargetAddressFlag.Name))
 	selector := cliContext.String(SelectorFlag.Name)
 	selectorBytes, err := common.ValidateAndConvertSelectorString(selector)
@@ -155,6 +232,9 @@ func readAndValidateRemoveConfig(cliContext *cli.Context, logger logging.Logger)
 		PermissionManagerAddress: gethcommon.HexToAddress(permissionManagerAddress),
 		ChainID:                  chainID,
 		Environment:              environment,
+		Broadcast:                broadcast,
+		OutputType:               outputType,
+		OutputFile:               outputFile,
 	}, nil
 }
 
@@ -170,6 +250,8 @@ func removeCommandFlags() []cli.Flag {
 		&flags.EnvironmentFlag,
 		&flags.ETHRpcUrlFlag,
 		&flags.BroadcastFlag,
+		&flags.OutputFileFlag,
+		&flags.OutputTypeFlag,
 	}
 	cmdFlags = append(cmdFlags, flags.GetSignerFlags()...)
 	sort.Sort(cli.FlagsByName(cmdFlags))

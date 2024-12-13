@@ -2,6 +2,7 @@ package appointee
 
 import (
 	"context"
+	"fmt"
 	"sort"
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
@@ -23,6 +24,9 @@ type SetAppointeePermissionWriter interface {
 		ctx context.Context,
 		request elcontracts.SetPermissionRequest,
 	) (*gethtypes.Receipt, error)
+	NewSetPermissionTx(
+		request elcontracts.SetPermissionRequest,
+	) (*gethtypes.Transaction, error)
 }
 
 func SetCmd(generator func(logging.Logger, *setConfig) (SetAppointeePermissionWriter, error)) *cli.Command {
@@ -31,7 +35,7 @@ func SetCmd(generator func(logging.Logger, *setConfig) (SetAppointeePermissionWr
 		Usage:     "user appointee set --account-address <AccountAddress> --appointee-address <AppointeeAddress> --target-address <TargetAddress> --selector <Selector>",
 		UsageText: "Grant an appointee a permission.",
 		Description: `
-		Grant an appointee a permission.'.
+		Grant an appointee a permission.
 		`,
 		Action: func(c *cli.Context) error {
 			return setAppointeePermission(c, generator)
@@ -59,29 +63,97 @@ func setAppointeePermission(
 	if err != nil {
 		return err
 	}
-	receipt, err := permissionWriter.SetPermission(
-		ctx,
-		elcontracts.SetPermissionRequest{
-			AccountAddress:   config.AccountAddress,
-			AppointeeAddress: config.AppointeeAddress,
-			Target:           config.Target,
-			Selector:         config.Selector,
-			WaitForReceipt:   true,
-		},
-	)
+	return broadcastOrPrint(ctx, logger, permissionWriter, config)
+}
+
+func broadcastOrPrint(
+	ctx context.Context,
+	logger logging.Logger,
+	permissionWriter SetAppointeePermissionWriter,
+	config *setConfig) error {
+	var err error
+	permissionRequest := elcontracts.SetPermissionRequest{
+		AccountAddress:   config.AccountAddress,
+		AppointeeAddress: config.AppointeeAddress,
+		Target:           config.Target,
+		Selector:         config.Selector,
+		WaitForReceipt:   true,
+	}
+	if config.Broadcast {
+		err = broadcastSetAppointeeCallData(ctx, permissionWriter, config, permissionRequest)
+	} else {
+		err = printSetAppointeeCallData(logger, permissionWriter, config, permissionRequest)
+	}
+	return err
+}
+
+func broadcastSetAppointeeCallData(
+	ctx context.Context,
+	permissionWriter SetAppointeePermissionWriter,
+	config *setConfig,
+	request elcontracts.SetPermissionRequest,
+) error {
+	receipt, err := permissionWriter.SetPermission(ctx, request)
+	if err == nil {
+		common.PrintTransactionInfo(receipt.TxHash.String(), config.ChainID)
+	}
+	return err
+}
+
+func printSetAppointeeCallData(
+	logger logging.Logger,
+	permissionWriter SetAppointeePermissionWriter,
+	config *setConfig,
+	request elcontracts.SetPermissionRequest,
+) error {
+	ethClient, err := ethclient.Dial(config.RPCUrl)
 	if err != nil {
 		return err
 	}
-	common.PrintTransactionInfo(receipt.TxHash.String(), config.ChainID)
+	noSendTxOpts := common.GetNoSendTxOpts(config.AccountAddress)
+	if common.IsSmartContractAddress(config.AccountAddress, ethClient) {
+		// address is a smart contract
+		noSendTxOpts.GasLimit = 150_000
+	}
+	tx, err := permissionWriter.NewSetPermissionTx(request)
+	if err != nil {
+		return eigenSdkUtils.WrapError("failed to create unsigned tx", err)
+	}
+
+	if config.OutputType == string(common.OutputType_Calldata) {
+		calldataHex := gethcommon.Bytes2Hex(tx.Data())
+		if !common.IsEmptyString(config.OutputFile) {
+			err = common.WriteToFile([]byte(calldataHex), config.OutputFile)
+			if err != nil {
+				return err
+			}
+			logger.Infof("Call data written to file: %s", config.OutputFile)
+		} else {
+			fmt.Println(calldataHex)
+		}
+	} else {
+		if !common.IsEmptyString(config.OutputType) {
+			fmt.Println("output file not supported for pretty output type")
+			fmt.Println()
+		}
+		fmt.Printf(
+			"Appointee %s will be given permission to target %s selector %s by account %s\n",
+			config.AppointeeAddress,
+			config.Target,
+			config.Selector,
+			config.AccountAddress,
+		)
+	}
+	txFeeDetails := common.GetTxFeeDetails(tx)
+	fmt.Println()
+	txFeeDetails.Print()
+	fmt.Println("To broadcast the transaction, use the --broadcast flag")
 	return nil
 }
 
 func generateSetAppointeePermissionWriter(
 	prompter utils.Prompter,
-) func(
-	logger logging.Logger,
-	config *setConfig,
-) (SetAppointeePermissionWriter, error) {
+) func(logger logging.Logger, config *setConfig) (SetAppointeePermissionWriter, error) {
 	return func(logger logging.Logger, config *setConfig) (SetAppointeePermissionWriter, error) {
 		ethClient, err := ethclient.Dial(config.RPCUrl)
 		if err != nil {
@@ -108,6 +180,9 @@ func readAndValidateSetConfig(cliContext *cli.Context, logger logging.Logger) (*
 	ethRpcUrl := cliContext.String(flags.ETHRpcUrlFlag.Name)
 	network := cliContext.String(flags.NetworkFlag.Name)
 	environment := cliContext.String(flags.EnvironmentFlag.Name)
+	outputType := cliContext.String(flags.OutputTypeFlag.Name)
+	outputFile := cliContext.String(flags.OutputFileFlag.Name)
+	broadcast := cliContext.Bool(flags.BroadcastFlag.Name)
 	target := gethcommon.HexToAddress(cliContext.String(TargetAddressFlag.Name))
 	selector := cliContext.String(SelectorFlag.Name)
 	selectorBytes, err := common.ValidateAndConvertSelectorString(selector)
@@ -155,6 +230,9 @@ func readAndValidateSetConfig(cliContext *cli.Context, logger logging.Logger) (*
 		PermissionManagerAddress: gethcommon.HexToAddress(permissionManagerAddress),
 		ChainID:                  chainID,
 		Environment:              environment,
+		OutputFile:               outputFile,
+		OutputType:               outputType,
+		Broadcast:                broadcast,
 	}, nil
 }
 
@@ -170,6 +248,8 @@ func setCommandFlags() []cli.Flag {
 		&flags.EnvironmentFlag,
 		&flags.ETHRpcUrlFlag,
 		&flags.BroadcastFlag,
+		&flags.OutputTypeFlag,
+		&flags.OutputFileFlag,
 	}
 	cmdFlags = append(cmdFlags, flags.GetSignerFlags()...)
 	sort.Sort(cli.FlagsByName(cmdFlags))
