@@ -1,6 +1,7 @@
 package operator
 
 import (
+	"errors"
 	"fmt"
 	"sort"
 
@@ -40,6 +41,10 @@ func SetOperatorSplit(cCtx *cli.Context, p utils.Prompter, isProgrammaticIncenti
 	config, err := readAndValidateSetOperatorSplitConfig(cCtx, logger, isProgrammaticIncentive)
 	if err != nil {
 		return eigenSdkUtils.WrapError("failed to read and validate operator split config", err)
+	}
+
+	if config.Network != "holesky" {
+		return errors.New("setting operator split only supported on holesky with this version of CLI")
 	}
 
 	cCtx.App.Metadata["network"] = config.ChainID.String()
