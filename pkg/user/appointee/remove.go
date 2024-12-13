@@ -60,6 +60,9 @@ func removeAppointeePermission(
 	}
 	cliCtx.App.Metadata["network"] = config.ChainID.String()
 	permissionWriter, err := generator(logger, config)
+	if err != nil {
+		return err
+	}
 	removePermissionRequest := elcontracts.RemovePermissionRequest{
 		AccountAddress:   config.AccountAddress,
 		AppointeeAddress: config.AppointeeAddress,
@@ -68,14 +71,7 @@ func removeAppointeePermission(
 		WaitForReceipt:   true,
 	}
 	if config.Broadcast {
-
-		if err != nil {
-			return err
-		}
-		err = broadcastRemoveAppointeeCallData(ctx, permissionWriter, config, removePermissionRequest)
-		if err != nil {
-			return err
-		}
+		err = broadcastRemoveAppointeeTx(ctx, permissionWriter, config, removePermissionRequest)
 	} else {
 		err = printRemoveAppointeeCallData(logger, permissionWriter, config, removePermissionRequest)
 	}
@@ -133,7 +129,7 @@ func printRemoveAppointeeCallData(
 	return nil
 }
 
-func broadcastRemoveAppointeeCallData(
+func broadcastRemoveAppointeeTx(
 	ctx context.Context,
 	permissionWriter RemoveAppointeePermissionWriter,
 	config *removeConfig,

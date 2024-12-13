@@ -70,7 +70,8 @@ func broadcastOrPrint(
 	ctx context.Context,
 	logger logging.Logger,
 	permissionWriter SetAppointeePermissionWriter,
-	config *setConfig) error {
+	config *setConfig,
+) error {
 	var err error
 	permissionRequest := elcontracts.SetPermissionRequest{
 		AccountAddress:   config.AccountAddress,
@@ -82,7 +83,7 @@ func broadcastOrPrint(
 	if config.Broadcast {
 		err = broadcastSetAppointeeCallData(ctx, permissionWriter, config, permissionRequest)
 	} else {
-		err = printSetAppointeeCallData(logger, permissionWriter, config, permissionRequest)
+		err = printSetAppointeeResults(logger, permissionWriter, config, permissionRequest)
 	}
 	return err
 }
@@ -100,7 +101,7 @@ func broadcastSetAppointeeCallData(
 	return err
 }
 
-func printSetAppointeeCallData(
+func printSetAppointeeResults(
 	logger logging.Logger,
 	permissionWriter SetAppointeePermissionWriter,
 	config *setConfig,
