@@ -59,10 +59,10 @@ func canCall(cliCtx *cli.Context, generator func(logging.Logger, *canCallConfig)
 		return err
 	}
 
-	result, err := elReader.CanCall(ctx, config.AppointeeAddress, config.AccountAddress, config.Target, config.Selector)
+	result, err := elReader.CanCall(ctx, config.AccountAddress, config.AppointeeAddress, config.Target, config.Selector)
 	fmt.Printf("CanCall Result: %v\n", result)
 	fmt.Printf(
-		"Selector, Target and Appointee: %s, %x, %s\n",
+		"Target, Selector and Appointee: %s, %x, %s\n",
 		config.Target,
 		string(config.Selector[:]),
 		config.AppointeeAddress,
