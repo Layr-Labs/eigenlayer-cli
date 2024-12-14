@@ -80,12 +80,12 @@ func broadcastOrPrint(
 		WaitForReceipt:   true,
 	}
 	if config.Broadcast {
-		return broadcastSetAppointeeCallData(ctx, permissionWriter, config, permissionRequest)
+		return broadcastSetAppointeeTx(ctx, permissionWriter, config, permissionRequest)
 	}
 	return printSetAppointeeResults(logger, permissionWriter, config, permissionRequest)
 }
 
-func broadcastSetAppointeeCallData(
+func broadcastSetAppointeeTx(
 	ctx context.Context,
 	permissionWriter SetAppointeePermissionWriter,
 	config *setConfig,

@@ -73,10 +73,10 @@ func removeAppointeePermission(
 	if config.Broadcast {
 		return broadcastRemoveAppointeeTx(ctx, permissionWriter, config, removePermissionRequest)
 	}
-	return printRemoveAppointeeCallData(logger, permissionWriter, config, removePermissionRequest)
+	return printRemoveAppointeeResult(logger, permissionWriter, config, removePermissionRequest)
 }
 
-func printRemoveAppointeeCallData(
+func printRemoveAppointeeResult(
 	logger logging.Logger,
 	permissionWriter RemoveAppointeePermissionWriter,
 	config *removeConfig,
