@@ -20,7 +20,6 @@ func AppointeeCmd(prompter utils.Prompter) *cli.Command {
 			&flags.VerboseFlag,
 		},
 		Subcommands: []*cli.Command{
-			BatchSetCmd(),
 			canCallCmd(generateCanCallReader),
 			ListCmd(generateListAppointeesReader),
 			ListPermissionsCmd(generateListAppointeePermissionsReader),

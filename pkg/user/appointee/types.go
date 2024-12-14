@@ -51,6 +51,9 @@ type removeConfig struct {
 	PermissionManagerAddress gethcommon.Address
 	ChainID                  *big.Int
 	Environment              string
+	OutputFile               string
+	OutputType               string
+	Broadcast                bool
 }
 
 type setConfig struct {
@@ -64,4 +67,7 @@ type setConfig struct {
 	PermissionManagerAddress gethcommon.Address
 	ChainID                  *big.Int
 	Environment              string
+	OutputFile               string
+	OutputType               string
+	Broadcast                bool
 }

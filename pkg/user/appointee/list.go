@@ -77,10 +77,11 @@ func printResults(config *listAppointeesConfig, appointees []gethcommon.Address)
 		string(config.Selector[:]),
 		config.AccountAddress,
 	)
+	fmt.Println()
 	fmt.Println(strings.Repeat("=", 60))
 
 	for _, appointee := range appointees {
-		fmt.Printf("Appointee address: %s\n", appointee)
+		fmt.Printf("%s\n", appointee)
 	}
 }
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"sort"
+	"strings"
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
@@ -118,13 +119,10 @@ func readAndValidateListAppointeePermissionsConfig(
 func printPermissions(config *listAppointeePermissionsConfig, targets []gethcommon.Address, selectors [][4]byte) {
 	fmt.Printf("Appointee address: %s\n", config.AppointeeAddress)
 	fmt.Printf("Appointed by: %s\n", config.AccountAddress)
-	fmt.Println("====================================================================================")
+	fmt.Println(strings.Repeat("=", 60))
 
-	for _, target := range targets {
-		for _, selector := range selectors {
-			fmt.Printf("Target: %s, Selector: %x\n", target, selector)
-		}
-
+	for index := range targets {
+		fmt.Printf("Target: %s, Selector: %x\n", targets[index], selectors[index])
 	}
 }
 
