@@ -72,7 +72,6 @@ func broadcastOrPrint(
 	permissionWriter SetAppointeePermissionWriter,
 	config *setConfig,
 ) error {
-	var err error
 	permissionRequest := elcontracts.SetPermissionRequest{
 		AccountAddress:   config.AccountAddress,
 		AppointeeAddress: config.AppointeeAddress,
@@ -81,11 +80,9 @@ func broadcastOrPrint(
 		WaitForReceipt:   true,
 	}
 	if config.Broadcast {
-		err = broadcastSetAppointeeCallData(ctx, permissionWriter, config, permissionRequest)
-	} else {
-		err = printSetAppointeeResults(logger, permissionWriter, config, permissionRequest)
+		return broadcastSetAppointeeCallData(ctx, permissionWriter, config, permissionRequest)
 	}
-	return err
+	return printSetAppointeeResults(logger, permissionWriter, config, permissionRequest)
 }
 
 func broadcastSetAppointeeCallData(
@@ -95,10 +92,11 @@ func broadcastSetAppointeeCallData(
 	request elcontracts.SetPermissionRequest,
 ) error {
 	receipt, err := permissionWriter.SetPermission(ctx, request)
-	if err == nil {
-		common.PrintTransactionInfo(receipt.TxHash.String(), config.ChainID)
+	if err != nil {
+		return err
 	}
-	return err
+	common.PrintTransactionInfo(receipt.TxHash.String(), config.ChainID)
+	return nil
 }
 
 func printSetAppointeeResults(

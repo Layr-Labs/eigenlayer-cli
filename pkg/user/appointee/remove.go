@@ -71,11 +71,9 @@ func removeAppointeePermission(
 		WaitForReceipt:   true,
 	}
 	if config.Broadcast {
-		err = broadcastRemoveAppointeeTx(ctx, permissionWriter, config, removePermissionRequest)
-	} else {
-		err = printRemoveAppointeeCallData(logger, permissionWriter, config, removePermissionRequest)
+		return broadcastRemoveAppointeeTx(ctx, permissionWriter, config, removePermissionRequest)
 	}
-	return err
+	return printRemoveAppointeeCallData(logger, permissionWriter, config, removePermissionRequest)
 }
 
 func printRemoveAppointeeCallData(
