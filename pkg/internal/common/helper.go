@@ -440,7 +440,7 @@ func GetSignerConfig(cCtx *cli.Context, logger eigensdkLogger.Logger) (*types.Si
 		}, nil
 	}
 
-	return nil, fmt.Errorf("supported signer not found, please provide details for signers to use")
+	return nil, errors.New("supported signer not found, please provide details for signers to use")
 }
 
 func IsEmptyString(s string) bool {

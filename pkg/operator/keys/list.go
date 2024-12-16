@@ -3,6 +3,7 @@ package keys
 import (
 	"crypto/ecdsa"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -95,7 +96,7 @@ func GetPubKey(keyStoreFile string) (string, error) {
 	}
 
 	if pubKey, ok := m["pubKey"].(string); !ok {
-		return "", fmt.Errorf("pubKey not found in key file")
+		return "", errors.New("pubKey not found in key file")
 	} else {
 		return pubKey, nil
 	}
@@ -116,17 +117,17 @@ func GetOperatorIdFromBLSPubKey(pubKey string) (string, error) {
 	// E([498211989701534593628498974128726712526336918939770789545660245177948853517,19434346619705907282579203143605058653932187676054178921788041096426532277474])
 
 	if pubKey == "O" {
-		return "", fmt.Errorf("pubKey is Infinity")
+		return "", errors.New("pubKey is Infinity")
 	}
 
 	if pubKey[:3] != "E([" && pubKey[len(pubKey)-2:] != "])" {
-		return "", fmt.Errorf("pubKey format failed by not E([x,y])")
+		return "", errors.New("pubKey format failed by not E([x,y])")
 	}
 
 	pubKeyStr := pubKey[3 : len(pubKey)-2]
 	strs := strings.Split(pubKeyStr, ",")
 	if len(strs) != 2 {
-		return "", fmt.Errorf("pubkey format failed by not x,y")
+		return "", errors.New("pubkey format failed by not x,y")
 	}
 
 	xe, err := new(fp.Element).SetString(strs[0])
@@ -163,7 +164,7 @@ func GetAddress(keyStoreFile string) (string, error) {
 	}
 
 	if address, ok := m["address"].(string); !ok {
-		return "", fmt.Errorf("address not found in key file")
+		return "", errors.New("address not found in key file")
 	} else {
 		return address, nil
 	}
