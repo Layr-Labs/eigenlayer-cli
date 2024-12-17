@@ -7,6 +7,7 @@ import (
 
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
 	"github.com/Layr-Labs/eigensdk-go/logging"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	gethcommon "github.com/ethereum/go-ethereum/common"
 	gethtypes "github.com/ethereum/go-ethereum/core/types"
 
@@ -15,7 +16,8 @@ import (
 )
 
 type mockAddPendingAdminWriter struct {
-	addPendingAdminFunc func(ctx context.Context, request elcontracts.AddPendingAdminRequest) (*gethtypes.Receipt, error)
+	addPendingAdminFunc      func(ctx context.Context, request elcontracts.AddPendingAdminRequest) (*gethtypes.Receipt, error)
+	newAddPendingAdminTxFunc func(txOpts *bind.TransactOpts, request elcontracts.AddPendingAdminRequest) (*gethtypes.Transaction, error)
 }
 
 func (m *mockAddPendingAdminWriter) AddPendingAdmin(
@@ -25,14 +27,25 @@ func (m *mockAddPendingAdminWriter) AddPendingAdmin(
 	return m.addPendingAdminFunc(ctx, request)
 }
 
+func (m *mockAddPendingAdminWriter) NewAddPendingAdminTx(
+	txOpts *bind.TransactOpts,
+	request elcontracts.AddPendingAdminRequest,
+) (*gethtypes.Transaction, error) {
+	return m.newAddPendingAdminTxFunc(txOpts, request)
+}
+
 func generateMockAddPendingAdminWriter(
 	receipt *gethtypes.Receipt,
+	tx *gethtypes.Transaction,
 	err error,
 ) func(logging.Logger, *addPendingAdminConfig) (AddPendingAdminWriter, error) {
 	return func(logger logging.Logger, config *addPendingAdminConfig) (AddPendingAdminWriter, error) {
 		return &mockAddPendingAdminWriter{
 			addPendingAdminFunc: func(ctx context.Context, request elcontracts.AddPendingAdminRequest) (*gethtypes.Receipt, error) {
 				return receipt, err
+			},
+			newAddPendingAdminTxFunc: func(txOpts *bind.TransactOpts, request elcontracts.AddPendingAdminRequest) (*gethtypes.Transaction, error) {
+				return tx, err
 			},
 		}, nil
 	}
@@ -42,10 +55,11 @@ func TestAddPendingCmd_Success(t *testing.T) {
 	mockReceipt := &gethtypes.Receipt{
 		TxHash: gethcommon.HexToHash("0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"),
 	}
+	mockTx := &gethtypes.Transaction{}
 
 	app := cli.NewApp()
 	app.Commands = []*cli.Command{
-		AddPendingCmd(generateMockAddPendingAdminWriter(mockReceipt, nil)),
+		AddPendingCmd(generateMockAddPendingAdminWriter(mockReceipt, mockTx, nil)),
 	}
 
 	args := []string{
@@ -56,6 +70,7 @@ func TestAddPendingCmd_Success(t *testing.T) {
 		"--eth-rpc-url", "https://ethereum-holesky.publicnode.com/",
 		"--network", "holesky",
 		"--ecdsa-private-key", "0xabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcd",
+		"--broadcast",
 	}
 
 	err := app.Run(args)
@@ -88,9 +103,11 @@ func TestAddPendingCmd_GeneratorError(t *testing.T) {
 
 func TestAddPendingCmd_AddPendingError(t *testing.T) {
 	expectedError := "error adding pending admin"
+	mockTx := &gethtypes.Transaction{}
+
 	app := cli.NewApp()
 	app.Commands = []*cli.Command{
-		AddPendingCmd(generateMockAddPendingAdminWriter(nil, errors.New(expectedError))),
+		AddPendingCmd(generateMockAddPendingAdminWriter(nil, mockTx, errors.New(expectedError))),
 	}
 
 	args := []string{
@@ -101,6 +118,7 @@ func TestAddPendingCmd_AddPendingError(t *testing.T) {
 		"--eth-rpc-url", "https://ethereum-holesky.publicnode.com/",
 		"--network", "holesky",
 		"--ecdsa-private-key", "0xabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcd",
+		"--broadcast",
 	}
 
 	err := app.Run(args)

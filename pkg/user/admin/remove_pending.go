@@ -2,6 +2,8 @@ package admin
 
 import (
 	"context"
+	"fmt"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"sort"
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
@@ -23,6 +25,10 @@ type RemovePendingAdminWriter interface {
 		ctx context.Context,
 		request elcontracts.RemovePendingAdminRequest,
 	) (*gethtypes.Receipt, error)
+	NewRemovePendingAdminTx(
+		txOpts *bind.TransactOpts,
+		request elcontracts.RemovePendingAdminRequest,
+	) (*gethtypes.Transaction, error)
 }
 
 func RemovePendingCmd(
@@ -57,19 +63,79 @@ func removePendingAdmin(
 	if err != nil {
 		return err
 	}
+	removeRequest := elcontracts.RemovePendingAdminRequest{
+		AccountAddress: config.AccountAddress,
+		AdminAddress:   config.AdminAddress,
+		WaitForReceipt: true,
+	}
 
-	receipt, err := elWriter.RemovePendingAdmin(
-		ctx,
-		elcontracts.RemovePendingAdminRequest{
-			AccountAddress: config.AccountAddress,
-			AdminAddress:   config.AdminAddress,
-			WaitForReceipt: true,
-		},
-	)
+	if config.Broadcast {
+		return broadcastRemovePendingAdminTx(ctx, elWriter, config, removeRequest)
+	}
+	return printRemovePendingAdminTx(logger, elWriter, config, removeRequest)
+}
+
+func broadcastRemovePendingAdminTx(
+	ctx context.Context,
+	elWriter RemovePendingAdminWriter,
+	config *removePendingAdminConfig,
+	request elcontracts.RemovePendingAdminRequest,
+) error {
+	receipt, err := elWriter.RemovePendingAdmin(ctx, request)
+	if err != nil {
+		return eigenSdkUtils.WrapError("failed to broadcast RemovePendingAdmin transaction", err)
+	}
+	common.PrintTransactionInfo(receipt.TxHash.String(), config.ChainID)
+	return nil
+}
+
+func printRemovePendingAdminTx(
+	logger logging.Logger,
+	elWriter RemovePendingAdminWriter,
+	config *removePendingAdminConfig,
+	request elcontracts.RemovePendingAdminRequest,
+) error {
+	ethClient, err := ethclient.Dial(config.RPCUrl)
 	if err != nil {
 		return err
 	}
-	common.PrintTransactionInfo(receipt.TxHash.String(), config.ChainID)
+
+	noSendTxOpts := common.GetNoSendTxOpts(config.CallerAddress)
+	if common.IsSmartContractAddress(config.CallerAddress, ethClient) {
+		noSendTxOpts.GasLimit = 150_000
+	}
+	unsignedTx, err := elWriter.NewRemovePendingAdminTx(noSendTxOpts, request)
+	if err != nil {
+		return eigenSdkUtils.WrapError("failed to create unsigned transaction", err)
+	}
+
+	if config.OutputType == string(common.OutputType_Calldata) {
+		calldataHex := gethcommon.Bytes2Hex(unsignedTx.Data())
+		if !common.IsEmptyString(config.OutputFile) {
+			err = common.WriteToFile([]byte(calldataHex), config.OutputFile)
+			if err != nil {
+				return err
+			}
+			logger.Infof("Call data written to file: %s", config.OutputFile)
+		} else {
+			fmt.Println(calldataHex)
+		}
+	} else {
+		if !common.IsEmptyString(config.OutputType) {
+			fmt.Println("Output file not supported for pretty output type")
+			fmt.Println()
+		}
+		fmt.Printf(
+			"Pending admin %s will be removed for account %s\n",
+			config.AdminAddress,
+			config.AccountAddress,
+		)
+	}
+
+	txFeeDetails := common.GetTxFeeDetails(unsignedTx)
+	fmt.Println()
+	txFeeDetails.Print()
+	fmt.Println("To broadcast the transaction, use the --broadcast flag")
 	return nil
 }
 
@@ -83,6 +149,9 @@ func readAndValidateRemovePendingAdminConfig(
 	ethRpcUrl := cliContext.String(flags.ETHRpcUrlFlag.Name)
 	network := cliContext.String(flags.NetworkFlag.Name)
 	environment := cliContext.String(flags.EnvironmentFlag.Name)
+	outputType := cliContext.String(flags.OutputTypeFlag.Name)
+	outputFile := cliContext.String(flags.OutputFileFlag.Name)
+	broadcast := cliContext.Bool(flags.BroadcastFlag.Name)
 	if environment == "" {
 		environment = common.GetEnvFromNetwork(network)
 	}
@@ -128,6 +197,9 @@ func readAndValidateRemovePendingAdminConfig(
 		SignerConfig:             *signerConfig,
 		ChainID:                  chainID,
 		Environment:              environment,
+		OutputFile:               outputFile,
+		OutputType:               outputType,
+		Broadcast:                broadcast,
 	}, nil
 }
 

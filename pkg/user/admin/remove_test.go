@@ -7,6 +7,7 @@ import (
 
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
 	"github.com/Layr-Labs/eigensdk-go/logging"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	gethcommon "github.com/ethereum/go-ethereum/common"
 	gethtypes "github.com/ethereum/go-ethereum/core/types"
 
@@ -15,7 +16,8 @@ import (
 )
 
 type mockRemoveAdminWriter struct {
-	removeAdminFunc func(ctx context.Context, request elcontracts.RemoveAdminRequest) (*gethtypes.Receipt, error)
+	removeAdminFunc      func(ctx context.Context, request elcontracts.RemoveAdminRequest) (*gethtypes.Receipt, error)
+	newRemoveAdminTxFunc func(txOpts *bind.TransactOpts, request elcontracts.RemoveAdminRequest) (*gethtypes.Transaction, error)
 }
 
 func (m *mockRemoveAdminWriter) RemoveAdmin(
@@ -25,14 +27,25 @@ func (m *mockRemoveAdminWriter) RemoveAdmin(
 	return m.removeAdminFunc(ctx, request)
 }
 
+func (m *mockRemoveAdminWriter) NewRemoveAdminTx(
+	txOpts *bind.TransactOpts,
+	request elcontracts.RemoveAdminRequest,
+) (*gethtypes.Transaction, error) {
+	return m.newRemoveAdminTxFunc(txOpts, request)
+}
+
 func generateMockRemoveAdminWriter(
 	receipt *gethtypes.Receipt,
+	tx *gethtypes.Transaction,
 	err error,
 ) func(logging.Logger, *removeAdminConfig) (RemoveAdminWriter, error) {
 	return func(logger logging.Logger, config *removeAdminConfig) (RemoveAdminWriter, error) {
 		return &mockRemoveAdminWriter{
 			removeAdminFunc: func(ctx context.Context, request elcontracts.RemoveAdminRequest) (*gethtypes.Receipt, error) {
 				return receipt, err
+			},
+			newRemoveAdminTxFunc: func(txOpts *bind.TransactOpts, request elcontracts.RemoveAdminRequest) (*gethtypes.Transaction, error) {
+				return tx, err
 			},
 		}, nil
 	}
@@ -42,10 +55,11 @@ func TestRemoveCmd_Success(t *testing.T) {
 	mockReceipt := &gethtypes.Receipt{
 		TxHash: gethcommon.HexToHash("0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"),
 	}
+	mockTx := &gethtypes.Transaction{}
 
 	app := cli.NewApp()
 	app.Commands = []*cli.Command{
-		RemoveCmd(generateMockRemoveAdminWriter(mockReceipt, nil)),
+		RemoveCmd(generateMockRemoveAdminWriter(mockReceipt, mockTx, nil)),
 	}
 
 	args := []string{
@@ -56,6 +70,7 @@ func TestRemoveCmd_Success(t *testing.T) {
 		"--eth-rpc-url", "https://ethereum-holesky.publicnode.com/",
 		"--network", "holesky",
 		"--ecdsa-private-key", "0xabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcd",
+		"--broadcast",
 	}
 
 	err := app.Run(args)
@@ -88,9 +103,11 @@ func TestRemoveCmd_GeneratorError(t *testing.T) {
 
 func TestRemoveCmd_RemoveAdminError(t *testing.T) {
 	expectedError := "error removing admin"
+	mockTx := &gethtypes.Transaction{}
+
 	app := cli.NewApp()
 	app.Commands = []*cli.Command{
-		RemoveCmd(generateMockRemoveAdminWriter(nil, errors.New(expectedError))),
+		RemoveCmd(generateMockRemoveAdminWriter(nil, mockTx, errors.New(expectedError))),
 	}
 
 	args := []string{
@@ -101,6 +118,7 @@ func TestRemoveCmd_RemoveAdminError(t *testing.T) {
 		"--eth-rpc-url", "https://ethereum-holesky.publicnode.com/",
 		"--network", "holesky",
 		"--ecdsa-private-key", "0xabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcd",
+		"--broadcast",
 	}
 
 	err := app.Run(args)
