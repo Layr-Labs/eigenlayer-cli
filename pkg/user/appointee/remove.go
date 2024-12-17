@@ -242,6 +242,7 @@ func removeCommandFlags() []cli.Flag {
 		&flags.VerboseFlag,
 		&AccountAddressFlag,
 		&AppointeeAddressFlag,
+		&CallerAddressFlag,
 		&TargetAddressFlag,
 		&SelectorFlag,
 		&PermissionControllerAddressFlag,
