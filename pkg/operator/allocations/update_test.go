@@ -219,7 +219,8 @@ func TestGenerateAllocationsParams(t *testing.T) {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
-				assert.Equal(t, tt.expectedAllocations, allocations)
+				assert.ElementsMatch(t, tt.expectedAllocations.Allocations, allocations.Allocations)
+				assert.Equal(t, tt.expectedAllocations.AllocatableMagnitudes, allocations.AllocatableMagnitudes)
 			}
 		})
 	}
