@@ -66,7 +66,7 @@ func deregisterAction(cCtx *cli.Context, p utils.Prompter) error {
 		}
 		logger.Info("Signing and broadcasting deregistration transaction")
 		eLWriter, err := common.GetELWriter(
-			config.operatorAddress,
+			config.callerAddress,
 			config.signerConfig,
 			ethClient,
 			elcontracts.Config{

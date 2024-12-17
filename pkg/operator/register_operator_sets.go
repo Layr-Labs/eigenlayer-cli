@@ -62,7 +62,7 @@ func registerOperatorSetsAction(cCtx *cli.Context, p utils.Prompter) error {
 		}
 		logger.Info("Signing and broadcasting registration transaction")
 		eLWriter, err := common.GetELWriter(
-			config.operatorAddress,
+			config.callerAddress,
 			config.signerConfig,
 			ethClient,
 			elcontracts.Config{
