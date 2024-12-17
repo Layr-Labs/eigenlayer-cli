@@ -29,12 +29,8 @@ func RemovePendingCmd(
 	generator func(logging.Logger, *removePendingAdminConfig) (RemovePendingAdminWriter, error),
 ) *cli.Command {
 	removeCmd := &cli.Command{
-		Name:      "remove-pending-admin",
-		Usage:     "user admin remove-pending-admin --account-address <AccountAddress> --admin-address <AdminAddress>",
-		UsageText: "Remove a user who is pending admin acceptance.",
-		Description: `
-		Remove a user who is pending admin acceptance.
-		`,
+		Name:  "remove-pending-admin",
+		Usage: "Remove a user who is pending admin acceptance.",
 		Action: func(context *cli.Context) error {
 			return removePendingAdmin(context, generator)
 		},

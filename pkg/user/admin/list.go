@@ -28,12 +28,8 @@ type ListAdminsReader interface {
 
 func ListCmd(readerGenerator func(logging.Logger, *listAdminsConfig) (ListAdminsReader, error)) *cli.Command {
 	listCmd := &cli.Command{
-		Name:      "list-admins",
-		Usage:     "user admin list-admins --account-address <AccountAddress>",
-		UsageText: "List all users who are admins.",
-		Description: `
-		List all users who are admins.
-		`,
+		Name:  "list-admins",
+		Usage: "List all users who are admins.",
 		Action: func(c *cli.Context) error {
 			return listAdmins(c, readerGenerator)
 		},

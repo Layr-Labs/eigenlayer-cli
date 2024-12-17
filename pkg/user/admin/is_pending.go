@@ -30,12 +30,8 @@ func IsPendingCmd(
 	readerGenerator func(logging.Logger, *isPendingAdminConfig) (IsPendingAdminReader, error),
 ) *cli.Command {
 	isPendingCmd := &cli.Command{
-		Name:      "is-pending-admin",
-		Usage:     "user admin is-pending-admin --account-address <AccountAddress> --pending-admin-address <PendingAdminAddress>",
-		UsageText: "Checks if a user is pending acceptance to admin.",
-		Description: `
-		Checks if a user is pending acceptance to admin.
-		`,
+		Name:  "is-pending-admin",
+		Usage: "Checks if a user is pending acceptance to admin.",
 		Action: func(c *cli.Context) error {
 			return isPendingAdmin(c, readerGenerator)
 		},

@@ -29,12 +29,8 @@ type ListAppointeesReader interface {
 
 func ListCmd(readerGenerator func(logging.Logger, *listAppointeesConfig) (ListAppointeesReader, error)) *cli.Command {
 	listCmd := &cli.Command{
-		Name:      "list",
-		Usage:     "user appointee list --account-address <AccountAddress> --target-address <TargetAddress> --selector <Selector>",
-		UsageText: "Lists all appointed addresses for an account with the provided permissions.",
-		Description: `
-		Lists all appointed addresses for an account with the provided permissions.
-		`,
+		Name:  "list",
+		Usage: "Lists all appointed addresses for an account with the provided permissions.",
 		Action: func(c *cli.Context) error {
 			return listAppointees(c, readerGenerator)
 		},

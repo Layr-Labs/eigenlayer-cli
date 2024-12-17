@@ -28,12 +28,8 @@ type IsAdminReader interface {
 
 func IsAdminCmd(readerGenerator func(logging.Logger, *isAdminConfig) (IsAdminReader, error)) *cli.Command {
 	cmd := &cli.Command{
-		Name:      "is-admin",
-		Usage:     "user admin is-admin --account-address <AccountAddress> --admin-address <AdminAddress>",
-		UsageText: "Checks if a user is an admin.",
-		Description: `
-		Checks if a user is an admin.
-		`,
+		Name:  "is-admin",
+		Usage: "Checks if a user is an admin.",
 		Action: func(c *cli.Context) error {
 			return isAdmin(c, readerGenerator)
 		},
