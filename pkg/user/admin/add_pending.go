@@ -77,11 +77,19 @@ func readAndValidateAddPendingAdminConfig(
 ) (*addPendingAdminConfig, error) {
 	accountAddress := gethcommon.HexToAddress(cliContext.String(AccountAddressFlag.Name))
 	adminAddress := gethcommon.HexToAddress(cliContext.String(AdminAddressFlag.Name))
+	callerAddress := gethcommon.HexToAddress(cliContext.String(CallerAddressFlag.Name))
 	ethRpcUrl := cliContext.String(flags.ETHRpcUrlFlag.Name)
 	network := cliContext.String(flags.NetworkFlag.Name)
 	environment := cliContext.String(flags.EnvironmentFlag.Name)
 	if environment == "" {
 		environment = common.GetEnvFromNetwork(network)
+	}
+	if common.IsEmptyString(callerAddress.String()) {
+		logger.Infof(
+			"Caller address not provided. Using account address (%s) as caller address",
+			accountAddress,
+		)
+		callerAddress = accountAddress
 	}
 	signerConfig, err := common.GetSignerConfig(cliContext, logger)
 	if err != nil {
@@ -113,6 +121,7 @@ func readAndValidateAddPendingAdminConfig(
 		RPCUrl:                   ethRpcUrl,
 		AccountAddress:           accountAddress,
 		AdminAddress:             adminAddress,
+		CallerAddress:            callerAddress,
 		SignerConfig:             *signerConfig,
 		PermissionManagerAddress: gethcommon.HexToAddress(permissionManagerAddress),
 		ChainID:                  chainID,
@@ -129,7 +138,7 @@ func generateAddPendingAdminWriter(
 			return nil, eigenSdkUtils.WrapError("failed to create new eth client", err)
 		}
 		return common.GetELWriter(
-			config.AccountAddress,
+			config.CallerAddress,
 			&config.SignerConfig,
 			ethClient,
 			elcontracts.Config{
@@ -147,6 +156,7 @@ func addPendingFlags() []cli.Flag {
 		&flags.VerboseFlag,
 		&AccountAddressFlag,
 		&AdminAddressFlag,
+		&CallerAddressFlag,
 		&PermissionControllerAddressFlag,
 		&flags.OutputTypeFlag,
 		&flags.OutputFileFlag,
