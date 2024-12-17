@@ -86,8 +86,8 @@ func printRemoveAppointeeResult(
 	if err != nil {
 		return err
 	}
-	noSendTxOpts := common.GetNoSendTxOpts(config.AccountAddress)
-	if common.IsSmartContractAddress(config.AccountAddress, ethClient) {
+	noSendTxOpts := common.GetNoSendTxOpts(config.CallerAddress)
+	if common.IsSmartContractAddress(config.CallerAddress, ethClient) {
 		// address is a smart contract
 		noSendTxOpts.GasLimit = 150_000
 	}
@@ -156,7 +156,7 @@ func generateRemoveAppointeePermissionWriter(
 			return nil, eigenSdkUtils.WrapError("failed to create new eth client", err)
 		}
 		elWriter, err := common.GetELWriter(
-			config.AccountAddress,
+			config.CallerAddress,
 			&config.SignerConfig,
 			ethClient,
 			elcontracts.Config{
@@ -173,6 +173,7 @@ func generateRemoveAppointeePermissionWriter(
 func readAndValidateRemoveConfig(cliContext *cli.Context, logger logging.Logger) (*removeConfig, error) {
 	accountAddress := gethcommon.HexToAddress(cliContext.String(AccountAddressFlag.Name))
 	appointeeAddress := gethcommon.HexToAddress(cliContext.String(AppointeeAddressFlag.Name))
+	callerAddress := gethcommon.HexToAddress(cliContext.String(CallerAddressFlag.Name))
 	ethRpcUrl := cliContext.String(flags.ETHRpcUrlFlag.Name)
 	network := cliContext.String(flags.NetworkFlag.Name)
 	environment := cliContext.String(flags.EnvironmentFlag.Name)
@@ -206,6 +207,13 @@ func readAndValidateRemoveConfig(cliContext *cli.Context, logger logging.Logger)
 			return nil, err
 		}
 	}
+	if common.IsEmptyString(callerAddress.String()) {
+		logger.Infof(
+			"Caller address not provided. Using account address (%s) as caller address",
+			accountAddress,
+		)
+		callerAddress = accountAddress
+	}
 
 	logger.Debugf(
 		"Env: %s, network: %s, chain ID: %s, PermissionManager address: %s",
@@ -220,6 +228,7 @@ func readAndValidateRemoveConfig(cliContext *cli.Context, logger logging.Logger)
 		RPCUrl:                   ethRpcUrl,
 		AccountAddress:           accountAddress,
 		AppointeeAddress:         appointeeAddress,
+		CallerAddress:            callerAddress,
 		Target:                   target,
 		Selector:                 selectorBytes,
 		SignerConfig:             *signerConfig,
