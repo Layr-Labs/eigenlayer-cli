@@ -76,6 +76,7 @@ func readAndValidateAcceptAdminConfig(
 	logger logging.Logger,
 ) (*acceptAdminConfig, error) {
 	accountAddress := gethcommon.HexToAddress(cliContext.String(AccountAddressFlag.Name))
+	callerAddress := gethcommon.HexToAddress(cliContext.String(CallerAddress.Name))
 	ethRpcUrl := cliContext.String(flags.ETHRpcUrlFlag.Name)
 	network := cliContext.String(flags.NetworkFlag.Name)
 	environment := cliContext.String(flags.EnvironmentFlag.Name)
@@ -98,6 +99,13 @@ func readAndValidateAcceptAdminConfig(
 			return nil, err
 		}
 	}
+	if common.IsEmptyString(callerAddress.String()) {
+		logger.Infof(
+			"Caller address not provided. Using account address (%s) as caller address",
+			accountAddress,
+		)
+		callerAddress = accountAddress
+	}
 
 	logger.Debugf(
 		"Env: %s, network: %s, chain ID: %s, PermissionManager address: %s",
@@ -111,6 +119,7 @@ func readAndValidateAcceptAdminConfig(
 		Network:                  network,
 		RPCUrl:                   ethRpcUrl,
 		AccountAddress:           accountAddress,
+		CallerAddress:            callerAddress,
 		PermissionManagerAddress: gethcommon.HexToAddress(permissionManagerAddress),
 		SignerConfig:             *signerConfig,
 		ChainID:                  chainID,
@@ -144,7 +153,7 @@ func generateAcceptAdminWriter(
 			return nil, eigenSdkUtils.WrapError("failed to create new eth client", err)
 		}
 		return common.GetELWriter(
-			config.AccountAddress,
+			config.CallerAddress,
 			&config.SignerConfig,
 			ethClient,
 			elcontracts.Config{

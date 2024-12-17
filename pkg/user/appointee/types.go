@@ -45,6 +45,7 @@ type removeConfig struct {
 	RPCUrl                   string
 	AccountAddress           gethcommon.Address
 	AppointeeAddress         gethcommon.Address
+	CallerAddress            gethcommon.Address
 	Target                   gethcommon.Address
 	SignerConfig             types.SignerConfig
 	Selector                 [4]byte
@@ -61,6 +62,7 @@ type setConfig struct {
 	RPCUrl                   string
 	AccountAddress           gethcommon.Address
 	AppointeeAddress         gethcommon.Address
+	CallerAddress            gethcommon.Address
 	Target                   gethcommon.Address
 	SignerConfig             types.SignerConfig
 	Selector                 [4]byte

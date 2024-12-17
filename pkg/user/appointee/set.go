@@ -109,9 +109,8 @@ func printSetAppointeeResults(
 	if err != nil {
 		return err
 	}
-	noSendTxOpts := common.GetNoSendTxOpts(config.AccountAddress)
-	if common.IsSmartContractAddress(config.AccountAddress, ethClient) {
-		// address is a smart contract
+	noSendTxOpts := common.GetNoSendTxOpts(config.CallerAddress)
+	if common.IsSmartContractAddress(config.CallerAddress, ethClient) {
 		noSendTxOpts.GasLimit = 150_000
 	}
 	tx, err := permissionWriter.NewSetPermissionTx(request)
@@ -159,7 +158,7 @@ func generateSetAppointeePermissionWriter(
 			return nil, eigenSdkUtils.WrapError("failed to create new eth client", err)
 		}
 		elWriter, err := common.GetELWriter(
-			config.AccountAddress,
+			config.CallerAddress,
 			&config.SignerConfig,
 			ethClient,
 			elcontracts.Config{
@@ -176,6 +175,7 @@ func generateSetAppointeePermissionWriter(
 func readAndValidateSetConfig(cliContext *cli.Context, logger logging.Logger) (*setConfig, error) {
 	accountAddress := gethcommon.HexToAddress(cliContext.String(AccountAddressFlag.Name))
 	appointeeAddress := gethcommon.HexToAddress(cliContext.String(AppointeeAddressFlag.Name))
+	callerAddress := gethcommon.HexToAddress(cliContext.String(CallerAddressFlag.Name))
 	ethRpcUrl := cliContext.String(flags.ETHRpcUrlFlag.Name)
 	network := cliContext.String(flags.NetworkFlag.Name)
 	environment := cliContext.String(flags.EnvironmentFlag.Name)
@@ -197,6 +197,13 @@ func readAndValidateSetConfig(cliContext *cli.Context, logger logging.Logger) (*
 
 	if environment == "" {
 		environment = common.GetEnvFromNetwork(network)
+	}
+	if common.IsEmptyString(callerAddress.String()) {
+		logger.Infof(
+			"Caller address not provided. Using account address (%s) as caller address",
+			accountAddress,
+		)
+		callerAddress = accountAddress
 	}
 
 	chainID := utils.NetworkNameToChainId(network)
@@ -223,6 +230,7 @@ func readAndValidateSetConfig(cliContext *cli.Context, logger logging.Logger) (*
 		RPCUrl:                   ethRpcUrl,
 		AccountAddress:           accountAddress,
 		AppointeeAddress:         appointeeAddress,
+		CallerAddress:            callerAddress,
 		Target:                   target,
 		Selector:                 selectorBytes,
 		SignerConfig:             *signerConfig,
@@ -240,6 +248,7 @@ func setCommandFlags() []cli.Flag {
 		&flags.VerboseFlag,
 		&AccountAddressFlag,
 		&AppointeeAddressFlag,
+		&CallerAddressFlag,
 		&TargetAddressFlag,
 		&SelectorFlag,
 		&PermissionControllerAddressFlag,

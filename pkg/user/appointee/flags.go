@@ -15,6 +15,13 @@ var (
 		Usage:   "The Ethereum address of the user. Example: --appointee-address \"0x...\"",
 		EnvVars: []string{"APPOINTEE_ADDRESS"},
 	}
+	CallerAddressFlag = cli.StringFlag{
+		Name:    "caller-address",
+		Aliases: []string{"ca"},
+		Usage: "This is the address of the caller who is calling the contract function. \n" +
+			"If it is not provided, the account address will be used as the caller address",
+		EnvVars: []string{"CALLER_ADDRESS"},
+	}
 	SelectorFlag = cli.StringFlag{
 		Name:    "selector",
 		Aliases: []string{"s"},
@@ -26,12 +33,6 @@ var (
 		Aliases: []string{"ta"},
 		Usage:   "The contract address for managing permissions to protocol operations.",
 		EnvVars: []string{"TARGET_ADDRESS"},
-	}
-	BatchSetFileFlag = cli.StringFlag{
-		Name:    "batch-set-file",
-		Aliases: []string{"bsf"},
-		Usage:   "A YAML file for executing a batch of set permission operations.",
-		EnvVars: []string{"BATCH_SET_FILE"},
 	}
 	PermissionControllerAddressFlag = cli.StringFlag{
 		Name:    "permission-controller-address",
