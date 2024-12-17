@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"math"
+	"math/big"
 	"os"
 	"testing"
 
@@ -74,6 +75,15 @@ func (f *fakeElChainReader) GetAllocatableMagnitude(
 		return initialMagnitude, nil
 	}
 	return magnitude, nil
+}
+
+func (f *fakeElChainReader) GetSlashableShares(
+	ctx context.Context,
+	operatorAddress gethcommon.Address,
+	operatorSet allocationmanager.OperatorSet,
+	strategies []gethcommon.Address,
+) (map[gethcommon.Address]*big.Int, error) {
+	return nil, errors.New("not implemented")
 }
 
 func TestGenerateAllocationsParams(t *testing.T) {

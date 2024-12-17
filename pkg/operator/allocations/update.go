@@ -37,6 +37,12 @@ type elChainReader interface {
 		operator gethcommon.Address,
 		strategy gethcommon.Address,
 	) (uint64, error)
+	GetSlashableShares(
+		ctx context.Context,
+		operatorAddress gethcommon.Address,
+		operatorSet allocationmanager.OperatorSet,
+		strategies []gethcommon.Address,
+	) (map[gethcommon.Address]*big.Int, error)
 }
 
 func UpdateCmd(p utils.Prompter) *cli.Command {
