@@ -54,6 +54,9 @@ type acceptAdminConfig struct {
 	SignerConfig             types.SignerConfig
 	ChainID                  *big.Int
 	Environment              string
+	OutputFile               string
+	OutputType               string
+	Broadcast                bool
 }
 
 type addPendingAdminConfig struct {
@@ -66,6 +69,9 @@ type addPendingAdminConfig struct {
 	SignerConfig             types.SignerConfig
 	ChainID                  *big.Int
 	Environment              string
+	OutputFile               string
+	OutputType               string
+	Broadcast                bool
 }
 
 type removeAdminConfig struct {
@@ -78,6 +84,9 @@ type removeAdminConfig struct {
 	SignerConfig             types.SignerConfig
 	ChainID                  *big.Int
 	Environment              string
+	OutputFile               string
+	OutputType               string
+	Broadcast                bool
 }
 
 type removePendingAdminConfig struct {
@@ -90,4 +99,7 @@ type removePendingAdminConfig struct {
 	SignerConfig             types.SignerConfig
 	ChainID                  *big.Int
 	Environment              string
+	OutputFile               string
+	OutputType               string
+	Broadcast                bool
 }

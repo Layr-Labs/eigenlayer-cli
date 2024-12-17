@@ -2,6 +2,7 @@ package admin
 
 import (
 	"context"
+	"fmt"
 	"sort"
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
@@ -11,6 +12,7 @@ import (
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
 	"github.com/Layr-Labs/eigensdk-go/logging"
 	eigenSdkUtils "github.com/Layr-Labs/eigensdk-go/utils"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	gethcommon "github.com/ethereum/go-ethereum/common"
 	gethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -23,6 +25,10 @@ type RemoveAdminWriter interface {
 		ctx context.Context,
 		request elcontracts.RemoveAdminRequest,
 	) (*gethtypes.Receipt, error)
+	NewRemoveAdminTx(
+		txOpts *bind.TransactOpts,
+		request elcontracts.RemoveAdminRequest,
+	) (*gethtypes.Transaction, error)
 }
 
 func RemoveCmd(generator func(logging.Logger, *removeAdminConfig) (RemoveAdminWriter, error)) *cli.Command {
@@ -56,18 +62,80 @@ func removeAdmin(
 		return err
 	}
 
-	receipt, err := elWriter.RemoveAdmin(
-		ctx,
-		elcontracts.RemoveAdminRequest{
-			AccountAddress: config.AccountAddress,
-			AdminAddress:   config.AdminAddress,
-			WaitForReceipt: true,
-		},
-	)
+	removeRequest := elcontracts.RemoveAdminRequest{
+		AccountAddress: config.AccountAddress,
+		AdminAddress:   config.AdminAddress,
+		WaitForReceipt: true,
+	}
+
+	if config.Broadcast {
+		return broadcastRemoveAdminTx(ctx, elWriter, config, removeRequest)
+	}
+
+	return printRemoveAdminTx(logger, elWriter, config, removeRequest)
+}
+
+func broadcastRemoveAdminTx(
+	ctx context.Context,
+	elWriter RemoveAdminWriter,
+	config *removeAdminConfig,
+	request elcontracts.RemoveAdminRequest,
+) error {
+	receipt, err := elWriter.RemoveAdmin(ctx, request)
+	if err != nil {
+		return eigenSdkUtils.WrapError("failed to broadcast RemoveAdmin transaction", err)
+	}
+	common.PrintTransactionInfo(receipt.TxHash.String(), config.ChainID)
+	return nil
+}
+
+func printRemoveAdminTx(
+	logger logging.Logger,
+	elWriter RemoveAdminWriter,
+	config *removeAdminConfig,
+	request elcontracts.RemoveAdminRequest,
+) error {
+	ethClient, err := ethclient.Dial(config.RPCUrl)
 	if err != nil {
 		return err
 	}
-	common.PrintTransactionInfo(receipt.TxHash.String(), config.ChainID)
+
+	noSendTxOpts := common.GetNoSendTxOpts(config.CallerAddress)
+	if common.IsSmartContractAddress(config.CallerAddress, ethClient) {
+		noSendTxOpts.GasLimit = 150_000
+	}
+	unsignedTx, err := elWriter.NewRemoveAdminTx(noSendTxOpts, request)
+	if err != nil {
+		return eigenSdkUtils.WrapError("failed to create unsigned tx", err)
+	}
+
+	if config.OutputType == string(common.OutputType_Calldata) {
+		calldataHex := gethcommon.Bytes2Hex(unsignedTx.Data())
+		if !common.IsEmptyString(config.OutputFile) {
+			err = common.WriteToFile([]byte(calldataHex), config.OutputFile)
+			if err != nil {
+				return err
+			}
+			logger.Infof("Call data written to file: %s", config.OutputFile)
+		} else {
+			fmt.Println(calldataHex)
+		}
+	} else {
+		if !common.IsEmptyString(config.OutputType) {
+			fmt.Println("output file not supported for pretty output type")
+			fmt.Println()
+		}
+		fmt.Printf(
+			"Admin %s will be removed for account %s\n",
+			config.AdminAddress,
+			config.AccountAddress,
+		)
+	}
+
+	txFeeDetails := common.GetTxFeeDetails(unsignedTx)
+	fmt.Println()
+	txFeeDetails.Print()
+	fmt.Println("To broadcast the transaction, use the --broadcast flag")
 	return nil
 }
 
@@ -81,6 +149,9 @@ func readAndValidateRemoveAdminConfig(
 	ethRpcUrl := cliContext.String(flags.ETHRpcUrlFlag.Name)
 	network := cliContext.String(flags.NetworkFlag.Name)
 	environment := cliContext.String(flags.EnvironmentFlag.Name)
+	outputType := cliContext.String(flags.OutputTypeFlag.Name)
+	outputFile := cliContext.String(flags.OutputFileFlag.Name)
+	broadcast := cliContext.Bool(flags.BroadcastFlag.Name)
 	if environment == "" {
 		environment = common.GetEnvFromNetwork(network)
 	}
@@ -126,6 +197,9 @@ func readAndValidateRemoveAdminConfig(
 		SignerConfig:             *signerConfig,
 		ChainID:                  chainID,
 		Environment:              environment,
+		OutputFile:               outputFile,
+		OutputType:               outputType,
+		Broadcast:                broadcast,
 	}, nil
 }
 
