@@ -2,6 +2,7 @@ package rewards
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"sort"
 
@@ -164,7 +165,7 @@ func readAndValidateSetClaimerConfig(cCtx *cli.Context, logger logging.Logger) (
 	broadcast := cCtx.Bool(flags.BroadcastFlag.Name)
 	claimerAddress := cCtx.String(ClaimerAddressFlag.Name)
 	if common.IsEmptyString(claimerAddress) {
-		return nil, fmt.Errorf("claimer address is required")
+		return nil, errors.New("claimer address is required")
 	}
 
 	rewardsCoordinatorAddress := cCtx.String(RewardsCoordinatorAddressFlag.Name)
