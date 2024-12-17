@@ -27,12 +27,8 @@ type RemoveAdminWriter interface {
 
 func RemoveCmd(generator func(logging.Logger, *removeAdminConfig) (RemoveAdminWriter, error)) *cli.Command {
 	removeCmd := &cli.Command{
-		Name:      "remove-admin",
-		Usage:     "user admin remove-admin --account-address <AccountAddress> --admin-address <AdminAddress>",
-		UsageText: "The remove command allows you to remove an admin user.",
-		Description: `
-		The remove command allows you to remove an admin user.
-		`,
+		Name:  "remove-admin",
+		Usage: "The remove command allows you to remove an admin user.",
 		Action: func(context *cli.Context) error {
 			return removeAdmin(context, generator)
 		},

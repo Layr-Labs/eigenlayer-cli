@@ -30,12 +30,8 @@ func ListPendingCmd(
 	readerGenerator func(logging.Logger, *listPendingAdminsConfig) (ListPendingAdminsReader, error),
 ) *cli.Command {
 	listPendingCmd := &cli.Command{
-		Name:      "list-pending-admins",
-		Usage:     "user admin list-pending-admins --account-address <AccountAddress>",
-		UsageText: "List all users who are pending admin acceptance.",
-		Description: `
-		List all users who are pending admin acceptance.
-		`,
+		Name:  "list-pending-admins",
+		Usage: "List all users who are pending admin acceptance.",
 		Action: func(c *cli.Context) error {
 			return listPendingAdmins(c, readerGenerator)
 		},

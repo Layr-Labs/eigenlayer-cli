@@ -9,12 +9,8 @@ import (
 
 func AppointeeCmd(prompter utils.Prompter) *cli.Command {
 	appointeeCmd := &cli.Command{
-		Name:      "appointee",
-		Usage:     "user appointee <command>",
-		UsageText: "User permission management operations.",
-		Description: `
-		User permission management operations.
-		`,
+		Name:  "appointee",
+		Usage: "User permission management operations.",
 		After: telemetry.AfterRunAction(),
 		Flags: []cli.Flag{
 			&flags.VerboseFlag,

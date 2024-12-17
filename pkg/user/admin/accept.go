@@ -27,12 +27,8 @@ type AcceptAdminWriter interface {
 
 func AcceptCmd(generator func(logging.Logger, *acceptAdminConfig) (AcceptAdminWriter, error)) *cli.Command {
 	acceptCmd := &cli.Command{
-		Name:      "accept-admin",
-		Usage:     "user admin accept-admin --account-address <AccountAddress>",
-		UsageText: "Accepts a user to become admin who is currently pending admin acceptance.",
-		Description: `
-		Accepts a user to become admin who is currently pending admin acceptance.
-		`,
+		Name:  "accept-admin",
+		Usage: "Accepts a user to become admin who is currently pending admin acceptance.",
 		Action: func(c *cli.Context) error {
 			return acceptAdmin(c, generator)
 		},

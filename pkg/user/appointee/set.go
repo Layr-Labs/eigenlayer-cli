@@ -31,12 +31,8 @@ type SetAppointeePermissionWriter interface {
 
 func SetCmd(generator func(logging.Logger, *setConfig) (SetAppointeePermissionWriter, error)) *cli.Command {
 	setCmd := &cli.Command{
-		Name:      "set",
-		Usage:     "user appointee set --account-address <AccountAddress> --appointee-address <AppointeeAddress> --target-address <TargetAddress> --selector <Selector>",
-		UsageText: "Grant an appointee a permission.",
-		Description: `
-		Grant an appointee a permission.
-		`,
+		Name:  "set",
+		Usage: "Grant an appointee a permission.",
 		Action: func(c *cli.Context) error {
 			return setAppointeePermission(c, generator)
 		},
