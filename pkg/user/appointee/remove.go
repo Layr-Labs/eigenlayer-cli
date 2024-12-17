@@ -105,7 +105,6 @@ func printRemoveAppointeeTx(
 	if common.IsSmartContractAddress(config.CallerAddress, ethClient) {
 		noSendTxOpts.GasLimit = 150_000
 	}
-
 	unsignedTx, err := permissionWriter.NewRemovePermissionTx(noSendTxOpts, request)
 	if err != nil {
 		return eigenSdkUtils.WrapError("failed to create unsigned tx", err)
@@ -124,7 +123,7 @@ func printRemoveAppointeeTx(
 		}
 	} else {
 		if !common.IsEmptyString(config.OutputType) {
-			fmt.Println("Output file not supported for pretty output type")
+			fmt.Println("output file not supported for pretty output type")
 			fmt.Println()
 		}
 		fmt.Printf(
@@ -135,7 +134,6 @@ func printRemoveAppointeeTx(
 			config.AccountAddress,
 		)
 	}
-
 	txFeeDetails := common.GetTxFeeDetails(unsignedTx)
 	fmt.Println()
 	txFeeDetails.Print()
