@@ -171,6 +171,7 @@ func readAndValidateAllocationDelayConfig(c *cli.Context, logger logging.Logger)
 
 	callerAddress := c.String(flags.CallerAddressFlag.Name)
 	if common.IsEmptyString(callerAddress) {
+		logger.Infof("Caller address not provided. Using operator address (%s) as caller address", operatorAddress)
 		callerAddress = operatorAddress
 	}
 

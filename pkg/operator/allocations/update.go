@@ -443,6 +443,7 @@ func readAndValidateUpdateFlags(cCtx *cli.Context, logger logging.Logger) (*upda
 	operatorAddress := cCtx.String(flags.OperatorAddressFlag.Name)
 	callerAddress := cCtx.String(flags.CallerAddressFlag.Name)
 	if common.IsEmptyString(callerAddress) {
+		logger.Infof("Caller address not provided. Using operator address (%s) as caller address", operatorAddress)
 		callerAddress = operatorAddress
 	}
 
