@@ -150,6 +150,7 @@ func showAction(cCtx *cli.Context, p utils.Prompter) error {
 	slashableMagnitudeHolders := make(SlashableMagnitudeHolders, 0)
 	dergisteredOpsets := make(DeregsiteredOperatorSets, 0)
 	for strategy, allocations := range allAllocations {
+		logger.Debugf("Strategy: %s, Allocations: %v", strategy, allocations)
 		strategyShares := operatorDelegatedSharesMap[strategy]
 		for _, alloc := range allocations {
 			currentShares, currentSharesPercentage := getSharesFromMagnitude(
@@ -193,7 +194,7 @@ func showAction(cCtx *cli.Context, p utils.Prompter) error {
 	}
 
 	for key, val := range operatorDelegatedSharesMap {
-		fmt.Printf("Strategy Address: %s, Shares %s\n", key, val.String())
+		fmt.Printf("Strategy Address: %s, Shares %s\n", key, common.FormatNumberWithUnderscores(val.String()))
 	}
 
 	currBlockNumber, err := ethClient.BlockNumber(ctx)

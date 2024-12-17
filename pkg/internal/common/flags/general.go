@@ -125,4 +125,11 @@ var (
 		Usage:   "Optional delegation manager address. This can be used if you are testing against your own deployment of eigenlayer contracts",
 		EnvVars: []string{"DELEGATION_MANAGER_ADDRESS"},
 	}
+
+	CallerAddressFlag = cli.StringFlag{
+		Name:    "caller-address",
+		Aliases: []string{"ca"},
+		Usage:   "This is the address of the caller who is calling the contract function. If it is not provided, the operator address will be used as the caller address",
+		EnvVars: []string{"CALLER_ADDRESS"},
+	}
 )
