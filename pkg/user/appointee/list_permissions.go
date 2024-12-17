@@ -30,12 +30,8 @@ func ListPermissionsCmd(
 	readerGenerator func(logging.Logger, *listAppointeePermissionsConfig) (PermissionsReader, error),
 ) *cli.Command {
 	cmd := &cli.Command{
-		Name:      "list-permissions",
-		Usage:     "user appointee list-permissions --account-address <AccountAddress> --appointee-address <AppointeeAddress>",
-		UsageText: "List all permissions for a user.",
-		Description: `
-		List all permissions of a user.
-		`,
+		Name:  "list-permissions",
+		Usage: "List all permissions of a user.",
 		Action: func(c *cli.Context) error {
 			return listPermissions(c, readerGenerator)
 		},

@@ -29,12 +29,8 @@ type CanCallReader interface {
 
 func canCallCmd(readerGenerator func(logging.Logger, *canCallConfig) (CanCallReader, error)) *cli.Command {
 	cmd := &cli.Command{
-		Name:      "can-call",
-		Usage:     "user appointee can-call --account-address <AccountsAddress> --appointee-address <AppointeeAddress> --target-address <TargetAddress> --selector <Selector>",
-		UsageText: "Checks if an appointee has a specific permission.",
-		Description: `
-		Checks if an appointee has a specific permission.
-		`,
+		Name:  "can-call",
+		Usage: "Checks if an appointee has a specific permission.",
 		Action: func(c *cli.Context) error {
 			return canCall(c, readerGenerator)
 		},

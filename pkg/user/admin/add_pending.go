@@ -27,12 +27,8 @@ type AddPendingAdminWriter interface {
 
 func AddPendingCmd(generator func(logging.Logger, *addPendingAdminConfig) (AddPendingAdminWriter, error)) *cli.Command {
 	addPendingCmd := &cli.Command{
-		Name:      "add-pending-admin",
-		Usage:     "user admin add-pending-admin --account-address <AccountAddress> --admin-address <AdminAddress>",
-		UsageText: "Add an admin to be pending until accepted.",
-		Description: `
-		Add an admin to be pending until accepted.
-		`,
+		Name:  "add-pending-admin",
+		Usage: "Add an admin to be pending until accepted.",
 		Action: func(context *cli.Context) error {
 			return addPendingAdmin(context, generator)
 		},

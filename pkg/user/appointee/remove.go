@@ -31,12 +31,8 @@ type RemoveAppointeePermissionWriter interface {
 
 func RemoveCmd(generator func(logging.Logger, *removeConfig) (RemoveAppointeePermissionWriter, error)) *cli.Command {
 	removeCmd := &cli.Command{
-		Name:      "remove",
-		Usage:     "user appointee remove --account-address <AccountAddress> --appointee-address <AppointeeAddress> --target-address <TargetAddress> --selector <Selector>",
-		UsageText: "Remove an appointee's permission",
-		Description: `
-		Remove an appointee's permission'.
-		`,
+		Name:  "remove",
+		Usage: "Remove an appointee's permission",
 		After: telemetry.AfterRunAction(),
 		Action: func(c *cli.Context) error {
 			return removeAppointeePermission(c, generator)

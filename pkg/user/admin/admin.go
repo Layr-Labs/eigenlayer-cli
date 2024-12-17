@@ -9,12 +9,8 @@ import (
 
 func AdminCmd(prompter utils.Prompter) *cli.Command {
 	adminCmd := &cli.Command{
-		Name:      "admin",
-		Usage:     "user admin <command>",
-		UsageText: "Manage admin users.",
-		Description: `
-		Manage admin users.
-		`,
+		Name:  "admin",
+		Usage: "Manage admin users.",
 		After: telemetry.AfterRunAction(),
 		Flags: []cli.Flag{
 			&flags.VerboseFlag,
