@@ -7,15 +7,16 @@ import (
 
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
 	"github.com/Layr-Labs/eigensdk-go/logging"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	gethtypes "github.com/ethereum/go-ethereum/core/types"
-	"github.com/stretchr/testify/assert"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/urfave/cli/v2"
 )
 
 type mockSetAppointeePermissionWriter struct {
 	setPermissionFunc      func(ctx context.Context, request elcontracts.SetPermissionRequest) (*gethtypes.Receipt, error)
-	newSetPermissionTxFunc func(request elcontracts.SetPermissionRequest) (*gethtypes.Transaction, error)
+	newSetPermissionTxFunc func(txOpts *bind.TransactOpts, request elcontracts.SetPermissionRequest) (*gethtypes.Transaction, error)
 }
 
 func (m *mockSetAppointeePermissionWriter) SetPermission(
@@ -26,9 +27,10 @@ func (m *mockSetAppointeePermissionWriter) SetPermission(
 }
 
 func (m *mockSetAppointeePermissionWriter) NewSetPermissionTx(
+	txOpts *bind.TransactOpts,
 	request elcontracts.SetPermissionRequest,
 ) (*gethtypes.Transaction, error) {
-	return m.newSetPermissionTxFunc(request)
+	return m.newSetPermissionTxFunc(txOpts, request)
 }
 
 func generateMockSetWriter(err error) func(logging.Logger, *setConfig) (SetAppointeePermissionWriter, error) {
@@ -37,7 +39,7 @@ func generateMockSetWriter(err error) func(logging.Logger, *setConfig) (SetAppoi
 			setPermissionFunc: func(ctx context.Context, request elcontracts.SetPermissionRequest) (*gethtypes.Receipt, error) {
 				return &gethtypes.Receipt{}, err
 			},
-			newSetPermissionTxFunc: func(request elcontracts.SetPermissionRequest) (*gethtypes.Transaction, error) {
+			newSetPermissionTxFunc: func(txOpts *bind.TransactOpts, request elcontracts.SetPermissionRequest) (*gethtypes.Transaction, error) {
 				return &gethtypes.Transaction{}, err
 			},
 		}, nil
