@@ -72,7 +72,7 @@ func readAndValidateAcceptAdminConfig(
 	logger logging.Logger,
 ) (*acceptAdminConfig, error) {
 	accountAddress := gethcommon.HexToAddress(cliContext.String(AccountAddressFlag.Name))
-	callerAddress := gethcommon.HexToAddress(cliContext.String(CallerAddress.Name))
+	callerAddress := gethcommon.HexToAddress(cliContext.String(CallerAddressFlag.Name))
 	ethRpcUrl := cliContext.String(flags.ETHRpcUrlFlag.Name)
 	network := cliContext.String(flags.NetworkFlag.Name)
 	environment := cliContext.String(flags.EnvironmentFlag.Name)
@@ -127,6 +127,7 @@ func acceptFlags() []cli.Flag {
 	cmdFlags := []cli.Flag{
 		&flags.VerboseFlag,
 		&AccountAddressFlag,
+		&CallerAddressFlag,
 		&PermissionControllerAddressFlag,
 		&flags.OutputTypeFlag,
 		&flags.OutputFileFlag,

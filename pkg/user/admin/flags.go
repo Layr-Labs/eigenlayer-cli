@@ -15,7 +15,7 @@ var (
 		Usage:   "user admin ... --admin-address \"0x...\"",
 		EnvVars: []string{"ADMIN_ADDRESS"},
 	}
-	CallerAddress = cli.StringFlag{
+	CallerAddressFlag = cli.StringFlag{
 		Name:    "caller-address",
 		Aliases: []string{"ca"},
 		Usage: "This is the address of the caller who is calling the contract function. \n" +

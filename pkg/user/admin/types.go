@@ -61,6 +61,7 @@ type addPendingAdminConfig struct {
 	RPCUrl                   string
 	AccountAddress           gethcommon.Address
 	AdminAddress             gethcommon.Address
+	CallerAddress            gethcommon.Address
 	PermissionManagerAddress gethcommon.Address
 	SignerConfig             types.SignerConfig
 	ChainID                  *big.Int
@@ -72,6 +73,7 @@ type removeAdminConfig struct {
 	RPCUrl                   string
 	AccountAddress           gethcommon.Address
 	AdminAddress             gethcommon.Address
+	CallerAddress            gethcommon.Address
 	PermissionManagerAddress gethcommon.Address
 	SignerConfig             types.SignerConfig
 	ChainID                  *big.Int
@@ -83,6 +85,7 @@ type removePendingAdminConfig struct {
 	RPCUrl                   string
 	AccountAddress           gethcommon.Address
 	AdminAddress             gethcommon.Address
+	CallerAddress            gethcommon.Address
 	PermissionManagerAddress gethcommon.Address
 	SignerConfig             types.SignerConfig
 	ChainID                  *big.Int
