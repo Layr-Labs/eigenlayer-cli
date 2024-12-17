@@ -12,6 +12,7 @@ import (
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
 	"github.com/Layr-Labs/eigensdk-go/logging"
 	eigenSdkUtils "github.com/Layr-Labs/eigensdk-go/utils"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	gethcommon "github.com/ethereum/go-ethereum/common"
 	gethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -25,6 +26,7 @@ type SetAppointeePermissionWriter interface {
 		request elcontracts.SetPermissionRequest,
 	) (*gethtypes.Receipt, error)
 	NewSetPermissionTx(
+		txOpts *bind.TransactOpts,
 		request elcontracts.SetPermissionRequest,
 	) (*gethtypes.Transaction, error)
 }
@@ -109,11 +111,11 @@ func printSetAppointeeResults(
 	if common.IsSmartContractAddress(config.CallerAddress, ethClient) {
 		noSendTxOpts.GasLimit = 150_000
 	}
-	tx, err := permissionWriter.NewSetPermissionTx(request)
+
+	tx, err := permissionWriter.NewSetPermissionTx(noSendTxOpts, request)
 	if err != nil {
 		return eigenSdkUtils.WrapError("failed to create unsigned tx", err)
 	}
-
 	if config.OutputType == string(common.OutputType_Calldata) {
 		calldataHex := gethcommon.Bytes2Hex(tx.Data())
 		if !common.IsEmptyString(config.OutputFile) {

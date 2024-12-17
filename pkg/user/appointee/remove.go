@@ -12,6 +12,7 @@ import (
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
 	"github.com/Layr-Labs/eigensdk-go/logging"
 	eigenSdkUtils "github.com/Layr-Labs/eigensdk-go/utils"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	gethcommon "github.com/ethereum/go-ethereum/common"
 	gethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -25,6 +26,7 @@ type RemoveAppointeePermissionWriter interface {
 		request elcontracts.RemovePermissionRequest,
 	) (*gethtypes.Receipt, error)
 	NewRemovePermissionTx(
+		txOpts *bind.TransactOpts,
 		request elcontracts.RemovePermissionRequest,
 	) (*gethtypes.Transaction, error)
 }
@@ -69,10 +71,27 @@ func removeAppointeePermission(
 	if config.Broadcast {
 		return broadcastRemoveAppointeeTx(ctx, permissionWriter, config, removePermissionRequest)
 	}
-	return printRemoveAppointeeResult(logger, permissionWriter, config, removePermissionRequest)
+	return printRemoveAppointeeTx(logger, permissionWriter, config, removePermissionRequest)
 }
 
-func printRemoveAppointeeResult(
+func broadcastRemoveAppointeeTx(
+	ctx context.Context,
+	permissionWriter RemoveAppointeePermissionWriter,
+	config *removeConfig,
+	request elcontracts.RemovePermissionRequest,
+) error {
+	receipt, err := permissionWriter.RemovePermission(
+		ctx,
+		request,
+	)
+	if err != nil {
+		return err
+	}
+	common.PrintTransactionInfo(receipt.TxHash.String(), config.ChainID)
+	return nil
+}
+
+func printRemoveAppointeeTx(
 	logger logging.Logger,
 	permissionWriter RemoveAppointeePermissionWriter,
 	config *removeConfig,
@@ -84,10 +103,9 @@ func printRemoveAppointeeResult(
 	}
 	noSendTxOpts := common.GetNoSendTxOpts(config.CallerAddress)
 	if common.IsSmartContractAddress(config.CallerAddress, ethClient) {
-		// address is a smart contract
 		noSendTxOpts.GasLimit = 150_000
 	}
-	unsignedTx, err := permissionWriter.NewRemovePermissionTx(request)
+	unsignedTx, err := permissionWriter.NewRemovePermissionTx(noSendTxOpts, request)
 	if err != nil {
 		return eigenSdkUtils.WrapError("failed to create unsigned tx", err)
 	}
@@ -109,7 +127,7 @@ func printRemoveAppointeeResult(
 			fmt.Println()
 		}
 		fmt.Printf(
-			"Appointee %s will be lose permission to target %s selector %s by account %s\n",
+			"Appointee %s will lose permission to target %s selector %s for account %s\n",
 			config.AppointeeAddress,
 			config.Target,
 			config.Selector,
@@ -120,23 +138,6 @@ func printRemoveAppointeeResult(
 	fmt.Println()
 	txFeeDetails.Print()
 	fmt.Println("To broadcast the transaction, use the --broadcast flag")
-	return nil
-}
-
-func broadcastRemoveAppointeeTx(
-	ctx context.Context,
-	permissionWriter RemoveAppointeePermissionWriter,
-	config *removeConfig,
-	request elcontracts.RemovePermissionRequest,
-) error {
-	receipt, err := permissionWriter.RemovePermission(
-		ctx,
-		request,
-	)
-	if err != nil {
-		return err
-	}
-	common.PrintTransactionInfo(receipt.TxHash.String(), config.ChainID)
 	return nil
 }
 
