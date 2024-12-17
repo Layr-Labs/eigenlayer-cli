@@ -1,6 +1,7 @@
 package allocations
 
 import (
+	"context"
 	"fmt"
 	"math/big"
 	"sort"
@@ -132,7 +133,7 @@ func showAction(cCtx *cli.Context, p utils.Prompter) error {
 	}
 
 	/*
-		5. Get the operator scaled shares for all strategies
+		5. Get the operator shares for all strategies
 	*/
 	operatorDelegatedSharesMap := make(map[string]*big.Int)
 	shares, err := elReader.GetOperatorShares(ctx, config.operatorAddress, config.strategyAddresses)
@@ -144,24 +145,43 @@ func showAction(cCtx *cli.Context, p utils.Prompter) error {
 	}
 
 	/*
-		6. Using all of the above, calculate SlashableMagnitudeHolders object
-		   for displaying the allocation state of the operator
+		6. Using all of the above, get Slashable Shares for the operator
+	*/
+	slashableSharesMap, err := getSlashableShares(
+		ctx,
+		config.operatorAddress,
+		registeredOperatorSets,
+		config.strategyAddresses,
+		elReader,
+	)
+	if err != nil {
+		return eigenSdkUtils.WrapError("failed to get slashable shares", err)
+	}
+
+	/*
+		7. Using all of the above, calculate SlashableMagnitudeHolders object
+		for displaying the allocation state of the operator
 	*/
 	slashableMagnitudeHolders := make(SlashableMagnitudeHolders, 0)
 	dergisteredOpsets := make(DeregsiteredOperatorSets, 0)
 	for strategy, allocations := range allAllocations {
 		logger.Debugf("Strategy: %s, Allocations: %v", strategy, allocations)
 		strategyShares := operatorDelegatedSharesMap[strategy]
+		totalMagnitude := totalMagnitudeMap[strategy]
 		for _, alloc := range allocations {
-			currentShares, currentSharesPercentage := getSharesFromMagnitude(
-				strategyShares,
-				alloc.CurrentMagnitude.Uint64(),
-			)
+			currentShares := slashableSharesMap[gethcommon.HexToAddress(strategy)][getUniqueKey(alloc.AvsAddress, alloc.OperatorSetId)]
+			currentSharesPercentage := getSharePercentage(currentShares, strategyShares)
+
 			newMagnitudeBigInt := big.NewInt(0)
 			if alloc.PendingDiff.Cmp(big.NewInt(0)) != 0 {
 				newMagnitudeBigInt = big.NewInt(0).Add(alloc.CurrentMagnitude, alloc.PendingDiff)
 			}
-			newShares, newSharesPercentage := getSharesFromMagnitude(strategyShares, newMagnitudeBigInt.Uint64())
+
+			newShares, newSharesPercentage := getSharesFromMagnitude(
+				strategyShares,
+				newMagnitudeBigInt.Uint64(),
+				totalMagnitude,
+			)
 
 			// Check if the operator set is not registered and add it to the unregistered list
 			// Then skip the rest of the loop
@@ -235,36 +255,65 @@ func showAction(cCtx *cli.Context, p utils.Prompter) error {
 	return nil
 }
 
-func getSharesFromMagnitude(totalScaledShare *big.Int, magnitude uint64) (*big.Int, *big.Float) {
+func getSharePercentage(shares *big.Int, totalShares *big.Int) *big.Float {
+	percentageShares := big.NewInt(1)
+	percentageShares = percentageShares.Mul(shares, big.NewInt(100))
+	percentageSharesFloat := new(
+		big.Float,
+	).Quo(new(big.Float).SetInt(percentageShares), new(big.Float).SetInt(totalShares))
+	return percentageSharesFloat
+}
 
+func getSlashableShares(
+	ctx context.Context,
+	operatorAddress gethcommon.Address,
+	opSets []allocationmanager.OperatorSet,
+	strategyAddresses []gethcommon.Address,
+	reader elChainReader,
+) (map[gethcommon.Address]map[string]*big.Int, error) {
+	result := make(map[gethcommon.Address]map[string]*big.Int)
+	for _, opSet := range opSets {
+		slashableSharesMap, err := reader.GetSlashableShares(ctx, operatorAddress, opSet, strategyAddresses)
+		if err != nil {
+			return nil, err
+		}
+
+		for strat, shares := range slashableSharesMap {
+			if _, ok := result[strat]; !ok {
+				result[strat] = make(map[string]*big.Int)
+			}
+			result[strat][getUniqueKey(opSet.Avs, opSet.Id)] = shares
+		}
+	}
+	return result, nil
+}
+
+func getSharesFromMagnitude(totalShare *big.Int, magnitude uint64, totalMagnitude uint64) (*big.Int, *big.Float) {
 	/*
-	 * shares = totalScaledShare * magnitude / PrecisionFactor
-	 * percentageShares = (shares / totalScaledShare) * 100
+	 * shares = totalShare * magnitude / totalMagnitude
+	 * percentageShares = (shares / totalShare) * 100
 	 */
 	// Check for zero magnitude or totalScaledShare to avoid divide-by-zero errors
-	if magnitude == 0 || totalScaledShare.Cmp(big.NewInt(0)) == 0 {
+	if magnitude == 0 || totalShare.Cmp(big.NewInt(0)) == 0 {
 		return big.NewInt(0), big.NewFloat(0)
 	}
 
-	slashableMagBigInt := big.NewInt(1)
-	slashableMagBigInt = slashableMagBigInt.SetUint64(magnitude)
-
-	scaledOpShares := big.NewInt(1)
-	scaledOpShares = scaledOpShares.Set(totalScaledShare)
-	scaledOpShares = scaledOpShares.Div(scaledOpShares, PrecisionFactor)
-	shares := scaledOpShares.Mul(scaledOpShares, slashableMagBigInt)
+	opShares := big.NewInt(1)
+	opShares = opShares.Set(totalShare)
+	shares := opShares.Mul(opShares, big.NewInt(int64(magnitude)))
+	shares = shares.Div(shares, big.NewInt(int64(totalMagnitude)))
 
 	percentageShares := big.NewInt(1)
-	percentageShares = percentageShares.Mul(scaledOpShares, big.NewInt(100))
+	percentageShares = percentageShares.Mul(opShares, big.NewInt(100))
 	percentageSharesFloat := new(
 		big.Float,
-	).Quo(new(big.Float).SetInt(percentageShares), new(big.Float).SetInt(totalScaledShare))
+	).Quo(new(big.Float).SetInt(percentageShares), new(big.Float).SetInt(totalShare))
 
 	return shares, percentageSharesFloat
 }
 
-func getUniqueKey(strategyAddress gethcommon.Address, opSetId uint32) string {
-	return fmt.Sprintf("%s-%d", strategyAddress.String(), opSetId)
+func getUniqueKey(avsAddress gethcommon.Address, opSetId uint32) string {
+	return fmt.Sprintf("%s-%d", avsAddress.String(), opSetId)
 }
 
 func readAndValidateShowConfig(cCtx *cli.Context, logger *logging.Logger) (*showConfig, error) {
