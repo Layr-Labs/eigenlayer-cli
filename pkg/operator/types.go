@@ -11,6 +11,7 @@ type DeregisterConfig struct {
 	avsAddress               common.Address
 	operatorSetIds           []uint32
 	operatorAddress          common.Address
+	callerAddress            common.Address
 	network                  string
 	environment              string
 	broadcast                bool
@@ -27,6 +28,7 @@ type RegisterConfig struct {
 	avsAddress               common.Address
 	operatorSetIds           []uint32
 	operatorAddress          common.Address
+	callerAddress            common.Address
 	network                  string
 	environment              string
 	broadcast                bool
