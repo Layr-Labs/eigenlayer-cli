@@ -7,6 +7,7 @@ import (
 
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
 	"github.com/Layr-Labs/eigensdk-go/logging"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	gethcommon "github.com/ethereum/go-ethereum/common"
 	gethtypes "github.com/ethereum/go-ethereum/core/types"
 
@@ -15,7 +16,8 @@ import (
 )
 
 type mockRemovePendingAdminWriter struct {
-	removePendingAdminFunc func(ctx context.Context, request elcontracts.RemovePendingAdminRequest) (*gethtypes.Receipt, error)
+	removePendingAdminFunc      func(ctx context.Context, request elcontracts.RemovePendingAdminRequest) (*gethtypes.Receipt, error)
+	newRemovePendingAdminTxFunc func(txOpts *bind.TransactOpts, request elcontracts.RemovePendingAdminRequest) (*gethtypes.Transaction, error)
 }
 
 func (m *mockRemovePendingAdminWriter) RemovePendingAdmin(
@@ -25,14 +27,25 @@ func (m *mockRemovePendingAdminWriter) RemovePendingAdmin(
 	return m.removePendingAdminFunc(ctx, request)
 }
 
+func (m *mockRemovePendingAdminWriter) NewRemovePendingAdminTx(
+	txOpts *bind.TransactOpts,
+	request elcontracts.RemovePendingAdminRequest,
+) (*gethtypes.Transaction, error) {
+	return m.newRemovePendingAdminTxFunc(txOpts, request)
+}
+
 func generateMockRemovePendingAdminWriter(
 	receipt *gethtypes.Receipt,
+	tx *gethtypes.Transaction,
 	err error,
 ) func(logging.Logger, *removePendingAdminConfig) (RemovePendingAdminWriter, error) {
 	return func(logger logging.Logger, config *removePendingAdminConfig) (RemovePendingAdminWriter, error) {
 		return &mockRemovePendingAdminWriter{
 			removePendingAdminFunc: func(ctx context.Context, request elcontracts.RemovePendingAdminRequest) (*gethtypes.Receipt, error) {
 				return receipt, err
+			},
+			newRemovePendingAdminTxFunc: func(txOpts *bind.TransactOpts, request elcontracts.RemovePendingAdminRequest) (*gethtypes.Transaction, error) {
+				return tx, err
 			},
 		}, nil
 	}
@@ -42,10 +55,11 @@ func TestRemovePendingCmd_Success(t *testing.T) {
 	mockReceipt := &gethtypes.Receipt{
 		TxHash: gethcommon.HexToHash("0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"),
 	}
+	mockTx := &gethtypes.Transaction{}
 
 	app := cli.NewApp()
 	app.Commands = []*cli.Command{
-		RemovePendingCmd(generateMockRemovePendingAdminWriter(mockReceipt, nil)),
+		RemovePendingCmd(generateMockRemovePendingAdminWriter(mockReceipt, mockTx, nil)),
 	}
 
 	args := []string{
@@ -56,12 +70,12 @@ func TestRemovePendingCmd_Success(t *testing.T) {
 		"--eth-rpc-url", "https://ethereum-holesky.publicnode.com/",
 		"--network", "holesky",
 		"--ecdsa-private-key", "0xabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcd",
+		"--broadcast",
 	}
 
 	err := app.Run(args)
 	assert.NoError(t, err)
 }
-
 func TestRemovePendingCmd_GeneratorError(t *testing.T) {
 	expectedError := "failed to create admin writer"
 	app := cli.NewApp()
@@ -90,9 +104,11 @@ func TestRemovePendingCmd_GeneratorError(t *testing.T) {
 
 func TestRemovePendingCmd_RemovePendingError(t *testing.T) {
 	expectedError := "error removing pending admin"
+	mockTx := &gethtypes.Transaction{}
+
 	app := cli.NewApp()
 	app.Commands = []*cli.Command{
-		RemovePendingCmd(generateMockRemovePendingAdminWriter(nil, errors.New(expectedError))),
+		RemovePendingCmd(generateMockRemovePendingAdminWriter(nil, mockTx, errors.New(expectedError))),
 	}
 
 	args := []string{
@@ -103,6 +119,7 @@ func TestRemovePendingCmd_RemovePendingError(t *testing.T) {
 		"--eth-rpc-url", "https://ethereum-holesky.publicnode.com/",
 		"--network", "holesky",
 		"--ecdsa-private-key", "0xabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcd",
+		"--broadcast",
 	}
 
 	err := app.Run(args)

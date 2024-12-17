@@ -2,6 +2,7 @@ package admin
 
 import (
 	"context"
+	"fmt"
 	"sort"
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
@@ -11,6 +12,7 @@ import (
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
 	"github.com/Layr-Labs/eigensdk-go/logging"
 	eigenSdkUtils "github.com/Layr-Labs/eigensdk-go/utils"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	gethcommon "github.com/ethereum/go-ethereum/common"
 	gethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -23,6 +25,10 @@ type AcceptAdminWriter interface {
 		ctx context.Context,
 		request elcontracts.AcceptAdminRequest,
 	) (*gethtypes.Receipt, error)
+	NewAcceptAdminTx(
+		txOpts *bind.TransactOpts,
+		request elcontracts.AcceptAdminRequest,
+	) (*gethtypes.Transaction, error)
 }
 
 func AcceptCmd(generator func(logging.Logger, *acceptAdminConfig) (AcceptAdminWriter, error)) *cli.Command {
@@ -56,14 +62,80 @@ func acceptAdmin(
 		return err
 	}
 
-	receipt, err := elWriter.AcceptAdmin(
-		ctx,
-		elcontracts.AcceptAdminRequest{AccountAddress: config.AccountAddress, WaitForReceipt: true},
-	)
+	acceptRequest := elcontracts.AcceptAdminRequest{
+		AccountAddress: config.AccountAddress,
+		WaitForReceipt: true,
+	}
+
+	if config.Broadcast {
+		return broadcastAcceptAdminTx(ctx, elWriter, config, acceptRequest)
+	}
+
+	return printAcceptAdminTx(logger, elWriter, config, acceptRequest)
+}
+
+func broadcastAcceptAdminTx(
+	ctx context.Context,
+	elWriter AcceptAdminWriter,
+	config *acceptAdminConfig,
+	request elcontracts.AcceptAdminRequest,
+) error {
+	receipt, err := elWriter.AcceptAdmin(ctx, request)
+	if err != nil {
+		return eigenSdkUtils.WrapError("failed to broadcast AcceptAdmin transaction", err)
+	}
+	common.PrintTransactionInfo(receipt.TxHash.String(), config.ChainID)
+	return nil
+}
+
+func printAcceptAdminTx(
+	logger logging.Logger,
+	elWriter AcceptAdminWriter,
+	config *acceptAdminConfig,
+	request elcontracts.AcceptAdminRequest,
+) error {
+	ethClient, err := ethclient.Dial(config.RPCUrl)
 	if err != nil {
 		return err
 	}
-	common.PrintTransactionInfo(receipt.TxHash.String(), config.ChainID)
+
+	noSendTxOpts := common.GetNoSendTxOpts(config.CallerAddress)
+	if common.IsSmartContractAddress(config.CallerAddress, ethClient) {
+		noSendTxOpts.GasLimit = 150_000
+	}
+
+	// Generate unsigned transaction
+	unsignedTx, err := elWriter.NewAcceptAdminTx(noSendTxOpts, request)
+	if err != nil {
+		return eigenSdkUtils.WrapError("failed to create unsigned tx", err)
+	}
+
+	if config.OutputType == string(common.OutputType_Calldata) {
+		calldataHex := gethcommon.Bytes2Hex(unsignedTx.Data())
+		if !common.IsEmptyString(config.OutputFile) {
+			err = common.WriteToFile([]byte(calldataHex), config.OutputFile)
+			if err != nil {
+				return err
+			}
+			logger.Infof("Call data written to file: %s", config.OutputFile)
+		} else {
+			fmt.Println(calldataHex)
+		}
+	} else {
+		if !common.IsEmptyString(config.OutputType) {
+			fmt.Println("output file not supported for pretty output type")
+			fmt.Println()
+		}
+		fmt.Printf(
+			"Pending admin at address %s will accept admin role\n",
+			config.CallerAddress,
+		)
+	}
+
+	txFeeDetails := common.GetTxFeeDetails(unsignedTx)
+	fmt.Println()
+	txFeeDetails.Print()
+	fmt.Println("To broadcast the transaction, use the --broadcast flag")
 	return nil
 }
 
@@ -76,6 +148,9 @@ func readAndValidateAcceptAdminConfig(
 	ethRpcUrl := cliContext.String(flags.ETHRpcUrlFlag.Name)
 	network := cliContext.String(flags.NetworkFlag.Name)
 	environment := cliContext.String(flags.EnvironmentFlag.Name)
+	outputType := cliContext.String(flags.OutputTypeFlag.Name)
+	outputFile := cliContext.String(flags.OutputFileFlag.Name)
+	broadcast := cliContext.Bool(flags.BroadcastFlag.Name)
 	if environment == "" {
 		environment = common.GetEnvFromNetwork(network)
 	}
@@ -120,6 +195,9 @@ func readAndValidateAcceptAdminConfig(
 		SignerConfig:             *signerConfig,
 		ChainID:                  chainID,
 		Environment:              environment,
+		OutputFile:               outputFile,
+		OutputType:               outputType,
+		Broadcast:                broadcast,
 	}, nil
 }
 
