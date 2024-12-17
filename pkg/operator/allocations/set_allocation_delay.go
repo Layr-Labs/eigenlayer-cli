@@ -62,7 +62,7 @@ func setDelayAction(cCtx *cli.Context, p utils.Prompter) error {
 			return nil
 		}
 		eLWriter, err := common.GetELWriter(
-			config.operatorAddress,
+			config.callerAddress,
 			config.signerConfig,
 			ethClient,
 			elcontracts.Config{
@@ -83,7 +83,7 @@ func setDelayAction(cCtx *cli.Context, p utils.Prompter) error {
 		}
 		common.PrintTransactionInfo(receipt.TxHash.String(), config.chainID)
 	} else {
-		noSendTxOpts := common.GetNoSendTxOpts(config.operatorAddress)
+		noSendTxOpts := common.GetNoSendTxOpts(config.callerAddress)
 		_, _, contractBindings, err := elcontracts.BuildClients(elcontracts.Config{
 			DelegationManagerAddress: config.delegationManagerAddress,
 		}, ethClient, nil, logger, nil)
@@ -94,7 +94,7 @@ func setDelayAction(cCtx *cli.Context, p utils.Prompter) error {
 		// since balance of contract can be 0, as it can be called by an EOA
 		// to claim. So we hardcode the gas limit to 150_000 so that we can
 		// create unsigned tx without gas limit estimation from contract bindings
-		if common.IsSmartContractAddress(config.operatorAddress, ethClient) {
+		if common.IsSmartContractAddress(config.callerAddress, ethClient) {
 			// address is a smart contract
 			noSendTxOpts.GasLimit = 150_000
 		}
@@ -142,6 +142,7 @@ func getSetAllocationDelayFlags() []cli.Flag {
 		&flags.VerboseFlag,
 		&flags.OperatorAddressFlag,
 		&flags.DelegationManagerAddressFlag,
+		&flags.CallerAddressFlag,
 	}
 	allFlags := append(baseFlags, flags.GetSignerFlags()...)
 	sort.Sort(cli.FlagsByName(allFlags))
@@ -167,6 +168,11 @@ func readAndValidateAllocationDelayConfig(c *cli.Context, logger logging.Logger)
 	outputType := c.String(flags.OutputTypeFlag.Name)
 	broadcast := c.Bool(flags.BroadcastFlag.Name)
 	operatorAddress := c.String(flags.OperatorAddressFlag.Name)
+
+	callerAddress := c.String(flags.CallerAddressFlag.Name)
+	if common.IsEmptyString(callerAddress) {
+		callerAddress = operatorAddress
+	}
 
 	chainID := utils.NetworkNameToChainId(network)
 	logger.Debugf("Using chain ID: %s", chainID.String())
@@ -204,5 +210,6 @@ func readAndValidateAllocationDelayConfig(c *cli.Context, logger logging.Logger)
 		signerConfig:             signerConfig,
 		delegationManagerAddress: gethcommon.HexToAddress(delegationManagerAddress),
 		allocationDelay:          uint32(allocationDelayUint),
+		callerAddress:            gethcommon.HexToAddress(callerAddress),
 	}, nil
 }

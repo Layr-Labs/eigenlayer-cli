@@ -93,6 +93,7 @@ type updateConfig struct {
 	avsAddress               gethcommon.Address
 	strategyAddress          gethcommon.Address
 	delegationManagerAddress gethcommon.Address
+	callerAddress            gethcommon.Address
 	operatorSetId            uint32
 	bipsToAllocate           uint64
 	signerConfig             *types.SignerConfig
@@ -119,6 +120,7 @@ type allocationDelayConfig struct {
 	signerConfig             *types.SignerConfig
 	allocationDelay          uint32
 	delegationManagerAddress gethcommon.Address
+	callerAddress            gethcommon.Address
 }
 
 type showConfig struct {

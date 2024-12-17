@@ -94,7 +94,7 @@ func updateAllocations(cCtx *cli.Context, p utils.Prompter) error {
 		}
 		logger.Info("Broadcasting magnitude allocation update...")
 		eLWriter, err := common.GetELWriter(
-			config.operatorAddress,
+			config.callerAddress,
 			config.signerConfig,
 			ethClient,
 			elcontracts.Config{
@@ -119,7 +119,7 @@ func updateAllocations(cCtx *cli.Context, p utils.Prompter) error {
 		}
 		common.PrintTransactionInfo(receipt.TxHash.String(), config.chainID)
 	} else {
-		noSendTxOpts := common.GetNoSendTxOpts(config.operatorAddress)
+		noSendTxOpts := common.GetNoSendTxOpts(config.callerAddress)
 		_, _, contractBindings, err := elcontracts.BuildClients(elcontracts.Config{
 			DelegationManagerAddress: config.delegationManagerAddress,
 		}, ethClient, nil, logger, nil)
@@ -130,7 +130,7 @@ func updateAllocations(cCtx *cli.Context, p utils.Prompter) error {
 		// since balance of contract can be 0, as it can be called by an EOA
 		// to claim. So we hardcode the gas limit to 150_000 so that we can
 		// create unsigned tx without gas limit estimation from contract bindings
-		if common.IsSmartContractAddress(config.operatorAddress, ethClient) {
+		if common.IsSmartContractAddress(config.callerAddress, ethClient) {
 			// address is a smart contract
 			noSendTxOpts.GasLimit = 150_000
 		}
@@ -189,6 +189,7 @@ func getUpdateFlags() []cli.Flag {
 		&flags.CSVFileFlag,
 		&flags.DelegationManagerAddressFlag,
 		&flags.SilentFlag,
+		&flags.CallerAddressFlag,
 		&BipsToAllocateFlag,
 	}
 	allFlags := append(baseFlags, flags.GetSignerFlags()...)
@@ -439,14 +440,19 @@ func readAndValidateUpdateFlags(cCtx *cli.Context, logger logging.Logger) (*upda
 	broadcast := cCtx.Bool(flags.BroadcastFlag.Name)
 	isSilent := cCtx.Bool(flags.SilentFlag.Name)
 
-	operatorAddress := gethcommon.HexToAddress(cCtx.String(flags.OperatorAddressFlag.Name))
+	operatorAddress := cCtx.String(flags.OperatorAddressFlag.Name)
+	callerAddress := cCtx.String(flags.CallerAddressFlag.Name)
+	if common.IsEmptyString(callerAddress) {
+		callerAddress = operatorAddress
+	}
+
 	avsAddress := gethcommon.HexToAddress(cCtx.String(flags.AVSAddressFlag.Name))
 	strategyAddress := gethcommon.HexToAddress(cCtx.String(flags.StrategyAddressFlag.Name))
 	operatorSetId := uint32(cCtx.Uint64(flags.OperatorSetIdFlag.Name))
 	bipsToAllocate := cCtx.Uint64(BipsToAllocateFlag.Name)
 	logger.Debugf(
 		"Operator address: %s, AVS address: %s, Strategy address: %s, Bips to allocate: %d",
-		operatorAddress.Hex(),
+		operatorAddress,
 		avsAddress.Hex(),
 		strategyAddress.Hex(),
 		bipsToAllocate,
@@ -478,7 +484,8 @@ func readAndValidateUpdateFlags(cCtx *cli.Context, logger logging.Logger) (*upda
 		output:                   output,
 		outputType:               outputType,
 		broadcast:                broadcast,
-		operatorAddress:          operatorAddress,
+		operatorAddress:          gethcommon.HexToAddress(operatorAddress),
+		callerAddress:            gethcommon.HexToAddress(callerAddress),
 		avsAddress:               avsAddress,
 		strategyAddress:          strategyAddress,
 		bipsToAllocate:           bipsToAllocate,
