@@ -169,6 +169,36 @@ func showAction(cCtx *cli.Context, p utils.Prompter) error {
 		strategyShares := operatorDelegatedSharesMap[strategy]
 		totalMagnitude := totalMagnitudeMap[strategy]
 		for _, alloc := range allocations {
+
+			// Check if the operator set is not registered and add it to the unregistered list
+			// Then skip the rest of the loop
+			if _, ok := registeredOperatorSetsMap[getUniqueKey(alloc.AvsAddress, alloc.OperatorSetId)]; !ok {
+				currentShares, currentSharesPercentage := getSharesFromMagnitude(
+					strategyShares,
+					alloc.CurrentMagnitude.Uint64(),
+					totalMagnitude,
+				)
+
+				// If the operator set is not registered and has no shares, skip it
+				// This comes as valid scenario since we iterate first over
+				// strategy addresses and then over allocations.
+				// This can be fixed by first going over allocations and then over strategy addresses
+				// We will fix this in a subsequent PR and improve (TODO: shrimalmadhur)
+				if currentShares == nil || currentShares.Cmp(big.NewInt(0)) == 0 {
+					continue
+				}
+
+				dergisteredOpsets = append(dergisteredOpsets, DeregisteredOperatorSet{
+					StrategyAddress:    gethcommon.HexToAddress(strategy),
+					AVSAddress:         alloc.AvsAddress,
+					OperatorSetId:      alloc.OperatorSetId,
+					SlashableMagnitude: alloc.CurrentMagnitude.Uint64(),
+					Shares:             currentShares,
+					SharesPercentage:   currentSharesPercentage.String(),
+				})
+				continue
+			}
+
 			currentShares := slashableSharesMap[gethcommon.HexToAddress(strategy)][getUniqueKey(alloc.AvsAddress, alloc.OperatorSetId)]
 			currentSharesPercentage := getSharePercentage(currentShares, strategyShares)
 
@@ -182,20 +212,6 @@ func showAction(cCtx *cli.Context, p utils.Prompter) error {
 				newMagnitudeBigInt.Uint64(),
 				totalMagnitude,
 			)
-
-			// Check if the operator set is not registered and add it to the unregistered list
-			// Then skip the rest of the loop
-			if _, ok := registeredOperatorSetsMap[getUniqueKey(alloc.AvsAddress, alloc.OperatorSetId)]; !ok {
-				dergisteredOpsets = append(dergisteredOpsets, DeregisteredOperatorSet{
-					StrategyAddress:    gethcommon.HexToAddress(strategy),
-					AVSAddress:         alloc.AvsAddress,
-					OperatorSetId:      alloc.OperatorSetId,
-					SlashableMagnitude: alloc.CurrentMagnitude.Uint64(),
-					Shares:             currentShares,
-					SharesPercentage:   currentSharesPercentage.String(),
-				})
-				continue
-			}
 
 			// Add the operator set to the registered list
 			slashableMagnitudeHolders = append(slashableMagnitudeHolders, SlashableMagnitudesHolder{
