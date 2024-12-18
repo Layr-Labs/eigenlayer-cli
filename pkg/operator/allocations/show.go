@@ -166,7 +166,7 @@ func showAction(cCtx *cli.Context, p utils.Prompter) error {
 	dergisteredOpsets := make(DeregsiteredOperatorSets, 0)
 	for strategy, allocations := range allAllocations {
 		logger.Debugf("Strategy: %s, Allocations: %v", strategy, allocations)
-		strategyShares := operatorDelegatedSharesMap[strategy]
+		totalStrategyShares := operatorDelegatedSharesMap[strategy]
 		totalMagnitude := totalMagnitudeMap[strategy]
 		for _, alloc := range allocations {
 
@@ -174,7 +174,7 @@ func showAction(cCtx *cli.Context, p utils.Prompter) error {
 			// Then skip the rest of the loop
 			if _, ok := registeredOperatorSetsMap[getUniqueKey(alloc.AvsAddress, alloc.OperatorSetId)]; !ok {
 				currentShares, currentSharesPercentage := getSharesFromMagnitude(
-					strategyShares,
+					totalStrategyShares,
 					alloc.CurrentMagnitude.Uint64(),
 					totalMagnitude,
 				)
@@ -199,8 +199,12 @@ func showAction(cCtx *cli.Context, p utils.Prompter) error {
 				continue
 			}
 
+			// If the total shares in that strategy are zero, skip the operator set
+			if totalStrategyShares == nil || totalStrategyShares.Cmp(big.NewInt(0)) == 0 {
+				continue
+			}
 			currentShares := slashableSharesMap[gethcommon.HexToAddress(strategy)][getUniqueKey(alloc.AvsAddress, alloc.OperatorSetId)]
-			currentSharesPercentage := getSharePercentage(currentShares, strategyShares)
+			currentSharesPercentage := getSharePercentage(currentShares, totalStrategyShares)
 
 			newMagnitudeBigInt := big.NewInt(0)
 			if alloc.PendingDiff.Cmp(big.NewInt(0)) != 0 {
@@ -208,7 +212,7 @@ func showAction(cCtx *cli.Context, p utils.Prompter) error {
 			}
 
 			newShares, newSharesPercentage := getSharesFromMagnitude(
-				strategyShares,
+				totalStrategyShares,
 				newMagnitudeBigInt.Uint64(),
 				totalMagnitude,
 			)
