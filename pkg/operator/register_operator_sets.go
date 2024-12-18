@@ -78,12 +78,13 @@ func registerOperatorSetsAction(cCtx *cli.Context, p utils.Prompter) error {
 		receipt, err := eLWriter.RegisterForOperatorSets(
 			ctx,
 			elcontracts.RegistrationRequest{
-				AVSAddress:     config.avsAddress,
-				OperatorSetIds: config.operatorSetIds,
-				WaitForReceipt: true,
+				OperatorAddress: config.operatorAddress,
+				AVSAddress:      config.avsAddress,
+				OperatorSetIds:  config.operatorSetIds,
+				WaitForReceipt:  true,
 			})
 		if err != nil {
-			return eigenSdkUtils.WrapError("failed to deregister from operator sets", err)
+			return eigenSdkUtils.WrapError("failed to register for operator sets", err)
 		}
 		common.PrintTransactionInfo(receipt.TxHash.String(), config.chainID)
 	} else {
