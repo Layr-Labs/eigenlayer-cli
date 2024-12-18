@@ -162,6 +162,68 @@ func showAction(cCtx *cli.Context, p utils.Prompter) error {
 		7. Using all of the above, calculate SlashableMagnitudeHolders object
 		for displaying the allocation state of the operator
 	*/
+	slashableMagnitudeHolders, dergisteredOpsets, err := prepareAllocationsData(
+		allAllocations,
+		registeredOperatorSetsMap,
+		operatorDelegatedSharesMap,
+		totalMagnitudeMap,
+		slashableSharesMap,
+		logger,
+	)
+	if err != nil {
+		return err
+	}
+
+	for key, val := range operatorDelegatedSharesMap {
+		fmt.Printf("Strategy Address: %s, Shares %s\n", key, common.FormatNumberWithUnderscores(val.String()))
+	}
+
+	currBlockNumber, err := ethClient.BlockNumber(ctx)
+	if err != nil {
+		return eigenSdkUtils.WrapError("failed to get current block number", err)
+	}
+	delay, err := elReader.GetAllocationDelay(ctx, config.operatorAddress)
+	if err != nil {
+		return err
+	}
+	fmt.Println()
+	fmt.Printf("Current allocation delay: %d blocks\n", delay)
+	fmt.Println()
+	fmt.Printf(
+		"------------------ Allocation State for %s (Block: %d) ---------------------\n",
+		config.operatorAddress.String(),
+		currBlockNumber,
+	)
+	if config.outputType == string(common.OutputType_Json) {
+		slashableMagnitudeHolders.PrintJSON()
+	} else {
+		slashableMagnitudeHolders.PrintPretty()
+	}
+
+	if len(dergisteredOpsets) > 0 {
+		fmt.Println()
+		fmt.Printf(
+			"NOTE: You have %d deregistered operator sets which have nonzero allocations as listed below. Please deallocate to use those funds.\n",
+			len(dergisteredOpsets),
+		)
+		if config.outputType == string(common.OutputType_Json) {
+			dergisteredOpsets.PrintJSON()
+		} else {
+			dergisteredOpsets.PrintPretty()
+		}
+	}
+
+	return nil
+}
+
+func prepareAllocationsData(
+	allAllocations map[string][]elcontracts.AllocationInfo,
+	registeredOperatorSetsMap map[string]allocationmanager.OperatorSet,
+	operatorDelegatedSharesMap map[string]*big.Int,
+	totalMagnitudeMap map[string]uint64,
+	slashableSharesMap map[gethcommon.Address]map[string]*big.Int,
+	logger logging.Logger,
+) (SlashableMagnitudeHolders, DeregsiteredOperatorSets, error) {
 	slashableMagnitudeHolders := make(SlashableMagnitudeHolders, 0)
 	dergisteredOpsets := make(DeregsiteredOperatorSets, 0)
 	for strategy, allocations := range allAllocations {
@@ -207,7 +269,7 @@ func showAction(cCtx *cli.Context, p utils.Prompter) error {
 			currentSharesPercentage := getSharePercentage(currentShares, totalStrategyShares)
 
 			newMagnitudeBigInt := big.NewInt(0)
-			if alloc.PendingDiff.Cmp(big.NewInt(0)) != 0 {
+			if alloc.PendingDiff != nil && alloc.PendingDiff.Cmp(big.NewInt(0)) != 0 {
 				newMagnitudeBigInt = big.NewInt(0).Add(alloc.CurrentMagnitude, alloc.PendingDiff)
 			}
 
@@ -232,47 +294,7 @@ func showAction(cCtx *cli.Context, p utils.Prompter) error {
 			})
 		}
 	}
-
-	for key, val := range operatorDelegatedSharesMap {
-		fmt.Printf("Strategy Address: %s, Shares %s\n", key, common.FormatNumberWithUnderscores(val.String()))
-	}
-
-	currBlockNumber, err := ethClient.BlockNumber(ctx)
-	if err != nil {
-		return eigenSdkUtils.WrapError("failed to get current block number", err)
-	}
-	delay, err := elReader.GetAllocationDelay(ctx, config.operatorAddress)
-	if err != nil {
-		return err
-	}
-	fmt.Println()
-	fmt.Printf("Current allocation delay: %d blocks\n", delay)
-	fmt.Println()
-	fmt.Printf(
-		"------------------ Allocation State for %s (Block: %d) ---------------------\n",
-		config.operatorAddress.String(),
-		currBlockNumber,
-	)
-	if config.outputType == string(common.OutputType_Json) {
-		slashableMagnitudeHolders.PrintJSON()
-	} else {
-		slashableMagnitudeHolders.PrintPretty()
-	}
-
-	if len(dergisteredOpsets) > 0 {
-		fmt.Println()
-		fmt.Printf(
-			"NOTE: You have %d deregistered operator sets which have nonzero allocations as listed below. Please deallocate to use those funds.\n",
-			len(dergisteredOpsets),
-		)
-		if config.outputType == string(common.OutputType_Json) {
-			dergisteredOpsets.PrintJSON()
-		} else {
-			dergisteredOpsets.PrintPretty()
-		}
-	}
-
-	return nil
+	return slashableMagnitudeHolders, dergisteredOpsets, nil
 }
 
 func getSharePercentage(shares *big.Int, totalShares *big.Int) *big.Float {
