@@ -8,6 +8,7 @@ operator-config.yaml.old
 operator.yaml
 operator.yaml.old
 config/*
+updates.csv
 
 # build
 dist/

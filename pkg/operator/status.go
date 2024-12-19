@@ -129,7 +129,7 @@ func printOperatorDetails(operator eigensdkTypes.Operator) {
 	fmt.Println("--------------------------- Operator Details ---------------------------")
 	fmt.Printf("Address: %s\n", operator.Address)
 	fmt.Printf("Delegation Approver Address: %s\n", operator.DelegationApproverAddress)
-	fmt.Printf("Staker Opt Out Window Blocks: %d\n", operator.StakerOptOutWindowBlocks)
+	fmt.Printf("Allocation Delay: %d\n", operator.AllocationDelay)
 	fmt.Println("------------------------------------------------------------------------")
 	fmt.Println()
 }
