@@ -2,9 +2,11 @@ package allocations
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"math/big"
 	"sort"
+	"strings"
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
@@ -20,11 +22,6 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 
 	"github.com/urfave/cli/v2"
-)
-
-var (
-	// PrecisionFactor comes from the allocation manager contract
-	PrecisionFactor = big.NewInt(1e18)
 )
 
 func ShowCmd(p utils.Prompter) *cli.Command {
@@ -197,7 +194,18 @@ func showAction(cCtx *cli.Context, p utils.Prompter) error {
 	if config.outputType == string(common.OutputType_Json) {
 		slashableMagnitudeHolders.PrintJSON()
 	} else {
-		slashableMagnitudeHolders.PrintPretty()
+		if !common.IsEmptyString(config.output) {
+			if !strings.HasSuffix(config.output, ".csv") {
+				return errors.New("output file must be a .csv file")
+			}
+			err = slashableMagnitudeHolders.WriteToCSV(config.output)
+			if err != nil {
+				return err
+			}
+			logger.Infof("Allocation state written to file: %s", config.output)
+		} else {
+			slashableMagnitudeHolders.PrintPretty()
+		}
 	}
 
 	if len(dergisteredOpsets) > 0 {
