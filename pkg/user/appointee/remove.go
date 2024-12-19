@@ -8,6 +8,7 @@ import (
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/user"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
 	"github.com/Layr-Labs/eigensdk-go/logging"
@@ -170,7 +171,7 @@ func generateRemoveAppointeePermissionWriter(
 func readAndValidateRemoveConfig(cliContext *cli.Context, logger logging.Logger) (*removeConfig, error) {
 	accountAddress := gethcommon.HexToAddress(cliContext.String(AccountAddressFlag.Name))
 	appointeeAddress := gethcommon.HexToAddress(cliContext.String(AppointeeAddressFlag.Name))
-	callerAddress := gethcommon.HexToAddress(cliContext.String(CallerAddressFlag.Name))
+	callerAddress := user.PopulateCallerAddress(cliContext, logger, accountAddress)
 	ethRpcUrl := cliContext.String(flags.ETHRpcUrlFlag.Name)
 	network := cliContext.String(flags.NetworkFlag.Name)
 	environment := cliContext.String(flags.EnvironmentFlag.Name)
@@ -204,14 +205,6 @@ func readAndValidateRemoveConfig(cliContext *cli.Context, logger logging.Logger)
 			return nil, err
 		}
 	}
-	if common.IsEmptyString(callerAddress.String()) {
-		logger.Infof(
-			"Caller address not provided. Using account address (%s) as caller address",
-			accountAddress,
-		)
-		callerAddress = accountAddress
-	}
-
 	logger.Debugf(
 		"Env: %s, network: %s, chain ID: %s, PermissionManager address: %s",
 		environment,
@@ -243,7 +236,7 @@ func removeCommandFlags() []cli.Flag {
 		&flags.VerboseFlag,
 		&AccountAddressFlag,
 		&AppointeeAddressFlag,
-		&CallerAddressFlag,
+		&user.CallerAddressFlag,
 		&TargetAddressFlag,
 		&SelectorFlag,
 		&PermissionControllerAddressFlag,
