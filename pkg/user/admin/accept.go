@@ -3,6 +3,7 @@ package admin
 import (
 	"context"
 	"fmt"
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/user"
 	"sort"
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
@@ -144,7 +145,7 @@ func readAndValidateAcceptAdminConfig(
 	logger logging.Logger,
 ) (*acceptAdminConfig, error) {
 	accountAddress := gethcommon.HexToAddress(cliContext.String(AccountAddressFlag.Name))
-	callerAddress := gethcommon.HexToAddress(cliContext.String(CallerAddressFlag.Name))
+	callerAddress := user.PopulateCallerAddress(cliContext, logger, accountAddress)
 	ethRpcUrl := cliContext.String(flags.ETHRpcUrlFlag.Name)
 	network := cliContext.String(flags.NetworkFlag.Name)
 	environment := cliContext.String(flags.EnvironmentFlag.Name)
@@ -170,14 +171,6 @@ func readAndValidateAcceptAdminConfig(
 			return nil, err
 		}
 	}
-	if common.IsEmptyString(callerAddress.String()) {
-		logger.Infof(
-			"Caller address not provided. Using account address (%s) as caller address",
-			accountAddress,
-		)
-		callerAddress = accountAddress
-	}
-
 	logger.Debugf(
 		"Env: %s, network: %s, chain ID: %s, PermissionManager address: %s",
 		environment,
@@ -205,7 +198,7 @@ func acceptFlags() []cli.Flag {
 	cmdFlags := []cli.Flag{
 		&flags.VerboseFlag,
 		&AccountAddressFlag,
-		&CallerAddressFlag,
+		&user.CallerAddressFlag,
 		&PermissionControllerAddressFlag,
 		&flags.OutputTypeFlag,
 		&flags.OutputFileFlag,

@@ -3,6 +3,7 @@ package appointee
 import (
 	"context"
 	"fmt"
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/user"
 	"sort"
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
@@ -173,7 +174,7 @@ func generateSetAppointeePermissionWriter(
 func readAndValidateSetConfig(cliContext *cli.Context, logger logging.Logger) (*setConfig, error) {
 	accountAddress := gethcommon.HexToAddress(cliContext.String(AccountAddressFlag.Name))
 	appointeeAddress := gethcommon.HexToAddress(cliContext.String(AppointeeAddressFlag.Name))
-	callerAddress := gethcommon.HexToAddress(cliContext.String(CallerAddressFlag.Name))
+	callerAddress := user.PopulateCallerAddress(cliContext, logger, accountAddress)
 	ethRpcUrl := cliContext.String(flags.ETHRpcUrlFlag.Name)
 	network := cliContext.String(flags.NetworkFlag.Name)
 	environment := cliContext.String(flags.EnvironmentFlag.Name)
@@ -195,13 +196,6 @@ func readAndValidateSetConfig(cliContext *cli.Context, logger logging.Logger) (*
 
 	if environment == "" {
 		environment = common.GetEnvFromNetwork(network)
-	}
-	if common.IsEmptyString(callerAddress.String()) {
-		logger.Infof(
-			"Caller address not provided. Using account address (%s) as caller address",
-			accountAddress,
-		)
-		callerAddress = accountAddress
 	}
 
 	chainID := utils.NetworkNameToChainId(network)
@@ -246,7 +240,7 @@ func setCommandFlags() []cli.Flag {
 		&flags.VerboseFlag,
 		&AccountAddressFlag,
 		&AppointeeAddressFlag,
-		&CallerAddressFlag,
+		&user.CallerAddressFlag,
 		&TargetAddressFlag,
 		&SelectorFlag,
 		&PermissionControllerAddressFlag,
