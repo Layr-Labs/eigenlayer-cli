@@ -61,7 +61,7 @@ var ChainMetadataMap = map[int64]types.ChainMetadata{
 		ELDelegationManagerAddress:  "0xA44151489861Fe9e3055d95adC98FbD462B948e7",
 		ELAVSDirectoryAddress:       "0x055733000064333CaDDbC92763c58BF0192fFeBf",
 		ELRewardsCoordinatorAddress: "0xAcc1fb458a1317E886dB376Fc8141540537E68fE",
-		ELPermissionManagerAddress:  "",
+		ELPermissionManagerAddress:  "0x598cb226B591155F767dA17AfE7A2241a68C5C10",
 		WebAppUrl:                   "https://holesky.eigenlayer.xyz/operator",
 		ProofStoreBaseURL:           "https://eigenlabs-rewards-testnet-holesky.s3.amazonaws.com",
 	},
