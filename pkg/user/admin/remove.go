@@ -8,6 +8,7 @@ import (
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/user"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
 	"github.com/Layr-Labs/eigensdk-go/logging"
@@ -145,7 +146,7 @@ func readAndValidateRemoveAdminConfig(
 ) (*removeAdminConfig, error) {
 	accountAddress := gethcommon.HexToAddress(cliContext.String(AccountAddressFlag.Name))
 	adminAddress := gethcommon.HexToAddress(cliContext.String(AdminAddressFlag.Name))
-	callerAddress := gethcommon.HexToAddress(cliContext.String(CallerAddressFlag.Name))
+	callerAddress := user.PopulateCallerAddress(cliContext, logger, accountAddress)
 	ethRpcUrl := cliContext.String(flags.ETHRpcUrlFlag.Name)
 	network := cliContext.String(flags.NetworkFlag.Name)
 	environment := cliContext.String(flags.EnvironmentFlag.Name)
@@ -154,13 +155,6 @@ func readAndValidateRemoveAdminConfig(
 	broadcast := cliContext.Bool(flags.BroadcastFlag.Name)
 	if environment == "" {
 		environment = common.GetEnvFromNetwork(network)
-	}
-	if common.IsEmptyString(callerAddress.String()) {
-		logger.Infof(
-			"Caller address not provided. Using account address (%s) as caller address",
-			accountAddress,
-		)
-		callerAddress = accountAddress
 	}
 	signerConfig, err := common.GetSignerConfig(cliContext, logger)
 	if err != nil {
@@ -230,7 +224,7 @@ func removeFlags() []cli.Flag {
 		&flags.VerboseFlag,
 		&AccountAddressFlag,
 		&AdminAddressFlag,
-		&CallerAddressFlag,
+		&user.CallerAddressFlag,
 		&PermissionControllerAddressFlag,
 		&flags.OutputTypeFlag,
 		&flags.OutputFileFlag,
