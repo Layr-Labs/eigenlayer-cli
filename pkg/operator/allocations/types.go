@@ -1,9 +1,12 @@
 package allocations
 
 import (
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"math/big"
+	"os"
+	"reflect"
 	"strings"
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
@@ -139,16 +142,73 @@ type showConfig struct {
 type SlashableMagnitudeHolders []SlashableMagnitudesHolder
 
 type SlashableMagnitudesHolder struct {
-	StrategyAddress          gethcommon.Address
-	AVSAddress               gethcommon.Address
-	OperatorSetId            uint32
-	SlashableMagnitude       uint64
-	NewMagnitude             uint64
-	NewAllocationShares      *big.Int
-	UpdateBlock              uint32
-	Shares                   *big.Int
-	SharesPercentage         string
-	UpcomingSharesPercentage string
+	StrategyAddress          gethcommon.Address `csv:"strategy_address"`
+	AVSAddress               gethcommon.Address `csv:"avs_address"`
+	OperatorSetId            uint32             `csv:"operator_set_id"`
+	SlashableMagnitude       uint64             `csv:"-"`
+	NewMagnitude             uint64             `csv:"-"`
+	Shares                   *big.Int           `csv:"shares"`
+	SharesPercentage         string             `csv:"shares_percentage"`
+	NewAllocationShares      *big.Int           `csv:"new_allocation_shares"`
+	UpcomingSharesPercentage string             `csv:"upcoming_shares_percentage"`
+	UpdateBlock              uint32             `csv:"update_block"`
+}
+
+func (s SlashableMagnitudeHolders) WriteToCSV(filePath string) error {
+	file, err := os.Create(filePath)
+	if err != nil {
+		return fmt.Errorf("failed to create file: %v", err)
+	}
+	defer file.Close()
+
+	writer := csv.NewWriter(file)
+	defer writer.Flush()
+
+	// Get fields and their CSV names, excluding skipped fields
+	var headers []string
+	var fieldIndices []int
+	val := reflect.ValueOf(SlashableMagnitudesHolder{})
+	typ := val.Type()
+
+	for i := 0; i < typ.NumField(); i++ {
+		field := typ.Field(i)
+		csvTag := field.Tag.Get("csv")
+
+		// Skip if tag is "-"
+		if csvTag == "-" {
+			continue
+		}
+
+		// Use tag value if present, otherwise use field name
+		if csvTag != "" {
+			headers = append(headers, csvTag)
+		} else {
+			headers = append(headers, field.Name)
+		}
+		fieldIndices = append(fieldIndices, i)
+	}
+
+	// Write headers
+	if err := writer.Write(headers); err != nil {
+		return fmt.Errorf("failed to write headers: %v", err)
+	}
+
+	// Write data rows
+	for _, eachRow := range s {
+		val := reflect.ValueOf(eachRow)
+		row := make([]string, len(fieldIndices))
+		// Only include non-skipped fields
+		for i, fieldIndex := range fieldIndices {
+			field := val.Field(fieldIndex)
+			row[i] = fmt.Sprintf("%v", field.Interface())
+		}
+
+		if err := writer.Write(row); err != nil {
+			return fmt.Errorf("failed to write row: %v", err)
+		}
+	}
+
+	return nil
 }
 
 func (s SlashableMagnitudeHolders) PrintPretty() {
