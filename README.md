@@ -12,6 +12,7 @@ EigenLayer CLI is used to interact with EigenLayer core contracts.
   * [Supported Key Management Backends](#supported-key-management-backends)
   * [Supported Operating Systems](#supported-operating-systems)
   * [Install `eigenlayer` CLI using a binary](#install-eigenlayer-cli-using-a-binary)
+    * [Installing a particular binary version](#installing-a-particular-binary-version)
     * [Installing in a custom location](#installing-in-a-custom-location)
   * [Install `eigenlayer` CLI using Go](#install-eigenlayer-cli-using-go)
   * [Install `eigenlayer` CLI from source](#install-eigenlayer-cli-from-source)
@@ -50,6 +51,17 @@ The binary will be installed inside the `~/bin` directory.
 To add the binary to your path, run:
 ```bash
 export PATH=$PATH:~/bin
+```
+
+### Installing a particular binary version
+To download a binary for a particular version, run:
+```bash
+curl -sSfL https://raw.githubusercontent.com/layr-labs/eigenlayer-cli/master/scripts/install.sh | sh -s -- <version>
+```
+
+Example: To install version `v0.11.0`, run:
+```bash
+curl -sSfL https://raw.githubusercontent.com/layr-labs/eigenlayer-cli/master/scripts/install.sh | sh -s -- v0.11.0
 ```
 
 ### Installing in a custom location
