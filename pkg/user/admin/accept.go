@@ -3,12 +3,12 @@ package admin
 import (
 	"context"
 	"fmt"
-	"github.com/Layr-Labs/eigenlayer-cli/pkg/user"
 	"sort"
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/user"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
 	"github.com/Layr-Labs/eigensdk-go/logging"
