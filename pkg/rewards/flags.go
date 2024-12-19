@@ -80,7 +80,7 @@ var (
 	AVSAddressesFlag = cli.StringFlag{
 		Name:    "avs-addresses",
 		Aliases: []string{"a"},
-		Usage:   "Comma seperated addresses of the AVS",
+		Usage:   "Comma separated addresses of the AVS",
 		EnvVars: []string{"AVS_ADDRESSES"},
 	}
 
