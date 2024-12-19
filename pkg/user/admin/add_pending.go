@@ -3,6 +3,7 @@ package admin
 import (
 	"context"
 	"fmt"
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/user"
 	"sort"
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
