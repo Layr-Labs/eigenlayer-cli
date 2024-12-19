@@ -12,9 +12,10 @@ operator:
   # For now, you can leave it  with the default value for un-gated delegation requests
   # Once we enable gated delegation requests, you can update this field with the address of the approver
   delegation_approver_address: 0x0000000000000000000000000000000000000000
-  # Please refer to this link for more details on this field https://github.com/Layr-Labs/eigenlayer-contracts/blob/92ccacc868785350973afc15e90a18dcd39fbc0b/src/contracts/interfaces/IDelegationManager.sol#L33:
-  # Please keep this field to 0, and it can be updated later using EigenLayer CLI
-  staker_opt_out_window_blocks: 0
+  # This is the delay in blocks after which your allocations will take into effect. This doesn't applies
+  # to deallocation which is set by the protocol.
+  allocation_delay: 1200
+  # This is the URL where the metadata of the operator is hosted.
   metadata_url: https://raw.githubusercontent.com/Layr-Labs/eigenlayer-cli/master/pkg/operator/config/metadata-example.json
 
 # EigenLayer Delegation manager contract address
