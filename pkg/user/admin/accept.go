@@ -3,7 +3,6 @@ package admin
 import (
 	"context"
 	"fmt"
-	"github.com/Layr-Labs/eigenlayer-cli/pkg/user"
 	"sort"
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
@@ -164,34 +163,34 @@ func readAndValidateAcceptAdminConfig(
 	}
 
 	chainID := utils.NetworkNameToChainId(network)
-	permissionManagerAddress := cliContext.String(PermissionControllerAddressFlag.Name)
+	PermissionControllerAddress := cliContext.String(PermissionControllerAddressFlag.Name)
 
-	if common.IsEmptyString(permissionManagerAddress) {
-		permissionManagerAddress, err = common.GetPermissionManagerAddress(utils.NetworkNameToChainId(network))
+	if common.IsEmptyString(PermissionControllerAddress) {
+		PermissionControllerAddress, err = common.GetPermissionControllerAddress(utils.NetworkNameToChainId(network))
 		if err != nil {
 			return nil, err
 		}
 	}
 	logger.Debugf(
-		"Env: %s, network: %s, chain ID: %s, PermissionManager address: %s",
+		"Env: %s, network: %s, chain ID: %s, PermissionController address: %s",
 		environment,
 		network,
 		chainID,
-		permissionManagerAddress,
+		PermissionControllerAddress,
 	)
 
 	return &acceptAdminConfig{
-		Network:                  network,
-		RPCUrl:                   ethRpcUrl,
-		AccountAddress:           accountAddress,
-		CallerAddress:            callerAddress,
-		PermissionManagerAddress: gethcommon.HexToAddress(permissionManagerAddress),
-		SignerConfig:             *signerConfig,
-		ChainID:                  chainID,
-		Environment:              environment,
-		OutputFile:               outputFile,
-		OutputType:               outputType,
-		Broadcast:                broadcast,
+		Network:                     network,
+		RPCUrl:                      ethRpcUrl,
+		AccountAddress:              accountAddress,
+		CallerAddress:               callerAddress,
+		PermissionControllerAddress: gethcommon.HexToAddress(PermissionControllerAddress),
+		SignerConfig:                *signerConfig,
+		ChainID:                     chainID,
+		Environment:                 environment,
+		OutputFile:                  outputFile,
+		OutputType:                  outputType,
+		Broadcast:                   broadcast,
 	}, nil
 }
 
@@ -226,7 +225,7 @@ func generateAcceptAdminWriter(
 			&config.SignerConfig,
 			ethClient,
 			elcontracts.Config{
-				PermissionsControllerAddress: config.PermissionManagerAddress,
+				PermissionsControllerAddress: config.PermissionControllerAddress,
 			},
 			prompter,
 			config.ChainID,

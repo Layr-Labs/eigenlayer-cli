@@ -83,32 +83,32 @@ func readAndValidateListAppointeePermissionsConfig(
 	}
 
 	chainID := utils.NetworkNameToChainId(network)
-	permissionManagerAddress := cliContext.String(PermissionControllerAddressFlag.Name)
+	PermissionControllerAddress := cliContext.String(PermissionControllerAddressFlag.Name)
 
 	var err error
-	if common.IsEmptyString(permissionManagerAddress) {
-		permissionManagerAddress, err = common.GetPermissionManagerAddress(utils.NetworkNameToChainId(network))
+	if common.IsEmptyString(PermissionControllerAddress) {
+		PermissionControllerAddress, err = common.GetPermissionControllerAddress(utils.NetworkNameToChainId(network))
 		if err != nil {
 			return nil, err
 		}
 	}
 
 	logger.Debugf(
-		"Env: %s, network: %s, chain ID: %s, PermissionManager address: %s",
+		"Env: %s, network: %s, chain ID: %s, PermissionController address: %s",
 		environment,
 		network,
 		chainID,
-		permissionManagerAddress,
+		PermissionControllerAddress,
 	)
 
 	return &listAppointeePermissionsConfig{
-		Network:                  network,
-		RPCUrl:                   ethRpcUrl,
-		AccountAddress:           accountAddress,
-		AppointeeAddress:         appointeeAddress,
-		PermissionManagerAddress: gethcommon.HexToAddress(permissionManagerAddress),
-		ChainID:                  chainID,
-		Environment:              environment,
+		Network:                     network,
+		RPCUrl:                      ethRpcUrl,
+		AccountAddress:              accountAddress,
+		AppointeeAddress:            appointeeAddress,
+		PermissionControllerAddress: gethcommon.HexToAddress(PermissionControllerAddress),
+		ChainID:                     chainID,
+		Environment:                 environment,
 	}, nil
 }
 
@@ -132,7 +132,7 @@ func generateListAppointeePermissionsReader(
 	}
 	elReader, err := elcontracts.NewReaderFromConfig(
 		elcontracts.Config{
-			PermissionsControllerAddress: config.PermissionManagerAddress,
+			PermissionsControllerAddress: config.PermissionControllerAddress,
 		},
 		ethClient,
 		logger,
