@@ -205,4 +205,4 @@ jobs:
 
       - name: Run User Command Integration Tests
         run: |
-          bats test/user/user-integration-tests-runner.sh
+          bats tests/user/user-integration-tests-runner.sh
