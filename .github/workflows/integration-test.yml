@@ -204,7 +204,6 @@ jobs:
           echo "Preparing environment for integration tests."
           cd eigenlayer-cli/tests/user
           chmod +x user-integration-tests-runner.sh
-          chmod +x export_env.sh
 
       - name: Run User Command Integration Tests
         run: |
