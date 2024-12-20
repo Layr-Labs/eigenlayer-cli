@@ -158,6 +158,7 @@ jobs:
             --web3signer-url http://127.0.0.1:9001 \
             --verbose \
             --broadcast
+
   UserIntegrationTests:
     name: Integration Test - User Commands
     runs-on: ubuntu-latest
