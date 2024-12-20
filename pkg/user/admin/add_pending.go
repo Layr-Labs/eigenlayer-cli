@@ -166,36 +166,36 @@ func readAndValidateAddPendingAdminConfig(
 	}
 
 	chainID := utils.NetworkNameToChainId(network)
-	permissionManagerAddress := cliContext.String(PermissionControllerAddressFlag.Name)
+	PermissionControllerAddress := cliContext.String(PermissionControllerAddressFlag.Name)
 
-	if common.IsEmptyString(permissionManagerAddress) {
-		permissionManagerAddress, err = common.GetPermissionManagerAddress(utils.NetworkNameToChainId(network))
+	if common.IsEmptyString(PermissionControllerAddress) {
+		PermissionControllerAddress, err = common.GetPermissionControllerAddress(utils.NetworkNameToChainId(network))
 		if err != nil {
 			return nil, err
 		}
 	}
 
 	logger.Debugf(
-		"Env: %s, network: %s, chain ID: %s, PermissionManager address: %s",
+		"Env: %s, network: %s, chain ID: %s, PermissionController address: %s",
 		environment,
 		network,
 		chainID,
-		permissionManagerAddress,
+		PermissionControllerAddress,
 	)
 
 	return &addPendingAdminConfig{
-		Network:                  network,
-		RPCUrl:                   ethRpcUrl,
-		AccountAddress:           accountAddress,
-		AdminAddress:             adminAddress,
-		CallerAddress:            callerAddress,
-		SignerConfig:             *signerConfig,
-		PermissionManagerAddress: gethcommon.HexToAddress(permissionManagerAddress),
-		ChainID:                  chainID,
-		Environment:              environment,
-		OutputFile:               outputFile,
-		OutputType:               outputType,
-		Broadcast:                broadcast,
+		Network:                     network,
+		RPCUrl:                      ethRpcUrl,
+		AccountAddress:              accountAddress,
+		AdminAddress:                adminAddress,
+		CallerAddress:               callerAddress,
+		SignerConfig:                *signerConfig,
+		PermissionControllerAddress: gethcommon.HexToAddress(PermissionControllerAddress),
+		ChainID:                     chainID,
+		Environment:                 environment,
+		OutputFile:                  outputFile,
+		OutputType:                  outputType,
+		Broadcast:                   broadcast,
 	}, nil
 }
 
@@ -212,7 +212,7 @@ func generateAddPendingAdminWriter(
 			&config.SignerConfig,
 			ethClient,
 			elcontracts.Config{
-				PermissionsControllerAddress: config.PermissionManagerAddress,
+				PermissionsControllerAddress: config.PermissionControllerAddress,
 			},
 			prompter,
 			config.ChainID,

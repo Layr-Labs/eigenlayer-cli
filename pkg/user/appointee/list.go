@@ -102,32 +102,32 @@ func readAndValidateListAppointeesConfig(
 
 	chainID := utils.NetworkNameToChainId(network)
 	cliContext.App.Metadata["network"] = chainID.String()
-	permissionManagerAddress := cliContext.String(PermissionControllerAddressFlag.Name)
+	PermissionControllerAddress := cliContext.String(PermissionControllerAddressFlag.Name)
 
-	if common.IsEmptyString(permissionManagerAddress) {
-		permissionManagerAddress, err = common.GetPermissionManagerAddress(utils.NetworkNameToChainId(network))
+	if common.IsEmptyString(PermissionControllerAddress) {
+		PermissionControllerAddress, err = common.GetPermissionControllerAddress(utils.NetworkNameToChainId(network))
 		if err != nil {
 			return nil, err
 		}
 	}
 
 	logger.Debugf(
-		"Env: %s, network: %s, chain ID: %s, PermissionManager address: %s",
+		"Env: %s, network: %s, chain ID: %s, PermissionController address: %s",
 		environment,
 		network,
 		chainID,
-		permissionManagerAddress,
+		PermissionControllerAddress,
 	)
 
 	return &listAppointeesConfig{
-		Network:                  network,
-		RPCUrl:                   ethRpcUrl,
-		AccountAddress:           accountAddress,
-		Target:                   target,
-		Selector:                 selectorBytes,
-		PermissionManagerAddress: gethcommon.HexToAddress(permissionManagerAddress),
-		ChainID:                  chainID,
-		Environment:              environment,
+		Network:                     network,
+		RPCUrl:                      ethRpcUrl,
+		AccountAddress:              accountAddress,
+		Target:                      target,
+		Selector:                    selectorBytes,
+		PermissionControllerAddress: gethcommon.HexToAddress(PermissionControllerAddress),
+		ChainID:                     chainID,
+		Environment:                 environment,
 	}, nil
 }
 
@@ -138,7 +138,7 @@ func generateListAppointeesReader(logger logging.Logger, config *listAppointeesC
 	}
 	elReader, err := elcontracts.NewReaderFromConfig(
 		elcontracts.Config{
-			PermissionsControllerAddress: config.PermissionManagerAddress,
+			PermissionsControllerAddress: config.PermissionControllerAddress,
 		},
 		ethClient,
 		logger,

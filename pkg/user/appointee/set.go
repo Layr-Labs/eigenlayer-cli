@@ -161,7 +161,7 @@ func generateSetAppointeePermissionWriter(
 			&config.SignerConfig,
 			ethClient,
 			elcontracts.Config{
-				PermissionsControllerAddress: config.PermissionManagerAddress,
+				PermissionsControllerAddress: config.PermissionControllerAddress,
 			},
 			prompter,
 			config.ChainID,
@@ -200,38 +200,38 @@ func readAndValidateSetConfig(cliContext *cli.Context, logger logging.Logger) (*
 
 	chainID := utils.NetworkNameToChainId(network)
 	cliContext.App.Metadata["network"] = chainID.String()
-	permissionManagerAddress := cliContext.String(PermissionControllerAddressFlag.Name)
+	PermissionControllerAddress := cliContext.String(PermissionControllerAddressFlag.Name)
 
-	if common.IsEmptyString(permissionManagerAddress) {
-		permissionManagerAddress, err = common.GetPermissionManagerAddress(utils.NetworkNameToChainId(network))
+	if common.IsEmptyString(PermissionControllerAddress) {
+		PermissionControllerAddress, err = common.GetPermissionControllerAddress(utils.NetworkNameToChainId(network))
 		if err != nil {
 			return nil, err
 		}
 	}
 
 	logger.Debugf(
-		"Env: %s, network: %s, chain ID: %s, PermissionManager address: %s",
+		"Env: %s, network: %s, chain ID: %s, PermissionController address: %s",
 		environment,
 		network,
 		chainID,
-		permissionManagerAddress,
+		PermissionControllerAddress,
 	)
 
 	return &setConfig{
-		Network:                  network,
-		RPCUrl:                   ethRpcUrl,
-		AccountAddress:           accountAddress,
-		AppointeeAddress:         appointeeAddress,
-		CallerAddress:            callerAddress,
-		Target:                   target,
-		Selector:                 selectorBytes,
-		SignerConfig:             *signerConfig,
-		PermissionManagerAddress: gethcommon.HexToAddress(permissionManagerAddress),
-		ChainID:                  chainID,
-		Environment:              environment,
-		OutputFile:               outputFile,
-		OutputType:               outputType,
-		Broadcast:                broadcast,
+		Network:                     network,
+		RPCUrl:                      ethRpcUrl,
+		AccountAddress:              accountAddress,
+		AppointeeAddress:            appointeeAddress,
+		CallerAddress:               callerAddress,
+		Target:                      target,
+		Selector:                    selectorBytes,
+		SignerConfig:                *signerConfig,
+		PermissionControllerAddress: gethcommon.HexToAddress(PermissionControllerAddress),
+		ChainID:                     chainID,
+		Environment:                 environment,
+		OutputFile:                  outputFile,
+		OutputType:                  outputType,
+		Broadcast:                   broadcast,
 	}, nil
 }
 
