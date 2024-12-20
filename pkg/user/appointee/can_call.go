@@ -84,10 +84,10 @@ func readAndValidateCanCallConfig(cliContext *cli.Context, logger logging.Logger
 	}
 
 	chainID := utils.NetworkNameToChainId(network)
-	PermissionControllerAddress := cliContext.String(PermissionControllerAddressFlag.Name)
+	permissionControllerAddress := cliContext.String(PermissionControllerAddressFlag.Name)
 
-	if common.IsEmptyString(PermissionControllerAddress) {
-		PermissionControllerAddress, err = common.GetPermissionControllerAddress(utils.NetworkNameToChainId(network))
+	if common.IsEmptyString(permissionControllerAddress) {
+		permissionControllerAddress, err = common.GetPermissionControllerAddress(utils.NetworkNameToChainId(network))
 		if err != nil {
 			return nil, err
 		}
@@ -98,7 +98,7 @@ func readAndValidateCanCallConfig(cliContext *cli.Context, logger logging.Logger
 		environment,
 		network,
 		chainID,
-		PermissionControllerAddress,
+		permissionControllerAddress,
 	)
 
 	return &canCallConfig{
@@ -108,7 +108,7 @@ func readAndValidateCanCallConfig(cliContext *cli.Context, logger logging.Logger
 		AppointeeAddress:            appointeeAddress,
 		Target:                      target,
 		Selector:                    selectorBytes,
-		PermissionControllerAddress: gethcommon.HexToAddress(PermissionControllerAddress),
+		PermissionControllerAddress: gethcommon.HexToAddress(permissionControllerAddress),
 		ChainID:                     chainID,
 		Environment:                 environment,
 	}, nil

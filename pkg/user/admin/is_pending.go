@@ -81,11 +81,11 @@ func readAndValidateIsPendingAdminConfig(
 	}
 
 	chainID := utils.NetworkNameToChainId(network)
-	PermissionControllerAddress := cliContext.String(PermissionControllerAddressFlag.Name)
+	permissionControllerAddress := cliContext.String(PermissionControllerAddressFlag.Name)
 
 	var err error
-	if common.IsEmptyString(PermissionControllerAddress) {
-		PermissionControllerAddress, err = common.GetPermissionControllerAddress(utils.NetworkNameToChainId(network))
+	if common.IsEmptyString(permissionControllerAddress) {
+		permissionControllerAddress, err = common.GetPermissionControllerAddress(utils.NetworkNameToChainId(network))
 		if err != nil {
 			return nil, err
 		}
@@ -96,7 +96,7 @@ func readAndValidateIsPendingAdminConfig(
 		environment,
 		network,
 		chainID,
-		PermissionControllerAddress,
+		permissionControllerAddress,
 	)
 
 	return &isPendingAdminConfig{
@@ -104,7 +104,7 @@ func readAndValidateIsPendingAdminConfig(
 		RPCUrl:                      ethRpcUrl,
 		AccountAddress:              accountAddress,
 		PendingAdminAddress:         pendingAdminAddress,
-		PermissionControllerAddress: gethcommon.HexToAddress(PermissionControllerAddress),
+		PermissionControllerAddress: gethcommon.HexToAddress(permissionControllerAddress),
 		ChainID:                     chainID,
 		Environment:                 environment,
 	}, nil

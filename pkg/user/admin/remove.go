@@ -164,10 +164,10 @@ func readAndValidateRemoveAdminConfig(
 	}
 
 	chainID := utils.NetworkNameToChainId(network)
-	PermissionControllerAddress := cliContext.String(PermissionControllerAddressFlag.Name)
+	permissionControllerAddress := cliContext.String(PermissionControllerAddressFlag.Name)
 
-	if common.IsEmptyString(PermissionControllerAddress) {
-		PermissionControllerAddress, err = common.GetPermissionControllerAddress(utils.NetworkNameToChainId(network))
+	if common.IsEmptyString(permissionControllerAddress) {
+		permissionControllerAddress, err = common.GetPermissionControllerAddress(utils.NetworkNameToChainId(network))
 		if err != nil {
 			return nil, err
 		}
@@ -178,7 +178,7 @@ func readAndValidateRemoveAdminConfig(
 		environment,
 		network,
 		chainID,
-		PermissionControllerAddress,
+		permissionControllerAddress,
 	)
 
 	return &removeAdminConfig{
@@ -187,7 +187,7 @@ func readAndValidateRemoveAdminConfig(
 		AccountAddress:              accountAddress,
 		AdminAddress:                adminAddress,
 		CallerAddress:               callerAddress,
-		PermissionControllerAddress: gethcommon.HexToAddress(PermissionControllerAddress),
+		PermissionControllerAddress: gethcommon.HexToAddress(permissionControllerAddress),
 		SignerConfig:                *signerConfig,
 		ChainID:                     chainID,
 		Environment:                 environment,

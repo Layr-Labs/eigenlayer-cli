@@ -83,11 +83,11 @@ func readAndValidateListAppointeePermissionsConfig(
 	}
 
 	chainID := utils.NetworkNameToChainId(network)
-	PermissionControllerAddress := cliContext.String(PermissionControllerAddressFlag.Name)
+	permissionControllerAddress := cliContext.String(PermissionControllerAddressFlag.Name)
 
 	var err error
-	if common.IsEmptyString(PermissionControllerAddress) {
-		PermissionControllerAddress, err = common.GetPermissionControllerAddress(utils.NetworkNameToChainId(network))
+	if common.IsEmptyString(permissionControllerAddress) {
+		permissionControllerAddress, err = common.GetPermissionControllerAddress(utils.NetworkNameToChainId(network))
 		if err != nil {
 			return nil, err
 		}
@@ -98,7 +98,7 @@ func readAndValidateListAppointeePermissionsConfig(
 		environment,
 		network,
 		chainID,
-		PermissionControllerAddress,
+		permissionControllerAddress,
 	)
 
 	return &listAppointeePermissionsConfig{
@@ -106,7 +106,7 @@ func readAndValidateListAppointeePermissionsConfig(
 		RPCUrl:                      ethRpcUrl,
 		AccountAddress:              accountAddress,
 		AppointeeAddress:            appointeeAddress,
-		PermissionControllerAddress: gethcommon.HexToAddress(PermissionControllerAddress),
+		PermissionControllerAddress: gethcommon.HexToAddress(permissionControllerAddress),
 		ChainID:                     chainID,
 		Environment:                 environment,
 	}, nil

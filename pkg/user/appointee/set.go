@@ -200,10 +200,10 @@ func readAndValidateSetConfig(cliContext *cli.Context, logger logging.Logger) (*
 
 	chainID := utils.NetworkNameToChainId(network)
 	cliContext.App.Metadata["network"] = chainID.String()
-	PermissionControllerAddress := cliContext.String(PermissionControllerAddressFlag.Name)
+	permissionControllerAddress := cliContext.String(PermissionControllerAddressFlag.Name)
 
-	if common.IsEmptyString(PermissionControllerAddress) {
-		PermissionControllerAddress, err = common.GetPermissionControllerAddress(utils.NetworkNameToChainId(network))
+	if common.IsEmptyString(permissionControllerAddress) {
+		permissionControllerAddress, err = common.GetPermissionControllerAddress(utils.NetworkNameToChainId(network))
 		if err != nil {
 			return nil, err
 		}
@@ -214,7 +214,7 @@ func readAndValidateSetConfig(cliContext *cli.Context, logger logging.Logger) (*
 		environment,
 		network,
 		chainID,
-		PermissionControllerAddress,
+		permissionControllerAddress,
 	)
 
 	return &setConfig{
@@ -226,7 +226,7 @@ func readAndValidateSetConfig(cliContext *cli.Context, logger logging.Logger) (*
 		Target:                      target,
 		Selector:                    selectorBytes,
 		SignerConfig:                *signerConfig,
-		PermissionControllerAddress: gethcommon.HexToAddress(PermissionControllerAddress),
+		PermissionControllerAddress: gethcommon.HexToAddress(permissionControllerAddress),
 		ChainID:                     chainID,
 		Environment:                 environment,
 		OutputFile:                  outputFile,
