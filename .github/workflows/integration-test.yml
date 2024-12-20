@@ -206,5 +206,4 @@ jobs:
 
       - name: Run User Command Integration Tests
         run: |
-          cd eigenlayer-cli
-          ./tests/user/user-integration-tests-runner.sh
+          bats -r eigenlayer-cli/tests/user
