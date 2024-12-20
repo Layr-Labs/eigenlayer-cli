@@ -188,10 +188,8 @@ jobs:
         with:
           path: eigenlayer-cli
 
-      - name: Install dependencies
-        run: |
-          sudo apt update
-          sudo apt install -y less bats
+      - name: Setup BATS
+        uses: mig4/setup-bats@v1
 
       - name: Install EigenLayer CLI
         run: |
@@ -207,15 +205,4 @@ jobs:
 
       - name: Run User Command Integration Tests
         run: |
-          cd eigenlayer-cli/tests/user
-          ./user-integration-tests-runner.sh
-
-      - name: Cleanup Output Files
-        run: |
-          rm -rf eigenlayer-cli/tests/user
-
-      - name: Validate Test Success
-        if: failure()
-        run: |
-          echo "Integration tests failed!"
-          exit 1
+          bats user-integration-tests-runner.sh
