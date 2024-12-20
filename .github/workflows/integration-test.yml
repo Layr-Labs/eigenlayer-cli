@@ -200,9 +200,9 @@ jobs:
       - name: Prepare Integration Test Environment
         run: |
           echo "Preparing environment for integration tests."
-          cd eigenlayer-cli/tests/user
+          cd tests/user
           chmod +x user-integration-tests-runner.sh
 
       - name: Run User Command Integration Tests
         run: |
-          bats user-integration-tests-runner.sh
+          bats test/user/user-integration-tests-runner.sh
