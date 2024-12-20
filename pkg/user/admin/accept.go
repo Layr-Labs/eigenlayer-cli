@@ -163,10 +163,10 @@ func readAndValidateAcceptAdminConfig(
 	}
 
 	chainID := utils.NetworkNameToChainId(network)
-	PermissionControllerAddress := cliContext.String(PermissionControllerAddressFlag.Name)
+	permissionControllerAddress := cliContext.String(PermissionControllerAddressFlag.Name)
 
-	if common.IsEmptyString(PermissionControllerAddress) {
-		PermissionControllerAddress, err = common.GetPermissionControllerAddress(utils.NetworkNameToChainId(network))
+	if common.IsEmptyString(permissionControllerAddress) {
+		permissionControllerAddress, err = common.GetPermissionControllerAddress(utils.NetworkNameToChainId(network))
 		if err != nil {
 			return nil, err
 		}
@@ -176,7 +176,7 @@ func readAndValidateAcceptAdminConfig(
 		environment,
 		network,
 		chainID,
-		PermissionControllerAddress,
+		permissionControllerAddress,
 	)
 
 	return &acceptAdminConfig{
@@ -184,7 +184,7 @@ func readAndValidateAcceptAdminConfig(
 		RPCUrl:                      ethRpcUrl,
 		AccountAddress:              accountAddress,
 		CallerAddress:               callerAddress,
-		PermissionControllerAddress: gethcommon.HexToAddress(PermissionControllerAddress),
+		PermissionControllerAddress: gethcommon.HexToAddress(permissionControllerAddress),
 		SignerConfig:                *signerConfig,
 		ChainID:                     chainID,
 		Environment:                 environment,

@@ -102,10 +102,10 @@ func readAndValidateListAppointeesConfig(
 
 	chainID := utils.NetworkNameToChainId(network)
 	cliContext.App.Metadata["network"] = chainID.String()
-	PermissionControllerAddress := cliContext.String(PermissionControllerAddressFlag.Name)
+	permissionControllerAddress := cliContext.String(PermissionControllerAddressFlag.Name)
 
-	if common.IsEmptyString(PermissionControllerAddress) {
-		PermissionControllerAddress, err = common.GetPermissionControllerAddress(utils.NetworkNameToChainId(network))
+	if common.IsEmptyString(permissionControllerAddress) {
+		permissionControllerAddress, err = common.GetPermissionControllerAddress(utils.NetworkNameToChainId(network))
 		if err != nil {
 			return nil, err
 		}
@@ -116,7 +116,7 @@ func readAndValidateListAppointeesConfig(
 		environment,
 		network,
 		chainID,
-		PermissionControllerAddress,
+		permissionControllerAddress,
 	)
 
 	return &listAppointeesConfig{
@@ -125,7 +125,7 @@ func readAndValidateListAppointeesConfig(
 		AccountAddress:              accountAddress,
 		Target:                      target,
 		Selector:                    selectorBytes,
-		PermissionControllerAddress: gethcommon.HexToAddress(PermissionControllerAddress),
+		PermissionControllerAddress: gethcommon.HexToAddress(permissionControllerAddress),
 		ChainID:                     chainID,
 		Environment:                 environment,
 	}, nil
