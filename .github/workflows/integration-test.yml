@@ -203,6 +203,7 @@ jobs:
           cd eigenlayer-cli
           cd tests/user
           chmod +x user-integration-tests-runner.sh
+          echo "CLI_PATH=${GITHUB_WORKSPACE}/bin/eigenlayer" >> tests/user/.env
 
       - name: Run User Command Integration Tests
         run: |
