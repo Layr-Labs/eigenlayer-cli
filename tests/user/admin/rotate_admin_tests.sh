@@ -6,7 +6,7 @@
     --admin-address "$FIRST_ADMIN_ADDRESS" \
     --eth-rpc-url "$RPC_URL" \
     --network "$NETWORK" \
-    --ecdsa-private-key "$ADMIN_PRIVATE_KEY" \
+    --ecdsa-private-key "$ACCOUNT_PRIVATE_KEY" \
     --broadcast
   [ "$status" -eq 0 ]
 
