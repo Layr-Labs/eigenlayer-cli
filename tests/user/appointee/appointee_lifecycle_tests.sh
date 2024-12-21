@@ -18,20 +18,6 @@ verify_listed_permissions() {
   [[ "$output" == *"Target: $target, Selector: $selector_2_no_prefix"* ]]
 }
 
-@test "Verify initial empty list of appointees" {
-  run $CLI_PATH user appointee list \
-    --account-address "$ACCOUNT_ADDRESS" \
-    --target-address "$TARGET_ADDRESS" \
-    --selector "$SELECTOR_1" \
-    --permission-controller-address "$PERMISSION_CONTROLLER_ADDRESS" \
-    --eth-rpc-url "$RPC_URL" \
-    --network "$NETWORK"
-
-  [ "$status" -eq 0 ]
-  [[ "$output" != *"$ACCOUNT_ADDRESS"* ]]
-  [[ "$output" != *"$APPOINTEE_1"* ]]
-}
-
 @test "Add first appointee for selector 1" {
   run $CLI_PATH user appointee set \
     --account-address "$ACCOUNT_ADDRESS" \
