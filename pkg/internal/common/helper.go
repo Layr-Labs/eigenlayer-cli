@@ -3,6 +3,7 @@ package common
 import (
 	"context"
 	"crypto/ecdsa"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -13,8 +14,6 @@ import (
 	"os/user"
 	"strings"
 	"time"
-
-	"github.com/urfave/cli/v2"
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/types"
@@ -36,32 +35,44 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 
 	"github.com/fatih/color"
+	"github.com/urfave/cli/v2"
+)
+
+const (
+	mainnet             = "mainnet"
+	testnet             = "testnet"
+	local               = "local"
+	selectorHexIdLength = 10
+	addressPrefix       = "0x"
 )
 
 var ChainMetadataMap = map[int64]types.ChainMetadata{
 	MainnetChainId: {
-		BlockExplorerUrl:            "https://etherscan.io/tx",
-		ELDelegationManagerAddress:  "0x39053D51B77DC0d36036Fc1fCc8Cb819df8Ef37A",
-		ELAVSDirectoryAddress:       "0x135dda560e946695d6f155dacafc6f1f25c1f5af",
-		ELRewardsCoordinatorAddress: "0x7750d328b314EfFa365A0402CcfD489B80B0adda",
-		WebAppUrl:                   "https://app.eigenlayer.xyz/operator",
-		ProofStoreBaseURL:           "https://eigenlabs-rewards-mainnet-ethereum.s3.amazonaws.com",
+		BlockExplorerUrl:              "https://etherscan.io/tx",
+		ELDelegationManagerAddress:    "0x39053D51B77DC0d36036Fc1fCc8Cb819df8Ef37A",
+		ELAVSDirectoryAddress:         "0x135dda560e946695d6f155dacafc6f1f25c1f5af",
+		ELRewardsCoordinatorAddress:   "0x7750d328b314EfFa365A0402CcfD489B80B0adda",
+		ELPermissionControllerAddress: "",
+		WebAppUrl:                     "https://app.eigenlayer.xyz/operator",
+		ProofStoreBaseURL:             "https://eigenlabs-rewards-mainnet-ethereum.s3.amazonaws.com",
 	},
 	HoleskyChainId: {
-		BlockExplorerUrl:            "https://holesky.etherscan.io/tx",
-		ELDelegationManagerAddress:  "0xA44151489861Fe9e3055d95adC98FbD462B948e7",
-		ELAVSDirectoryAddress:       "0x055733000064333CaDDbC92763c58BF0192fFeBf",
-		ELRewardsCoordinatorAddress: "0xAcc1fb458a1317E886dB376Fc8141540537E68fE",
-		WebAppUrl:                   "https://holesky.eigenlayer.xyz/operator",
-		ProofStoreBaseURL:           "https://eigenlabs-rewards-testnet-holesky.s3.amazonaws.com",
+		BlockExplorerUrl:              "https://holesky.etherscan.io/tx",
+		ELDelegationManagerAddress:    "0xA44151489861Fe9e3055d95adC98FbD462B948e7",
+		ELAVSDirectoryAddress:         "0x055733000064333CaDDbC92763c58BF0192fFeBf",
+		ELRewardsCoordinatorAddress:   "0xAcc1fb458a1317E886dB376Fc8141540537E68fE",
+		ELPermissionControllerAddress: "0x598cb226B591155F767dA17AfE7A2241a68C5C10",
+		WebAppUrl:                     "https://holesky.eigenlayer.xyz/operator",
+		ProofStoreBaseURL:             "https://eigenlabs-rewards-testnet-holesky.s3.amazonaws.com",
 	},
 	AnvilChainId: {
-		BlockExplorerUrl:            "",
-		ELDelegationManagerAddress:  "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
-		ELAVSDirectoryAddress:       "0x0165878A594ca255338adfa4d48449f69242Eb8F",
-		ELRewardsCoordinatorAddress: "0x610178dA211FEF7D417bC0e6FeD39F05609AD788",
-		WebAppUrl:                   "",
-		ProofStoreBaseURL:           "",
+		BlockExplorerUrl:              "",
+		ELDelegationManagerAddress:    "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
+		ELAVSDirectoryAddress:         "0x0165878A594ca255338adfa4d48449f69242Eb8F",
+		ELRewardsCoordinatorAddress:   "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+		ELPermissionControllerAddress: "0x3Aa5ebB10DC797CAC828524e59A333d0A371443c",
+		WebAppUrl:                     "",
+		ProofStoreBaseURL:             "",
 	},
 }
 
@@ -321,6 +332,26 @@ func GetAVSDirectoryAddress(chainID *big.Int) (string, error) {
 	}
 }
 
+func GetDelegationManagerAddress(chainID *big.Int) (string, error) {
+	chainIDInt := chainID.Int64()
+	chainMetadata, ok := ChainMetadataMap[chainIDInt]
+	if !ok {
+		return "", fmt.Errorf("chain ID %d not supported", chainIDInt)
+	} else {
+		return chainMetadata.ELDelegationManagerAddress, nil
+	}
+}
+
+func GetPermissionControllerAddress(chainID *big.Int) (string, error) {
+	chainIDInt := chainID.Int64()
+	chainMetadata, ok := ChainMetadataMap[chainIDInt]
+	if !ok {
+		return "", fmt.Errorf("chain ID %d not supported", chainIDInt)
+	} else {
+		return chainMetadata.ELPermissionControllerAddress, nil
+	}
+}
+
 func GetTransactionLink(txHash string, chainId *big.Int) string {
 	chainIDInt := chainId.Int64()
 	chainMetadata, ok := ChainMetadataMap[chainIDInt]
@@ -480,7 +511,7 @@ func GetNoSendTxOpts(from common.Address) *bind.TransactOpts {
 }
 
 func Trim0x(s string) string {
-	return strings.TrimPrefix(s, "0x")
+	return strings.TrimPrefix(s, addressPrefix)
 }
 
 func Sign(digest []byte, cfg types.SignerConfig, p utils.Prompter) ([]byte, error) {
@@ -532,4 +563,35 @@ func Sign(digest []byte, cfg types.SignerConfig, p utils.Prompter) ([]byte, erro
 	}
 
 	return signed, nil
+}
+
+func ValidateAndConvertSelectorString(selector string) ([4]byte, error) {
+	if len(selector) != selectorHexIdLength || selector[:2] != addressPrefix {
+		return [4]byte{}, errors.New("selector must be a 4-byte hex string prefixed with '0x'")
+	}
+
+	decoded, err := hex.DecodeString(selector[2:])
+	if err != nil {
+		return [4]byte{}, eigenSdkUtils.WrapError("invalid hex encoding: %v", err)
+	}
+
+	if len(decoded) != 4 {
+		return [4]byte{}, fmt.Errorf("decoded selector must be 4 bytes, got %d bytes", len(decoded))
+	}
+
+	var selectorBytes [4]byte
+	copy(selectorBytes[:], decoded)
+
+	return selectorBytes, nil
+}
+
+func GetEnvFromNetwork(network string) string {
+	switch network {
+	case utils.HoleskyNetworkName:
+		return testnet
+	case utils.MainnetNetworkName:
+		return mainnet
+	default:
+		return local
+	}
 }

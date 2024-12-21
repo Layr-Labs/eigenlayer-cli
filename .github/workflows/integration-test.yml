@@ -23,7 +23,7 @@ jobs:
         with:
             repository: layr-labs/eigensdk-go
             token: ${{ github.token }}
-            ref: dev
+            ref: 549e0185cee644d0a6fc9c9863f1cf76d9ef971f
 
       - name: Run anvil chain
         run: |
@@ -96,7 +96,7 @@ jobs:
         with:
           repository: layr-labs/eigensdk-go
           token: ${{ github.token }}
-          ref: dev
+          ref: 549e0185cee644d0a6fc9c9863f1cf76d9ef971f
       - name: Run anvil chain
         run: |
           nohup make start-anvil-with-contracts-deployed > nohup.out 2>&1 &
@@ -158,3 +158,52 @@ jobs:
             --web3signer-url http://127.0.0.1:9001 \
             --verbose \
             --broadcast
+
+  UserIntegrationTests:
+    name: Integration Test - User Commands
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly-c4a984fbf2c48b793c8cd53af84f56009dd1070c
+
+      - name: Checkout eigensdk-go
+        uses: actions/checkout@v4
+        with:
+          repository: layr-labs/eigensdk-go
+          token: ${{ github.token }}
+          ref: 549e0185cee644d0a6fc9c9863f1cf76d9ef971f
+
+      - name: Run anvil chain
+        run: |
+          nohup make start-anvil-with-contracts-deployed > nohup.out 2>&1 &
+
+      - name: Install EigenLayer CLI
+        uses: actions/checkout@v4
+        with:
+          path: eigenlayer-cli
+
+      - name: Setup BATS
+        uses: mig4/setup-bats@v1
+
+      - name: Install EigenLayer CLI
+        run: |
+          cd eigenlayer-cli
+          make build
+          ./bin/eigenlayer --version
+
+      - name: Prepare Integration Test Environment
+        run: |
+          echo "Preparing environment for integration tests."
+          cd eigenlayer-cli
+          echo "CLI_PATH=${GITHUB_WORKSPACE}/bin/eigenlayer" >> .env
+
+      - name: Run User Command Integration Tests
+        run: |
+          cd eigenlayer-cli/tests/user
+          ./user-integration-tests-runner.sh
