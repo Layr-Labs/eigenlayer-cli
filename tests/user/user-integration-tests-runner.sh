@@ -14,6 +14,7 @@ run_bats_test() {
   fi
 }
 
+run_bats_test "admin/rotate_admin_tests.sh"
 run_bats_test "admin/admin_lifecycle_tests.sh"
 run_bats_test "appointee/appointee_lifecycle_tests.sh"
 run_bats_test "appointee/appointee_output_tests.sh"
