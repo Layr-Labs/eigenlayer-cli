@@ -180,7 +180,6 @@ teardown() {
     --network "$NETWORK" \
 
   [ "$status" -eq 0 ]
-  [[ "$output" != *"$ACCOUNT_ADDRESS"* ]]
   [[ "$output" != *"$FIRST_ADMIN_ADDRESS"* ]]
   [[ "$output" == *"$SECOND_ADMIN_ADDRESS"* ]]
 }

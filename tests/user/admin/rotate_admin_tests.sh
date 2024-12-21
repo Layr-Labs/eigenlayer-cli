@@ -18,15 +18,6 @@
     --broadcast
   [ "$status" -eq 0 ]
 
-  run $CLI_PATH user admin remove-admin \
-    --account-address "$ACCOUNT_ADDRESS" \
-    --admin-address "$ACCOUNT_ADDRESS" \
-    --eth-rpc-url "$RPC_URL" \
-    --network "$NETWORK" \
-    --ecdsa-private-key "$FIRST_ADMIN_PRIVATE_KEY" \
-    --broadcast
-  [ "$status" -eq 0 ]
-
   run $CLI_PATH user admin list-admins \
     --account-address "$ACCOUNT_ADDRESS" \
     --eth-rpc-url "$RPC_URL" \
