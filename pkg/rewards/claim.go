@@ -222,10 +222,6 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 		return eigenSdkUtils.WrapError("failed to read and validate claim config", err)
 	}
 
-	if config.Network != "holesky" && config.BatchClaimFile != "" {
-		return errors.New("batch claim only supported on holesky with this version of CLI")
-	}
-
 	cCtx.App.Metadata["network"] = config.ChainID.String()
 
 	ethClient, err := ethclient.Dial(config.RPCUrl)
