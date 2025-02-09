@@ -11,26 +11,27 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-func SetOperatorPISplitCmd(p utils.Prompter) *cli.Command {
+func SetOperatorSetSplitCmd(p utils.Prompter) *cli.Command {
 	var operatorSplitCmd = &cli.Command{
-		Name:  "set-pi-split",
-		Usage: "Set operator programmatic incentives split",
+		Name:  "set-operatorset-split",
+		Usage: "Set operator set split",
 		Action: func(cCtx *cli.Context) error {
-			return SetOperatorSplit(cCtx, p, true, false)
+			return SetOperatorSplit(cCtx, p, false, true)
 		},
 		After: telemetry.AfterRunAction(),
-		Flags: getSetOperatorPISplitFlags(),
+		Flags: getSetOperatorSetSplitFlags(),
 	}
 
 	return operatorSplitCmd
 }
 
-func getSetOperatorPISplitFlags() []cli.Flag {
+func getSetOperatorSetSplitFlags() []cli.Flag {
 	baseFlags := []cli.Flag{
 		&flags.NetworkFlag,
 		&flags.ETHRpcUrlFlag,
 		&flags.OperatorAddressFlag,
 		&split.OperatorSplitFlag,
+		&split.OperatorSetIdFlag,
 		&rewards.RewardsCoordinatorAddressFlag,
 		&flags.BroadcastFlag,
 		&flags.OutputTypeFlag,

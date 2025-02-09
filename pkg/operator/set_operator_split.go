@@ -12,6 +12,7 @@ import (
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
+	contractIRewardsCoordinator "github.com/Layr-Labs/eigensdk-go/contracts/bindings/IRewardsCoordinator"
 	"github.com/Layr-Labs/eigensdk-go/logging"
 	eigenSdkUtils "github.com/Layr-Labs/eigensdk-go/utils"
 	gethcommon "github.com/ethereum/go-ethereum/common"
@@ -25,7 +26,7 @@ func SetOperatorSplitCmd(p utils.Prompter) *cli.Command {
 		Name:  "set-rewards-split",
 		Usage: "Set operator rewards split",
 		Action: func(cCtx *cli.Context) error {
-			return SetOperatorSplit(cCtx, p, false)
+			return SetOperatorSplit(cCtx, p, false, false)
 		},
 		After: telemetry.AfterRunAction(),
 		Flags: getSetOperatorSplitFlags(),
@@ -34,11 +35,11 @@ func SetOperatorSplitCmd(p utils.Prompter) *cli.Command {
 	return operatorSplitCmd
 }
 
-func SetOperatorSplit(cCtx *cli.Context, p utils.Prompter, isProgrammaticIncentive bool) error {
+func SetOperatorSplit(cCtx *cli.Context, p utils.Prompter, isProgrammaticIncentive bool, isOperatorSet bool) error {
 	ctx := cCtx.Context
 	logger := common.GetLogger(cCtx)
 
-	config, err := readAndValidateSetOperatorSplitConfig(cCtx, logger, isProgrammaticIncentive)
+	config, err := readAndValidateSetOperatorSplitConfig(cCtx, logger, isProgrammaticIncentive, isOperatorSet)
 	if err != nil {
 		return eigenSdkUtils.WrapError("failed to read and validate operator split config", err)
 	}
@@ -75,7 +76,13 @@ func SetOperatorSplit(cCtx *cli.Context, p utils.Prompter, isProgrammaticIncenti
 		logger.Infof("Broadcasting set operator transaction...")
 
 		var receipt *types.Receipt
-		if isProgrammaticIncentive {
+		if isOperatorSet {
+			operatorSet := contractIRewardsCoordinator.OperatorSet{
+				Id:  uint32(config.OperatorSetId),
+				Avs: config.AVSAddress,
+			}
+			receipt, err = eLWriter.SetOperatorSetSplit(ctx, config.OperatorAddress, operatorSet, config.Split, true)
+		} else if isProgrammaticIncentive {
 			receipt, err = eLWriter.SetOperatorPISplit(ctx, config.OperatorAddress, config.Split, true)
 
 		} else {
@@ -106,7 +113,13 @@ func SetOperatorSplit(cCtx *cli.Context, p utils.Prompter, isProgrammaticIncenti
 		}
 
 		var unsignedTx *types.Transaction
-		if isProgrammaticIncentive {
+		if isOperatorSet {
+			operatorSet := contractIRewardsCoordinator.OperatorSet{
+				Id:  uint32(config.OperatorSetId),
+				Avs: config.AVSAddress,
+			}
+			unsignedTx, err = contractBindings.RewardsCoordinator.SetOperatorSetSplit(noSendTxOpts, config.OperatorAddress, operatorSet, config.Split)
+		} else if isProgrammaticIncentive {
 			unsignedTx, err = contractBindings.RewardsCoordinator.SetOperatorPISplit(noSendTxOpts, config.OperatorAddress, config.Split)
 		} else {
 			unsignedTx, err = contractBindings.RewardsCoordinator.SetOperatorAVSSplit(noSendTxOpts, config.OperatorAddress, config.AVSAddress, config.Split)
@@ -165,6 +178,7 @@ func readAndValidateSetOperatorSplitConfig(
 	cCtx *cli.Context,
 	logger logging.Logger,
 	isProgrammaticIncentive bool,
+	isOperatorSet bool,
 ) (*split.SetOperatorAVSSplitConfig, error) {
 	network := cCtx.String(flags.NetworkFlag.Name)
 	rpcUrl := cCtx.String(flags.ETHRpcUrlFlag.Name)
@@ -194,6 +208,14 @@ func readAndValidateSetOperatorSplitConfig(
 		logger.Infof("Using AVS address: %s", avsAddress.String())
 	}
 
+	var operatorSetId int
+	if isOperatorSet {
+		operatorSetId = cCtx.Int(split.OperatorSetIdFlag.Name)
+		if operatorSetId == 0 {
+			return nil, errors.New("operator set ID is required")
+		}
+	}
+
 	chainID := utils.NetworkNameToChainId(network)
 	logger.Debugf("Using chain ID: %s", chainID.String())
 
@@ -214,6 +236,7 @@ func readAndValidateSetOperatorSplitConfig(
 		OperatorAddress:           operatorAddress,
 		AVSAddress:                avsAddress,
 		Split:                     uint16(opSplit),
+		OperatorSetId:             operatorSetId,
 		Broadcast:                 broadcast,
 		OutputType:                outputType,
 		OutputFile:                outputFile,
