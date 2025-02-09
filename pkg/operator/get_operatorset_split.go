@@ -32,6 +32,8 @@ func getGetOperatorSetSplitFlags() []cli.Flag {
 		&flags.OperatorAddressFlag,
 		&split.OperatorSplitFlag,
 		&rewards.RewardsCoordinatorAddressFlag,
+		&split.OperatorSetIdFlag,
+		&flags.AVSAddressFlag,
 	}
 
 	sort.Sort(cli.FlagsByName(baseFlags))

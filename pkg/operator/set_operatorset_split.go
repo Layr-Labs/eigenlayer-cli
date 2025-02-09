@@ -33,6 +33,7 @@ func getSetOperatorSetSplitFlags() []cli.Flag {
 		&split.OperatorSplitFlag,
 		&split.OperatorSetIdFlag,
 		&rewards.RewardsCoordinatorAddressFlag,
+		&flags.AVSAddressFlag,
 		&flags.BroadcastFlag,
 		&flags.OutputTypeFlag,
 		&flags.OutputFileFlag,

@@ -19,7 +19,7 @@ var (
 	}
 
 	OperatorSetIdFlag = cli.IntFlag{
-		Name:    "operator-set-id",
+		Name:    "operatorset-id",
 		Aliases: []string{"osi"},
 		Usage:   "Operator set ID to set operator split",
 		EnvVars: []string{"OPERATOR_SET_ID"},
