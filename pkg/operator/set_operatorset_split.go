@@ -14,7 +14,7 @@ import (
 func SetOperatorSetSplitCmd(p utils.Prompter) *cli.Command {
 	var operatorSplitCmd = &cli.Command{
 		Name:  "set-operatorset-split",
-		Usage: "Set operator set split",
+		Usage: "Set OperatorSet split",
 		Action: func(cCtx *cli.Context) error {
 			return SetOperatorSplit(cCtx, p, false, true)
 		},

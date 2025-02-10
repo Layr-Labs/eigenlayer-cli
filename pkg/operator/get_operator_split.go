@@ -1,7 +1,6 @@
 package operator
 
 import (
-	"errors"
 	"sort"
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
@@ -52,9 +51,6 @@ func GetOperatorSplit(cCtx *cli.Context, isProgrammaticIncentive bool, isOperato
 	logger := common.GetLogger(cCtx)
 
 	config, err := readAndValidateGetOperatorSplitConfig(cCtx, logger, isProgrammaticIncentive, isOperatorSet)
-	if config.Network != "holesky" {
-		return errors.New("getting operator split only supported on holesky with this version of CLI")
-	}
 
 	if err != nil {
 		return eigenSdkUtils.WrapError("failed to read and validate operator split config", err)
@@ -133,9 +129,6 @@ func readAndValidateGetOperatorSplitConfig(
 	var operatorSetId int
 	if isOperatorSet {
 		operatorSetId = cCtx.Int(split.OperatorSetIdFlag.Name)
-		if operatorSetId == 0 {
-			return nil, errors.New("operator set ID is required")
-		}
 	}
 
 	chainID := utils.NetworkNameToChainId(network)

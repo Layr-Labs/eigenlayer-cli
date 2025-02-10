@@ -211,9 +211,6 @@ func readAndValidateSetOperatorSplitConfig(
 	var operatorSetId int
 	if isOperatorSet {
 		operatorSetId = cCtx.Int(split.OperatorSetIdFlag.Name)
-		if operatorSetId == 0 {
-			return nil, errors.New("operator set ID is required")
-		}
 	}
 
 	chainID := utils.NetworkNameToChainId(network)

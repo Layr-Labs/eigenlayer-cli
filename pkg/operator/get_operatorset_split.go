@@ -14,7 +14,7 @@ import (
 func GetOperatorSetSplitCmd(p utils.Prompter) *cli.Command {
 	var operatorSplitCmd = &cli.Command{
 		Name:  "get-operatorset-split",
-		Usage: "Get programmatic incentives rewards split",
+		Usage: "Get OperatorSet rewards split",
 		Action: func(cCtx *cli.Context) error {
 			return GetOperatorSplit(cCtx, true, true)
 		},
