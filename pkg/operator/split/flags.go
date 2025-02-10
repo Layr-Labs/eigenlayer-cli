@@ -17,4 +17,11 @@ var (
 		Usage:   "AVS address to set operator split",
 		EnvVars: []string{"AVS_ADDRESS"},
 	}
+
+	OperatorSetIdFlag = cli.IntFlag{
+		Name:    "operatorset-id",
+		Aliases: []string{"osi"},
+		Usage:   "Operator set ID to set operator split",
+		EnvVars: []string{"OPERATOR_SET_ID"},
+	}
 )

@@ -22,6 +22,8 @@ func OperatorCmd(p utils.Prompter) *cli.Command {
 			operator.GetOperatorSplitCmd(p),
 			operator.GetOperatorPISplitCmd(p),
 			operator.SetOperatorPISplitCmd(p),
+			operator.SetOperatorSetSplitCmd(p),
+			operator.GetOperatorSetSplitCmd(p),
 			operator.AllocationsCmd(p),
 			operator.DeregisterCommand(p),
 			operator.RegisterOperatorSetsCommand(p),
