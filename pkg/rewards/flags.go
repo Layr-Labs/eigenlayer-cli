@@ -33,11 +33,11 @@ var (
 		EnvVars: []string{"RECIPIENT_ADDRESS"},
 	}
 
-	ProofStoreBaseURLFlag = cli.StringFlag{
-		Name:    "proof-store-base-url",
-		Aliases: []string{"psbu"},
-		Usage:   "Specify the base URL of the proof store. If not provided, the value based on network will be used",
-		EnvVars: []string{"PROOF_STORE_BASE_URL"},
+	SidecarUrlFlag = cli.StringFlag{
+		Name:    "sidecar-http-rpc-url",
+		Aliases: []string{"shru"},
+		Usage:   "URL of the Sidecar HTTP RPC",
+		EnvVars: []string{"SIDECAR_HTTP_RPC_URL"},
 	}
 
 	EnvironmentFlag = cli.StringFlag{

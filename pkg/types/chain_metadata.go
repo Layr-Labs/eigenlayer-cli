@@ -6,5 +6,5 @@ type ChainMetadata struct {
 	ELAVSDirectoryAddress       string
 	ELRewardsCoordinatorAddress string
 	WebAppUrl                   string
-	ProofStoreBaseURL           string
+	SidecarHttpRpcURL           string
 }

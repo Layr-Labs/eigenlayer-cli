@@ -45,7 +45,7 @@ var ChainMetadataMap = map[int64]types.ChainMetadata{
 		ELAVSDirectoryAddress:       "0x135dda560e946695d6f155dacafc6f1f25c1f5af",
 		ELRewardsCoordinatorAddress: "0x7750d328b314EfFa365A0402CcfD489B80B0adda",
 		WebAppUrl:                   "https://app.eigenlayer.xyz/operator",
-		ProofStoreBaseURL:           "https://eigenlabs-rewards-mainnet-ethereum.s3.amazonaws.com",
+		SidecarHttpRpcURL:           "https://sidecar-rpc.eigenlayer.xyz/mainnet",
 	},
 	HoleskyChainId: {
 		BlockExplorerUrl:            "https://holesky.etherscan.io/tx",
@@ -53,7 +53,7 @@ var ChainMetadataMap = map[int64]types.ChainMetadata{
 		ELAVSDirectoryAddress:       "0x055733000064333CaDDbC92763c58BF0192fFeBf",
 		ELRewardsCoordinatorAddress: "0xAcc1fb458a1317E886dB376Fc8141540537E68fE",
 		WebAppUrl:                   "https://holesky.eigenlayer.xyz/operator",
-		ProofStoreBaseURL:           "https://eigenlabs-rewards-testnet-holesky.s3.amazonaws.com",
+		SidecarHttpRpcURL:           "https://sidecar-rpc.eigenlayer.xyz/holesky",
 	},
 	AnvilChainId: {
 		BlockExplorerUrl:            "",
@@ -61,7 +61,7 @@ var ChainMetadataMap = map[int64]types.ChainMetadata{
 		ELAVSDirectoryAddress:       "0x0165878A594ca255338adfa4d48449f69242Eb8F",
 		ELRewardsCoordinatorAddress: "0x610178dA211FEF7D417bC0e6FeD39F05609AD788",
 		WebAppUrl:                   "",
-		ProofStoreBaseURL:           "",
+		SidecarHttpRpcURL:           "",
 	},
 }
 

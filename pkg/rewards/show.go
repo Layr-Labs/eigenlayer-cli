@@ -6,9 +6,11 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
-	"net/http"
 	"sort"
 	"strings"
+
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/clients/sidecar"
+	rewardsV1 "github.com/Layr-Labs/protocol-apis/gen/protos/eigenlayer/sidecar/v1/rewards"
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
@@ -16,9 +18,6 @@ import (
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 
-	"github.com/Layr-Labs/eigenlayer-rewards-proofs/pkg/proofDataFetcher/httpProofDataFetcher"
-
-	"github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
 	"github.com/Layr-Labs/eigensdk-go/logging"
 	eigenSdkUtils "github.com/Layr-Labs/eigensdk-go/utils"
 
@@ -77,8 +76,8 @@ func getShowFlags() []cli.Flag {
 		&EarnerAddressFlag,
 		&EnvironmentFlag,
 		&ClaimTypeFlag,
-		&ProofStoreBaseURLFlag,
 		&ClaimTimestampFlag,
+		&SidecarUrlFlag,
 	}
 
 	sort.Sort(cli.FlagsByName(baseFlags))
@@ -93,89 +92,83 @@ func ShowRewards(cCtx *cli.Context) error {
 	if err != nil {
 		return fmt.Errorf("error reading and validating config: %s", err)
 	}
+
+	sidecarClient, err := sidecar.NewSidecarRewardsClient(config.SidecarHttpRpcURL)
+	if err != nil {
+		return eigenSdkUtils.WrapError("failed to create new sidecar client", err)
+	}
+
 	cCtx.App.Metadata["network"] = config.ChainID.String()
 
-	ethClient, err := ethclient.Dial(config.RPCUrl)
-	if err != nil {
-		return eigenSdkUtils.WrapError("failed to create new eth client", err)
-	}
-
-	elReader, err := elcontracts.NewReaderFromConfig(
-		elcontracts.Config{
-			RewardsCoordinatorAddress: config.RewardsCoordinatorAddress,
-		},
-		ethClient,
-		logger,
-	)
-	if err != nil {
-		return eigenSdkUtils.WrapError("failed to create new reader from config", err)
-	}
-
-	df := httpProofDataFetcher.NewHttpProofDataFetcher(
-		config.ProofStoreBaseURL,
-		config.Environment,
-		config.Network,
-		http.DefaultClient,
-	)
-
-	claimDate, _, err := getClaimDistributionRoot(ctx, config.ClaimTimestamp, elReader, logger)
+	_, _, blockHeight, err := getClaimDistributionRoot(ctx, config.ClaimTimestamp, logger, sidecarClient)
 	if err != nil {
 		return eigenSdkUtils.WrapError("failed to get claim distribution root", err)
 	}
 
-	proofData, err := df.FetchClaimAmountsForDate(ctx, claimDate)
+	summarizedRewards, err := sidecarClient.GetSummarizedRewardsForEarner(
+		ctx,
+		&rewardsV1.GetSummarizedRewardsForEarnerRequest{
+			EarnerAddress: strings.ToLower(config.EarnerAddress.String()),
+			BlockHeight:   &blockHeight,
+		},
+	)
 	if err != nil {
-		return eigenSdkUtils.WrapError("failed to fetch claim amounts for date", err)
-	}
-
-	tokenAddressesMap, present := proofData.Distribution.GetTokensForEarner(config.EarnerAddress)
-	if !present {
-		return eigenSdkUtils.WrapError("earner address not found in distribution", nil)
+		return eigenSdkUtils.WrapError("failed to get summarized rewards for earner", err)
 	}
 
 	allRewards := make(map[gethcommon.Address]*big.Int)
-	msg := "Lifetime Rewards"
-	for pair := tokenAddressesMap.Oldest(); pair != nil; pair = pair.Next() {
-		amt, _ := new(big.Int).SetString(pair.Value.String(), 10)
-		allRewards[pair.Key] = amt
+	claimedRewards := make(map[gethcommon.Address]*big.Int)
+	unclaimedRewards := make(map[gethcommon.Address]*big.Int)
+
+	for _, tokenData := range summarizedRewards.Rewards {
+		token := gethcommon.HexToAddress(tokenData.Token)
+		if _, ok := allRewards[token]; !ok {
+			if tokenData.Earned == "" {
+				tokenData.Earned = "0"
+			}
+			earned, success := new(big.Int).SetString(tokenData.Earned, 10)
+			if !success {
+				return eigenSdkUtils.WrapError("failed to set string for earned", err)
+			}
+			allRewards[token] = earned
+		}
+
+		if _, ok := claimedRewards[token]; !ok {
+			if tokenData.Claimed == "" {
+				tokenData.Claimed = "0"
+			}
+			claimed, success := new(big.Int).SetString(tokenData.Claimed, 10)
+			if !success {
+				return eigenSdkUtils.WrapError("failed to set string for claimed", err)
+			}
+			claimedRewards[token] = claimed
+		}
+
+		if _, ok := unclaimedRewards[token]; !ok {
+			if tokenData.Claimable == "" {
+				tokenData.Claimable = "0"
+			}
+			unclaimed, success := new(big.Int).SetString(tokenData.Claimable, 10)
+			if !success {
+				return eigenSdkUtils.WrapError("failed to set string for unclaimed", err)
+			}
+			unclaimedRewards[token] = unclaimed
+		}
 	}
 
-	if config.ClaimType != All {
-		claimedRewards, err := getClaimedRewards(ctx, elReader, config.EarnerAddress, allRewards)
-		if err != nil {
-			return eigenSdkUtils.WrapError("failed to get claimed rewards", err)
-		}
-		switch config.ClaimType {
-		case Claimed:
-			allRewards = claimedRewards
-			msg = "Claimed Rewards"
-		case Unclaimed:
-			allRewards = calculateUnclaimedRewards(allRewards, claimedRewards)
-			msg = "Unclaimed Rewards"
-		}
+	switch config.ClaimType {
+	case Claimed:
+		err = handleRewardsOutput(config, claimedRewards, "Claimed Rewards")
+	case Unclaimed:
+		err = handleRewardsOutput(config, unclaimedRewards, "Unclaimed Rewards")
+	default:
+		err = handleRewardsOutput(config, allRewards, "Lifetime Rewards")
 	}
-	err = handleRewardsOutput(config, allRewards, msg)
+
 	if err != nil {
 		return err
 	}
 	return nil
-}
-
-func getClaimedRewards(
-	ctx context.Context,
-	elReader ELReader,
-	earnerAddress gethcommon.Address,
-	allRewards map[gethcommon.Address]*big.Int,
-) (map[gethcommon.Address]*big.Int, error) {
-	claimedRewards := make(map[gethcommon.Address]*big.Int)
-	for address := range allRewards {
-		claimed, err := getCummulativeClaimedRewards(ctx, elReader, earnerAddress, address)
-		if err != nil {
-			return nil, err
-		}
-		claimedRewards[address] = claimed
-	}
-	return claimedRewards, nil
 }
 
 func getCummulativeClaimedRewards(
@@ -192,18 +185,6 @@ func getCummulativeClaimedRewards(
 		claimed = big.NewInt(0)
 	}
 	return claimed, nil
-}
-
-func calculateUnclaimedRewards(
-	allRewards,
-	claimedRewards map[gethcommon.Address]*big.Int,
-) map[gethcommon.Address]*big.Int {
-	unclaimedRewards := make(map[gethcommon.Address]*big.Int)
-	for address, total := range allRewards {
-		claimed := claimedRewards[address]
-		unclaimedRewards[address] = new(big.Int).Sub(total, claimed)
-	}
-	return unclaimedRewards
 }
 
 func handleRewardsOutput(
@@ -312,19 +293,6 @@ func readAndValidateConfig(cCtx *cli.Context, logger logging.Logger) (*ShowConfi
 	}
 	logger.Debugf("Using Rewards Coordinator address: %s", rewardsCoordinatorAddress)
 
-	proofStoreBaseURL := cCtx.String(ProofStoreBaseURLFlag.Name)
-
-	// If empty get from utils
-	if common.IsEmptyString(proofStoreBaseURL) {
-		proofStoreBaseURL = getProofStoreBaseURL(network)
-
-		// If still empty return error
-		if common.IsEmptyString(proofStoreBaseURL) {
-			return nil, errors.New("proof store base URL not provided")
-		}
-	}
-	logger.Debugf("Using Proof store base URL: %s", proofStoreBaseURL)
-
 	claimType := ClaimType(cCtx.String(ClaimTypeFlag.Name))
 	if claimType != All && claimType != Unclaimed && claimType != Claimed {
 		return nil, errors.New("claim type must be 'all', 'unclaimed' or 'claimed'")
@@ -344,6 +312,16 @@ func readAndValidateConfig(cCtx *cli.Context, logger logging.Logger) (*ShowConfi
 		network = "ethereum"
 	}
 
+	sidecarUrl := cCtx.String(SidecarUrlFlag.Name)
+	if common.IsEmptyString(sidecarUrl) {
+		sidecarUrl = getSidecarUrl(network)
+
+		if common.IsEmptyString(sidecarUrl) {
+			return nil, errors.New("sidecar URL not provided")
+		}
+	}
+	logger.Debugf("Using Sidecar URL: %s", sidecarUrl)
+
 	return &ShowConfig{
 		EarnerAddress:             earnerAddress,
 		Network:                   network,
@@ -353,8 +331,8 @@ func readAndValidateConfig(cCtx *cli.Context, logger logging.Logger) (*ShowConfi
 		Output:                    output,
 		OutputType:                outputType,
 		RPCUrl:                    ethRpcUrl,
-		ProofStoreBaseURL:         proofStoreBaseURL,
 		ClaimTimestamp:            claimTimestamp,
 		RewardsCoordinatorAddress: gethcommon.HexToAddress(rewardsCoordinatorAddress),
+		SidecarHttpRpcURL:         sidecarUrl,
 	}, nil
 }

@@ -10,6 +10,11 @@ import (
 	"testing"
 	"time"
 
+	mocks2 "github.com/Layr-Labs/eigenlayer-cli/pkg/clients/sidecar/mocks"
+	"github.com/Layr-Labs/protocol-apis/gen/protos/eigenlayer/sidecar/v1/rewards"
+	"go.uber.org/mock/gomock"
+	"google.golang.org/protobuf/types/known/timestamppb"
+
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/testutils"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
@@ -126,7 +131,7 @@ func TestReadAndValidateConfig_NoRecipientProvided(t *testing.T) {
 	fs.String(EarnerAddressFlag.Name, earnerAddress, "")
 	fs.String(RewardsCoordinatorAddressFlag.Name, "0x1234", "")
 	fs.String(ClaimTimestampFlag.Name, "latest", "")
-	fs.String(ProofStoreBaseURLFlag.Name, "dummy-url", "")
+	fs.String(SidecarUrlFlag.Name, "sidecar", "")
 	cliCtx := cli.NewContext(nil, fs, nil)
 
 	logger := logging.NewJsonSLogger(os.Stdout, &logging.SLoggerOptions{})
@@ -147,7 +152,7 @@ func TestReadAndValidateConfig_NoTokenAddressesProvided(t *testing.T) {
 	fs.String(RewardsCoordinatorAddressFlag.Name, "0x1234", "")
 	fs.String(TokenAddressesFlag.Name, "", "")
 	fs.String(ClaimTimestampFlag.Name, "latest", "")
-	fs.String(ProofStoreBaseURLFlag.Name, "dummy-url", "")
+	fs.String(SidecarUrlFlag.Name, "sidecar", "")
 	cliCtx := cli.NewContext(nil, fs, nil)
 
 	logger := logging.NewJsonSLogger(os.Stdout, &logging.SLoggerOptions{})
@@ -168,7 +173,7 @@ func TestReadAndValidateConfig_ZeroTokenAddressesProvided(t *testing.T) {
 	fs.String(RewardsCoordinatorAddressFlag.Name, "0x1234", "")
 	fs.String(TokenAddressesFlag.Name, utils.ZeroAddress.String(), "")
 	fs.String(ClaimTimestampFlag.Name, "latest", "")
-	fs.String(ProofStoreBaseURLFlag.Name, "dummy-url", "")
+	fs.String(SidecarUrlFlag.Name, "sidecar", "")
 	cliCtx := cli.NewContext(nil, fs, nil)
 
 	logger := logging.NewJsonSLogger(os.Stdout, &logging.SLoggerOptions{})
@@ -188,7 +193,7 @@ func TestReadAndValidateConfig_RecipientProvided(t *testing.T) {
 	fs.String(RecipientAddressFlag.Name, recipientAddress, "")
 	fs.String(RewardsCoordinatorAddressFlag.Name, "0x1234", "")
 	fs.String(ClaimTimestampFlag.Name, "latest", "")
-	fs.String(ProofStoreBaseURLFlag.Name, "dummy-url", "")
+	fs.String(SidecarUrlFlag.Name, "sidecar", "")
 	cliCtx := cli.NewContext(nil, fs, nil)
 
 	logger := logging.NewJsonSLogger(os.Stdout, &logging.SLoggerOptions{})
@@ -206,7 +211,7 @@ func TestReadAndValidateConfig_NoClaimerProvided(t *testing.T) {
 	fs.String(EarnerAddressFlag.Name, earnerAddress, "")
 	fs.String(RewardsCoordinatorAddressFlag.Name, "0x1234", "")
 	fs.String(ClaimTimestampFlag.Name, "latest", "")
-	fs.String(ProofStoreBaseURLFlag.Name, "dummy-url", "")
+	fs.String(SidecarUrlFlag.Name, "sidecar", "")
 	cliCtx := cli.NewContext(nil, fs, nil)
 
 	logger := logging.NewJsonSLogger(os.Stdout, &logging.SLoggerOptions{})
@@ -224,7 +229,7 @@ func TestReadAndValidateConfig_ClaimerProvided(t *testing.T) {
 	fs.String(ClaimerAddressFlag.Name, claimerAddress, "")
 	fs.String(RewardsCoordinatorAddressFlag.Name, "0x1234", "")
 	fs.String(ClaimTimestampFlag.Name, "latest", "")
-	fs.String(ProofStoreBaseURLFlag.Name, "dummy-url", "")
+	fs.String(SidecarUrlFlag.Name, "sidecar", "")
 	cliCtx := cli.NewContext(nil, fs, nil)
 
 	logger := logging.NewJsonSLogger(os.Stdout, &logging.SLoggerOptions{})
@@ -235,8 +240,41 @@ func TestReadAndValidateConfig_ClaimerProvided(t *testing.T) {
 	assert.Equal(t, common.HexToAddress(claimerAddress), config.ClaimerAddress)
 }
 
+func parseTimestampToTime(ts string) time.Time {
+	s, _ := time.Parse(time.RFC3339, ts)
+	return s
+}
+
 func TestGetClaimDistributionRoot(t *testing.T) {
-	now := time.Now()
+	ctrl := gomock.NewController(t)
+
+	client := mocks2.NewMockISidecarClient(ctrl)
+
+	expectedRoots := []*rewards.DistributionRoot{
+		{
+			Root:      "0x3283c1d2ce88be155961e397782d3318f368b2408fdf43cd58efb5f5ae3015d2",
+			RootIndex: 210,
+			// fake the end date to be 24 hours in the future
+			RewardsCalculationEnd: timestamppb.New(parseTimestampToTime("2025-02-15T00:00:00Z")),
+			ActivatedAt:           timestamppb.New(time.Now().Add(24 * time.Hour)),
+			BlockHeight:           3371820,
+			LogIndex:              43,
+		}, {
+			Root:                  "0xa3f31747245d8fc3fc8cd589cc6c56d751924e934fda73125774beed6fd6c135",
+			RootIndex:             209,
+			RewardsCalculationEnd: timestamppb.New(parseTimestampToTime("2025-02-14T00:00:00Z")),
+			ActivatedAt:           timestamppb.New(parseTimestampToTime("2025-02-16T19:00:24Z")),
+			BlockHeight:           3365501,
+			LogIndex:              272,
+		}, {
+			Root:                  "0x0c7809acafad83b51bc2efa2d8ca71d92d11a2b419761a110d1b9217b1d1bbda",
+			RootIndex:             208,
+			RewardsCalculationEnd: timestamppb.New(parseTimestampToTime("2025-02-13T00:00:00Z")),
+			ActivatedAt:           timestamppb.New(parseTimestampToTime("2025-02-15T19:00:36Z")),
+			BlockHeight:           3358860,
+			LogIndex:              54,
+		},
+	}
 
 	tests := []struct {
 		name              string
@@ -244,38 +282,61 @@ func TestGetClaimDistributionRoot(t *testing.T) {
 		expectErr         bool
 		expectedClaimDate string
 		expectedRootIndex uint32
+		expect            func()
 	}{
 		{
 			name:              "latest root",
 			claimTimestamp:    "latest",
 			expectErr:         false,
-			expectedClaimDate: now.Add(-time.Hour).UTC().Format(time.DateOnly),
-			expectedRootIndex: 2,
+			expectedClaimDate: "2025-02-15",
+			expectedRootIndex: 210,
+			expect: func() {
+				client.EXPECT().
+					ListDistributionRoots(gomock.Any(), gomock.Any()).
+					Return(&rewards.ListDistributionRootsResponse{
+						DistributionRoots: expectedRoots,
+					}, nil)
+			},
 		},
 		{
 			name:              "latest active root",
 			claimTimestamp:    "latest_active",
 			expectErr:         false,
-			expectedClaimDate: now.Add(-48 * time.Hour).UTC().Format(time.DateOnly),
-			expectedRootIndex: 0,
+			expectedClaimDate: expectedRoots[1].RewardsCalculationEnd.AsTime().UTC().Format(time.DateOnly),
+			expectedRootIndex: 209,
+			expect: func() {
+				client.EXPECT().
+					ListDistributionRoots(gomock.Any(), gomock.Any()).
+					Return(&rewards.ListDistributionRootsResponse{
+						DistributionRoots: expectedRoots,
+					}, nil)
+			},
 		},
 		{
 			name:           "none of them",
 			claimTimestamp: "none",
 			expectErr:      true,
+			expect: func() {
+				client.EXPECT().
+					ListDistributionRoots(gomock.Any(), gomock.Any()).
+					Return(&rewards.ListDistributionRootsResponse{
+						DistributionRoots: []*rewards.DistributionRoot{},
+					}, nil)
+			},
 		},
 	}
 
-	reader := newFakeELReader(now, nil)
 	logger := logging.NewJsonSLogger(os.Stdout, &logging.SLoggerOptions{})
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			claimDate, rootIndex, err := getClaimDistributionRoot(
+			tt.expect()
+
+			claimDate, rootIndex, _, err := getClaimDistributionRoot(
 				context.Background(),
 				tt.claimTimestamp,
-				reader,
 				logger,
+				client,
 			)
 			if tt.expectErr {
 				assert.Error(t, err)
