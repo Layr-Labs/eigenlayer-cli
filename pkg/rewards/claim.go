@@ -114,6 +114,7 @@ func batchClaim(
 	p utils.Prompter,
 	rootIndex uint32,
 	sidecarClient rewardsV1.RewardsGatewayClient,
+	blockHeight uint64,
 ) error {
 
 	yamlFile, err := os.ReadFile(config.BatchClaimFile)
@@ -154,6 +155,7 @@ func batchClaim(
 			earnerAddr,
 			tokenAddrs,
 			sidecarClient,
+			blockHeight,
 		)
 
 		if err != nil {
@@ -167,6 +169,40 @@ func batchClaim(
 	return broadcastClaims(config, ethClient, logger, p, ctx, proofs)
 }
 
+func getClaimableRewardsForEarner(
+	ctx context.Context,
+	earnerAddress gethcommon.Address,
+	sidecarClient rewardsV1.RewardsGatewayClient,
+	blockHeight uint64,
+) (map[gethcommon.Address]*big.Int, error) {
+	summarizedRewards, err := sidecarClient.GetSummarizedRewardsForEarner(
+		ctx,
+		&rewardsV1.GetSummarizedRewardsForEarnerRequest{
+			EarnerAddress: strings.ToLower(earnerAddress.String()),
+			BlockHeight:   &blockHeight,
+		},
+	)
+	if err != nil {
+		return nil, eigenSdkUtils.WrapError("failed to get summarized rewards for earner", err)
+	}
+
+	claimableTokensMap := make(map[gethcommon.Address]*big.Int)
+	for _, tokenData := range summarizedRewards.Rewards {
+		token := gethcommon.HexToAddress(tokenData.Token)
+		if tokenData.Claimable == "" {
+			tokenData.Claimable = "0"
+		}
+		claimable, success := new(big.Int).SetString(tokenData.Claimable, 10)
+		if !success {
+			return nil, eigenSdkUtils.WrapError("failed to set string for claimable", err)
+		}
+		if claimable.Cmp(big.NewInt(0)) > 0 {
+			claimableTokensMap[token] = claimable
+		}
+	}
+	return claimableTokensMap, nil
+}
+
 func generateClaimPayload(
 	ctx context.Context,
 	rootIndex uint32,
@@ -175,14 +211,27 @@ func generateClaimPayload(
 	earnerAddress gethcommon.Address,
 	tokenAddresses []gethcommon.Address,
 	sidecarClient rewardsV1.RewardsGatewayClient,
+	blockHeight uint64,
 ) (
 	*rewardsV1.Proof,
 	error,
 ) {
-
 	tokens := make([]string, 0)
-	for _, token := range tokenAddresses {
-		tokens = append(tokens, token.String())
+	if len(tokenAddresses) == 0 {
+		tokenMap, err := getClaimableRewardsForEarner(ctx, earnerAddress, sidecarClient, blockHeight)
+		if err != nil {
+			return nil, eigenSdkUtils.WrapError("failed to get claimable rewards for earner", err)
+		}
+		for token := range tokenMap {
+			tokens = append(tokens, token.String())
+		}
+	} else {
+		for _, token := range tokenAddresses {
+			tokens = append(tokens, token.String())
+		}
+	}
+	if len(tokens) == 0 {
+		return nil, errors.New("no claimable tokens found for earner")
 	}
 	logger.Infof("Fetching claim proof from sidecar for earner '%s'", earnerAddress)
 	proof, err := sidecarClient.GenerateClaimProof(ctx, &rewardsV1.GenerateClaimProofRequest{
@@ -241,13 +290,13 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 		return eigenSdkUtils.WrapError("failed to create new reader from config", err)
 	}
 
-	_, rootIndex, _, err := getClaimDistributionRoot(ctx, config.ClaimTimestamp, logger, sidecarClient)
+	_, rootIndex, blockHeight, err := getClaimDistributionRoot(ctx, config.ClaimTimestamp, logger, sidecarClient)
 	if err != nil {
 		return eigenSdkUtils.WrapError("failed to get claim distribution root", err)
 	}
 
 	if config.BatchClaimFile != "" {
-		return batchClaim(ctx, logger, ethClient, elReader, config, p, rootIndex, sidecarClient)
+		return batchClaim(ctx, logger, ethClient, elReader, config, p, rootIndex, sidecarClient, blockHeight)
 	}
 
 	proof, err := generateClaimPayload(
@@ -258,6 +307,7 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 		config.EarnerAddress,
 		config.TokenAddresses,
 		sidecarClient,
+		blockHeight,
 	)
 
 	if err != nil {
