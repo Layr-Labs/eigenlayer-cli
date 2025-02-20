@@ -28,11 +28,11 @@ type ClaimConfig struct {
 	RewardsCoordinatorAddress gethcommon.Address
 	ClaimTimestamp            string
 	ChainID                   *big.Int
-	ProofStoreBaseURL         string
 	Environment               string
 	SignerConfig              *types.SignerConfig
 	IsSilent                  bool
 	BatchClaimFile            string
+	SidecarHttpRpcURL         string
 }
 
 type SetClaimerConfig struct {
@@ -61,4 +61,5 @@ type ShowConfig struct {
 	ProofStoreBaseURL         string
 	ClaimTimestamp            string
 	RewardsCoordinatorAddress gethcommon.Address
+	SidecarHttpRpcURL         string
 }
