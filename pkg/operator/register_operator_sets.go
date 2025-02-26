@@ -77,6 +77,7 @@ func registerOperatorSetsAction(cCtx *cli.Context, p utils.Prompter) error {
 		}
 		receipt, err := eLWriter.RegisterForOperatorSets(
 			ctx,
+			config.callerAddress,
 			elcontracts.RegistrationRequest{
 				OperatorAddress: config.operatorAddress,
 				AVSAddress:      config.avsAddress,
