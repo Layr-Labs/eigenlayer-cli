@@ -88,14 +88,14 @@ func getClaimFlags() []cli.Flag {
 
 func convertSidecarProofToContractProof(
 	proof *rewardsV1.Proof,
-) rewardscoordinator.IRewardsCoordinatorRewardsMerkleClaim {
+) rewardscoordinator.IRewardsCoordinatorTypesRewardsMerkleClaim {
 	var earnerTokenRoot [32]byte
 	copy(earnerTokenRoot[:], proof.EarnerLeaf.EarnerTokenRoot)
-	return rewardscoordinator.IRewardsCoordinatorRewardsMerkleClaim{
+	return rewardscoordinator.IRewardsCoordinatorTypesRewardsMerkleClaim{
 		RootIndex:       proof.RootIndex,
 		EarnerIndex:     proof.EarnerIndex,
 		EarnerTreeProof: proof.EarnerTreeProof,
-		EarnerLeaf: rewardscoordinator.IRewardsCoordinatorEarnerTreeMerkleLeaf{
+		EarnerLeaf: rewardscoordinator.IRewardsCoordinatorTypesEarnerTreeMerkleLeaf{
 			Earner:          gethcommon.HexToAddress(proof.EarnerLeaf.Earner),
 			EarnerTokenRoot: earnerTokenRoot,
 		},
@@ -332,7 +332,7 @@ func broadcastClaims(
 		return fmt.Errorf("at least one claim is required")
 	}
 	// just-in-time convert proofs to the contract format.
-	elClaims := make([]rewardscoordinator.IRewardsCoordinatorRewardsMerkleClaim, 0)
+	elClaims := make([]rewardscoordinator.IRewardsCoordinatorTypesRewardsMerkleClaim, 0)
 	for _, proof := range proofs {
 		elClaim := convertSidecarProofToContractProof(proof)
 		elClaims = append(elClaims, elClaim)
