@@ -638,11 +638,6 @@ func readAndValidateClaimConfig(cCtx *cli.Context, logger logging.Logger) (*Clai
 		logger.Debugf("Failed to get signer config: %s", err)
 	}
 
-	// TODO(shrimalmadhur): Fix to make sure correct S3 bucket is used. Clean up later
-	if network == utils.MainnetNetworkName {
-		network = "ethereum"
-	}
-
 	sidecarUrl := cCtx.String(SidecarUrlFlag.Name)
 	if common.IsEmptyString(sidecarUrl) {
 		sidecarUrl = getSidecarUrl(network)
