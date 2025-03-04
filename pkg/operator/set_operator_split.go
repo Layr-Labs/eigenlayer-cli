@@ -24,8 +24,12 @@ type SetOperatorSplitCmd struct {
 	isOperatorSet           bool
 }
 
-func NewSetOperatorSplitCmd(p utils.Prompter) *cli.Command {
-	delegateCommand := &SetOperatorSplitCmd{prompter: p, isProgrammaticIncentive: false, isOperatorSet: false}
+func NewSetOperatorSplitCmd(p utils.Prompter, isProgrammaticIncentive bool, isOperatorSet bool) *cli.Command {
+	delegateCommand := &SetOperatorSplitCmd{
+		prompter:                p,
+		isProgrammaticIncentive: isProgrammaticIncentive,
+		isOperatorSet:           isOperatorSet,
+	}
 	setOperatorSplitCmd := command.NewWriteableCallDataCommand(
 		delegateCommand,
 		"set-rewards-split",
@@ -39,10 +43,14 @@ func NewSetOperatorSplitCmd(p utils.Prompter) *cli.Command {
 }
 
 func (s SetOperatorSplitCmd) Execute(cCtx *cli.Context) error {
+	return SetOperatorSplit(cCtx, s.prompter, s.isProgrammaticIncentive, s.isOperatorSet)
+}
+
+func SetOperatorSplit(cCtx *cli.Context, p utils.Prompter, isProgrammaticIncentive bool, isOperatorSet bool) error {
 	ctx := cCtx.Context
 	logger := common.GetLogger(cCtx)
 
-	config, err := readAndValidateSetOperatorSplitConfig(cCtx, logger, s.isProgrammaticIncentive, s.isOperatorSet)
+	config, err := readAndValidateSetOperatorSplitConfig(cCtx, logger, isProgrammaticIncentive, isOperatorSet)
 	if err != nil {
 		return eigenSdkUtils.WrapError("failed to read and validate operator split config", err)
 	}
@@ -63,7 +71,7 @@ func (s SetOperatorSplitCmd) Execute(cCtx *cli.Context) error {
 			elcontracts.Config{
 				RewardsCoordinatorAddress: config.RewardsCoordinatorAddress,
 			},
-			s.prompter,
+			p,
 			config.ChainID,
 			logger,
 		)
@@ -75,13 +83,13 @@ func (s SetOperatorSplitCmd) Execute(cCtx *cli.Context) error {
 		logger.Infof("Broadcasting set operator transaction...")
 
 		var receipt *types.Receipt
-		if s.isOperatorSet {
+		if isOperatorSet {
 			operatorSet := contractIRewardsCoordinator.OperatorSet{
 				Id:  uint32(config.OperatorSetId),
 				Avs: config.AVSAddress,
 			}
 			receipt, err = eLWriter.SetOperatorSetSplit(ctx, config.OperatorAddress, operatorSet, config.Split, true)
-		} else if s.isProgrammaticIncentive {
+		} else if isProgrammaticIncentive {
 			receipt, err = eLWriter.SetOperatorPISplit(ctx, config.OperatorAddress, config.Split, true)
 
 		} else {
@@ -112,13 +120,13 @@ func (s SetOperatorSplitCmd) Execute(cCtx *cli.Context) error {
 		}
 
 		var unsignedTx *types.Transaction
-		if s.isOperatorSet {
+		if isOperatorSet {
 			operatorSet := contractIRewardsCoordinator.OperatorSet{
 				Id:  uint32(config.OperatorSetId),
 				Avs: config.AVSAddress,
 			}
 			unsignedTx, err = contractBindings.RewardsCoordinator.SetOperatorSetSplit(noSendTxOpts, config.OperatorAddress, operatorSet, config.Split)
-		} else if s.isProgrammaticIncentive {
+		} else if isProgrammaticIncentive {
 			unsignedTx, err = contractBindings.RewardsCoordinator.SetOperatorPISplit(noSendTxOpts, config.OperatorAddress, config.Split)
 		} else {
 			unsignedTx, err = contractBindings.RewardsCoordinator.SetOperatorAVSSplit(noSendTxOpts, config.OperatorAddress, config.AVSAddress, config.Split)

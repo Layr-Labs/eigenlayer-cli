@@ -18,7 +18,7 @@ func OperatorCmd(p utils.Prompter) *cli.Command {
 			operator.UpdateCmd(p),
 			operator.UpdateMetadataURICmd(p),
 			operator.GetApprovalCmd(p),
-			operator.NewSetOperatorSplitCmd(p),
+			operator.NewSetOperatorSplitCmd(p, false, false),
 			operator.GetOperatorSplitCmd(p),
 			operator.GetOperatorPISplitCmd(p),
 			operator.SetOperatorPISplitCmd(p),
