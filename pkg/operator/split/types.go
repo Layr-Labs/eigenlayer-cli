@@ -16,6 +16,7 @@ type SetOperatorAVSSplitConfig struct {
 	Broadcast                 bool
 	OperatorAddress           gethcommon.Address
 	AVSAddress                gethcommon.Address
+	CallerAddress             gethcommon.Address
 	Split                     uint16
 	OutputType                string
 	OutputFile                string

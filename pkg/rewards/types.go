@@ -21,6 +21,7 @@ type ClaimConfig struct {
 	EarnerAddress             gethcommon.Address
 	RecipientAddress          gethcommon.Address
 	ClaimerAddress            gethcommon.Address
+	CallerAddress             gethcommon.Address
 	Output                    string
 	OutputType                string
 	Broadcast                 bool
@@ -44,6 +45,7 @@ type SetClaimerConfig struct {
 	ChainID                   *big.Int
 	SignerConfig              *types.SignerConfig
 	EarnerAddress             gethcommon.Address
+	CallerAddress             gethcommon.Address
 	Output                    string
 	OutputType                string
 }
