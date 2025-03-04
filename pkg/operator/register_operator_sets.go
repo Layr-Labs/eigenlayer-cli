@@ -22,7 +22,7 @@ type RegisterOperatorSetCmd struct {
 	prompter utils.Prompter
 }
 
-func RegisterOperatorSetsCommand(p utils.Prompter) *cli.Command {
+func NewRegisterOperatorSetsCommand(p utils.Prompter) *cli.Command {
 	delegateCommand := &RegisterOperatorSetCmd{p}
 	registerOperatorSetCmd := command.NewWriteableCallDataCommand(
 		delegateCommand,
@@ -153,8 +153,8 @@ func readAndValidateRegisterOperatorSetsConfig(cCtx *cli.Context, logger logging
 	broadcast := cCtx.Bool(flags.BroadcastFlag.Name)
 	isSilent := cCtx.Bool(flags.SilentFlag.Name)
 
-	operatorAddress := cCtx.String(flags.OperatorAddressFlag.Name)
-	callerAddress := common.PopulateCallerAddress(cCtx, logger, gethcommon.HexToAddress(operatorAddress))
+	operatorAddress := gethcommon.HexToAddress(cCtx.String(flags.OperatorAddressFlag.Name))
+	callerAddress := common.PopulateCallerAddress(cCtx, logger, operatorAddress)
 	avsAddress := gethcommon.HexToAddress(cCtx.String(flags.AVSAddressFlag.Name))
 
 	// Get signerConfig
@@ -184,7 +184,7 @@ func readAndValidateRegisterOperatorSetsConfig(cCtx *cli.Context, logger logging
 	config := &RegisterConfig{
 		avsAddress:               avsAddress,
 		operatorSetIds:           operatorSetIds,
-		operatorAddress:          gethcommon.HexToAddress(operatorAddress),
+		operatorAddress:          operatorAddress,
 		callerAddress:            callerAddress,
 		network:                  network,
 		environment:              environment,

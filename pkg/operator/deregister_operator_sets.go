@@ -25,7 +25,7 @@ type DeregisterOperatorSetsCmd struct {
 	prompter utils.Prompter
 }
 
-func DeregisterCommand(p utils.Prompter) *cli.Command {
+func NewDeregisterCommand(p utils.Prompter) *cli.Command {
 	delegateCommand := &DeregisterOperatorSetsCmd{prompter: p}
 	deregisterCmd := command.NewWriteableCallDataCommand(
 		delegateCommand,
