@@ -22,7 +22,7 @@ type RegisterOperatorSetCmd struct {
 	prompter utils.Prompter
 }
 
-func NewRegisterOperatorSetsCommand(p utils.Prompter) *cli.Command {
+func NewRegisterOperatorSetsCmd(p utils.Prompter) *cli.Command {
 	delegateCommand := &RegisterOperatorSetCmd{p}
 	registerOperatorSetCmd := command.NewWriteableCallDataCommand(
 		delegateCommand,
