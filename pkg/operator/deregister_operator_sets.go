@@ -231,7 +231,6 @@ func getDeregistrationFlags() []cli.Flag {
 		&flags.SilentFlag,
 	}
 
-	allFlags := append(baseFlags, flags.GetSignerFlags()...)
-	sort.Sort(cli.FlagsByName(allFlags))
-	return allFlags
+	sort.Sort(cli.FlagsByName(baseFlags))
+	return baseFlags
 }
