@@ -3,8 +3,6 @@ package operator
 import (
 	"fmt"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/command"
-	"sort"
-
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/operator/split"
@@ -157,7 +155,7 @@ func (s SetOperatorSplitCmd) Execute(cCtx *cli.Context) error {
 }
 
 func getSetOperatorSplitFlags() []cli.Flag {
-	baseFlags := []cli.Flag{
+	return []cli.Flag{
 		&flags.NetworkFlag,
 		&flags.ETHRpcUrlFlag,
 		&flags.OperatorAddressFlag,
@@ -166,9 +164,6 @@ func getSetOperatorSplitFlags() []cli.Flag {
 		&split.AVSAddressFlag,
 		&flags.SilentFlag,
 	}
-
-	sort.Sort(cli.FlagsByName(baseFlags))
-	return baseFlags
 }
 
 func readAndValidateSetOperatorSplitConfig(

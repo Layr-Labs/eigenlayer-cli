@@ -3,8 +3,6 @@ package rewards
 import (
 	"context"
 	"fmt"
-	"sort"
-
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/command"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
@@ -38,7 +36,7 @@ func NewSetClaimerCmd(p utils.Prompter) *cli.Command {
 }
 
 func getSetClaimerFlags() []cli.Flag {
-	baseFlags := []cli.Flag{
+	return []cli.Flag{
 		&flags.NetworkFlag,
 		&flags.ETHRpcUrlFlag,
 		&EarnerAddressFlag,
@@ -46,8 +44,6 @@ func getSetClaimerFlags() []cli.Flag {
 		&ClaimerAddressFlag,
 		&flags.VerboseFlag,
 	}
-	sort.Sort(cli.FlagsByName(baseFlags))
-	return baseFlags
 }
 
 func (s SetClaimerCmd) Execute(cCtx *cli.Context) error {

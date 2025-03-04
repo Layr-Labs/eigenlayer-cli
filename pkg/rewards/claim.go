@@ -8,7 +8,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"math/big"
 	"os"
-	"sort"
 	"strings"
 	"time"
 
@@ -66,7 +65,7 @@ func NewClaimCmd(p utils.Prompter) *cli.Command {
 }
 
 func getClaimFlags() []cli.Flag {
-	baseFlags := []cli.Flag{
+	return []cli.Flag{
 		&flags.NetworkFlag,
 		&flags.ETHRpcUrlFlag,
 		&EarnerAddressFlag,
@@ -81,8 +80,6 @@ func getClaimFlags() []cli.Flag {
 		&flags.SilentFlag,
 		&flags.BatchClaimFile,
 	}
-	sort.Sort(cli.FlagsByName(baseFlags))
-	return baseFlags
 }
 
 func convertSidecarProofToContractProof(

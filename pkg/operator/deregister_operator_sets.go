@@ -2,12 +2,10 @@ package operator
 
 import (
 	"fmt"
-	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/command"
 	"math"
 	"strings"
 
-	"sort"
-
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/command"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
@@ -219,7 +217,7 @@ func readAndValidateDeregisterConfig(cCtx *cli.Context, logger logging.Logger) (
 }
 
 func getDeregistrationFlags() []cli.Flag {
-	baseFlags := []cli.Flag{
+	return []cli.Flag{
 		&flags.NetworkFlag,
 		&flags.EnvironmentFlag,
 		&flags.ETHRpcUrlFlag,
@@ -230,7 +228,4 @@ func getDeregistrationFlags() []cli.Flag {
 		&flags.DelegationManagerAddressFlag,
 		&flags.SilentFlag,
 	}
-
-	sort.Sort(cli.FlagsByName(baseFlags))
-	return baseFlags
 }
