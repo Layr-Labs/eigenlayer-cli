@@ -2,11 +2,9 @@ package operator
 
 import (
 	"fmt"
-	"sort"
-
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/command"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
-	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
@@ -20,27 +18,25 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-func RegisterOperatorSetsCommand(p utils.Prompter) *cli.Command {
-	registerOperatorSetsCmd := &cli.Command{
-		Name:      "register-operator-sets",
-		Usage:     "register operator from specified operator sets",
-		UsageText: "register-operator-sets [flags]",
-		Description: `
-register operator sets for operator.
-
-To find what operator set you are registered for, use the 'eigenlayer operator allocations show' command.
-
-`,
-		Flags: getRegistrationFlags(),
-		After: telemetry.AfterRunAction(),
-		Action: func(context *cli.Context) error {
-			return registerOperatorSetsAction(context, p)
-		},
-	}
-	return registerOperatorSetsCmd
+type RegisterOperatorSetCmd struct {
+	prompter utils.Prompter
 }
 
-func registerOperatorSetsAction(cCtx *cli.Context, p utils.Prompter) error {
+func NewRegisterOperatorSetsCmd(p utils.Prompter) *cli.Command {
+	delegateCommand := &RegisterOperatorSetCmd{p}
+	registerOperatorSetCmd := command.NewWriteableCallDataCommand(
+		delegateCommand,
+		"register-operator-sets",
+		"register operator from specified operator sets",
+		"register-operator-sets [flags]",
+		"",
+		getRegistrationFlags(),
+	)
+
+	return registerOperatorSetCmd
+}
+
+func (r RegisterOperatorSetCmd) Execute(cCtx *cli.Context) error {
 	ctx := cCtx.Context
 	logger := common.GetLogger(cCtx)
 
@@ -68,7 +64,7 @@ func registerOperatorSetsAction(cCtx *cli.Context, p utils.Prompter) error {
 			elcontracts.Config{
 				DelegationManagerAddress: config.delegationManagerAddress,
 			},
-			p,
+			r.prompter,
 			config.chainID,
 			logger,
 		)
@@ -96,7 +92,7 @@ func registerOperatorSetsAction(cCtx *cli.Context, p utils.Prompter) error {
 		if err != nil {
 			return err
 		}
-		// If operator is a smart contract, we can't estimate gas using geth
+		// If caller is a smart contract, we can't estimate gas using geth
 		// since balance of contract can be 0, as it can be called by an EOA
 		// to claim. So we hardcode the gas limit to 150_000 so that we can
 		// create unsigned tx without gas limit estimation from contract bindings
@@ -157,12 +153,8 @@ func readAndValidateRegisterOperatorSetsConfig(cCtx *cli.Context, logger logging
 	broadcast := cCtx.Bool(flags.BroadcastFlag.Name)
 	isSilent := cCtx.Bool(flags.SilentFlag.Name)
 
-	operatorAddress := cCtx.String(flags.OperatorAddressFlag.Name)
-	callerAddress := cCtx.String(flags.CallerAddressFlag.Name)
-	if common.IsEmptyString(callerAddress) {
-		logger.Infof("Caller address not provided. Using operator address (%s) as caller address", operatorAddress)
-		callerAddress = operatorAddress
-	}
+	operatorAddress := gethcommon.HexToAddress(cCtx.String(flags.OperatorAddressFlag.Name))
+	callerAddress := common.PopulateCallerAddress(cCtx, logger, operatorAddress)
 	avsAddress := gethcommon.HexToAddress(cCtx.String(flags.AVSAddressFlag.Name))
 
 	// Get signerConfig
@@ -192,8 +184,8 @@ func readAndValidateRegisterOperatorSetsConfig(cCtx *cli.Context, logger logging
 	config := &RegisterConfig{
 		avsAddress:               avsAddress,
 		operatorSetIds:           operatorSetIds,
-		operatorAddress:          gethcommon.HexToAddress(operatorAddress),
-		callerAddress:            gethcommon.HexToAddress(callerAddress),
+		operatorAddress:          operatorAddress,
+		callerAddress:            callerAddress,
 		network:                  network,
 		environment:              environment,
 		broadcast:                broadcast,
@@ -210,23 +202,15 @@ func readAndValidateRegisterOperatorSetsConfig(cCtx *cli.Context, logger logging
 }
 
 func getRegistrationFlags() []cli.Flag {
-	baseFlags := []cli.Flag{
+	return []cli.Flag{
 		&flags.NetworkFlag,
 		&flags.EnvironmentFlag,
 		&flags.ETHRpcUrlFlag,
-		&flags.OutputFileFlag,
-		&flags.OutputTypeFlag,
-		&flags.BroadcastFlag,
 		&flags.VerboseFlag,
 		&flags.AVSAddressFlag,
 		&flags.OperatorAddressFlag,
 		&flags.OperatorSetIdsFlag,
 		&flags.DelegationManagerAddressFlag,
 		&flags.SilentFlag,
-		&flags.CallerAddressFlag,
 	}
-
-	allFlags := append(baseFlags, flags.GetSignerFlags()...)
-	sort.Sort(cli.FlagsByName(allFlags))
-	return allFlags
 }

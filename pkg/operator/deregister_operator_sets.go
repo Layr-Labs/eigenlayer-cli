@@ -5,11 +5,9 @@ import (
 	"math"
 	"strings"
 
-	"sort"
-
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/command"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
-	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
@@ -23,28 +21,29 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-func DeregisterCommand(p utils.Prompter) *cli.Command {
-	getDeregisterCmd := &cli.Command{
-		Name:      "deregister-operator-sets",
-		Usage:     "Deregister operator from specified operator sets",
-		UsageText: "deregister-operator-sets [flags]",
-		Description: `
-Deregister operator from operator sets. 
-This command doesn't automatically deallocate your slashable stake from that operator set so you will have to use the 'operator allocations update' command to deallocate your stake from the operator set.
-
-To find what operator set you are part of, use the 'eigenlayer operator allocations show' command.
-
-`,
-		Flags: getDeregistrationFlags(),
-		After: telemetry.AfterRunAction(),
-		Action: func(context *cli.Context) error {
-			return deregisterAction(context, p)
-		},
-	}
-	return getDeregisterCmd
+type DeregisterOperatorSetsCmd struct {
+	prompter utils.Prompter
 }
 
-func deregisterAction(cCtx *cli.Context, p utils.Prompter) error {
+func NewDeregisterOperatorSetsCmd(p utils.Prompter) *cli.Command {
+	delegateCommand := &DeregisterOperatorSetsCmd{prompter: p}
+	deregisterCmd := command.NewWriteableCallDataCommand(
+		delegateCommand,
+		"deregister-operator-sets",
+		"Deregister operator from specified operator sets",
+		"deregister-operator-sets [flags]",
+		`
+		Deregister operator from operator sets. 
+		This command doesn't automatically deallocate your slashable stake from that operator set so you will have to use the 'operator allocations update' command to deallocate your stake from the operator set.
+
+		To find what operator set you are part of, use the 'eigenlayer operator allocations show' command.
+		`,
+		getDeregistrationFlags(),
+	)
+	return deregisterCmd
+}
+
+func (d DeregisterOperatorSetsCmd) Execute(cCtx *cli.Context) error {
 	ctx := cCtx.Context
 	logger := common.GetLogger(cCtx)
 
@@ -72,7 +71,7 @@ func deregisterAction(cCtx *cli.Context, p utils.Prompter) error {
 			elcontracts.Config{
 				DelegationManagerAddress: config.delegationManagerAddress,
 			},
-			p,
+			d.prompter,
 			config.chainID,
 			logger,
 		)
@@ -169,12 +168,8 @@ func readAndValidateDeregisterConfig(cCtx *cli.Context, logger logging.Logger) (
 	broadcast := cCtx.Bool(flags.BroadcastFlag.Name)
 	isSilent := cCtx.Bool(flags.SilentFlag.Name)
 
-	operatorAddress := cCtx.String(flags.OperatorAddressFlag.Name)
-	callerAddress := cCtx.String(flags.CallerAddressFlag.Name)
-	if common.IsEmptyString(callerAddress) {
-		logger.Infof("Caller address not provided. Using operator address (%s) as caller address", operatorAddress)
-		callerAddress = operatorAddress
-	}
+	operatorAddress := gethcommon.HexToAddress(cCtx.String(flags.OperatorAddressFlag.Name))
+	callerAddress := common.PopulateCallerAddress(cCtx, logger, operatorAddress)
 	avsAddress := gethcommon.HexToAddress(cCtx.String(flags.AVSAddressFlag.Name))
 
 	// Get signerConfig
@@ -204,8 +199,8 @@ func readAndValidateDeregisterConfig(cCtx *cli.Context, logger logging.Logger) (
 	config := &DeregisterConfig{
 		avsAddress:               avsAddress,
 		operatorSetIds:           operatorSetIds,
-		operatorAddress:          gethcommon.HexToAddress(operatorAddress),
-		callerAddress:            gethcommon.HexToAddress(callerAddress),
+		operatorAddress:          operatorAddress,
+		callerAddress:            callerAddress,
 		network:                  network,
 		environment:              environment,
 		broadcast:                broadcast,
@@ -222,23 +217,15 @@ func readAndValidateDeregisterConfig(cCtx *cli.Context, logger logging.Logger) (
 }
 
 func getDeregistrationFlags() []cli.Flag {
-	baseFlags := []cli.Flag{
+	return []cli.Flag{
 		&flags.NetworkFlag,
 		&flags.EnvironmentFlag,
 		&flags.ETHRpcUrlFlag,
-		&flags.OutputFileFlag,
-		&flags.OutputTypeFlag,
-		&flags.BroadcastFlag,
 		&flags.VerboseFlag,
 		&flags.AVSAddressFlag,
 		&flags.OperatorAddressFlag,
 		&flags.OperatorSetIdsFlag,
 		&flags.DelegationManagerAddressFlag,
 		&flags.SilentFlag,
-		&flags.CallerAddressFlag,
 	}
-
-	allFlags := append(baseFlags, flags.GetSignerFlags()...)
-	sort.Sort(cli.FlagsByName(allFlags))
-	return allFlags
 }

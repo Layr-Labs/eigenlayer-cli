@@ -145,7 +145,7 @@ func readAndValidateAcceptAdminConfig(
 	logger logging.Logger,
 ) (*acceptAdminConfig, error) {
 	accountAddress := gethcommon.HexToAddress(cliContext.String(AccountAddressFlag.Name))
-	callerAddress := user.PopulateCallerAddress(cliContext, logger, accountAddress)
+	callerAddress := common.PopulateCallerAddress(cliContext, logger, accountAddress)
 	ethRpcUrl := cliContext.String(flags.ETHRpcUrlFlag.Name)
 	network := cliContext.String(flags.NetworkFlag.Name)
 	environment := cliContext.String(flags.EnvironmentFlag.Name)

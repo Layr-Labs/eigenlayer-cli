@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"gopkg.in/yaml.v2"
 	"math/big"
 	"os"
-	"sort"
 	"strings"
 	"time"
 
@@ -17,11 +17,10 @@ import (
 	rewardsV1 "github.com/Layr-Labs/protocol-apis/gen/protos/eigenlayer/sidecar/v1/rewards"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/command"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
-	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
-	"gopkg.in/yaml.v2"
 
 	"github.com/Layr-Labs/eigenlayer-rewards-proofs/pkg/distribution"
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
@@ -47,27 +46,28 @@ type elChainReader interface {
 	GetCumulativeClaimed(ctx context.Context, earnerAddress, tokenAddress gethcommon.Address) (*big.Int, error)
 }
 
-func ClaimCmd(p utils.Prompter) *cli.Command {
-	var claimCmd = &cli.Command{
-		Name:  "claim",
-		Usage: "Claim rewards for any earner",
-		Action: func(cCtx *cli.Context) error {
-			return Claim(cCtx, p)
-		},
-		After: telemetry.AfterRunAction(),
-		Flags: getClaimFlags(),
-	}
+type ClaimCmd struct {
+	prompter utils.Prompter
+}
+
+func NewClaimCmd(p utils.Prompter) *cli.Command {
+	delegateCmd := &ClaimCmd{prompter: p}
+	claimCmd := command.NewWriteableCallDataCommand(
+		delegateCmd,
+		"claim",
+		"Claim rewards for any earner",
+		"",
+		"",
+		getClaimFlags(),
+	)
 
 	return claimCmd
 }
 
 func getClaimFlags() []cli.Flag {
-	baseFlags := []cli.Flag{
+	return []cli.Flag{
 		&flags.NetworkFlag,
 		&flags.ETHRpcUrlFlag,
-		&flags.OutputFileFlag,
-		&flags.OutputTypeFlag,
-		&flags.BroadcastFlag,
 		&EarnerAddressFlag,
 		&EnvironmentFlag,
 		&RecipientAddressFlag,
@@ -80,10 +80,6 @@ func getClaimFlags() []cli.Flag {
 		&flags.SilentFlag,
 		&flags.BatchClaimFile,
 	}
-
-	allFlags := append(baseFlags, flags.GetSignerFlags()...)
-	sort.Sort(cli.FlagsByName(allFlags))
-	return allFlags
 }
 
 func convertSidecarProofToContractProof(
@@ -258,7 +254,7 @@ func generateClaimPayload(
 	return proof.Proof, nil
 }
 
-func Claim(cCtx *cli.Context, p utils.Prompter) error {
+func (c ClaimCmd) Execute(cCtx *cli.Context) error {
 	ctx := cCtx.Context
 	logger := common.GetLogger(cCtx)
 
@@ -296,7 +292,7 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 	}
 
 	if config.BatchClaimFile != "" {
-		return batchClaim(ctx, logger, ethClient, elReader, config, p, rootIndex, sidecarClient, blockHeight)
+		return batchClaim(ctx, logger, ethClient, elReader, config, c.prompter, rootIndex, sidecarClient, blockHeight)
 	}
 
 	proof, err := generateClaimPayload(
@@ -315,7 +311,7 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 	}
 
 	proofs := []*rewardsV1.Proof{proof}
-	err = broadcastClaims(config, ethClient, logger, p, ctx, proofs)
+	err = broadcastClaims(config, ethClient, logger, c.prompter, ctx, proofs)
 
 	return err
 }
@@ -340,7 +336,7 @@ func broadcastClaims(
 
 	if config.Broadcast {
 		eLWriter, err := common.GetELWriter(
-			config.ClaimerAddress,
+			config.CallerAddress,
 			config.SignerConfig,
 			ethClient,
 			elcontracts.Config{
@@ -371,7 +367,7 @@ func broadcastClaims(
 		logger.Infof("Claim transaction submitted successfully")
 		common.PrintTransactionInfo(receipt.TxHash.String(), config.ChainID)
 	} else {
-		noSendTxOpts := common.GetNoSendTxOpts(config.ClaimerAddress)
+		noSendTxOpts := common.GetNoSendTxOpts(config.CallerAddress)
 		_, _, contractBindings, err := elcontracts.BuildClients(elcontracts.Config{
 			RewardsCoordinatorAddress: config.RewardsCoordinatorAddress,
 		}, ethClient, nil, logger, nil)
@@ -379,12 +375,12 @@ func broadcastClaims(
 			return err
 		}
 
-		// If claimer is a smart contract, we can't estimate gas using geth
+		// If caller is a smart contract, we can't estimate gas using geth
 		// since balance of contract can be 0, as it can be called by an EOA
 		// to claim. So we hardcode the gas limit to 150_000 so that we can
 		// create unsigned tx without gas limit estimation from contract bindings
-		if common.IsSmartContractAddress(config.ClaimerAddress, ethClient) {
-			// Claimer is a smart contract
+		if common.IsSmartContractAddress(config.CallerAddress, ethClient) {
+			// Caller is a smart contract
 			noSendTxOpts.GasLimit = 150_000
 		}
 		var unsignedTx *types.Transaction
@@ -582,6 +578,7 @@ func readAndValidateClaimConfig(cCtx *cli.Context, logger logging.Logger) (*Clai
 	tokenAddresses := cCtx.String(TokenAddressesFlag.Name)
 	splitTokenAddresses := strings.Split(tokenAddresses, ",")
 	validTokenAddresses := getValidHexAddresses(splitTokenAddresses)
+	callerAddress := common.PopulateCallerAddress(cCtx, logger, earnerAddress)
 	rewardsCoordinatorAddress := cCtx.String(RewardsCoordinatorAddressFlag.Name)
 	isSilent := cCtx.Bool(flags.SilentFlag.Name)
 	batchClaimFile := cCtx.String(flags.BatchClaimFile.Name)
@@ -622,7 +619,7 @@ func readAndValidateClaimConfig(cCtx *cli.Context, logger logging.Logger) (*Clai
 	logger.Debugf("Using chain ID: %s", chainID.String())
 
 	if common.IsEmptyString(environment) {
-		environment = getEnvFromNetwork(network)
+		environment = common.GetEnvFromNetwork(network)
 	}
 	logger.Debugf("Using network %s and environment: %s", network, environment)
 
@@ -653,6 +650,7 @@ func readAndValidateClaimConfig(cCtx *cli.Context, logger logging.Logger) (*Clai
 		Network:                   network,
 		RPCUrl:                    rpcUrl,
 		EarnerAddress:             earnerAddress,
+		CallerAddress:             callerAddress,
 		Output:                    output,
 		OutputType:                outputType,
 		Broadcast:                 broadcast,
@@ -677,17 +675,6 @@ func getSidecarUrl(network string) string {
 		return ""
 	} else {
 		return chainMetadata.SidecarHttpRpcURL
-	}
-}
-
-func getEnvFromNetwork(network string) string {
-	switch network {
-	case utils.HoleskyNetworkName:
-		return "testnet"
-	case utils.MainnetNetworkName:
-		return "mainnet"
-	default:
-		return "local"
 	}
 }
 

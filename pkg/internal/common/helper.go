@@ -585,6 +585,24 @@ func ValidateAndConvertSelectorString(selector string) ([4]byte, error) {
 	return selectorBytes, nil
 }
 
+func PopulateCallerAddress(
+	cliContext *cli.Context,
+	logger eigensdkLogger.Logger,
+	defaultAddress common.Address,
+) common.Address {
+	// TODO: these are copied across both callers of this method. Will clean this up in the CLI refactor of flags.
+	callerAddress := cliContext.String(flags.CallerAddressFlag.Name)
+	if IsEmptyString(callerAddress) {
+		logger.Infof(
+			"User access management delegation using caller address not invoked. Signing with: %s",
+			defaultAddress,
+		)
+
+		return defaultAddress
+	}
+	return common.HexToAddress(callerAddress)
+}
+
 func GetEnvFromNetwork(network string) string {
 	switch network {
 	case utils.HoleskyNetworkName:

@@ -3,60 +3,50 @@ package rewards
 import (
 	"context"
 	"fmt"
-	"sort"
-
-	eigenSdkUtils "github.com/Layr-Labs/eigensdk-go/utils"
-
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/command"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
-	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
 	"github.com/Layr-Labs/eigensdk-go/logging"
+	eigenSdkUtils "github.com/Layr-Labs/eigensdk-go/utils"
 	gethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 
 	"github.com/urfave/cli/v2"
 )
 
-func SetClaimerCmd(p utils.Prompter) *cli.Command {
-	setClaimerCmd := &cli.Command{
-		Name:      "set-claimer",
-		Usage:     "Set the claimer address for the earner",
-		UsageText: "set-claimer",
-		Description: `
-Set the rewards claimer address for the earner.
-		`,
-		After: telemetry.AfterRunAction(),
-		Flags: getSetClaimerFlags(),
-		Action: func(cCtx *cli.Context) error {
-			return SetClaimer(cCtx, p)
-		},
-	}
+type SetClaimerCmd struct {
+	prompter utils.Prompter
+}
+
+func NewSetClaimerCmd(p utils.Prompter) *cli.Command {
+	delegateCommand := &SetClaimerCmd{prompter: p}
+	setClaimerCmd := command.NewWriteableCallDataCommand(
+		delegateCommand,
+		"set-claimer",
+		"Set the claimer address for the earner",
+		"set-claimer",
+		`Set the rewards claimer address for the earner.`,
+		getSetClaimerFlags(),
+	)
 
 	return setClaimerCmd
 }
 
 func getSetClaimerFlags() []cli.Flag {
-	baseFlags := []cli.Flag{
+	return []cli.Flag{
 		&flags.NetworkFlag,
 		&flags.ETHRpcUrlFlag,
-		&flags.OutputFileFlag,
-		&flags.OutputTypeFlag,
-		&flags.BroadcastFlag,
 		&EarnerAddressFlag,
 		&RewardsCoordinatorAddressFlag,
 		&ClaimerAddressFlag,
 		&flags.VerboseFlag,
 	}
-
-	allFlags := append(baseFlags, flags.GetSignerFlags()...)
-	sort.Sort(cli.FlagsByName(allFlags))
-	return allFlags
 }
 
-func SetClaimer(cCtx *cli.Context, p utils.Prompter) error {
+func (s SetClaimerCmd) Execute(cCtx *cli.Context) error {
 	logger := common.GetLogger(cCtx)
 	config, err := readAndValidateSetClaimerConfig(cCtx, logger)
 	if err != nil {
@@ -78,16 +68,21 @@ func SetClaimer(cCtx *cli.Context, p utils.Prompter) error {
 			return err
 		}
 
-		noSendTxOpts := common.GetNoSendTxOpts(config.EarnerAddress)
+		noSendTxOpts := common.GetNoSendTxOpts(config.CallerAddress)
+		// If caller is a smart contract, we can't estimate gas using geth
+		// since balance of contract can be 0, as it can be called by an EOA
+		// to claim. So we hardcode the gas limit to 150_000 so that we can
+		// create unsigned tx without gas limit estimation from contract bindings
+		if common.IsSmartContractAddress(config.CallerAddress, ethClient) {
+			// Caller is a smart contract
+			noSendTxOpts.GasLimit = 150_000
+		}
 		unsignedTx, err := contractBindings.RewardsCoordinator.SetClaimerFor(noSendTxOpts, config.ClaimerAddress)
 		if err != nil {
 			return eigenSdkUtils.WrapError("failed to create unsigned tx", err)
 		}
 
 		if config.OutputType == string(common.OutputType_Calldata) {
-			if err != nil {
-				return err
-			}
 			calldataHex := gethcommon.Bytes2Hex(unsignedTx.Data())
 			if !common.IsEmptyString(config.Output) {
 				err := common.WriteToFile([]byte(calldataHex), config.Output)
@@ -119,13 +114,13 @@ func SetClaimer(cCtx *cli.Context, p utils.Prompter) error {
 	}
 
 	elWriter, err := common.GetELWriter(
-		config.EarnerAddress,
+		config.CallerAddress,
 		config.SignerConfig,
 		ethClient,
 		elcontracts.Config{
 			RewardsCoordinatorAddress: config.RewardsCoordinatorAddress,
 		},
-		p,
+		s.prompter,
 		config.ChainID,
 		logger,
 	)
@@ -166,6 +161,7 @@ func readAndValidateSetClaimerConfig(cCtx *cli.Context, logger logging.Logger) (
 	if common.IsEmptyString(claimerAddress) {
 		return nil, fmt.Errorf("claimer address is required")
 	}
+	callerAddress := common.PopulateCallerAddress(cCtx, logger, earnerAddress)
 
 	rewardsCoordinatorAddress := cCtx.String(RewardsCoordinatorAddressFlag.Name)
 	var err error
@@ -181,7 +177,7 @@ func readAndValidateSetClaimerConfig(cCtx *cli.Context, logger logging.Logger) (
 	logger.Debugf("Using chain ID: %s", chainID.String())
 
 	if common.IsEmptyString(environment) {
-		environment = getEnvFromNetwork(network)
+		environment = common.GetEnvFromNetwork(network)
 	}
 	logger.Debugf("Using network %s and environment: %s", network, environment)
 
@@ -202,6 +198,7 @@ func readAndValidateSetClaimerConfig(cCtx *cli.Context, logger logging.Logger) (
 		ChainID:                   chainID,
 		SignerConfig:              signerConfig,
 		EarnerAddress:             earnerAddress,
+		CallerAddress:             callerAddress,
 		Output:                    output,
 		OutputType:                outputType,
 	}, nil
