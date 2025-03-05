@@ -1,7 +1,7 @@
 package types
 
 type Web3SignerConfig struct {
-	Url string `yaml:"url"`
+	Url string `yaml:"url" json:"url"`
 }
 
 func (w *Web3SignerConfig) MarshalYAML() (interface{}, error) {

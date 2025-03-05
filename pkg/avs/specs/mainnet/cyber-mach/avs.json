@@ -1,0 +1,8 @@
+{
+    "name": "mainnet/cyber-mach",
+    "description": "Cyber MACH",
+    "network": "mainnet",
+    "contract_address": "0x1f2c296448f692af840843d993ffc0546619dcdb",
+    "coordinator": "middleware",
+    "remote_signing": true
+}

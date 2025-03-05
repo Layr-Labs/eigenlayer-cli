@@ -1,0 +1,8 @@
+{
+    "name": "mainnet/automata-mp",
+    "description": "Automata Multi-Prover AVS",
+    "network": "mainnet",
+    "contract_address": "0xe5445838c475a2980e6a88054ff1514230b83aeb",
+    "coordinator": "middleware",
+    "remote_signing": true
+}

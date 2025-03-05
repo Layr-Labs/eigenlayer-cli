@@ -43,3 +43,8 @@ build-linux-arm64: ## Compile the binary for arm64
 
 build-linux: ## Compile the binary for linux
 	@env GOOS=linux go build -o bin/$(APP_NAME) cmd/$(APP_NAME)/main.go
+
+manifest: manifest-force ## Rebuild AVS specification manifest
+	@./scripts/manifest.sh
+
+manifest-force: ;

@@ -1,0 +1,8 @@
+{
+    "name": "holesky/brevis-cochain",
+    "description": "Brevis coChain AVS on Holesky Testnet",
+    "network": "holesky",
+    "contract_address": "0x7a46219950d8a9bf2186549552da35bf6fb85b1f",
+    "coordinator": "middleware",
+    "remote_signing": true
+}

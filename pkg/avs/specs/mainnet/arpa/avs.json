@@ -1,0 +1,72 @@
+{
+    "name": "mainnet/arpa",
+    "description": "ARPA Network",
+    "network": "mainnet",
+    "contract_address": "0x1de75eaab2df55d467494a172652579e6fa4540e",
+    "coordinator": "contract",
+    "remote_signing": true,
+    "abi": "service_manager.json",
+    "functions": {
+        "register": {
+            "name": "registerOperator",
+            "parameters": [
+                "config:operator.address",
+                "func:ecdsa_sign(hash=call:avsDirectory.calculateOperatorAVSRegistrationDigestHash,salt=last:salt,expiry=last:expiry)"
+            ]
+        },
+        "opt-in": {
+            "message": "opt-in not required, use register instead"
+        },
+        "opt-out": {
+            "message": "opt-out not required, use deregister instead"
+        },
+        "deregister": {
+            "name": "deregisterOperator",
+            "parameters": [
+                "config:operator.address"
+            ]
+        },
+        "status": {
+            "name": "avsDirectory.avsOperatorStatus"
+        }
+    },
+    "delegates": [
+        {
+            "name": "avsDirectory",
+            "abi": "avs_directory.json",
+            "functions": [
+                {
+                    "name": "calculateOperatorAVSRegistrationDigestHash",
+                    "parameters": [
+                        "config:operator.address",
+                        "spec:contract_address",
+                        "func:salt(seed=const:arpa)",
+                        "func:expiry(timeout=const:300)"
+                    ]
+                },
+                {
+                    "name": "avsOperatorStatus",
+                    "parameters": [
+                        "spec:contract_address",
+                        "config:operator.address"
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "nodeRegistryAddress",
+            "abi": "node_registry.json",
+            "functions": [
+                {
+                    "name": "nodeRegister",
+                    "parameters": [
+                        "func:ecdsa_public_key(file=config:avs_key_file,password=passwd:avs_key_password,format=const:[]byte)",
+                        "const:true",
+                        "config:asset_account_address",
+                        "func:ecdsa_sign(hash=call:avsDirectory.calculateOperatorAVSRegistrationDigestHash,salt=last:salt,expiry=last:expiry)"
+                    ]
+                }
+            ]
+        }
+    ]
+}

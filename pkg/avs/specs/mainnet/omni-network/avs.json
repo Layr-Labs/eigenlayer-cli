@@ -1,0 +1,54 @@
+{
+    "name": "mainnet/omni-network",
+    "description": "Omni Network",
+    "network": "mainnet",
+    "contract_address": "0xed2f4d90b073128ae6769a9a8d51547b1df766c8",
+    "coordinator": "contract",
+    "remote_signing": false,
+    "abi": "service_manager.json",
+    "functions": {
+        "register": {
+            "name": "registerOperator",
+            "parameters": [
+                "func:ecdsa_public_key(file=config:private_key_store_path,password=passwd:private_key_store_password,format=const:[]byte)",
+                "func:ecdsa_sign(hash=call:avsDirectory.calculateOperatorAVSRegistrationDigestHash,salt=last:salt,expiry=last:expiry)"
+            ]
+        },
+        "opt-in": {
+            "message": "opt-in not required, use register instead"
+        },
+        "opt-out": {
+            "message": "opt-out not required, use deregister instead"
+        },
+        "deregister": {
+            "name": "deregisterOperator"
+        },
+        "status": {
+            "name": "avsDirectory.avsOperatorStatus"
+        }
+    },
+    "delegates": [
+        {
+            "name": "avsDirectory",
+            "abi": "avs_directory.json",
+            "functions": [
+                {
+                    "name": "calculateOperatorAVSRegistrationDigestHash",
+                    "parameters": [
+                        "config:operator.address",
+                        "spec:contract_address",
+                        "func:salt(seed=const:omni)",
+                        "func:expiry(timeout=const:300)"
+                    ]
+                },
+                {
+                    "name": "avsOperatorStatus",
+                    "parameters": [
+                        "spec:contract_address",
+                        "config:operator.address"
+                    ]
+                }
+            ]
+        }
+    ]
+}

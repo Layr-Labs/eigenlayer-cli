@@ -3,10 +3,10 @@ package types
 import "crypto/ecdsa"
 
 type SignerConfig struct {
-	PrivateKeyStorePath string           `yaml:"private_key_store_path"`
-	SignerType          SignerType       `yaml:"signer_type"`
-	FireblocksConfig    FireblocksConfig `yaml:"fireblocks"`
-	Web3SignerConfig    Web3SignerConfig `yaml:"web3"`
+	PrivateKeyStorePath string           `yaml:"private_key_store_path" json:"private_key_store_path"`
+	SignerType          SignerType       `yaml:"signer_type"            json:"signer_type"`
+	FireblocksConfig    FireblocksConfig `yaml:"fireblocks"             json:"fireblocks"`
+	Web3SignerConfig    Web3SignerConfig `yaml:"web3"                   json:"web3"`
 	PrivateKey          *ecdsa.PrivateKey
 }
 

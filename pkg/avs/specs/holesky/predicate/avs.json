@@ -1,0 +1,58 @@
+{
+    "name": "holesky/predicate",
+    "description": "Predicate AVS on Holesky Testnet",
+    "network": "holesky",
+    "contract_address": "0x4fc1132230fe16f67531d82acbb9d78993b23825",
+    "coordinator": "contract",
+    "remote_signing": true,
+    "abi": "service_manager.json",
+    "functions": {
+        "register": {
+            "name": "registerOperatorToAVS",
+            "parameters": [
+                "config:operator.address",
+                "func:ecdsa_sign(hash=call:avsDirectory.calculateOperatorAVSRegistrationDigestHash,salt=last:salt,expiry=last:expiry)"
+            ]
+        },
+        "opt-in": {
+            "message": "opt-in not required, use register instead"
+        },
+        "opt-out": {
+            "message": "opt-out not required, use deregister instead"
+        },
+        "deregister": {
+            "message": "only avs owner may perform deregistration",
+            "_name": "deregisterOperatorFromAVS",
+            "_parameters": [
+                "config:operator.address"
+            ]
+        },
+        "status": {
+            "name": "avsDirectory.avsOperatorStatus"
+        }
+    },
+    "delegates": [
+        {
+            "name": "avsDirectory",
+            "abi": "avs_directory.json",
+            "functions": [
+                {
+                    "name": "calculateOperatorAVSRegistrationDigestHash",
+                    "parameters": [
+                        "config:operator.address",
+                        "spec:contract_address",
+                        "func:salt(seed=const:predicate)",
+                        "func:expiry(timeout=const:300)"
+                    ]
+                },
+                {
+                    "name": "avsOperatorStatus",
+                    "parameters": [
+                        "spec:contract_address",
+                        "config:operator.address"
+                    ]
+                }
+            ]
+        }        
+    ]
+}

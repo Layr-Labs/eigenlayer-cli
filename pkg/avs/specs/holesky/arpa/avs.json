@@ -1,0 +1,79 @@
+{
+    "name": "holesky/arpa",
+    "description": "ARPA Network on Holesky Testnet",
+    "network": "holesky",
+    "contract_address": "0xd36b6e5eee8311d7bffb2f3bb33301a1ab7de101",
+    "coordinator": "contract",
+    "remote_signing": true,
+    "abi": "service_manager.json",
+    "functions": {
+        "register": {
+            "name": "nodeRegistryAddress.nodeRegister"
+        },
+        "opt-in": {
+            "name": "nodeRegistryAddress.nodeActivate"
+        },
+        "opt-out": {
+            "name": "nodeRegistryAddress.nodeQuit"
+        },
+        "deregister": {
+            "name": "nodeRegistryAddress.nodeLogOff"
+        },
+        "status": {
+            "name": "avsDirectory.avsOperatorStatus"
+        }
+    },
+    "delegates": [
+        {
+            "name": "avsDirectory",
+            "abi": "avs_directory.json",
+            "functions": [
+                {
+                    "name": "calculateOperatorAVSRegistrationDigestHash",
+                    "parameters": [
+                        "config:operator.address",
+                        "spec:contract_address",
+                        "func:salt(seed=const:arpa)",
+                        "func:expiry(timeout=const:300)"
+                    ]
+                },
+                {
+                    "name": "avsOperatorStatus",
+                    "parameters": [
+                        "spec:contract_address",
+                        "config:operator.address"
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "nodeRegistryAddress",
+            "abi": "node_registry.json",
+            "functions": [
+                {
+                    "name": "nodeRegister",
+                    "parameters": [
+                        "func:bls_public_key(type=const:local_keystore,file=config:avs_key_file,password=passwd:avs_key_password,format=const:[]byte)",
+                        "const:true",
+                        "config:operator.address",
+                        "func:ecdsa_sign(hash=call:avsDirectory.calculateOperatorAVSRegistrationDigestHash,salt=last:salt,expiry=last:expiry)"
+                    ]
+                },
+                {
+                    "name": "nodeActivate",
+                    "parameters": [
+                        "func:ecdsa_sign(hash=call:avsDirectory.calculateOperatorAVSRegistrationDigestHash,salt=last:salt,expiry=last:expiry)"
+                    ]
+                },
+                {
+                    "name": "nodeLogOff",
+                    "parameters": []
+                },
+                {
+                    "name": "nodeQuit",
+                    "parameters": []
+                }
+            ]
+        }
+    ]
+}

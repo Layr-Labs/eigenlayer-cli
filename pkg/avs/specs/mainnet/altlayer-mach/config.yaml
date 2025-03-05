@@ -1,0 +1,15 @@
+# The avs_id parameter used for identifying the AVS.
+# DO NOT MODIFY.
+avs_id: "mainnet/altlayer-mach"
+
+# List of quorum ids as a string of comma separated values.
+# Example: "1"
+quorum_id_list: 
+
+# The socket of the node for serving dispersal and retrieval.
+# Example: "120.13.43.29:32005;32004"
+socket: 
+
+# Full path to the operator BLS key file.
+# Example: "/home/user/.eigenlayer/operator_keys/node.bls.key.json"
+bls_key_file: 
