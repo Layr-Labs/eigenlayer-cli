@@ -1,0 +1,12 @@
+# The avs_id parameter used for identifying the AVS.
+# DO NOT MODIFY.
+avs_id: "mainnet/arpa"
+
+# Full path to the ARPA AVS key.
+# This is an ECDSA key and can only be used for a single registration.
+# Example: "/home/user/.eigenlayer/operator_keys/arpa.bls.key.json"
+avs_key_file: 
+
+# Address of the asset account
+# Example: 0x086184DD0Dc240419CA0350418B9dCa85fcfA6b5
+asset_account_address: 

@@ -1,0 +1,79 @@
+{
+    "name": "mainnet/opacity",
+    "description": "Opacity Network AVS",
+    "network": "mainnet",
+    "contract_address": "0xCE06c5fe42d22fF827A519396583Fd9f5176E3D3",
+    "coordinator": "contract",
+    "remote_signing": true,
+    "abi": "service_manager.json",
+    "functions": {
+        "register": {
+            "name": "registryCoordinator.registerOperator"
+        },
+        "opt-in": {
+            "message": "opt-in not required, use register instead"
+        },
+        "opt-out": {
+            "message": "opt-out not required, use deregister instead"
+        }, 
+        "deregister": {
+            "name": "registryCoordinator.deregisterOperator"
+        },
+        "status": {
+            "name": "avsDirectory.avsOperatorStatus"
+        }
+    },
+    "delegates": [
+        {
+            "name": "avsDirectory",
+            "ABI": "avs_directory.json",
+            "functions": [
+                {
+                    "name": "calculateOperatorAVSRegistrationDigestHash",
+                    "parameters": [
+                        "config:operator.address",
+                        "spec:contract_address",
+                        "func:salt(seed=const:opacity)",
+                        "func:expiry(timeout=const:300)"
+                    ]
+                },
+                {
+                    "name": "avsOperatorStatus",
+                    "parameters": [
+                        "spec:contract_address",
+                        "config:operator.address"
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "registryCoordinator",
+            "ABI": "registry_coordinator.json",
+            "contract_address": "0xeCd099fA5048c3738a5544347D8cBc8076E76494",
+            "functions": [
+                {
+                    "name": "deregisterOperator",
+                    "parameters": [
+                        "func:array_uint8(list=const:0)"
+                    ]
+                },
+                {
+                    "name": "pubkeyRegistrationMessageHash",
+                    "parameters": [
+                        "config:operator.address"
+                    ],
+                    "transform": "[]byte"
+                },
+                {
+                    "name": "registerOperator",
+                    "parameters": [
+                        "func:array_uint8(list=const:0)",
+                        "config:socket",
+                        "func:bls_curve_sign(type=const:local_keystore,file=config:bls_key_file,password=passwd:bls_key_password,hash=call:registryCoordinator.pubkeyRegistrationMessageHash)->struct(PubkeyRegistrationSignature:signature[bn254g1],PubkeyG1:g1[bn254g1],PubkeyG2:g2[bn254g2])",
+                        "func:ecdsa_sign(hash=call:avsDirectory.calculateOperatorAVSRegistrationDigestHash),salt=last:salt,expiry=last:expiry)"
+                    ]
+                }
+            ]
+        }
+    ]
+}

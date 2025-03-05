@@ -1,0 +1,67 @@
+{
+    "name": "mainnet/lagrange-zkpn",
+    "description": "Lagrange ZK Prover Network AVS",
+    "network": "mainnet",
+    "contract_address": "0x22cac0e6a1465f043428e8aef737b3cb09d0eeda",
+    "coordinator": "contract",
+    "remote_signing": true,
+    "abi": "service_manager.json",
+    "functions": {
+        "register": {
+            "name": "stakeRegistry.registerOperator"
+        },
+        "opt-in": {
+            "message": "opt-in not required, use register instead"
+        },
+        "opt-out": {
+            "message": "opt-out not required, use deregister instead"
+        },
+        "deregister": {
+            "name": "stakeRegistry.deregisterOperator"
+        },
+        "status": {
+            "name": "avsDirectory.avsOperatorStatus"
+        }
+    },
+    "delegates": [
+        {
+            "name": "avsDirectory",
+            "abi": "avs_directory.json",
+            "functions": [
+                {
+                    "name": "calculateOperatorAVSRegistrationDigestHash",
+                    "parameters": [
+                        "config:operator.address",
+                        "spec:contract_address",
+                        "func:salt(seed=const:lagrange-zkpn)",
+                        "func:expiry(timeout=const:300)"
+                    ]
+                },
+                {
+                    "name": "avsOperatorStatus",
+                    "parameters": [
+                        "spec:contract_address",
+                        "config:operator.address"
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "stakeRegistry",
+            "abi": "stake_registry.json",
+            "functions": [
+                {
+                    "name": "registerOperator",
+                    "parameters": [
+                        "func:ecdsa_public_key(file=config:avs_key_file,password=passwd:avs_key_password)",
+                        "func:ecdsa_sign(hash=call:avsDirectory.calculateOperatorAVSRegistrationDigestHash,salt=last:salt,expiry=last:expiry)"
+                    ]
+                },
+                {
+                    "name": "deregisterOperator",
+                    "parameters": []
+                }
+            ]
+        }
+    ]
+}

@@ -31,7 +31,7 @@ func GetELWriter(
 		return nil, errors.New("signer is required for broadcasting")
 	}
 	logger.Debug("Getting Writer from config")
-	keyWallet, sender, err := getWallet(
+	keyWallet, sender, err := GetWallet(
 		*signerConfig,
 		signerAddress.String(),
 		ethClient,
