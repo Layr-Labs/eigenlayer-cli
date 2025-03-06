@@ -1,0 +1,8 @@
+{
+    "name": "mainnet/xterio-mach",
+    "description": "Xterio MACH",
+    "network": "mainnet",
+    "contract_address": "0x6026b61bdd2252160691cb3f6005b6b72e0ec044",
+    "coordinator": "middleware",
+    "remote_signing": true
+}

@@ -1,0 +1,3 @@
+# The avs_id parameter used for identifying the AVS.
+# DO NOT MODIFY.
+avs_id: "holesky/hyperlane"

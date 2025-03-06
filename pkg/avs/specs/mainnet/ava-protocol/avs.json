@@ -1,0 +1,8 @@
+{
+    "name": "mainnet/ava-protocol",
+    "description": "AVA Protocol AVS",
+    "network": "mainnet",
+    "contract_address": "0x18343aa10e3d2f3a861e5649627324aead987adf",
+    "coordinator": "middleware",
+    "remote_signing": true
+}

@@ -1,0 +1,76 @@
+{
+    "name": "mainnet/lagrange-sc",
+    "description": "Lagrange State Committees AVS",
+    "network": "mainnet",
+    "contract_address": "0x35f4f28a8d3ff20eed10e087e8f96ea2641e6aa2",
+    "coordinator": "contract",
+    "remote_signing": true,
+    "abi": "service_manager.json",
+    "functions": {
+        "register": {
+            "name": "register",
+            "parameters": [
+                "config:operator.address",
+                "func:bls_sign(type=const:local_keystore,file=config:bls_key_file,password=passwd:bls_key_password,hash=call:committee.calculateKeyWithProofHash,salt=last:salt,expiry=last:expiry)->struct(BlsG1PublicKeys:g1,AggG2PublicKey:g2,Signature:signature,Salt:salt,Expiry:expiry)",
+                "func:ecdsa_sign(hash=call:avsDirectory.calculateOperatorAVSRegistrationDigestHash,salt=last:salt,expiry=last:expiry)"
+            ]
+        },
+        "opt-in": {
+            "name": "subscribe",
+            "parameters": [
+                "config:roll_up_chain_id"
+            ]
+        },
+        "opt-out": {
+            "name": "unsubscribe",
+            "parameters": [
+                "config:roll_up_chain_id"
+            ]
+        },
+        "deregister": {
+            "name": "deregister",
+            "parameters": []
+        },
+        "status": {
+            "name": "avsDirectory.avsOperatorStatus"
+        }
+    },
+    "delegates": [
+        {
+            "name": "avsDirectory",
+            "abi": "avs_directory.json",
+            "functions": [
+                {
+                    "name": "calculateOperatorAVSRegistrationDigestHash",
+                    "parameters": [
+                        "config:operator.address",
+                        "spec:contract_address",
+                        "last:salt",
+                        "last:expiry"
+                    ]
+                },
+                {
+                    "name": "avsOperatorStatus",
+                    "parameters": [
+                        "spec:contract_address",
+                        "config:operator.address"
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "committee",
+            "abi": "committee.json",
+            "functions": [
+                {
+                    "name": "calculateKeyWithProofHash",
+                    "parameters": [
+                        "config:operator.address",
+                        "func:salt(seed=const:lagrange-sc)",
+                        "func:expiry(timeout=const:300)"
+                    ]
+                }
+            ]
+        }
+    ]
+}

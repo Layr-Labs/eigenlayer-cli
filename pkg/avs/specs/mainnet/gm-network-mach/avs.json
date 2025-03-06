@@ -1,0 +1,8 @@
+{
+    "name": "mainnet/gm-network-mach",
+    "description": "GM Network MACH",
+    "network": "mainnet",
+    "contract_address": "0xb3acaf09a1b801e36655b786da4eaa6ae9f5dc37",
+    "coordinator": "middleware",
+    "remote_signing": true
+}

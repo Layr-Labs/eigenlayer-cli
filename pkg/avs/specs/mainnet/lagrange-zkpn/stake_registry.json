@@ -1,0 +1,845 @@
+[
+    {
+        "type": "function",
+        "name": "addToWhitelist",
+        "inputs": [
+            {
+                "name": "addrs",
+                "type": "address[]",
+                "internalType": "address[]"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "cancelOwnershipHandover",
+        "inputs": [],
+        "outputs": [],
+        "stateMutability": "payable"
+    },
+    {
+        "type": "function",
+        "name": "completeOwnershipHandover",
+        "inputs": [
+            {
+                "name": "pendingOwner",
+                "type": "address",
+                "internalType": "address"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "payable"
+    },
+    {
+        "type": "function",
+        "name": "delegationManager",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "",
+                "type": "address",
+                "internalType": "contract IDelegationManager"
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "deregisterOperator",
+        "inputs": [],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "evictOperator",
+        "inputs": [
+            {
+                "name": "operator",
+                "type": "address",
+                "internalType": "address"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "getOperatorShares",
+        "inputs": [
+            {
+                "name": "operator",
+                "type": "address",
+                "internalType": "address"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "getOperatorWeight",
+        "inputs": [
+            {
+                "name": "operator",
+                "type": "address",
+                "internalType": "address"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "initialize",
+        "inputs": [
+            {
+                "name": "delegationManager_",
+                "type": "address",
+                "internalType": "address"
+            },
+            {
+                "name": "quorum_",
+                "type": "tuple",
+                "internalType": "struct Quorum",
+                "components": [
+                    {
+                        "name": "strategies",
+                        "type": "tuple[]",
+                        "internalType": "struct StrategyParams[]",
+                        "components": [
+                            {
+                                "name": "strategy",
+                                "type": "address",
+                                "internalType": "contract IStrategy"
+                            },
+                            {
+                                "name": "multiplier",
+                                "type": "uint96",
+                                "internalType": "uint96"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "owner_",
+                "type": "address",
+                "internalType": "address"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "isRegistered",
+        "inputs": [
+            {
+                "name": "operator",
+                "type": "address",
+                "internalType": "address"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "",
+                "type": "bool",
+                "internalType": "bool"
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "minimumWeight",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "operators",
+        "inputs": [
+            {
+                "name": "operator",
+                "type": "address",
+                "internalType": "address"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "x",
+                "type": "uint256",
+                "internalType": "uint256"
+            },
+            {
+                "name": "y",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "owner",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "address",
+                "internalType": "address"
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "ownershipHandoverExpiresAt",
+        "inputs": [
+            {
+                "name": "pendingOwner",
+                "type": "address",
+                "internalType": "address"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "result",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "quorum",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "",
+                "type": "tuple",
+                "internalType": "struct Quorum",
+                "components": [
+                    {
+                        "name": "strategies",
+                        "type": "tuple[]",
+                        "internalType": "struct StrategyParams[]",
+                        "components": [
+                            {
+                                "name": "strategy",
+                                "type": "address",
+                                "internalType": "contract IStrategy"
+                            },
+                            {
+                                "name": "multiplier",
+                                "type": "uint96",
+                                "internalType": "uint96"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "registerOperator",
+        "inputs": [
+            {
+                "name": "publicKey",
+                "type": "tuple",
+                "internalType": "struct PublicKey",
+                "components": [
+                    {
+                        "name": "x",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    },
+                    {
+                        "name": "y",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    }
+                ]
+            },
+            {
+                "name": "operatorSignature",
+                "type": "tuple",
+                "internalType": "struct ISignatureUtils.SignatureWithSaltAndExpiry",
+                "components": [
+                    {
+                        "name": "signature",
+                        "type": "bytes",
+                        "internalType": "bytes"
+                    },
+                    {
+                        "name": "salt",
+                        "type": "bytes32",
+                        "internalType": "bytes32"
+                    },
+                    {
+                        "name": "expiry",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    }
+                ]
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "removeFromWhitelist",
+        "inputs": [
+            {
+                "name": "addrs",
+                "type": "address[]",
+                "internalType": "address[]"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "renounceOwnership",
+        "inputs": [],
+        "outputs": [],
+        "stateMutability": "payable"
+    },
+    {
+        "type": "function",
+        "name": "requestOwnershipHandover",
+        "inputs": [],
+        "outputs": [],
+        "stateMutability": "payable"
+    },
+    {
+        "type": "function",
+        "name": "serviceManager",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "",
+                "type": "address",
+                "internalType": "contract IServiceManager"
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "setServiceManager",
+        "inputs": [
+            {
+                "name": "serviceManager_",
+                "type": "address",
+                "internalType": "address"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "toggleWhitelist",
+        "inputs": [
+            {
+                "name": "client",
+                "type": "address",
+                "internalType": "address"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "totalOperators",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "transferOwnership",
+        "inputs": [
+            {
+                "name": "newOwner",
+                "type": "address",
+                "internalType": "address"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "payable"
+    },
+    {
+        "type": "function",
+        "name": "updateMinimumWeight",
+        "inputs": [
+            {
+                "name": "newMinimumWeight",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "updateOperatorKey",
+        "inputs": [
+            {
+                "name": "publicKey",
+                "type": "tuple",
+                "internalType": "struct PublicKey",
+                "components": [
+                    {
+                        "name": "x",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    },
+                    {
+                        "name": "y",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    }
+                ]
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "updateQuorumConfig",
+        "inputs": [
+            {
+                "name": "quorum_",
+                "type": "tuple",
+                "internalType": "struct Quorum",
+                "components": [
+                    {
+                        "name": "strategies",
+                        "type": "tuple[]",
+                        "internalType": "struct StrategyParams[]",
+                        "components": [
+                            {
+                                "name": "strategy",
+                                "type": "address",
+                                "internalType": "contract IStrategy"
+                            },
+                            {
+                                "name": "multiplier",
+                                "type": "uint96",
+                                "internalType": "uint96"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "whitelist",
+        "inputs": [
+            {
+                "name": "",
+                "type": "address",
+                "internalType": "address"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "",
+                "type": "bool",
+                "internalType": "bool"
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "event",
+        "name": "BatchWhitelisted",
+        "inputs": [
+            {
+                "name": "addrs",
+                "type": "address[]",
+                "indexed": false,
+                "internalType": "address[]"
+            },
+            {
+                "name": "value",
+                "type": "bool",
+                "indexed": false,
+                "internalType": "bool"
+            }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "Initialized",
+        "inputs": [
+            {
+                "name": "version",
+                "type": "uint64",
+                "indexed": false,
+                "internalType": "uint64"
+            }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "MinimumWeightUpdated",
+        "inputs": [
+            {
+                "name": "oldWeight",
+                "type": "uint256",
+                "indexed": false,
+                "internalType": "uint256"
+            },
+            {
+                "name": "newWeight",
+                "type": "uint256",
+                "indexed": false,
+                "internalType": "uint256"
+            }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "OperatorDeregistered",
+        "inputs": [
+            {
+                "name": "operator",
+                "type": "address",
+                "indexed": true,
+                "internalType": "address"
+            },
+            {
+                "name": "avs",
+                "type": "address",
+                "indexed": true,
+                "internalType": "address"
+            }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "OperatorEvicted",
+        "inputs": [
+            {
+                "name": "operator",
+                "type": "address",
+                "indexed": true,
+                "internalType": "address"
+            },
+            {
+                "name": "avs",
+                "type": "address",
+                "indexed": true,
+                "internalType": "address"
+            }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "OperatorRegistered",
+        "inputs": [
+            {
+                "name": "operator",
+                "type": "address",
+                "indexed": true,
+                "internalType": "address"
+            },
+            {
+                "name": "avs",
+                "type": "address",
+                "indexed": true,
+                "internalType": "address"
+            },
+            {
+                "name": "publicKey",
+                "type": "tuple",
+                "indexed": false,
+                "internalType": "struct PublicKey",
+                "components": [
+                    {
+                        "name": "x",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    },
+                    {
+                        "name": "y",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    }
+                ]
+            }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "OperatorUpdated",
+        "inputs": [
+            {
+                "name": "operator",
+                "type": "address",
+                "indexed": true,
+                "internalType": "address"
+            },
+            {
+                "name": "avs",
+                "type": "address",
+                "indexed": true,
+                "internalType": "address"
+            },
+            {
+                "name": "publicKey",
+                "type": "tuple",
+                "indexed": false,
+                "internalType": "struct PublicKey",
+                "components": [
+                    {
+                        "name": "x",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    },
+                    {
+                        "name": "y",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    }
+                ]
+            }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "OwnershipHandoverCanceled",
+        "inputs": [
+            {
+                "name": "pendingOwner",
+                "type": "address",
+                "indexed": true,
+                "internalType": "address"
+            }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "OwnershipHandoverRequested",
+        "inputs": [
+            {
+                "name": "pendingOwner",
+                "type": "address",
+                "indexed": true,
+                "internalType": "address"
+            }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "OwnershipTransferred",
+        "inputs": [
+            {
+                "name": "oldOwner",
+                "type": "address",
+                "indexed": true,
+                "internalType": "address"
+            },
+            {
+                "name": "newOwner",
+                "type": "address",
+                "indexed": true,
+                "internalType": "address"
+            }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "QuorumUpdated",
+        "inputs": [
+            {
+                "name": "oldQuorum",
+                "type": "tuple",
+                "indexed": false,
+                "internalType": "struct Quorum",
+                "components": [
+                    {
+                        "name": "strategies",
+                        "type": "tuple[]",
+                        "internalType": "struct StrategyParams[]",
+                        "components": [
+                            {
+                                "name": "strategy",
+                                "type": "address",
+                                "internalType": "contract IStrategy"
+                            },
+                            {
+                                "name": "multiplier",
+                                "type": "uint96",
+                                "internalType": "uint96"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "newQuorum",
+                "type": "tuple",
+                "indexed": false,
+                "internalType": "struct Quorum",
+                "components": [
+                    {
+                        "name": "strategies",
+                        "type": "tuple[]",
+                        "internalType": "struct StrategyParams[]",
+                        "components": [
+                            {
+                                "name": "strategy",
+                                "type": "address",
+                                "internalType": "contract IStrategy"
+                            },
+                            {
+                                "name": "multiplier",
+                                "type": "uint96",
+                                "internalType": "uint96"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "Whitelisted",
+        "inputs": [
+            {
+                "name": "addr",
+                "type": "address",
+                "indexed": false,
+                "internalType": "address"
+            },
+            {
+                "name": "value",
+                "type": "bool",
+                "indexed": false,
+                "internalType": "bool"
+            }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "error",
+        "name": "AlreadyInitialized",
+        "inputs": []
+    },
+    {
+        "type": "error",
+        "name": "InvalidInitialization",
+        "inputs": []
+    },
+    {
+        "type": "error",
+        "name": "InvalidPublicKey",
+        "inputs": []
+    },
+    {
+        "type": "error",
+        "name": "InvalidQuorum",
+        "inputs": []
+    },
+    {
+        "type": "error",
+        "name": "NewOwnerIsZeroAddress",
+        "inputs": []
+    },
+    {
+        "type": "error",
+        "name": "NoHandoverRequest",
+        "inputs": []
+    },
+    {
+        "type": "error",
+        "name": "NotAuthorized",
+        "inputs": []
+    },
+    {
+        "type": "error",
+        "name": "NotInitializing",
+        "inputs": []
+    },
+    {
+        "type": "error",
+        "name": "NotSorted",
+        "inputs": []
+    },
+    {
+        "type": "error",
+        "name": "OperatorAlreadyRegistered",
+        "inputs": []
+    },
+    {
+        "type": "error",
+        "name": "OperatorNotRegistered",
+        "inputs": []
+    },
+    {
+        "type": "error",
+        "name": "ServiceManagerAlreadySet",
+        "inputs": []
+    },
+    {
+        "type": "error",
+        "name": "Unauthorized",
+        "inputs": []
+    }
+]
