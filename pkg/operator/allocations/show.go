@@ -191,7 +191,7 @@ func showAction(cCtx *cli.Context, p utils.Prompter) error {
 		config.operatorAddress.String(),
 		currBlockNumber,
 	)
-	if config.outputType == string(common.OutputType_Json) {
+	if config.outputType == utils.JsonOutputType {
 		slashableMagnitudeHolders.PrintJSON()
 	} else {
 		if !common.IsEmptyString(config.output) {
@@ -214,7 +214,7 @@ func showAction(cCtx *cli.Context, p utils.Prompter) error {
 			"NOTE: You have %d deregistered operator sets which have nonzero allocations as listed below. Please deallocate to use those funds.\n",
 			len(dergisteredOpsets),
 		)
-		if config.outputType == string(common.OutputType_Json) {
+		if config.outputType == utils.JsonOutputType {
 			dergisteredOpsets.PrintJSON()
 		} else {
 			dergisteredOpsets.PrintPretty()

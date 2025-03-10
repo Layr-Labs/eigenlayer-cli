@@ -13,10 +13,16 @@ const (
 
 	MainnetChainId = 1
 	HoleskyChainId = 17000
+	SepoliaChainId = 11155111
 	AnvilChainId   = 31337
+
+	CallDataOutputType string = "calldata"
+	PrettyOutputType   string = "pretty"
+	JsonOutputType     string = "json"
 
 	MainnetNetworkName = "mainnet"
 	HoleskyNetworkName = "holesky"
+	SepoliaNetworkName = "sepolia"
 	AnvilNetworkName   = "anvil"
 	UnknownNetworkName = "unknown"
 )

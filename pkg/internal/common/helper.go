@@ -42,14 +42,15 @@ import (
 const (
 	mainnet             = "mainnet"
 	testnet             = "testnet"
+	sepoliaTestnet0     = "sepolia-testnet-0"
 	local               = "local"
 	selectorHexIdLength = 10
 	addressPrefix       = "0x"
 )
 
 var ChainMetadataMap = map[int64]types.ChainMetadata{
-	MainnetChainId: {
-		BlockExplorerUrl:              "https://etherscan.io/tx",
+	utils.MainnetChainId: {
+		BlockExplorerUrl:              "https://etherscan.io",
 		ELDelegationManagerAddress:    "0x39053D51B77DC0d36036Fc1fCc8Cb819df8Ef37A",
 		ELAVSDirectoryAddress:         "0x135dda560e946695d6f155dacafc6f1f25c1f5af",
 		ELRewardsCoordinatorAddress:   "0x7750d328b314EfFa365A0402CcfD489B80B0adda",
@@ -57,8 +58,8 @@ var ChainMetadataMap = map[int64]types.ChainMetadata{
 		WebAppUrl:                     "https://app.eigenlayer.xyz/operator",
 		SidecarHttpRpcURL:             "https://sidecar-rpc.eigenlayer.xyz/mainnet",
 	},
-	HoleskyChainId: {
-		BlockExplorerUrl:              "https://holesky.etherscan.io/tx",
+	utils.HoleskyChainId: {
+		BlockExplorerUrl:              "https://holesky.etherscan.io",
 		ELDelegationManagerAddress:    "0xA44151489861Fe9e3055d95adC98FbD462B948e7",
 		ELAVSDirectoryAddress:         "0x055733000064333CaDDbC92763c58BF0192fFeBf",
 		ELRewardsCoordinatorAddress:   "0xAcc1fb458a1317E886dB376Fc8141540537E68fE",
@@ -66,7 +67,16 @@ var ChainMetadataMap = map[int64]types.ChainMetadata{
 		WebAppUrl:                     "https://holesky.eigenlayer.xyz/operator",
 		SidecarHttpRpcURL:             "https://sidecar-rpc.eigenlayer.xyz/holesky",
 	},
-	AnvilChainId: {
+	utils.SepoliaChainId: {
+		BlockExplorerUrl:              "https://sepolia.etherscan.io",
+		ELDelegationManagerAddress:    "",
+		ELAVSDirectoryAddress:         "",
+		ELRewardsCoordinatorAddress:   "",
+		ELPermissionControllerAddress: "",
+		WebAppUrl:                     "",
+		SidecarHttpRpcURL:             "",
+	},
+	utils.AnvilChainId: {
 		BlockExplorerUrl:              "",
 		ELDelegationManagerAddress:    "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
 		ELAVSDirectoryAddress:         "0x0165878A594ca255338adfa4d48449f69242Eb8F",
@@ -612,6 +622,8 @@ func GetEnvFromNetwork(network string) string {
 		return testnet
 	case utils.MainnetNetworkName:
 		return mainnet
+	case utils.SepoliaNetworkName:
+		return sepoliaTestnet0
 	default:
 		return local
 	}

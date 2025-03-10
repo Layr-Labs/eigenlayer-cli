@@ -113,7 +113,7 @@ func (r RegisterOperatorSetCmd) Execute(cCtx *cli.Context) error {
 			return eigenSdkUtils.WrapError("failed to create unsigned transaction", err)
 		}
 
-		if config.outputType == string(common.OutputType_Calldata) {
+		if config.outputType == utils.CallDataOutputType {
 			calldataHex := gethcommon.Bytes2Hex(unsignedTx.Data())
 			if !common.IsEmptyString(config.output) {
 				err = common.WriteToFile([]byte(calldataHex), config.output)
