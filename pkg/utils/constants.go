@@ -25,6 +25,10 @@ const (
 	SepoliaNetworkName = "sepolia"
 	AnvilNetworkName   = "anvil"
 	UnknownNetworkName = "unknown"
+
+	MainnetBlockExplorerUrl = "https://etherscan.io/"
+	HoleskyBlockExplorerUrl = "https://holesky.etherscan.io"
+	SepoliaBlockExplorerUrl = "https://sepolia.etherscan.io"
 )
 
 var (
