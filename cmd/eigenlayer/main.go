@@ -39,6 +39,7 @@ func main() {
 		return nil
 	}
 
+	app.Commands = append(app.Commands, pkg.NotificationsCmd(prompter))
 	app.Commands = append(app.Commands, pkg.OperatorCmd(prompter))
 	app.Commands = append(app.Commands, pkg.RewardsCmd(prompter))
 	app.Commands = append(app.Commands, pkg.KeysCmd(prompter))
