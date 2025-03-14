@@ -21,12 +21,12 @@ const (
 )
 
 type OperatorConfig struct {
-	Operator                    eigensdkTypes.Operator `yaml:"operator"`
-	ELDelegationManagerAddress  string                 `yaml:"el_delegation_manager_address"`
+	Operator                    eigensdkTypes.Operator `yaml:"operator"                      json:"operator"`
+	ELDelegationManagerAddress  string                 `yaml:"el_delegation_manager_address" json:"el_delegation_manager_address"`
 	ELAVSDirectoryAddress       string
 	ELRewardsCoordinatorAddress string
-	EthRPCUrl                   string  `yaml:"eth_rpc_url"`
-	ChainId                     big.Int `yaml:"chain_id"`
+	EthRPCUrl                   string  `yaml:"eth_rpc_url"                   json:"eth_rpc_url"`
+	ChainId                     big.Int `yaml:"chain_id"                      json:"chain_id"`
 	SignerConfig                SignerConfig
 }
 

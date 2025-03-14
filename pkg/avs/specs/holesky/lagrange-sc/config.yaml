@@ -1,0 +1,16 @@
+# The avs_id parameter used for identifying the AVS.
+# DO NOT MODIFY.
+avs_id: "holesky/lagrange-sc"
+
+# Roll-up chain id.
+# See https://docs.lagrange.dev/state-committees/operator-guide/supported-chains for more details.
+# Supported values are as follows.
+#   Optimism    10
+#   Base        8453
+#   Arbitrum    42161
+# Example: 10
+roll_up_chain_id: 
+
+# Full path to the operator BLS key file.
+# Example: "/home/user/.eigenlayer/operator_keys/node.bls.key.json"
+bls_key_file: 

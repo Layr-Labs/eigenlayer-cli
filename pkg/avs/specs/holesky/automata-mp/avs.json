@@ -1,0 +1,8 @@
+{
+    "name": "holesky/automata-mp",
+    "description": "Automata Multi-Prover AVS on Holesky Testnet",
+    "network": "holesky",
+    "contract_address": "0x4665af665df5703445645d243f0fd63ed3b9d132",
+    "coordinator": "middleware",
+    "remote_signing": true
+}

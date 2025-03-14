@@ -1,0 +1,9 @@
+{
+    "name": "mainnet/eigenda",
+    "description": "EigenDA",
+    "network": "mainnet",
+    "contract_address": "0x870679e138bcdf293b7ff14dd44b70fc97e12fc0",
+    "coordinator": "middleware",
+    "remote_signing": true,
+    "churner_url": "churner.eigenda.xyz:443"
+}

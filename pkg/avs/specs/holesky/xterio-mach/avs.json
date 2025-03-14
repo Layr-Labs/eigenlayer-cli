@@ -1,0 +1,8 @@
+{
+    "name": "holesky/xterio-mach",
+    "description": "Xterio MACH on Holesky Testnet",
+    "network": "holesky",
+    "contract_address": "0x648e5012d7b30755963755f7dd7ff03e2f61bf8b",
+    "coordinator": "middleware",
+    "remote_signing": true
+}

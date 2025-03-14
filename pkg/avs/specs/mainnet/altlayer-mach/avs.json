@@ -1,0 +1,8 @@
+{
+    "name": "mainnet/altlayer-mach",
+    "description": "ALT Layer MACH",
+    "network": "mainnet",
+    "contract_address": "0x71a77037870169d47aad6c2c9360861a4c0df2bf",
+    "coordinator": "middleware",
+    "remote_signing": true
+}

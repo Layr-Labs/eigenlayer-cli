@@ -14,6 +14,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/signers"
+
 	"github.com/urfave/cli/v2"
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
@@ -81,7 +83,7 @@ func PrintTransactionInfo(txHash string, chainId *big.Int) {
 	}
 }
 
-func getWallet(
+func GetWallet(
 	cfg types.SignerConfig,
 	signerAddress string,
 	ethClient *ethclient.Client,
@@ -89,6 +91,18 @@ func getWallet(
 	chainID big.Int,
 	logger eigensdkLogger.Logger,
 ) (wallet.Wallet, common.Address, error) {
+	signer, address, _, err := GetWalletWithSigner(cfg, signerAddress, ethClient, p, chainID, logger)
+	return signer, address, err
+}
+
+func GetWalletWithSigner(
+	cfg types.SignerConfig,
+	signerAddress string,
+	ethClient *ethclient.Client,
+	p utils.Prompter,
+	chainID big.Int,
+	logger eigensdkLogger.Logger,
+) (wallet.Wallet, common.Address, Signer, error) {
 	var keyWallet wallet.Wallet
 	if cfg.SignerType == types.LocalKeystoreSigner {
 		// Check if input is available in the pipe and read the password from it
@@ -102,7 +116,7 @@ func getWallet(
 			)
 			if err != nil {
 				fmt.Println("Error while reading ecdsa key password")
-				return nil, common.Address{}, err
+				return nil, common.Address{}, nil, err
 			}
 		}
 
@@ -110,7 +124,7 @@ func getWallet(
 		// This is not supported by Go's standard library
 		keyFullPath, err := expandTilde(cfg.PrivateKeyStorePath)
 		if err != nil {
-			return nil, common.Address{}, err
+			return nil, common.Address{}, nil, err
 		}
 		cfg.PrivateKeyStorePath = keyFullPath
 
@@ -120,14 +134,19 @@ func getWallet(
 		}
 		sgn, sender, err := signerv2.SignerFromConfig(signerCfg, &chainID)
 		if err != nil {
-			return nil, common.Address{}, err
+			return nil, common.Address{}, nil, err
 		}
 		keyWallet, err = wallet.NewPrivateKeyWallet(ethClient, sgn, sender, logger)
 		if err != nil {
-			return nil, common.Address{}, err
+			return nil, common.Address{}, nil, err
 		}
 
-		return keyWallet, sender, nil
+		signer, err := signers.NewLocalSigner(cfg.PrivateKeyStorePath, ecdsaPassword)
+		if err != nil {
+			return nil, common.Address{}, nil, err
+		}
+
+		return keyWallet, sender, signer, nil
 	} else if cfg.SignerType == types.FireBlocksSigner {
 		var secretKey string
 		var err error
@@ -143,14 +162,14 @@ func getWallet(
 				cfg.FireblocksConfig.AWSRegion,
 			)
 			if err != nil {
-				return nil, common.Address{}, err
+				return nil, common.Address{}, nil, err
 			}
 			logger.Infof("Secret key with name %s from region %s read from AWS secret manager",
 				cfg.FireblocksConfig.SecretKey,
 				cfg.FireblocksConfig.AWSRegion,
 			)
 		default:
-			return nil, common.Address{}, fmt.Errorf("secret storage type %s is not supported",
+			return nil, common.Address{}, nil, fmt.Errorf("secret storage type %s is not supported",
 				cfg.FireblocksConfig.SecretStorageType,
 			)
 		}
@@ -162,7 +181,7 @@ func getWallet(
 			logger,
 		)
 		if err != nil {
-			return nil, common.Address{}, err
+			return nil, common.Address{}, nil, err
 		}
 		keyWallet, err = wallet.NewFireblocksWallet(
 			fireblocksClient,
@@ -171,13 +190,21 @@ func getWallet(
 			logger,
 		)
 		if err != nil {
-			return nil, common.Address{}, err
+			return nil, common.Address{}, nil, err
 		}
 		sender, err := keyWallet.SenderAddress(context.Background())
 		if err != nil {
-			return nil, common.Address{}, err
+			return nil, common.Address{}, nil, err
 		}
-		return keyWallet, sender, nil
+		client, err := signers.NewFireblocksClient(cfg.FireblocksConfig.APIKey,
+			[]byte(secretKey),
+			cfg.FireblocksConfig.BaseUrl,
+			time.Duration(cfg.FireblocksConfig.Timeout)*time.Second,
+			logger)
+		if err != nil {
+			return nil, common.Address{}, nil, err
+		}
+		return keyWallet, sender, signers.NewFireblocksSigner(client, chainID.Uint64(), cfg.FireblocksConfig.VaultAccountName), nil
 	} else if cfg.SignerType == types.Web3Signer {
 		signerCfg := signerv2.Config{
 			Endpoint: cfg.Web3SignerConfig.Url,
@@ -185,28 +212,36 @@ func getWallet(
 		}
 		sgn, sender, err := signerv2.SignerFromConfig(signerCfg, &chainID)
 		if err != nil {
-			return nil, common.Address{}, err
+			return nil, common.Address{}, nil, err
 		}
 		keyWallet, err = wallet.NewPrivateKeyWallet(ethClient, sgn, sender, logger)
 		if err != nil {
-			return nil, common.Address{}, err
+			return nil, common.Address{}, nil, err
 		}
-		return keyWallet, sender, nil
+		signer, err := signers.NewWeb3Signer(cfg.Web3SignerConfig.Url, signerAddress)
+		if err != nil {
+			return nil, common.Address{}, nil, err
+		}
+		return keyWallet, sender, signer, nil
 	} else if cfg.SignerType == types.PrivateKeySigner {
 		signerCfg := signerv2.Config{
 			PrivateKey: cfg.PrivateKey,
 		}
 		sgn, sender, err := signerv2.SignerFromConfig(signerCfg, &chainID)
 		if err != nil {
-			return nil, common.Address{}, err
+			return nil, common.Address{}, nil, err
 		}
 		keyWallet, err = wallet.NewPrivateKeyWallet(ethClient, sgn, sender, logger)
 		if err != nil {
-			return nil, common.Address{}, err
+			return nil, common.Address{}, nil, err
 		}
-		return keyWallet, sender, nil
+		signer, err := signers.NewPrivateKeySigner(cfg.PrivateKey)
+		if err != nil {
+			return nil, common.Address{}, nil, err
+		}
+		return keyWallet, sender, signer, nil
 	} else {
-		return nil, common.Address{}, fmt.Errorf("%s signer is not supported", cfg.SignerType)
+		return nil, common.Address{}, nil, fmt.Errorf("%s signer is not supported", cfg.SignerType)
 	}
 }
 

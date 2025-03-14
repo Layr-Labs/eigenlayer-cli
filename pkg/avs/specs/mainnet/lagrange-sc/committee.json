@@ -1,0 +1,1249 @@
+[
+    {
+        "inputs": [
+            {
+                "internalType": "contract ILagrangeService",
+                "name": "_service",
+                "type": "address"
+            },
+            {
+                "internalType": "contract IVoteWeigher",
+                "name": "_voteWeigher",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "operator",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "orgLength",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "added",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "removed",
+                "type": "uint256"
+            }
+        ],
+        "name": "BlsKeyUpdated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "chainID",
+                "type": "uint256"
+            },
+            {
+                "indexed": true,
+                "internalType": "uint8",
+                "name": "quorumNumber",
+                "type": "uint8"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "genesisBlock",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "duration",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "freezeDuration",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint96",
+                "name": "minWeight",
+                "type": "uint96"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint96",
+                "name": "maxWeight",
+                "type": "uint96"
+            }
+        ],
+        "name": "InitCommittee",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint8",
+                "name": "version",
+                "type": "uint8"
+            }
+        ],
+        "name": "Initialized",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "previousOwner",
+                "type": "address"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "newOwner",
+                "type": "address"
+            }
+        ],
+        "name": "OwnershipTransferred",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "operator",
+                "type": "address"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "signAddress",
+                "type": "address"
+            }
+        ],
+        "name": "SignAddressUpdated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "chainID",
+                "type": "uint256"
+            },
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "epochNumber",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "bytes32",
+                "name": "current",
+                "type": "bytes32"
+            }
+        ],
+        "name": "UpdateCommittee",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "chainID",
+                "type": "uint256"
+            },
+            {
+                "indexed": true,
+                "internalType": "uint8",
+                "name": "quorumNumber",
+                "type": "uint8"
+            },
+            {
+                "indexed": false,
+                "internalType": "int256",
+                "name": "l1Bias",
+                "type": "int256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "genesisBlock",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "duration",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "freezeDuration",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint96",
+                "name": "minWeight",
+                "type": "uint96"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint96",
+                "name": "maxWeight",
+                "type": "uint96"
+            }
+        ],
+        "name": "UpdateCommitteeParams",
+        "type": "event"
+    },
+    {
+        "inputs": [],
+        "name": "BLS_KEY_WITH_PROOF_TYPEHASH",
+        "outputs": [
+            {
+                "internalType": "bytes32",
+                "name": "",
+                "type": "bytes32"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "DOMAIN_TYPEHASH",
+        "outputs": [
+            {
+                "internalType": "bytes32",
+                "name": "",
+                "type": "bytes32"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "INNER_NODE_PREFIX",
+        "outputs": [
+            {
+                "internalType": "bytes1",
+                "name": "",
+                "type": "bytes1"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "LEAF_NODE_PREFIX",
+        "outputs": [
+            {
+                "internalType": "bytes1",
+                "name": "",
+                "type": "bytes1"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "operator",
+                "type": "address"
+            },
+            {
+                "components": [
+                    {
+                        "internalType": "uint256[2][]",
+                        "name": "blsG1PublicKeys",
+                        "type": "uint256[2][]"
+                    },
+                    {
+                        "internalType": "uint256[2][2]",
+                        "name": "aggG2PublicKey",
+                        "type": "uint256[2][2]"
+                    },
+                    {
+                        "internalType": "uint256[2]",
+                        "name": "signature",
+                        "type": "uint256[2]"
+                    },
+                    {
+                        "internalType": "bytes32",
+                        "name": "salt",
+                        "type": "bytes32"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "expiry",
+                        "type": "uint256"
+                    }
+                ],
+                "internalType": "struct IBLSKeyChecker.BLSKeyWithProof",
+                "name": "blsKeyWithProof",
+                "type": "tuple"
+            }
+        ],
+        "name": "addBlsPubKeys",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "operator",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "signAddress",
+                "type": "address"
+            },
+            {
+                "components": [
+                    {
+                        "internalType": "uint256[2][]",
+                        "name": "blsG1PublicKeys",
+                        "type": "uint256[2][]"
+                    },
+                    {
+                        "internalType": "uint256[2][2]",
+                        "name": "aggG2PublicKey",
+                        "type": "uint256[2][2]"
+                    },
+                    {
+                        "internalType": "uint256[2]",
+                        "name": "signature",
+                        "type": "uint256[2]"
+                    },
+                    {
+                        "internalType": "bytes32",
+                        "name": "salt",
+                        "type": "bytes32"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "expiry",
+                        "type": "uint256"
+                    }
+                ],
+                "internalType": "struct IBLSKeyChecker.BLSKeyWithProof",
+                "name": "blsKeyWithProof",
+                "type": "tuple"
+            }
+        ],
+        "name": "addOperator",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "operator",
+                "type": "address"
+            },
+            {
+                "internalType": "bytes32",
+                "name": "salt",
+                "type": "bytes32"
+            },
+            {
+                "internalType": "uint256",
+                "name": "expiry",
+                "type": "uint256"
+            }
+        ],
+        "name": "calculateKeyWithProofHash",
+        "outputs": [
+            {
+                "internalType": "bytes32",
+                "name": "",
+                "type": "bytes32"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "name": "chainIDs",
+        "outputs": [
+            {
+                "internalType": "uint32",
+                "name": "",
+                "type": "uint32"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint32",
+                "name": "",
+                "type": "uint32"
+            },
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "name": "committeeAddrs",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint32",
+                "name": "",
+                "type": "uint32"
+            }
+        ],
+        "name": "committeeParams",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "startBlock",
+                "type": "uint256"
+            },
+            {
+                "internalType": "int256",
+                "name": "l1Bias",
+                "type": "int256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "genesisBlock",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "duration",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "freezeDuration",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint8",
+                "name": "quorumNumber",
+                "type": "uint8"
+            },
+            {
+                "internalType": "uint96",
+                "name": "minWeight",
+                "type": "uint96"
+            },
+            {
+                "internalType": "uint96",
+                "name": "maxWeight",
+                "type": "uint96"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint32",
+                "name": "",
+                "type": "uint32"
+            },
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "name": "committees",
+        "outputs": [
+            {
+                "internalType": "bytes32",
+                "name": "root",
+                "type": "bytes32"
+            },
+            {
+                "internalType": "uint224",
+                "name": "updatedBlock",
+                "type": "uint224"
+            },
+            {
+                "internalType": "uint32",
+                "name": "leafCount",
+                "type": "uint32"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "domainSeparator",
+        "outputs": [
+            {
+                "internalType": "bytes32",
+                "name": "",
+                "type": "bytes32"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "opAddr",
+                "type": "address"
+            },
+            {
+                "internalType": "uint32",
+                "name": "chainID",
+                "type": "uint32"
+            }
+        ],
+        "name": "getBlsPubKeyVotingPowers",
+        "outputs": [
+            {
+                "internalType": "uint96[]",
+                "name": "individualVotingPowers",
+                "type": "uint96[]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "operator",
+                "type": "address"
+            }
+        ],
+        "name": "getBlsPubKeys",
+        "outputs": [
+            {
+                "internalType": "uint256[2][]",
+                "name": "",
+                "type": "uint256[2][]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint32",
+                "name": "chainID",
+                "type": "uint32"
+            },
+            {
+                "internalType": "uint256",
+                "name": "blockNumber",
+                "type": "uint256"
+            }
+        ],
+        "name": "getCommittee",
+        "outputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "bytes32",
+                        "name": "root",
+                        "type": "bytes32"
+                    },
+                    {
+                        "internalType": "uint224",
+                        "name": "updatedBlock",
+                        "type": "uint224"
+                    },
+                    {
+                        "internalType": "uint32",
+                        "name": "leafCount",
+                        "type": "uint32"
+                    }
+                ],
+                "internalType": "struct ILagrangeCommittee.CommitteeData",
+                "name": "currentCommittee",
+                "type": "tuple"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint32",
+                "name": "chainID",
+                "type": "uint32"
+            },
+            {
+                "internalType": "uint256",
+                "name": "epochNumber",
+                "type": "uint256"
+            }
+        ],
+        "name": "getEpochInterval",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "startBlock",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "freezeBlock",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "endBlock",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint32",
+                "name": "chainID",
+                "type": "uint32"
+            },
+            {
+                "internalType": "uint256",
+                "name": "blockNumber",
+                "type": "uint256"
+            }
+        ],
+        "name": "getEpochNumber",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "epochNumber",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "opAddr",
+                "type": "address"
+            },
+            {
+                "internalType": "uint32",
+                "name": "chainID",
+                "type": "uint32"
+            }
+        ],
+        "name": "getOperatorVotingPower",
+        "outputs": [
+            {
+                "internalType": "uint96",
+                "name": "",
+                "type": "uint96"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "operator",
+                "type": "address"
+            }
+        ],
+        "name": "getTokenListForOperator",
+        "outputs": [
+            {
+                "internalType": "address[]",
+                "name": "",
+                "type": "address[]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "initialOwner",
+                "type": "address"
+            }
+        ],
+        "name": "initialize",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint32",
+                "name": "chainID",
+                "type": "uint32"
+            }
+        ],
+        "name": "isLocked",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            },
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "operator",
+                "type": "address"
+            },
+            {
+                "internalType": "bytes32",
+                "name": "salt",
+                "type": "bytes32"
+            }
+        ],
+        "name": "isSaltSpent",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "operator",
+                "type": "address"
+            }
+        ],
+        "name": "isUnregisterable",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            },
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint32",
+                "name": "chainID",
+                "type": "uint32"
+            },
+            {
+                "internalType": "uint256",
+                "name": "epochNumber",
+                "type": "uint256"
+            }
+        ],
+        "name": "isUpdatable",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "name": "operatorsStatus",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "signAddress",
+                "type": "address"
+            },
+            {
+                "internalType": "uint8",
+                "name": "subscribedChainCount",
+                "type": "uint8"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "owner",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint32",
+                "name": "chainID",
+                "type": "uint32"
+            },
+            {
+                "internalType": "uint256",
+                "name": "genesisBlock",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "epochPeriod",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "freezeDuration",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint8",
+                "name": "quorumNumber",
+                "type": "uint8"
+            },
+            {
+                "internalType": "uint96",
+                "name": "minWeight",
+                "type": "uint96"
+            },
+            {
+                "internalType": "uint96",
+                "name": "maxWeight",
+                "type": "uint96"
+            }
+        ],
+        "name": "registerChain",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "operator",
+                "type": "address"
+            },
+            {
+                "internalType": "uint32[]",
+                "name": "indices",
+                "type": "uint32[]"
+            }
+        ],
+        "name": "removeBlsPubKeys",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "operator",
+                "type": "address"
+            }
+        ],
+        "name": "removeOperator",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "renounceOwnership",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint32",
+                "name": "chainID",
+                "type": "uint32"
+            },
+            {
+                "internalType": "uint256",
+                "name": "epochNumber",
+                "type": "uint256"
+            }
+        ],
+        "name": "revertEpoch",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "service",
+        "outputs": [
+            {
+                "internalType": "contract ILagrangeService",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "operator",
+                "type": "address"
+            },
+            {
+                "internalType": "uint32",
+                "name": "chainID",
+                "type": "uint32"
+            }
+        ],
+        "name": "subscribeChain",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint32",
+                "name": "",
+                "type": "uint32"
+            },
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "name": "subscribedChains",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "newOwner",
+                "type": "address"
+            }
+        ],
+        "name": "transferOwnership",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address[]",
+                "name": "operators",
+                "type": "address[]"
+            },
+            {
+                "internalType": "uint32",
+                "name": "chainID",
+                "type": "uint32"
+            }
+        ],
+        "name": "unsubscribeByAdmin",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "operator",
+                "type": "address"
+            },
+            {
+                "internalType": "uint32",
+                "name": "chainID",
+                "type": "uint32"
+            }
+        ],
+        "name": "unsubscribeChain",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint32",
+                "name": "chainID",
+                "type": "uint32"
+            },
+            {
+                "internalType": "uint256",
+                "name": "epochNumber",
+                "type": "uint256"
+            }
+        ],
+        "name": "update",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "operator",
+                "type": "address"
+            },
+            {
+                "internalType": "uint32",
+                "name": "index",
+                "type": "uint32"
+            },
+            {
+                "components": [
+                    {
+                        "internalType": "uint256[2][]",
+                        "name": "blsG1PublicKeys",
+                        "type": "uint256[2][]"
+                    },
+                    {
+                        "internalType": "uint256[2][2]",
+                        "name": "aggG2PublicKey",
+                        "type": "uint256[2][2]"
+                    },
+                    {
+                        "internalType": "uint256[2]",
+                        "name": "signature",
+                        "type": "uint256[2]"
+                    },
+                    {
+                        "internalType": "bytes32",
+                        "name": "salt",
+                        "type": "bytes32"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "expiry",
+                        "type": "uint256"
+                    }
+                ],
+                "internalType": "struct IBLSKeyChecker.BLSKeyWithProof",
+                "name": "blsKeyWithProof",
+                "type": "tuple"
+            }
+        ],
+        "name": "updateBlsPubKey",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint32",
+                "name": "chainID",
+                "type": "uint32"
+            },
+            {
+                "internalType": "int256",
+                "name": "l1Bias",
+                "type": "int256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "genesisBlock",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "epochPeriod",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "freezeDuration",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint8",
+                "name": "quorumNumber",
+                "type": "uint8"
+            },
+            {
+                "internalType": "uint96",
+                "name": "minWeight",
+                "type": "uint96"
+            },
+            {
+                "internalType": "uint96",
+                "name": "maxWeight",
+                "type": "uint96"
+            }
+        ],
+        "name": "updateChain",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "operator",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "newSignAddress",
+                "type": "address"
+            }
+        ],
+        "name": "updateSignAddress",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint32",
+                "name": "",
+                "type": "uint32"
+            }
+        ],
+        "name": "updatedEpoch",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "voteWeigher",
+        "outputs": [
+            {
+                "internalType": "contract IVoteWeigher",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    }
+]

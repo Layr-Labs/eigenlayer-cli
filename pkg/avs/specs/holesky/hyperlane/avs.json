@@ -1,0 +1,67 @@
+{
+    "name": "holesky/hyperlane",
+    "description": "Hyperlane AVS on Holesky Testnet",
+    "network": "holesky",
+    "contract_address": "0xc76e477437065093d353b7d56c81ff54d167b0ab",
+    "coordinator": "contract",
+    "remote_signing": true,
+    "abi": "service_manager.json",
+    "functions": {
+        "register": {
+            "name": "stakeRegistry.registerOperatorWithSignature"
+        },
+        "opt-in": {
+            "message": "opt-in not required, use register instead"
+        },
+        "opt-out": {
+            "message": "opt-out not required, use deregister instead"
+        },
+        "deregister": {
+            "name": "stakeRegistry.deregisterOperator"
+        },
+        "status": {
+            "name": "avsDirectory.avsOperatorStatus"
+        }
+    },
+    "delegates": [
+        {
+            "name": "avsDirectory",
+            "abi": "avs_directory.json",
+            "functions": [
+                {
+                    "name": "calculateOperatorAVSRegistrationDigestHash",
+                    "parameters": [
+                        "config:operator.address",
+                        "spec:contract_address",
+                        "func:salt(seed=const:hyperlane)",
+                        "func:expiry(timeout=const:300)"
+                    ]
+                },
+                {
+                    "name": "avsOperatorStatus",
+                    "parameters": [
+                        "spec:contract_address",
+                        "config:operator.address"
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "stakeRegistry",
+            "abi": "stake_registry.json",
+            "functions": [
+                {
+                    "name": "registerOperatorWithSignature",
+                    "parameters": [
+                        "func:ecdsa_sign(hash=call:avsDirectory.calculateOperatorAVSRegistrationDigestHash,salt=last:salt,expiry=last:expiry)",
+                        "config:operator.address"
+                    ]
+                },
+                {
+                    "name": "deregisterOperator",
+                    "parameters": []
+                }
+            ]
+        }
+    ]
+}

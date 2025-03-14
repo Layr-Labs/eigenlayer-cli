@@ -1,0 +1,8 @@
+{
+    "name": "mainnet/brevis-cochain",
+    "description": "Brevis coChain AVS",
+    "network": "mainnet",
+    "contract_address": "0x9fc952bdcbb7daca7d420fa55b942405b073a89d",
+    "coordinator": "middleware",
+    "remote_signing": true
+}

@@ -1,0 +1,57 @@
+{
+    "name": "mainnet/witness-chain",
+    "description": "Witness Chain",
+    "network": "mainnet",
+    "contract_address": "0xd25c2c5802198cb8541987b73a8db4c9bcae5cc7",
+    "coordinator": "contract",
+    "remote_signing": true,
+    "abi": "witness_hub.json",
+    "functions": {
+        "register": {
+            "name": "registerOperatorToAVS",
+            "parameters": [
+                "config:operator.address",
+                "func:ecdsa_sign(hash=call:avsDirectory.calculateOperatorAVSRegistrationDigestHash,salt=last:salt,expiry=last:expiry)"
+            ]
+        },
+        "opt-in": {
+            "message": "opt-in not required, use register instead"
+        },
+        "opt-out": {
+            "message": "opt-out not required, use deregister instead"
+        },
+        "deregister": {
+            "name": "deregisterOperatorFromAVS",
+            "parameters": [
+                "config:operator.address"
+            ]
+        },
+        "status": {
+            "name": "avsDirectory.avsOperatorStatus"
+        }
+    },
+    "delegates": [
+        {
+            "name": "avsDirectory",
+            "abi": "avs_directory.json",
+            "functions": [
+                {
+                    "name": "calculateOperatorAVSRegistrationDigestHash",
+                    "parameters": [
+                        "config:operator.address",
+                        "spec:contract_address",
+                        "func:salt(seed=const:predicate)",
+                        "func:expiry(timeout=const:300)"
+                    ]
+                },
+                {
+                    "name": "avsOperatorStatus",
+                    "parameters": [
+                        "spec:contract_address",
+                        "config:operator.address"
+                    ]
+                }
+            ]
+        }        
+    ]
+}
