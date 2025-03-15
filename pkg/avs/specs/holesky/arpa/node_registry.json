@@ -1,0 +1,882 @@
+[
+    {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+    },
+    {
+        "inputs": [],
+        "name": "EIP1271SignatureExpired",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "EIP1271SignatureNotFromSigner",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "EIP1271SignatureSaltAlreadySpent",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "EIP1271SignatureVerificationFailed",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "InvalidArrayLength",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "InvalidPublicKey",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "InvalidZeroAddress",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "NodeAlreadyActive",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "NodeAlreadyRegistered",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "NodeNotRegistered",
+        "type": "error"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "pendingUntilBlock",
+                "type": "uint256"
+            }
+        ],
+        "name": "NodeStillPending",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "OperatorUnderStaking",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "SenderNotController",
+        "type": "error"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "previousAdmin",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "newAdmin",
+                "type": "address"
+            }
+        ],
+        "name": "AdminChanged",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "assetAccountAddress",
+                "type": "address"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "nodeAddress",
+                "type": "address"
+            }
+        ],
+        "name": "AssetAccountSet",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "beacon",
+                "type": "address"
+            }
+        ],
+        "name": "BeaconUpgraded",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "nodeAddress",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "bytes",
+                "name": "dkgPublicKey",
+                "type": "bytes"
+            }
+        ],
+        "name": "DkgPublicKeyChanged",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint8",
+                "name": "version",
+                "type": "uint8"
+            }
+        ],
+        "name": "Initialized",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "nodeAddress",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "groupIndex",
+                "type": "uint256"
+            }
+        ],
+        "name": "NodeActivated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "nodeAddress",
+                "type": "address"
+            }
+        ],
+        "name": "NodeQuit",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "nodeAddress",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "bytes",
+                "name": "dkgPublicKey",
+                "type": "bytes"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "groupIndex",
+                "type": "uint256"
+            }
+        ],
+        "name": "NodeRegistered",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "nodeAddress",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "ethAmount",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "arpaAmount",
+                "type": "uint256"
+            }
+        ],
+        "name": "NodeRewarded",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "nodeIdAddress",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "stakingRewardPenalty",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "pendingBlock",
+                "type": "uint256"
+            }
+        ],
+        "name": "NodeSlashed",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "previousOwner",
+                "type": "address"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "newOwner",
+                "type": "address"
+            }
+        ],
+        "name": "OwnershipTransferred",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "implementation",
+                "type": "address"
+            }
+        ],
+        "name": "Upgraded",
+        "type": "event"
+    },
+    {
+        "inputs": [],
+        "name": "DOMAIN_TYPEHASH",
+        "outputs": [
+            {
+                "internalType": "bytes32",
+                "name": "",
+                "type": "bytes32"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "NATIVE_NODE_REGISTRATION_TYPEHASH",
+        "outputs": [
+            {
+                "internalType": "bytes32",
+                "name": "",
+                "type": "bytes32"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address[]",
+                "name": "nodes",
+                "type": "address[]"
+            },
+            {
+                "internalType": "uint256",
+                "name": "ethAmount",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "arpaAmount",
+                "type": "uint256"
+            }
+        ],
+        "name": "addReward",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "assetAccountAddress",
+                "type": "address"
+            },
+            {
+                "internalType": "bytes32",
+                "name": "salt",
+                "type": "bytes32"
+            }
+        ],
+        "name": "assetAccountSaltIsSpent",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "assetAccountAddress",
+                "type": "address"
+            },
+            {
+                "internalType": "bytes32",
+                "name": "salt",
+                "type": "bytes32"
+            },
+            {
+                "internalType": "uint256",
+                "name": "expiry",
+                "type": "uint256"
+            }
+        ],
+        "name": "calculateNativeNodeRegistrationDigestHash",
+        "outputs": [
+            {
+                "internalType": "bytes32",
+                "name": "",
+                "type": "bytes32"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bytes",
+                "name": "dkgPublicKey",
+                "type": "bytes"
+            }
+        ],
+        "name": "changeDkgPublicKey",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "nodeIdAddress",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "pendingBlock",
+                "type": "uint256"
+            }
+        ],
+        "name": "dismissNode",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "domainSeparator",
+        "outputs": [
+            {
+                "internalType": "bytes32",
+                "name": "",
+                "type": "bytes32"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "nodeAddress",
+                "type": "address"
+            }
+        ],
+        "name": "getAssetAccountAddressByNodeAddress",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "nodeAddress",
+                "type": "address"
+            }
+        ],
+        "name": "getDKGPublicKey",
+        "outputs": [
+            {
+                "internalType": "bytes",
+                "name": "",
+                "type": "bytes"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "nodeAddress",
+                "type": "address"
+            }
+        ],
+        "name": "getNode",
+        "outputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "address",
+                        "name": "idAddress",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "bytes",
+                        "name": "dkgPublicKey",
+                        "type": "bytes"
+                    },
+                    {
+                        "internalType": "bool",
+                        "name": "isEigenlayerNode",
+                        "type": "bool"
+                    },
+                    {
+                        "internalType": "bool",
+                        "name": "state",
+                        "type": "bool"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "pendingUntilBlock",
+                        "type": "uint256"
+                    }
+                ],
+                "internalType": "struct INodeRegistry.Node",
+                "name": "",
+                "type": "tuple"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "assetAccountAddress",
+                "type": "address"
+            }
+        ],
+        "name": "getNodeAddressByAssetAccountAddress",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "getNodeRegistryConfig",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "controllerContractAddress",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "stakingContractAddress",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "serviceManagerContractAddress",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "nativeNodeStakingAmount",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "eigenlayerNodeStakingAmount",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "pendingBlockAfterQuit",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "nodeAddress",
+                "type": "address"
+            }
+        ],
+        "name": "getNodeWithdrawableTokens",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "arpa",
+                "type": "address"
+            }
+        ],
+        "name": "initialize",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "bytes",
+                        "name": "signature",
+                        "type": "bytes"
+                    },
+                    {
+                        "internalType": "bytes32",
+                        "name": "salt",
+                        "type": "bytes32"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "expiry",
+                        "type": "uint256"
+                    }
+                ],
+                "internalType": "struct ISignatureUtils.SignatureWithSaltAndExpiry",
+                "name": "assetAccountSignature",
+                "type": "tuple"
+            }
+        ],
+        "name": "nodeActivate",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "nodeLogOff",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "nodeQuit",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bytes",
+                "name": "dkgPublicKey",
+                "type": "bytes"
+            },
+            {
+                "internalType": "bool",
+                "name": "isEigenlayerNode",
+                "type": "bool"
+            },
+            {
+                "internalType": "address",
+                "name": "assetAccountAddress",
+                "type": "address"
+            },
+            {
+                "components": [
+                    {
+                        "internalType": "bytes",
+                        "name": "signature",
+                        "type": "bytes"
+                    },
+                    {
+                        "internalType": "bytes32",
+                        "name": "salt",
+                        "type": "bytes32"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "expiry",
+                        "type": "uint256"
+                    }
+                ],
+                "internalType": "struct ISignatureUtils.SignatureWithSaltAndExpiry",
+                "name": "assetAccountSignature",
+                "type": "tuple"
+            }
+        ],
+        "name": "nodeRegister",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "recipient",
+                "type": "address"
+            }
+        ],
+        "name": "nodeWithdraw",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "owner",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "proxiableUUID",
+        "outputs": [
+            {
+                "internalType": "bytes32",
+                "name": "",
+                "type": "bytes32"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "renounceOwnership",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address[]",
+                "name": "assetAccountAddresses",
+                "type": "address[]"
+            },
+            {
+                "internalType": "address[]",
+                "name": "nodeAddresses",
+                "type": "address[]"
+            }
+        ],
+        "name": "setAssetAccount",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "controllerContractAddress",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "stakingContractAddress",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "serviceManagerContractAddress",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "nativeNodeStakingAmount",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "eigenlayerNodeStakingAmount",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "pendingBlockAfterQuit",
+                "type": "uint256"
+            }
+        ],
+        "name": "setNodeRegistryConfig",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "nodeIdAddress",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "stakingRewardPenalty",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "pendingBlock",
+                "type": "uint256"
+            }
+        ],
+        "name": "slashNode",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "newOwner",
+                "type": "address"
+            }
+        ],
+        "name": "transferOwnership",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "newImplementation",
+                "type": "address"
+            }
+        ],
+        "name": "upgradeTo",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "newImplementation",
+                "type": "address"
+            },
+            {
+                "internalType": "bytes",
+                "name": "data",
+                "type": "bytes"
+            }
+        ],
+        "name": "upgradeToAndCall",
+        "outputs": [],
+        "stateMutability": "payable",
+        "type": "function"
+    }
+]

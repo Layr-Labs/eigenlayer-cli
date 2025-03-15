@@ -1,0 +1,8 @@
+{
+    "name": "mainnet/dodochain-mach",
+    "description": "DODOchain MACH",
+    "network": "mainnet",
+    "contract_address": "0xd50e0931703302b080880c45148f5d83ea66ae2a",
+    "coordinator": "middleware",
+    "remote_signing": true
+}

@@ -1,18 +1,18 @@
 package types
 
 type FireblocksConfig struct {
-	APIKey           string `yaml:"api_key"`
-	SecretKey        string `yaml:"secret_key"`
-	BaseUrl          string `yaml:"base_url"`
-	VaultAccountName string `yaml:"vault_account_name"`
+	APIKey           string `yaml:"api_key"            json:"api_key"`
+	SecretKey        string `yaml:"secret_key"         json:"secret_key"`
+	BaseUrl          string `yaml:"base_url"           json:"base_url"`
+	VaultAccountName string `yaml:"vault_account_name" json:"vault_account_name"`
 
-	SecretStorageType SecretStorageType `yaml:"secret_storage_type"`
+	SecretStorageType SecretStorageType `yaml:"secret_storage_type" json:"secret_storage_type"`
 
 	// AWSRegion is the region where the secret is stored in AWS Secret Manager
-	AWSRegion string `yaml:"aws_region"`
+	AWSRegion string `yaml:"aws_region" json:"aws_region"`
 
 	// Timeout for API in seconds
-	Timeout int64 `yaml:"timeout"`
+	Timeout int64 `yaml:"timeout" json:"timeout"`
 }
 
 func (f *FireblocksConfig) MarshalYAML() (interface{}, error) {

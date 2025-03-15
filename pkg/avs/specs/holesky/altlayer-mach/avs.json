@@ -1,0 +1,8 @@
+{
+    "name": "holesky/altlayer-mach",
+    "description": "ALT Layer MACH on Holesky Testnet",
+    "network": "holesky",
+    "contract_address": "0xAE9a4497dee2540DaF489BeddB0706128a99ec63",
+    "coordinator": "middleware",
+    "remote_signing": true
+}

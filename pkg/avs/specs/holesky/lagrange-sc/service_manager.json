@@ -1,0 +1,566 @@
+[
+    {
+        "type": "constructor",
+        "inputs": [
+            {
+                "name": "_committee",
+                "type": "address",
+                "internalType": "contract ILagrangeCommittee"
+            },
+            {
+                "name": "_stakeManager",
+                "type": "address",
+                "internalType": "contract IStakeManager"
+            },
+            {
+                "name": "_avsDirectoryAddress",
+                "type": "address",
+                "internalType": "address"
+            },
+            {
+                "name": "_voteWeigher",
+                "type": "address",
+                "internalType": "contract IVoteWeigher"
+            }
+        ],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "addBlsPubKeys",
+        "inputs": [
+            {
+                "name": "blsKeyWithProof",
+                "type": "tuple",
+                "internalType": "struct IBLSKeyChecker.BLSKeyWithProof",
+                "components": [
+                    {
+                        "name": "blsG1PublicKeys",
+                        "type": "uint256[2][]",
+                        "internalType": "uint256[2][]"
+                    },
+                    {
+                        "name": "aggG2PublicKey",
+                        "type": "uint256[2][2]",
+                        "internalType": "uint256[2][2]"
+                    },
+                    {
+                        "name": "signature",
+                        "type": "uint256[2]",
+                        "internalType": "uint256[2]"
+                    },
+                    {
+                        "name": "salt",
+                        "type": "bytes32",
+                        "internalType": "bytes32"
+                    },
+                    {
+                        "name": "expiry",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    }
+                ]
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "addOperatorsToWhitelist",
+        "inputs": [
+            {
+                "name": "operators",
+                "type": "address[]",
+                "internalType": "address[]"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "avsDirectory",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "",
+                "type": "address",
+                "internalType": "contract IAVSDirectory"
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "committee",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "",
+                "type": "address",
+                "internalType": "contract ILagrangeCommittee"
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "deregister",
+        "inputs": [],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "getOperatorRestakedStrategies",
+        "inputs": [
+            {
+                "name": "operator",
+                "type": "address",
+                "internalType": "address"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "",
+                "type": "address[]",
+                "internalType": "address[]"
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "getRestakeableStrategies",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "",
+                "type": "address[]",
+                "internalType": "address[]"
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "initialize",
+        "inputs": [
+            {
+                "name": "initialOwner",
+                "type": "address",
+                "internalType": "address"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "operatorWhitelist",
+        "inputs": [
+            {
+                "name": "",
+                "type": "address",
+                "internalType": "address"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "",
+                "type": "bool",
+                "internalType": "bool"
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "owner",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "",
+                "type": "address",
+                "internalType": "address"
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "register",
+        "inputs": [
+            {
+                "name": "signAddress",
+                "type": "address",
+                "internalType": "address"
+            },
+            {
+                "name": "blsKeyWithProof",
+                "type": "tuple",
+                "internalType": "struct IBLSKeyChecker.BLSKeyWithProof",
+                "components": [
+                    {
+                        "name": "blsG1PublicKeys",
+                        "type": "uint256[2][]",
+                        "internalType": "uint256[2][]"
+                    },
+                    {
+                        "name": "aggG2PublicKey",
+                        "type": "uint256[2][2]",
+                        "internalType": "uint256[2][2]"
+                    },
+                    {
+                        "name": "signature",
+                        "type": "uint256[2]",
+                        "internalType": "uint256[2]"
+                    },
+                    {
+                        "name": "salt",
+                        "type": "bytes32",
+                        "internalType": "bytes32"
+                    },
+                    {
+                        "name": "expiry",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    }
+                ]
+            },
+            {
+                "name": "operatorSignature",
+                "type": "tuple",
+                "internalType": "struct ISignatureUtils.SignatureWithSaltAndExpiry",
+                "components": [
+                    {
+                        "name": "signature",
+                        "type": "bytes",
+                        "internalType": "bytes"
+                    },
+                    {
+                        "name": "salt",
+                        "type": "bytes32",
+                        "internalType": "bytes32"
+                    },
+                    {
+                        "name": "expiry",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    }
+                ]
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "removeBlsPubKeys",
+        "inputs": [
+            {
+                "name": "indices",
+                "type": "uint32[]",
+                "internalType": "uint32[]"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "removeOperatorsFromWhitelist",
+        "inputs": [
+            {
+                "name": "operators",
+                "type": "address[]",
+                "internalType": "address[]"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "renounceOwnership",
+        "inputs": [],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "stakeManager",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "",
+                "type": "address",
+                "internalType": "contract IStakeManager"
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "subscribe",
+        "inputs": [
+            {
+                "name": "chainID",
+                "type": "uint32",
+                "internalType": "uint32"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "transferOwnership",
+        "inputs": [
+            {
+                "name": "newOwner",
+                "type": "address",
+                "internalType": "address"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "unsubscribe",
+        "inputs": [
+            {
+                "name": "chainID",
+                "type": "uint32",
+                "internalType": "uint32"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "unsubscribeByAdmin",
+        "inputs": [
+            {
+                "name": "operators",
+                "type": "address[]",
+                "internalType": "address[]"
+            },
+            {
+                "name": "chainID",
+                "type": "uint32",
+                "internalType": "uint32"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "updateAVSMetadataURI",
+        "inputs": [
+            {
+                "name": "_metadataURI",
+                "type": "string",
+                "internalType": "string"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "updateBlsPubKey",
+        "inputs": [
+            {
+                "name": "index",
+                "type": "uint32",
+                "internalType": "uint32"
+            },
+            {
+                "name": "blsKeyWithProof",
+                "type": "tuple",
+                "internalType": "struct IBLSKeyChecker.BLSKeyWithProof",
+                "components": [
+                    {
+                        "name": "blsG1PublicKeys",
+                        "type": "uint256[2][]",
+                        "internalType": "uint256[2][]"
+                    },
+                    {
+                        "name": "aggG2PublicKey",
+                        "type": "uint256[2][2]",
+                        "internalType": "uint256[2][2]"
+                    },
+                    {
+                        "name": "signature",
+                        "type": "uint256[2]",
+                        "internalType": "uint256[2]"
+                    },
+                    {
+                        "name": "salt",
+                        "type": "bytes32",
+                        "internalType": "bytes32"
+                    },
+                    {
+                        "name": "expiry",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    }
+                ]
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "updateSignAddress",
+        "inputs": [
+            {
+                "name": "newSignAddress",
+                "type": "address",
+                "internalType": "address"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "voteWeigher",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "",
+                "type": "address",
+                "internalType": "contract IVoteWeigher"
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "event",
+        "name": "Initialized",
+        "inputs": [
+            {
+                "name": "version",
+                "type": "uint8",
+                "indexed": false,
+                "internalType": "uint8"
+            }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "OperatorDeregistered",
+        "inputs": [
+            {
+                "name": "operator",
+                "type": "address",
+                "indexed": true,
+                "internalType": "address"
+            }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "OperatorRegistered",
+        "inputs": [
+            {
+                "name": "operator",
+                "type": "address",
+                "indexed": true,
+                "internalType": "address"
+            },
+            {
+                "name": "serveUntilBlock",
+                "type": "uint32",
+                "indexed": false,
+                "internalType": "uint32"
+            }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "OperatorSubscribed",
+        "inputs": [
+            {
+                "name": "operator",
+                "type": "address",
+                "indexed": true,
+                "internalType": "address"
+            },
+            {
+                "name": "chainID",
+                "type": "uint32",
+                "indexed": true,
+                "internalType": "uint32"
+            }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "OperatorUnsubscribed",
+        "inputs": [
+            {
+                "name": "operator",
+                "type": "address",
+                "indexed": true,
+                "internalType": "address"
+            },
+            {
+                "name": "chainID",
+                "type": "uint32",
+                "indexed": true,
+                "internalType": "uint32"
+            }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "OwnershipTransferred",
+        "inputs": [
+            {
+                "name": "previousOwner",
+                "type": "address",
+                "indexed": true,
+                "internalType": "address"
+            },
+            {
+                "name": "newOwner",
+                "type": "address",
+                "indexed": true,
+                "internalType": "address"
+            }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "UnsubscribedByAdmin",
+        "inputs": [
+            {
+                "name": "operator",
+                "type": "address",
+                "indexed": true,
+                "internalType": "address"
+            },
+            {
+                "name": "chainID",
+                "type": "uint32",
+                "indexed": true,
+                "internalType": "uint32"
+            }
+        ],
+        "anonymous": false
+    }
+]
