@@ -1,51 +1,104 @@
 package notifications
 
 import (
-	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
-
 	"github.com/urfave/cli/v2"
 )
 
-type SubscribeRequest struct {
-	DeliveryMethod  string `json:"deliveryMethod"`
-	DeliveryDetails string `json:"deliveryDetails"`
-	EventType       string `json:"eventType"`
-	AvsName         string `json:"avsName"`
-	OperatorId      string `json:"operatorId"`
+// SubscriptionParams holds parameters for subscription creation
+type SubscriptionParams struct {
+	AvsName         string
+	EventName       string
+	OperatorID      string
+	DeliveryMethod  string
+	DeliveryDetails string
 }
 
-var DeliveryMethodFlag = cli.StringFlag{
-	Name:     "delivery-method",
-	Usage:    "Method of delivery for notifications (email, webhook, or telegram)",
-	Required: true,
-}
+// validateSubscribeParams validates all required parameters for subscription
+func validateSubscribeParams(cliCtx *cli.Context) (*SubscriptionParams, error) {
+	params := &SubscriptionParams{}
 
-var DeliveryDetailsFlag = cli.StringFlag{
-	Name:     "delivery-details",
-	Usage:    "Details for the delivery method (email address, webhook URL, or telegram chat ID)",
-	Required: true,
-}
-
-func validateDeliveryMethod(method string) error {
-	validMethods := map[string]bool{
-		"email":    true,
-		"webhook":  true,
-		"telegram": true,
+	params.AvsName = cliCtx.String("avs-name")
+	if params.AvsName == "" {
+		return nil, fmt.Errorf("avs-name is required")
 	}
-	if !validMethods[method] {
-		return fmt.Errorf("invalid delivery method: %s. Must be one of: email, webhook, telegram", method)
+
+	params.EventName = cliCtx.String("event-name")
+	if params.EventName == "" {
+		return nil, fmt.Errorf("event-name is required")
 	}
-	return nil
+
+	params.OperatorID = cliCtx.String("operator-id")
+	if params.OperatorID == "" {
+		return nil, fmt.Errorf("operator-id is required")
+	}
+
+	params.DeliveryMethod = cliCtx.String("delivery-method")
+	if err := validateDeliveryMethod(params.DeliveryMethod); err != nil {
+		return nil, err
+	}
+
+	params.DeliveryDetails = cliCtx.String("delivery-details")
+	if params.DeliveryDetails == "" {
+		return nil, fmt.Errorf("delivery-details is required")
+	}
+
+	return params, nil
 }
 
+// displaySubscriptionResponse formats and displays the subscription response
+func displaySubscriptionResponse(resp SubscriptionResponseDto, params *SubscriptionParams) {
+	fmt.Printf("Successfully subscribed to %s events for AVS '%s'\n", params.EventName, params.AvsName)
+	fmt.Printf("Subscription ID: %s\n", resp.SubscriptionID)
+
+	if resp.Message != "" {
+		fmt.Printf("Message: %s\n", resp.Message)
+	}
+
+	if resp.WorkflowID != "" {
+		fmt.Printf("Workflow ID: %s (for webhook delivery)\n", resp.WorkflowID)
+	}
+}
+
+// createSubscription creates a subscription with the given parameters
+func createSubscription(ctx context.Context, params *SubscriptionParams) (*SubscriptionResponseDto, error) {
+	// Create request body with the new DTO type
+	reqBody := SubscribeDto{
+		DeliveryMethod:  params.DeliveryMethod,
+		DeliveryDetails: params.DeliveryDetails,
+		EventType:       params.EventName,
+		AvsName:         params.AvsName,
+		OperatorID:      params.OperatorID,
+	}
+
+	// Make the request to the subscriptions endpoint
+	requestURL := fmt.Sprintf("%s%s", getAPIBaseURL(), SubscriptionsEndpoint)
+	resp, body, err := makePostRequest(ctx, requestURL, reqBody)
+	if err != nil {
+		return nil, fmt.Errorf("failed to send subscription request: %w", err)
+	}
+
+	// Check for success status code (expect 201 Created)
+	if !isSuccessStatusCode(resp.StatusCode) {
+		return nil, handleErrorResponse(resp.StatusCode, body)
+	}
+
+	// Parse success response
+	var subscriptionResp SubscriptionResponseDto
+	if err := json.Unmarshal(body, &subscriptionResp); err != nil {
+		return nil, fmt.Errorf("failed to parse subscription response: %w", err)
+	}
+
+	return &subscriptionResp, nil
+}
+
+// SubscribeEventsCmd returns a command to subscribe to events via the notification service
 func SubscribeEventsCmd() *cli.Command {
-	subscribeCmd := &cli.Command{
+	return &cli.Command{
 		Name:      "subscribe",
 		Usage:     "Subscribe to an event via the notification service",
 		UsageText: "subscribe --avs-name <avs-name> --event-name <event-name> --operator-id <operator-id> --delivery-method <method> --delivery-details <details>",
@@ -57,88 +110,31 @@ Supported delivery methods are:
 - telegram: use with a telegram chat ID
 		`,
 		After: telemetry.AfterRunAction(),
-		Action: func(context *cli.Context) error {
+		Action: func(cliCtx *cli.Context) error {
 			// Validate all required parameters
-			avsName := context.String("avs-name")
-			if avsName == "" {
-				return fmt.Errorf("avs-name is required")
-			}
-
-			eventName := context.String("event-name")
-			if eventName == "" {
-				return fmt.Errorf("event-name is required")
-			}
-
-			operatorId := context.String("operator-id")
-			if operatorId == "" {
-				return fmt.Errorf("operator-id is required")
-			}
-
-			deliveryMethod := context.String("delivery-method")
-			if err := validateDeliveryMethod(deliveryMethod); err != nil {
+			params, err := validateSubscribeParams(cliCtx)
+			if err != nil {
 				return err
 			}
 
-			deliveryDetails := context.String("delivery-details")
-			if deliveryDetails == "" {
-				return fmt.Errorf("delivery-details is required")
-			}
+			ctx := context.Background()
 
-			// Create request body
-			reqBody := SubscribeRequest{
-				DeliveryMethod:  deliveryMethod,
-				DeliveryDetails: deliveryDetails,
-				EventType:       eventName,
-				AvsName:         avsName,
-				OperatorId:      operatorId,
-			}
-
-			jsonBody, err := json.Marshal(reqBody)
+			// Create subscription
+			subscriptionResp, err := createSubscription(ctx, params)
 			if err != nil {
-				return fmt.Errorf("failed to create request body: %v", err)
+				return err
 			}
 
-			// Create request
-			req, err := http.NewRequest("POST", baseURL+"/subscribe", bytes.NewBuffer(jsonBody))
-			if err != nil {
-				return fmt.Errorf("failed to create request: %v", err)
-			}
-
-			req.Header.Set("Accept", "application/json")
-			req.Header.Set("Content-Type", "application/json")
-
-			// Send request
-			client := &http.Client{}
-			resp, err := client.Do(req)
-			if err != nil {
-				return fmt.Errorf("failed to send subscription request: %v", err)
-			}
-			defer resp.Body.Close()
-
-			body, err := io.ReadAll(resp.Body)
-			if err != nil {
-				return fmt.Errorf("failed to read response body: %v", err)
-			}
-
-			// Accept both 200 and 201 as success codes
-			if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
-				var errResp ErrorResponse
-				if err := json.Unmarshal(body, &errResp); err != nil {
-					return fmt.Errorf("server error: %d - %s", resp.StatusCode, string(body))
-				}
-				return fmt.Errorf("server error: %s", errResp.Message)
-			}
-
-			fmt.Printf("Successfully subscribed to %s events for AVS '%s'\n", eventName, avsName)
+			// Display results
+			displaySubscriptionResponse(*subscriptionResp, params)
 			return nil
 		},
 		Flags: []cli.Flag{
 			&AvsNameFlag,
 			&EventNameFlag,
-			&OperatorIdFlag,
+			&OperatorIDFlag,
 			&DeliveryMethodFlag,
 			&DeliveryDetailsFlag,
 		},
 	}
-	return subscribeCmd
 }

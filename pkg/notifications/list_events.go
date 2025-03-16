@@ -1,99 +1,87 @@
 package notifications
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
 	"net/url"
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
-
 	"github.com/urfave/cli/v2"
 )
 
-type Event struct {
-	Name            string `json:"name"`
-	ContractAddress string `json:"contractAddress"`
-	EthereumTopic   string `json:"ethereumTopic"`
+// fetchAvailableEvents fetches available events for a given AVS
+func fetchAvailableEvents(ctx context.Context, avsName string) ([]AvailableEventItemDto, error) {
+	// Use the avs/{avsName}/events endpoint
+	reqURL := fmt.Sprintf("%s%s", getAPIBaseURL(),
+		fmt.Sprintf(AvsEventsEndpointFormat, url.PathEscape(avsName)))
+
+	resp, body, err := makeGetRequest(ctx, reqURL)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch events data: %w", err)
+	}
+
+	if !isSuccessStatusCode(resp.StatusCode) {
+		return nil, handleErrorResponse(resp.StatusCode, body)
+	}
+
+	var eventsResponse AvailableEventsResponseDto
+	if err := json.Unmarshal(body, &eventsResponse); err != nil {
+		return nil, fmt.Errorf("failed to parse events data: %w", err)
+	}
+
+	return eventsResponse.Events, nil
 }
 
-type EventsResponse struct {
-	Events []Event `json:"events"`
+// displayAvailableEvents displays a formatted list of available events
+func displayAvailableEvents(events []AvailableEventItemDto, avsName string) {
+	fmt.Printf("Available Events for AVS '%s':\n", avsName)
+	fmt.Println("----------------")
+
+	if len(events) == 0 {
+		fmt.Println("No events found for this AVS.")
+		return
+	}
+
+	for _, event := range events {
+		fmt.Printf("Event Name: %s\n", event.Name)
+		fmt.Printf("Contract Address: %s\n", event.ContractAddress)
+		fmt.Printf("Ethereum Topic: %s\n", event.EthereumTopic)
+		fmt.Println("----------------")
+	}
 }
 
-type ErrorResponse struct {
-	StatusCode int    `json:"statusCode"`
-	Message    string `json:"message"`
-}
-
-const baseURL = "http://localhost:3000/api"
-
+// ListEventsCmd returns a command to list available events for a given AVS
 func ListEventsCmd() *cli.Command {
-	listCmd := &cli.Command{
+	return &cli.Command{
 		Name:      "list-events",
 		Usage:     "List all the events available to be subscribed to via notification service for a given AVS",
 		UsageText: "list-events --avs-name <avs-name>",
 		Description: `
 This command provides a listing of all events available to be subscribed via the notification service.
+The AVS name is required to filter events by a specific AVS.
 		`,
 		After: telemetry.AfterRunAction(),
-		Action: func(context *cli.Context) error {
-			avsName := context.String("avs-name")
+		Action: func(cliCtx *cli.Context) error {
+			avsName := cliCtx.String("avs-name")
 			if avsName == "" {
 				return fmt.Errorf("avs-name is required")
 			}
 
-			// Construct URL with query parameter
-			reqURL := fmt.Sprintf("%s/available-events?avsName=%s", baseURL, url.QueryEscape(avsName))
+			ctx := context.Background()
 
-			// Create request with headers
-			req, err := http.NewRequest("GET", reqURL, nil)
+			// Fetch events
+			events, err := fetchAvailableEvents(ctx, avsName)
 			if err != nil {
-				return fmt.Errorf("failed to create request: %v", err)
-			}
-			req.Header.Set("Accept", "application/json")
-
-			// Send request
-			client := &http.Client{}
-			resp, err := client.Do(req)
-			if err != nil {
-				return fmt.Errorf("failed to fetch events data: %v", err)
-			}
-			defer resp.Body.Close()
-
-			body, err := io.ReadAll(resp.Body)
-			if err != nil {
-				return fmt.Errorf("failed to read response body: %v", err)
+				return err
 			}
 
-			if resp.StatusCode != http.StatusOK {
-				var errResp ErrorResponse
-				if err := json.Unmarshal(body, &errResp); err != nil {
-					return fmt.Errorf("server error: %d - %s", resp.StatusCode, string(body))
-				}
-				return fmt.Errorf("server error: %s", errResp.Message)
-			}
-
-			var eventsResponse EventsResponse
-			if err := json.Unmarshal(body, &eventsResponse); err != nil {
-				return fmt.Errorf("failed to parse events data: %v", err)
-			}
-
-			fmt.Printf("Available Events for AVS '%s':\n", avsName)
-			fmt.Println("----------------")
-			for _, event := range eventsResponse.Events {
-				fmt.Printf("Event Name: %s\n", event.Name)
-				fmt.Printf("Contract Address: %s\n", event.ContractAddress)
-				fmt.Printf("Ethereum Topic: %s\n", event.EthereumTopic)
-				fmt.Println("----------------")
-			}
-
+			// Display results
+			displayAvailableEvents(events, avsName)
 			return nil
 		},
 		Flags: []cli.Flag{
 			&AvsNameFlag,
 		},
 	}
-	return listCmd
 }

@@ -11,8 +11,8 @@ func NotificationsCmd(p utils.Prompter) *cli.Command {
 		Name:  "notifications",
 		Usage: "Subscribe and unsubscribe to EigenLayer events via the notification service",
 		Subcommands: []*cli.Command{
-			notifications.ListEventsCmd(),
 			notifications.ListAvsCmd(),
+			notifications.ListEventsCmd(),
 			notifications.SubscribeEventsCmd(),
 			notifications.UnsubscribeEventsCmd(),
 		},
