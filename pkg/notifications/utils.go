@@ -156,7 +156,11 @@ func makeDeleteRequest(ctx context.Context, url string) (*http.Response, []byte,
 }
 
 // makeDeleteRequestWithBody makes a DELETE request with a JSON body to the specified URL
-func makeDeleteRequestWithBody(ctx context.Context, url string, requestBody interface{}) (*http.Response, []byte, error) {
+func makeDeleteRequestWithBody(
+	ctx context.Context,
+	url string,
+	requestBody interface{},
+) (*http.Response, []byte, error) {
 	config := RequestConfig{
 		Method: http.MethodDelete,
 		URL:    url,
