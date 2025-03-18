@@ -161,7 +161,7 @@ func readAndValidateSetClaimerConfig(cCtx *cli.Context, logger logging.Logger) (
 	if common.IsEmptyString(claimerAddress) {
 		return nil, fmt.Errorf("claimer address is required")
 	}
-	callerAddress := common.PopulateCallerAddress(cCtx, logger, earnerAddress)
+	callerAddress := common.PopulateCallerAddress(cCtx, logger, earnerAddress, flags.OperatorAddressFlag.Name)
 
 	rewardsCoordinatorAddress := cCtx.String(RewardsCoordinatorAddressFlag.Name)
 	var err error

@@ -129,7 +129,7 @@ var (
 	CallerAddressFlag = cli.StringFlag{
 		Name:    "caller-address",
 		Aliases: []string{"ca"},
-		Usage:   "This is the address of the caller who is calling the contract function. If it is not provided, the operator address will be used as the caller address",
+		Usage:   "Used to execute an action on behalf of another user. See User Access Management documents for more details.",
 		EnvVars: []string{"CALLER_ADDRESS"},
 	}
 )

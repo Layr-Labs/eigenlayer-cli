@@ -49,7 +49,7 @@ type acceptAdminConfig struct {
 	Network                     string
 	RPCUrl                      string
 	AccountAddress              gethcommon.Address
-	CallerAddress               gethcommon.Address
+	AcceptorAddress             gethcommon.Address
 	PermissionControllerAddress gethcommon.Address
 	SignerConfig                types.SignerConfig
 	ChainID                     *big.Int

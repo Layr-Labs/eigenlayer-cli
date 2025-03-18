@@ -22,6 +22,7 @@ import (
 	"github.com/Layr-Labs/eigensdk-go/aws/secretmanager"
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/fireblocks"
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/wallet"
+	"github.com/Layr-Labs/eigensdk-go/logging"
 	eigensdkLogger "github.com/Layr-Labs/eigensdk-go/logging"
 	"github.com/Layr-Labs/eigensdk-go/signerv2"
 	eigensdkTypes "github.com/Layr-Labs/eigensdk-go/types"
@@ -587,14 +588,16 @@ func ValidateAndConvertSelectorString(selector string) ([4]byte, error) {
 
 func PopulateCallerAddress(
 	cliContext *cli.Context,
-	logger eigensdkLogger.Logger,
+	logger logging.Logger,
 	defaultAddress common.Address,
+	defaultName string,
 ) common.Address {
 	// TODO: these are copied across both callers of this method. Will clean this up in the CLI refactor of flags.
 	callerAddress := cliContext.String(flags.CallerAddressFlag.Name)
 	if IsEmptyString(callerAddress) {
 		logger.Infof(
-			"User access management delegation using caller address not invoked. Signing with: %s",
+			"Caller address not provided. Using %s as default address (%s)",
+			defaultName,
 			defaultAddress,
 		)
 

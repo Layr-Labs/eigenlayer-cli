@@ -171,7 +171,7 @@ func generateRemoveAppointeePermissionWriter(
 func readAndValidateRemoveConfig(cliContext *cli.Context, logger logging.Logger) (*removeConfig, error) {
 	accountAddress := gethcommon.HexToAddress(cliContext.String(AccountAddressFlag.Name))
 	appointeeAddress := gethcommon.HexToAddress(cliContext.String(AppointeeAddressFlag.Name))
-	callerAddress := user.PopulateCallerAddress(cliContext, logger, accountAddress)
+	callerAddress := common.PopulateCallerAddress(cliContext, logger, accountAddress, AccountAddressFlag.Name)
 	ethRpcUrl := cliContext.String(flags.ETHRpcUrlFlag.Name)
 	network := cliContext.String(flags.NetworkFlag.Name)
 	environment := cliContext.String(flags.EnvironmentFlag.Name)

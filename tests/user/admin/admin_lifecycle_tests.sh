@@ -120,7 +120,7 @@ teardown() {
 @test "Accept $FIRST_ADMIN_ADDRESS as admin (calldata)" {
   run $CLI_PATH user admin accept-admin \
     --account-address "$ACCOUNT_ADDRESS" \
-    --caller-address "$FIRST_ADMIN_ADDRESS" \
+    --acceptor-address "$FIRST_ADMIN_ADDRESS" \
     --permission-controller-address "$PERMISSION_CONTROLLER_ADDRESS" \
     --eth-rpc-url "$RPC_URL" \
     --network "$NETWORK" \
@@ -135,6 +135,7 @@ teardown() {
 @test "Accept $FIRST_ADMIN_ADDRESS as admin (broadcast)" {
   run $CLI_PATH user admin accept-admin \
     --account-address "$ACCOUNT_ADDRESS" \
+    --acceptor-address "$FIRST_ADMIN_ADDRESS" \
     --permission-controller-address "$PERMISSION_CONTROLLER_ADDRESS" \
     --eth-rpc-url "$RPC_URL" \
     --network "$NETWORK" \
@@ -201,7 +202,7 @@ teardown() {
 @test "Accept $SECOND_ADMIN_ADDRESS as admin (calldata)" {
   run $CLI_PATH user admin accept-admin \
     --account-address "$ACCOUNT_ADDRESS" \
-    --caller-address "$SECOND_ADMIN_ADDRESS" \
+    --acceptor-address "$SECOND_ADMIN_ADDRESS" \
     --permission-controller-address "$PERMISSION_CONTROLLER_ADDRESS" \
     --eth-rpc-url "$RPC_URL" \
     --network "$NETWORK" \
@@ -216,6 +217,7 @@ teardown() {
 @test "Accept $SECOND_ADMIN_ADDRESS as admin (broadcast)" {
   run $CLI_PATH user admin accept-admin \
     --account-address "$ACCOUNT_ADDRESS" \
+    --acceptor-address "$SECOND_ADMIN_ADDRESS" \
     --permission-controller-address "$PERMISSION_CONTROLLER_ADDRESS" \
     --eth-rpc-url "$RPC_URL" \
     --network "$NETWORK" \
