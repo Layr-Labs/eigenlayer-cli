@@ -589,7 +589,7 @@ func ValidateAndConvertSelectorString(selector string) ([4]byte, error) {
 func PopulateCallerAddress(
 	cliContext *cli.Context,
 	logger logging.Logger,
-	accountAddress common.Address,
+	defaultAddress common.Address,
 	defaultName string,
 ) common.Address {
 	// TODO: these are copied across both callers of this method. Will clean this up in the CLI refactor of flags.
@@ -598,10 +598,10 @@ func PopulateCallerAddress(
 		logger.Infof(
 			"Caller address not provided. Using %s as default address (%s)",
 			defaultName,
-			accountAddress,
+			defaultAddress,
 		)
 
-		return accountAddress
+		return defaultAddress
 	}
 	return common.HexToAddress(callerAddress)
 }
