@@ -24,7 +24,7 @@ import (
 
 	"github.com/Layr-Labs/eigenlayer-rewards-proofs/pkg/distribution"
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
-	rewardscoordinator "github.com/Layr-Labs/eigensdk-go/contracts/bindings/IRewardsCoordinator"
+	rewardscoordinator "github.com/Layr-Labs/eigensdk-go/contracts/bindings/RewardsCoordinator"
 	"github.com/Layr-Labs/eigensdk-go/logging"
 	eigenSdkUtils "github.com/Layr-Labs/eigensdk-go/utils"
 
