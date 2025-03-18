@@ -201,7 +201,7 @@ func readAndValidateSetOperatorSplitConfig(
 
 	operatorAddress := gethcommon.HexToAddress(cCtx.String(flags.OperatorAddressFlag.Name))
 	logger.Infof("Using operator address: %s", operatorAddress.String())
-	callerAddress := common.PopulateCallerAddress(cCtx, logger, operatorAddress)
+	callerAddress := common.PopulateCallerAddress(cCtx, logger, operatorAddress, flags.OperatorAddressFlag.Name)
 
 	avsAddress := gethcommon.HexToAddress(cCtx.String(split.AVSAddressFlag.Name))
 

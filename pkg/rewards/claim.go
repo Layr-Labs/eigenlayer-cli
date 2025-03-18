@@ -336,7 +336,7 @@ func broadcastClaims(
 
 	if config.Broadcast {
 		eLWriter, err := common.GetELWriter(
-			config.CallerAddress,
+			config.ClaimerAddress,
 			config.SignerConfig,
 			ethClient,
 			elcontracts.Config{
@@ -367,7 +367,7 @@ func broadcastClaims(
 		logger.Infof("Claim transaction submitted successfully")
 		common.PrintTransactionInfo(receipt.TxHash.String(), config.ChainID)
 	} else {
-		noSendTxOpts := common.GetNoSendTxOpts(config.CallerAddress)
+		noSendTxOpts := common.GetNoSendTxOpts(config.ClaimerAddress)
 		_, _, contractBindings, err := elcontracts.BuildClients(elcontracts.Config{
 			RewardsCoordinatorAddress: config.RewardsCoordinatorAddress,
 		}, ethClient, nil, logger, nil)
@@ -379,7 +379,7 @@ func broadcastClaims(
 		// since balance of contract can be 0, as it can be called by an EOA
 		// to claim. So we hardcode the gas limit to 150_000 so that we can
 		// create unsigned tx without gas limit estimation from contract bindings
-		if common.IsSmartContractAddress(config.CallerAddress, ethClient) {
+		if common.IsSmartContractAddress(config.ClaimerAddress, ethClient) {
 			// Caller is a smart contract
 			noSendTxOpts.GasLimit = 150_000
 		}
@@ -578,7 +578,6 @@ func readAndValidateClaimConfig(cCtx *cli.Context, logger logging.Logger) (*Clai
 	tokenAddresses := cCtx.String(TokenAddressesFlag.Name)
 	splitTokenAddresses := strings.Split(tokenAddresses, ",")
 	validTokenAddresses := getValidHexAddresses(splitTokenAddresses)
-	callerAddress := common.PopulateCallerAddress(cCtx, logger, earnerAddress)
 	rewardsCoordinatorAddress := cCtx.String(RewardsCoordinatorAddressFlag.Name)
 	isSilent := cCtx.Bool(flags.SilentFlag.Name)
 	batchClaimFile := cCtx.String(flags.BatchClaimFile.Name)
@@ -650,7 +649,6 @@ func readAndValidateClaimConfig(cCtx *cli.Context, logger logging.Logger) (*Clai
 		Network:                   network,
 		RPCUrl:                    rpcUrl,
 		EarnerAddress:             earnerAddress,
-		CallerAddress:             callerAddress,
 		Output:                    output,
 		OutputType:                outputType,
 		Broadcast:                 broadcast,

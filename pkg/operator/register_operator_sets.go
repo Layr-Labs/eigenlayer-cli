@@ -154,7 +154,7 @@ func readAndValidateRegisterOperatorSetsConfig(cCtx *cli.Context, logger logging
 	isSilent := cCtx.Bool(flags.SilentFlag.Name)
 
 	operatorAddress := gethcommon.HexToAddress(cCtx.String(flags.OperatorAddressFlag.Name))
-	callerAddress := common.PopulateCallerAddress(cCtx, logger, operatorAddress)
+	callerAddress := common.PopulateCallerAddress(cCtx, logger, operatorAddress, flags.OperatorAddressFlag.Name)
 	avsAddress := gethcommon.HexToAddress(cCtx.String(flags.AVSAddressFlag.Name))
 
 	// Get signerConfig

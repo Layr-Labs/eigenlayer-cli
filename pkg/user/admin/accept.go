@@ -8,7 +8,6 @@ import (
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
-	"github.com/Layr-Labs/eigenlayer-cli/pkg/user"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
 	"github.com/Layr-Labs/eigensdk-go/logging"
@@ -100,8 +99,8 @@ func printAcceptAdminTx(
 		return err
 	}
 
-	noSendTxOpts := common.GetNoSendTxOpts(config.CallerAddress)
-	if common.IsSmartContractAddress(config.CallerAddress, ethClient) {
+	noSendTxOpts := common.GetNoSendTxOpts(config.AcceptorAddress)
+	if common.IsSmartContractAddress(config.AcceptorAddress, ethClient) {
 		noSendTxOpts.GasLimit = 150_000
 	}
 
@@ -129,7 +128,7 @@ func printAcceptAdminTx(
 		}
 		fmt.Printf(
 			"Pending admin at address %s will accept admin role\n",
-			config.CallerAddress,
+			config.AcceptorAddress,
 		)
 	}
 
@@ -145,7 +144,7 @@ func readAndValidateAcceptAdminConfig(
 	logger logging.Logger,
 ) (*acceptAdminConfig, error) {
 	accountAddress := gethcommon.HexToAddress(cliContext.String(AccountAddressFlag.Name))
-	callerAddress := common.PopulateCallerAddress(cliContext, logger, accountAddress)
+	acceptorAddress := gethcommon.HexToAddress(cliContext.String(AcceptorAddressFlag.Name))
 	ethRpcUrl := cliContext.String(flags.ETHRpcUrlFlag.Name)
 	network := cliContext.String(flags.NetworkFlag.Name)
 	environment := cliContext.String(flags.EnvironmentFlag.Name)
@@ -183,7 +182,7 @@ func readAndValidateAcceptAdminConfig(
 		Network:                     network,
 		RPCUrl:                      ethRpcUrl,
 		AccountAddress:              accountAddress,
-		CallerAddress:               callerAddress,
+		AcceptorAddress:             acceptorAddress,
 		PermissionControllerAddress: gethcommon.HexToAddress(permissionControllerAddress),
 		SignerConfig:                *signerConfig,
 		ChainID:                     chainID,
@@ -198,7 +197,7 @@ func acceptFlags() []cli.Flag {
 	cmdFlags := []cli.Flag{
 		&flags.VerboseFlag,
 		&AccountAddressFlag,
-		&user.CallerAddressFlag,
+		&AcceptorAddressFlag,
 		&PermissionControllerAddressFlag,
 		&flags.OutputTypeFlag,
 		&flags.OutputFileFlag,
@@ -221,7 +220,7 @@ func generateAcceptAdminWriter(
 			return nil, eigenSdkUtils.WrapError("failed to create new eth client", err)
 		}
 		return common.GetELWriter(
-			config.CallerAddress,
+			config.AcceptorAddress,
 			&config.SignerConfig,
 			ethClient,
 			elcontracts.Config{
