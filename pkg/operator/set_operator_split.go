@@ -2,6 +2,7 @@ package operator
 
 import (
 	"fmt"
+
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/command"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
@@ -9,13 +10,11 @@ import (
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/rewards"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
-	contractIRewardsCoordinator "github.com/Layr-Labs/eigensdk-go/contracts/bindings/RewardsCoordinator"
 	"github.com/Layr-Labs/eigensdk-go/logging"
 	eigenSdkUtils "github.com/Layr-Labs/eigensdk-go/utils"
 	gethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/urfave/cli/v2"
 )
 
 type SetOperatorSplitCmd struct {
@@ -84,7 +83,7 @@ func SetOperatorSplit(cCtx *cli.Context, p utils.Prompter, isProgrammaticIncenti
 
 		var receipt *types.Receipt
 		if isOperatorSet {
-			operatorSet := contractIRewardsCoordinator.OperatorSet{
+			operatorSet := contractRewardsCoordinator.OperatorSet{
 				Id:  uint32(config.OperatorSetId),
 				Avs: config.AVSAddress,
 			}
@@ -121,7 +120,7 @@ func SetOperatorSplit(cCtx *cli.Context, p utils.Prompter, isProgrammaticIncenti
 
 		var unsignedTx *types.Transaction
 		if isOperatorSet {
-			operatorSet := contractIRewardsCoordinator.OperatorSet{
+			operatorSet := contractRewardsCoordinator.OperatorSet{
 				Id:  uint32(config.OperatorSetId),
 				Avs: config.AVSAddress,
 			}
