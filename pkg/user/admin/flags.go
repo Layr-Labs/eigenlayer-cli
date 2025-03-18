@@ -17,7 +17,7 @@ var (
 	}
 	AcceptorAddressFlag = cli.StringFlag{
 		Name:    "acceptor-address",
-		Aliases: []string{"aa"},
+		Aliases: []string{"aca"},
 		Usage:   "user admin ... --acceptor-address \"0x...\"",
 		EnvVars: []string{"ACCEPTOR_ADDRESS"},
 	}
