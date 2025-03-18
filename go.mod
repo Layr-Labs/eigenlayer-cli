@@ -2,17 +2,20 @@ module github.com/Layr-Labs/eigenlayer-cli
 
 go 1.22.0
 
-toolchain go1.23.1
+toolchain go1.23.2
+
+replace github.com/Layr-Labs/eigensdk-go => /Users/brandonchatham/sandbox/cli/eigensdk-go
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
 	github.com/Layr-Labs/eigenlayer-rewards-proofs v0.2.12
 	github.com/Layr-Labs/eigenpod-proofs-generation v0.0.14-stable.0.20240730152248-5c11a259293e
-	github.com/Layr-Labs/eigensdk-go v0.3.0-rc.1.0.20250319161742-4a9a369f40c6
+	github.com/Layr-Labs/eigensdk-go v0.2.0-beta.1.0.20250207181954-d729fcd8d579
 	github.com/Layr-Labs/protocol-apis v1.6.0
 	github.com/akuity/grpc-gateway-client v0.0.0-20240912082144-55a48e8b4b89
 	github.com/blang/semver/v4 v4.0.0
 	github.com/consensys/gnark-crypto v0.16.0
+	github.com/docker/docker v27.1.1+incompatible
 	github.com/ethereum/go-ethereum v1.15.0
 	github.com/fatih/color v1.17.0
 	github.com/gocarina/gocsv v0.0.0-20240520201108-78e41c74b4b1
@@ -73,7 +76,6 @@ require (
 	github.com/deckarep/golang-set/v2 v2.6.0 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.0.1 // indirect
 	github.com/distribution/reference v0.6.0 // indirect
-	github.com/docker/docker v27.1.1+incompatible // indirect
 	github.com/docker/go-connections v0.5.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/ethereum/c-kzg-4844 v1.0.0 // indirect

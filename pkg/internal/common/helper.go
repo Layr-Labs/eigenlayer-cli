@@ -22,7 +22,7 @@ import (
 	"github.com/Layr-Labs/eigensdk-go/aws/secretmanager"
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/fireblocks"
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/wallet"
-	"github.com/Layr-Labs/eigensdk-go/logging"
+	sdkEcdsa "github.com/Layr-Labs/eigensdk-go/crypto/ecdsa"
 	eigensdkLogger "github.com/Layr-Labs/eigensdk-go/logging"
 	"github.com/Layr-Labs/eigensdk-go/signerv2"
 	eigensdkTypes "github.com/Layr-Labs/eigensdk-go/types"
@@ -103,34 +103,12 @@ func getWallet(
 ) (wallet.Wallet, common.Address, error) {
 	var keyWallet wallet.Wallet
 	if cfg.SignerType == types.LocalKeystoreSigner {
-		// Check if input is available in the pipe and read the password from it
-		ecdsaPassword, readFromPipe := utils.GetStdInPassword()
-		var err error
-		if !readFromPipe {
-			ecdsaPassword, err = p.InputHiddenString("Enter password to decrypt the ecdsa private key:", "",
-				func(password string) error {
-					return nil
-				},
-			)
-			if err != nil {
-				fmt.Println("Error while reading ecdsa key password")
-				return nil, common.Address{}, err
-			}
-		}
 
-		// This is to expand the tilde in the path to the home directory
-		// This is not supported by Go's standard library
-		keyFullPath, err := expandTilde(cfg.PrivateKeyStorePath)
+		signerCfg, err := getKeystoreSignerConfig(&cfg, p)
 		if err != nil {
 			return nil, common.Address{}, err
 		}
-		cfg.PrivateKeyStorePath = keyFullPath
-
-		signerCfg := signerv2.Config{
-			KeystorePath: cfg.PrivateKeyStorePath,
-			Password:     ecdsaPassword,
-		}
-		sgn, sender, err := signerv2.SignerFromConfig(signerCfg, &chainID)
+		sgn, sender, err := signerv2.SignerFromConfig(*signerCfg, &chainID)
 		if err != nil {
 			return nil, common.Address{}, err
 		}
@@ -588,16 +566,14 @@ func ValidateAndConvertSelectorString(selector string) ([4]byte, error) {
 
 func PopulateCallerAddress(
 	cliContext *cli.Context,
-	logger logging.Logger,
+	logger eigensdkLogger.Logger,
 	defaultAddress common.Address,
-	defaultName string,
 ) common.Address {
 	// TODO: these are copied across both callers of this method. Will clean this up in the CLI refactor of flags.
 	callerAddress := cliContext.String(flags.CallerAddressFlag.Name)
 	if IsEmptyString(callerAddress) {
 		logger.Infof(
-			"Caller address not provided. Using %s as default address (%s)",
-			defaultName,
+			"User access management delegation using caller address not invoked. Signing with: %s",
 			defaultAddress,
 		)
 
@@ -615,4 +591,73 @@ func GetEnvFromNetwork(network string) string {
 	default:
 		return local
 	}
+}
+
+func GetMessageSigner(
+	cfg *types.SignerConfig,
+	p utils.Prompter,
+) (func([]byte) ([]byte, error), common.Address, error) {
+	var signerCfg *signerv2.Config
+	var err error
+	var signer func([]byte) ([]byte, error)
+	var senderAddress common.Address
+
+	switch cfg.SignerType {
+	case types.LocalKeystoreSigner:
+		signerCfg, err = getKeystoreSignerConfig(cfg, p)
+		if err != nil {
+			return nil, common.Address{}, err
+		}
+		senderAddress, err = sdkEcdsa.GetAddressFromKeyStoreFile(signerCfg.KeystorePath)
+		if err != nil {
+			return nil, common.Address{}, err
+		}
+		signer, err = signerv2.KeyStoreMessageSignerFn(signerCfg.KeystorePath, signerCfg.Password)
+	case types.Web3Signer:
+		signerCfg = &signerv2.Config{
+			Endpoint: cfg.Web3SignerConfig.Url,
+		}
+		senderAddress = common.HexToAddress(signerCfg.Address)
+		signer, err = signerv2.Web3MessageSignerFn(senderAddress, signerCfg.Endpoint)
+	case types.PrivateKeySigner:
+		signerCfg = &signerv2.Config{
+			PrivateKey: cfg.PrivateKey,
+		}
+		senderAddress = crypto.PubkeyToAddress(signerCfg.PrivateKey.PublicKey)
+		signer = signerv2.PrivateKeyMessageSignerFn(signerCfg.PrivateKey)
+
+	default:
+		return nil, common.Address{}, fmt.Errorf("unsupported message signer type: %s", cfg.SignerType)
+	}
+
+	return signer, senderAddress, nil
+}
+
+func getKeystoreSignerConfig(cfg *types.SignerConfig, p utils.Prompter) (*signerv2.Config, error) {
+	// Check if input is available in the pipe and read the password from it
+	ecdsaPassword, readFromPipe := utils.GetStdInPassword()
+	var err error
+	if !readFromPipe {
+		ecdsaPassword, err = p.InputHiddenString("Enter password to decrypt the ecdsa private key:", "",
+			func(password string) error {
+				return nil
+			},
+		)
+		if err != nil {
+			fmt.Println("Error while reading ecdsa key password")
+			return nil, err
+		}
+	}
+
+	// This is to expand the tilde in the path to the home directory
+	// This is not supported by Go's standard library
+	keyFullPath, err := expandTilde(cfg.PrivateKeyStorePath)
+	if err != nil {
+		return nil, err
+	}
+	cfg.PrivateKeyStorePath = keyFullPath
+	return &signerv2.Config{
+		KeystorePath: keyFullPath,
+		Password:     ecdsaPassword,
+	}, nil
 }
