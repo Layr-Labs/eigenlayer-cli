@@ -21,7 +21,6 @@ type ClaimConfig struct {
 	EarnerAddress             gethcommon.Address
 	RecipientAddress          gethcommon.Address
 	ClaimerAddress            gethcommon.Address
-	CallerAddress             gethcommon.Address
 	Output                    string
 	OutputType                string
 	Broadcast                 bool

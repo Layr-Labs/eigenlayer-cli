@@ -146,7 +146,7 @@ func readAndValidateRemovePendingAdminConfig(
 ) (*removePendingAdminConfig, error) {
 	accountAddress := gethcommon.HexToAddress(cliContext.String(AccountAddressFlag.Name))
 	adminAddress := gethcommon.HexToAddress(cliContext.String(AdminAddressFlag.Name))
-	callerAddress := user.PopulateCallerAddress(cliContext, logger, accountAddress)
+	callerAddress := common.PopulateCallerAddress(cliContext, logger, accountAddress, AccountAddressFlag.Name)
 	ethRpcUrl := cliContext.String(flags.ETHRpcUrlFlag.Name)
 	network := cliContext.String(flags.NetworkFlag.Name)
 	environment := cliContext.String(flags.EnvironmentFlag.Name)

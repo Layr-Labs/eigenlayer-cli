@@ -15,6 +15,12 @@ var (
 		Usage:   "user admin ... --admin-address \"0x...\"",
 		EnvVars: []string{"ADMIN_ADDRESS"},
 	}
+	AcceptorAddressFlag = cli.StringFlag{
+		Name:    "acceptor-address",
+		Aliases: []string{"aa"},
+		Usage:   "user admin ... --acceptor-address \"0x...\"",
+		EnvVars: []string{"ACCEPTOR_ADDRESS"},
+	}
 	PendingAdminAddressFlag = cli.StringFlag{
 		Name:    "pending-admin-address",
 		Aliases: []string{"paa"},
