@@ -125,7 +125,7 @@ func generateIsPendingAdminReader(logger logging.Logger, config *isPendingAdminC
 	}
 	elReader, err := elcontracts.NewReaderFromConfig(
 		elcontracts.Config{
-			PermissionsControllerAddress: config.PermissionControllerAddress,
+			PermissionControllerAddress: config.PermissionControllerAddress,
 		},
 		ethClient,
 		logger,

@@ -158,7 +158,7 @@ func generateRemoveAppointeePermissionWriter(
 			&config.SignerConfig,
 			ethClient,
 			elcontracts.Config{
-				PermissionsControllerAddress: config.PermissionControllerAddress,
+				PermissionControllerAddress: config.PermissionControllerAddress,
 			},
 			prompter,
 			config.ChainID,

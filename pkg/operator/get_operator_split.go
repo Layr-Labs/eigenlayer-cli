@@ -10,7 +10,7 @@ import (
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
-	contractIRewardsCoordinator "github.com/Layr-Labs/eigensdk-go/contracts/bindings/IRewardsCoordinator"
+	contractRewardsCoordinator "github.com/Layr-Labs/eigensdk-go/contracts/bindings/RewardsCoordinator"
 	"github.com/Layr-Labs/eigensdk-go/logging"
 	eigenSdkUtils "github.com/Layr-Labs/eigensdk-go/utils"
 	gethcommon "github.com/ethereum/go-ethereum/common"
@@ -79,7 +79,7 @@ func GetOperatorSplit(cCtx *cli.Context, isProgrammaticIncentive bool, isOperato
 
 	var split uint16
 	if isOperatorSet {
-		operatorSet := contractIRewardsCoordinator.OperatorSet{
+		operatorSet := contractRewardsCoordinator.OperatorSet{
 			Id:  uint32(config.OperatorSetId),
 			Avs: config.AVSAddress,
 		}

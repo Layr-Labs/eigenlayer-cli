@@ -126,7 +126,7 @@ func generateListPendingAdminsReader(
 	}
 	elReader, err := elcontracts.NewReaderFromConfig(
 		elcontracts.Config{
-			PermissionsControllerAddress: config.PermissionControllerAddress,
+			PermissionControllerAddress: config.PermissionControllerAddress,
 		},
 		ethClient,
 		logger,
