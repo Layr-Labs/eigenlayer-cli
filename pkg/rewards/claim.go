@@ -5,11 +5,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"gopkg.in/yaml.v2"
 	"math/big"
 	"os"
 	"strings"
 	"time"
+
+	"gopkg.in/yaml.v2"
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/clients/sidecar"
 	"github.com/Layr-Labs/eigenlayer-rewards-proofs/pkg/claimgen"
