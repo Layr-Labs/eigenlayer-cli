@@ -21,7 +21,7 @@ import (
 
 	"github.com/Layr-Labs/eigenlayer-rewards-proofs/pkg/distribution"
 
-	rewardscoordinator "github.com/Layr-Labs/eigensdk-go/contracts/bindings/IRewardsCoordinator"
+	rewardscoordinator "github.com/Layr-Labs/eigensdk-go/contracts/bindings/RewardsCoordinator"
 	"github.com/Layr-Labs/eigensdk-go/logging"
 
 	"github.com/ethereum/go-ethereum/common"

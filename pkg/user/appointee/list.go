@@ -138,7 +138,7 @@ func generateListAppointeesReader(logger logging.Logger, config *listAppointeesC
 	}
 	elReader, err := elcontracts.NewReaderFromConfig(
 		elcontracts.Config{
-			PermissionsControllerAddress: config.PermissionControllerAddress,
+			PermissionControllerAddress: config.PermissionControllerAddress,
 		},
 		ethClient,
 		logger,
