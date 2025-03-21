@@ -3,6 +3,7 @@ package container
 import (
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/command"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
+
 	"github.com/urfave/cli/v2"
 	"sort"
 )
