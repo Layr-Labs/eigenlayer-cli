@@ -6,7 +6,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-
 	"sort"
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
