@@ -1,69 +1,69 @@
 package container
 
 import (
-	"context"
-	"encoding/json"
+	"encoding/hex"
 	"fmt"
-	"log"
-	"sort"
-	"strings"
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
-	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/registry"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
-	"github.com/Layr-Labs/eigenlayer-cli/pkg/verifiable"
 
-	"github.com/docker/docker/client"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/urfave/cli/v2"
 )
 
-var shaPrefix = "sha256:"
-
-type SignContainerCmd interface {
-	executeSignature(config *verifiable.SignMessageConfig) error
+type signContainerCmd struct {
+	prompter utils.Prompter
+	registry registry.ContainerRegistry
 }
 
-func NewSignContainerCmd(prompter utils.Prompter) *cli.Command {
-	setCmd := &cli.Command{
-		Name:  "sign",
-		Usage: "Sign a container using a specified key or remote signer.",
-		Action: func(c *cli.Context) error {
-			return executeSignature(c, prompter)
-		},
-		After: telemetry.AfterRunAction(),
-		Flags: getContainerSignerFlags(),
-	}
-
-	return setCmd
+func NewSignContainerCmd(prompter utils.Prompter, registry registry.ContainerRegistry) *cli.Command {
+	delegateCommand := signContainerCmd{prompter: prompter, registry: registry}
+	return NewVerifiableContainerCommand(
+		delegateCommand,
+		"sign",
+		"Sign a container using a specified key or remote signer.",
+		"",
+		"",
+		getContainerSignerFlags(),
+	)
 }
 
-func getImageSHA(imageId string) (string, error) {
-	dockerClient, err := client.NewClientWithOpts(client.FromEnv)
+func (s signContainerCmd) Execute(cliCtx *cli.Context) error {
+	cfg, err := validateAndGenerateConfig(cliCtx)
 	if err != nil {
-		return "", fmt.Errorf("failed to connect to Docker daemon: %w", err)
+		return fmt.Errorf("failed to validate signature config: %w", err)
 	}
-	defer func(dockerClient *client.Client) {
-		closeErr := dockerClient.Close()
-		if closeErr != nil {
-			log.Printf("failed to close Docker daemon: %v", closeErr)
-		}
-	}(dockerClient)
 
-	imageInspect, _, err := dockerClient.ImageInspectWithRaw(context.Background(), imageId)
+	signerFn, signerAddress, err := common.GetMessageSigner(cfg.SignerConfig, s.prompter)
 	if err != nil {
-		return "", fmt.Errorf("failed to inspect image %s: %w", imageId, err)
+		return fmt.Errorf("failed to get message signer: %w", err)
+	}
+	digest := cfg.ContainerDigest
+	digestBytes, err := hex.DecodeString(digest)
+	if err != nil {
+		return fmt.Errorf("failed to sign image: %w", err)
 	}
 
-	// TODO: what is this?
-	if !strings.HasPrefix(imageInspect.ID, shaPrefix) {
-		return "", fmt.Errorf("unexpected image ID format: %s", imageInspect.ID)
+	signature, err := signerFn(digestBytes)
+	if err != nil {
+		return fmt.Errorf("failed to sign image: %w", err)
 	}
 
-	return strings.TrimPrefix(imageInspect.ID, shaPrefix), nil
+	tag, err := s.registry.TagSignature(cfg.RepositoryLocation, digest)
+	if err != nil {
+		return err
+	}
+	pubKeyHex, err := extractPublicKeyHexFromSignature(digest, signature)
+	if err != nil {
+		return fmt.Errorf("failed to extract public key: %w", err)
+	}
+	signerAddressHex := signerAddress.Hex()
+	return s.registry.PushSignature(digestBytes, signature, pubKeyHex, signerAddressHex, tag)
 }
 
-func validateAndGenerateConfig(cCtx *cli.Context) (*verifiable.SignMessageConfig, error) {
+func validateAndGenerateConfig(cCtx *cli.Context) (*SignMessageConfig, error) {
 	logger := common.GetLogger(cCtx)
 
 	signerConfig, err := common.GetSignerConfig(cCtx, logger)
@@ -71,58 +71,45 @@ func validateAndGenerateConfig(cCtx *cli.Context) (*verifiable.SignMessageConfig
 		return nil, fmt.Errorf("failed to create signer config: %w", err)
 	}
 
-	imageId := cCtx.String(imageIdFlag.Name)
+	digest := cCtx.String(containerDigestFlag.Name)
 	location := cCtx.String(repositoryLocationFlag.Name)
+	ecdsaPublicKey := cCtx.String(ecdsaPublicKeyFlag.Name)
 
-	return &verifiable.SignMessageConfig{
+	return &SignMessageConfig{
 		SignerConfig:       signerConfig,
 		RepositoryLocation: location,
-		ImageId:            imageId,
+		ContainerDigest:    digest,
+		EcdsaPublicKey:     ecdsaPublicKey,
 	}, nil
 }
 
-func executeSignature(cliCtx *cli.Context, prompter utils.Prompter) error {
-	signatureConfig, err := validateAndGenerateConfig(cliCtx)
-	if err != nil {
-		return err
-	}
-	signerFn, signerPk, err := common.GetMessageSigner(signatureConfig.SignerConfig, prompter)
-	if err != nil {
-		return err
-	}
-	signerPkHex := signerPk.Hex()
-	imageSha, err := getImageSHA(signatureConfig.ImageId)
-	if err != nil {
-		return err
-	}
-	signedHash, err := signerFn([]byte(imageSha))
-	if err != nil {
-		return err
-	}
-	artifact := verifiable.NewOCISignatureArtifact(
-		imageSha,
-		signedHash,
-		signerPkHex,
-		signatureConfig.RepositoryLocation,
-	)
-	jsonOutput, err := json.MarshalIndent(artifact, "", "  ")
-	if err != nil {
-		return fmt.Errorf("failed to serialize signature artifact: %w", err)
+func extractPublicKeyHexFromSignature(containerDigest string, sigBytes []byte) (string, error) {
+	if len(sigBytes) != 65 {
+		return "", fmt.Errorf("invalid signature length: expected 65 bytes, got %d", len(sigBytes))
 	}
 
-	fmt.Println(string(jsonOutput))
-	return nil
+	digestBytes, err := hex.DecodeString(containerDigest)
+	if err != nil {
+
+	}
+	pubKey, err := crypto.SigToPub(digestBytes, sigBytes)
+	if err != nil {
+		return "", fmt.Errorf("failed to recover public key: %w", err)
+	}
+
+	pubKeyBytes := crypto.FromECDSAPub(pubKey)
+	pubKeyHex := hex.EncodeToString(pubKeyBytes)
+
+	return pubKeyHex, nil
 }
 
 func getContainerSignerFlags() []cli.Flag {
 	cmdFlags := []cli.Flag{
 		&flags.VerboseFlag,
-		&imageIdFlag,
 		&repositoryLocationFlag,
-		&flags.EcdsaPrivateKeyFlag,
+		&ecdsaPublicKeyFlag,
 		&flags.PathToKeyStoreFlag,
 		&flags.Web3SignerUrlFlag,
 	}
-	sort.Sort(cli.FlagsByName(cmdFlags))
 	return cmdFlags
 }

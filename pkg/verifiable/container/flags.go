@@ -5,25 +5,24 @@ import (
 )
 
 var (
-	imageIdFlag = cli.StringFlag{
-		Name:     "image-id",
-		Aliases:  []string{"ii"},
-		Usage:    "The image id of the container as the subject of the command.",
+	containerDigestFlag = cli.StringFlag{
+		Name:     "container-digest",
+		Aliases:  []string{"cd"},
+		Usage:    "The digest of the container.",
 		Required: true,
-		EnvVars:  []string{"IMAGE_ID"},
+		EnvVars:  []string{"CONTAINER_DIGEST"},
 	}
 	repositoryLocationFlag = cli.StringFlag{
 		Name:     "repository-location",
 		Aliases:  []string{"rl"},
 		Usage:    "The GHCR repository location to tag the signature artifact with.",
 		Required: true,
-		EnvVars:  []string{"IMAGE_ID"},
+		EnvVars:  []string{"REPOSITORY_LOCATION"},
 	}
-	containerTagFlag = cli.StringFlag{
-		Name:     "tag",
-		Aliases:  []string{"t"},
-		Usage:    "The container image tag.",
-		Required: true,
-		EnvVars:  []string{"TAG"},
+	ecdsaPublicKeyFlag = cli.StringFlag{
+		Name:    "ecdsa-public-key",
+		Aliases: []string{"e"},
+		Usage:   "ECDSA public key to annotate releases with for verification by users.",
+		EnvVars: []string{"ECDSA_PUBLIC_KEY"},
 	}
 )

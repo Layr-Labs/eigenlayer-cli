@@ -1,170 +1,159 @@
 package container
 
 import (
-	"context"
+	"crypto/ecdsa"
+	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"io"
+
 	"sort"
-	"strings"
 
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/registry"
 
-	"github.com/docker/docker/api/types/image"
-	"github.com/docker/docker/client"
+	eigensdkLogger "github.com/Layr-Labs/eigensdk-go/logging"
 	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/google/go-containerregistry/pkg/name"
+	"github.com/google/go-containerregistry/pkg/v1"
+	"github.com/google/go-containerregistry/pkg/v1/remote"
 	"github.com/urfave/cli/v2"
 )
 
-var (
-	sha256Prefix       = "sha256:"
-	hexPrefix          = "0x"
-	annotationsKey     = "Annotations"
-	signatureKey       = "io.eigen.signature"
-	signerPublicKeyKey = "io.eigen.signer.publickey"
-)
+type verifySignatureCmd struct{}
 
 func NewVerifyContainerCmd() *cli.Command {
-	return &cli.Command{
-		Name:  "verify",
-		Usage: "Verify a container signature from Github Container Registry.",
-		Action: func(c *cli.Context) error {
-			return executeVerification(c)
-		},
-		Flags: getVerifyContainerFlags(),
-	}
+	delegateCmd := verifySignatureCmd{}
+	return NewVerifiableContainerCommand(
+		delegateCmd,
+		"verify",
+		"Verify a container signature from Github Container Registry.",
+		"",
+		"",
+		getVerifyContainerFlags(),
+	)
 }
 
-func executeVerification(cliCtx *cli.Context) error {
-	repo := cliCtx.String(repositoryLocationFlag.Name)
-	tag := cliCtx.String(containerTagFlag.Name)
+func (v verifySignatureCmd) Execute(cliCtx *cli.Context) error {
+	return executeSignatureVerification(cliCtx)
+}
 
-	signatureTag := fmt.Sprintf("%s.sig:%s", repo, tag)
-
-	if err := pullImage(signatureTag); err != nil {
-		fmt.Printf("No signature artifact found for %s in GHCR.\n", repo)
+func executeSignatureVerification(cliCtx *cli.Context) error {
+	logger := common.GetLogger(cliCtx)
+	location := cliCtx.String(repositoryLocationFlag.Name)
+	digest := cliCtx.String(containerDigestFlag.Name)
+	signature, publicKey, err := getContainerSignatureAndPubKey(logger, location, digest)
+	if err != nil {
 		return err
 	}
-
-	signatureArtifact, err := inspectSignatureArtifact(signatureTag)
-	if err != nil {
-		return fmt.Errorf("failed to inspect signature artifact: %w", err)
+	isVerified := verifySignature(logger, digest, signature, publicKey)
+	if !isVerified {
+		return fmt.Errorf("container signature verification failed")
 	}
-
-	imageTag := fmt.Sprintf("%s:%s", repo, tag)
-	imageSha, err := getImageSHA_2(imageTag)
-	if err != nil {
-		return fmt.Errorf("failed to retrieve image SHA for %s: %w", imageTag, err)
-	}
-
-	valid, extractedSigner := verifySignature(imageSha, signatureArtifact)
-	if !valid {
-		fmt.Println("Signature verification failed! The image was NOT signed by the expected key.")
-		return fmt.Errorf("signature mismatch")
-	}
-
-	fmt.Printf("Successfully verified: %s:%s was signed by %s\n", repo, tag, extractedSigner)
 	return nil
 }
 
-func pullImage(imageTag string) error {
-	cli, err := client.NewClientWithOpts(client.FromEnv)
-	if err != nil {
-		return fmt.Errorf("failed to initialize Docker client: %w", err)
-	}
-	defer cli.Close()
-
-	out, err := cli.ImagePull(context.Background(), imageTag, image.PullOptions{})
-	if err != nil {
-		return fmt.Errorf("failed to pull image %s: %w", imageTag, err)
-	}
-	defer out.Close()
-
-	_, _ = io.Copy(io.Discard, out)
-	return nil
+func getContainerSignatureAndPubKey(
+	logger eigensdkLogger.Logger,
+	location string,
+	digest string,
+) (string, string, error) {
+	annotations := getVerificationComponents(location, digest)
+	return parseSignatureWithPublicKey(logger, annotations)
 }
 
-func inspectSignatureArtifact(imageTag string) (map[string]interface{}, error) {
-	dockerClient, err := client.NewClientWithOpts(client.FromEnv)
+func getVerificationComponents(location string, digest string) map[string]string {
+	sigTag := fmt.Sprintf(signatureTagFormat, digest)
+	sigRef := fmt.Sprintf(registryLocationTagFormat, location, sigTag)
+
+	ref, err := name.NewTag(sigRef)
 	if err != nil {
-		return nil, fmt.Errorf("failed to initialize Docker client: %w", err)
+		return nil
 	}
-	defer dockerClient.Close()
 
-	inspectData, _, err := dockerClient.ImageInspectWithRaw(context.Background(), imageTag)
+	desc, err := remote.Get(ref)
 	if err != nil {
-		return nil, fmt.Errorf("failed to inspect image %s: %w", imageTag, err)
+		return nil
 	}
 
-	var result map[string]interface{}
-	jsonData, err := json.Marshal(inspectData)
-	if err != nil {
-		return nil, fmt.Errorf("failed to serialize inspection data: %w", err)
+	var manifest v1.Manifest
+	if err = json.Unmarshal(desc.Manifest, &manifest); err != nil {
+		return nil
 	}
 
-	if err := json.Unmarshal(jsonData, &result); err != nil {
-		return nil, fmt.Errorf("failed to parse inspection JSON: %w", err)
-	}
-
-	return result, nil
+	return manifest.Annotations
 }
 
-func getImageSHA_2(imageTag string) (string, error) {
-	dockerClient, err := client.NewClientWithOpts(client.FromEnv)
-	if err != nil {
-		return "", err
+func parseSignatureWithPublicKey(logger eigensdkLogger.Logger, annotations map[string]string) (string, string, error) {
+	signature, sigOk := annotations[registry.EigenSignatureKey]
+	if !sigOk {
+		return "", "", fmt.Errorf("signature not found in annotations")
 	}
-	defer dockerClient.Close()
-
-	inspect, _, err := dockerClient.ImageInspectWithRaw(context.Background(), imageTag)
-	if err != nil {
-		return "", err
+	signerAddress, addrOk := annotations[registry.EigenSignerAddressKey]
+	if !addrOk {
+		return "", "", fmt.Errorf("signer address not found in annotations")
 	}
-
-	if !strings.HasPrefix(inspect.ID, sha256Prefix) {
-		return "", fmt.Errorf("unexpected image ID format: %s", inspect.ID)
+	publicKey, keyOk := annotations[registry.EigenPublicKey]
+	if !keyOk {
+		return "", "", fmt.Errorf("public key not found in annotations")
 	}
 
-	return strings.TrimPrefix(inspect.ID, sha256Prefix), nil
+	logger.Debugf("Fetched Signature: %s", signature)
+	logger.Debugf("Fetched Public Key: %s", publicKey)
+	logger.Debugf("Fetched Signer Address: %s", signerAddress)
+	return signature, publicKey, nil
 }
 
-func verifySignature(imageSha string, artifactData map[string]interface{}) (bool, string) {
-	annotations, ok := artifactData[annotationsKey].(map[string]interface{})
-	if !ok {
-		return false, ""
-	}
-
-	signedHashHex, ok := annotations[signatureKey].(string)
-	if !ok {
-		return false, ""
-	}
-	signerPkHex, ok := annotations[signerPublicKeyKey].(string)
-	if !ok {
-		return false, ""
-	}
-
-	signedHash, err := hex.DecodeString(signedHashHex)
+func verifySignature(
+	logger eigensdkLogger.Logger,
+	containerDigest string,
+	signatureBase64 string,
+	pubKeyHex string,
+) bool {
+	publicKey, err := getSignaturePublicKey(signatureBase64, containerDigest)
 	if err != nil {
-		return false, ""
+		logger.Fatalf("Failed to recover public key: %v", err)
+		return false
+	}
+	recoveredHex := hex.EncodeToString(crypto.FromECDSAPub(publicKey))
+
+	if len(pubKeyHex) > 2 && pubKeyHex[:2] == "0x" {
+		pubKeyHex = pubKeyHex[2:]
 	}
 
-	signerPkBytes, err := hex.DecodeString(strings.TrimPrefix(signerPkHex, hexPrefix))
+	if recoveredHex == pubKeyHex {
+		logger.Infof("Signature is valid and matches expected public key!")
+		return true
+	}
+
+	logger.Infof("Signature is valid but does not match the expected public key.")
+	return false
+}
+
+func getSignaturePublicKey(signatureBase64 string, containerDigest string) (*ecdsa.PublicKey, error) {
+	signatureBytes, err := base64.StdEncoding.DecodeString(signatureBase64)
 	if err != nil {
-		return false, ""
+		return nil, fmt.Errorf("rrror decoding signature to bytes: %v", err)
 	}
 
-	valid := crypto.VerifySignature(signerPkBytes, []byte(imageSha), signedHash)
-	return valid, signerPkHex
+	if len(signatureBytes) != 65 {
+		return nil, fmt.Errorf("invalid signature length: expected 65 bytes, got %d", len(signatureBytes))
+	}
+
+	digestBytes, err := hex.DecodeString(containerDigest)
+	if err != nil {
+		return nil, fmt.Errorf("error decoding digest to bytes: %v", err)
+	}
+
+	return crypto.SigToPub(digestBytes, signatureBytes)
 }
 
 func getVerifyContainerFlags() []cli.Flag {
 	cmdFlags := []cli.Flag{
-		&containerTagFlag,
 		&repositoryLocationFlag,
 		&flags.VerboseFlag,
 	}
 	sort.Sort(cli.FlagsByName(cmdFlags))
 	return cmdFlags
-
 }
