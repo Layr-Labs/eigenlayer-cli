@@ -3,6 +3,7 @@ package container
 import (
 	"encoding/hex"
 	"fmt"
+	"github.com/Layr-Labs/eigensdk-go/logging"
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
@@ -11,6 +12,10 @@ import (
 
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/urfave/cli/v2"
+)
+
+const (
+	expectedKeyLength = 65
 )
 
 type signContainerCmd struct {
@@ -31,7 +36,8 @@ func NewSignContainerCmd(prompter utils.Prompter, registry registry.ContainerReg
 }
 
 func (s signContainerCmd) Execute(cliCtx *cli.Context) error {
-	cfg, err := validateAndGenerateConfig(cliCtx)
+	logger := common.GetLogger(cliCtx)
+	cfg, err := validateAndGenerateConfig(cliCtx, logger)
 	if err != nil {
 		return fmt.Errorf("failed to validate signature config: %w", err)
 	}
@@ -63,9 +69,7 @@ func (s signContainerCmd) Execute(cliCtx *cli.Context) error {
 	return s.registry.PushSignature(digestBytes, signature, pubKeyHex, signerAddressHex, tag)
 }
 
-func validateAndGenerateConfig(cCtx *cli.Context) (*SignMessageConfig, error) {
-	logger := common.GetLogger(cCtx)
-
+func validateAndGenerateConfig(cCtx *cli.Context, logger logging.Logger) (*SignMessageConfig, error) {
 	signerConfig, err := common.GetSignerConfig(cCtx, logger)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create signer config: %w", err)
@@ -84,7 +88,7 @@ func validateAndGenerateConfig(cCtx *cli.Context) (*SignMessageConfig, error) {
 }
 
 func extractPublicKeyHexFromSignature(containerDigest string, sigBytes []byte) (string, error) {
-	if len(sigBytes) != 65 {
+	if len(sigBytes) != expectedKeyLength {
 		return "", fmt.Errorf("invalid signature length: expected 65 bytes, got %d", len(sigBytes))
 	}
 
