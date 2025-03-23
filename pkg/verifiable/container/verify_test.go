@@ -6,8 +6,10 @@ import (
 	"encoding/hex"
 	"errors"
 	"flag"
+	"fmt"
 	"testing"
 
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/registry"
 	eigensdkLogger "github.com/Layr-Labs/eigensdk-go/logging"
 
@@ -21,6 +23,14 @@ type mockLogger struct {
 	eigensdkLogger.Logger
 	logs  []string
 	fatal string
+}
+
+func (m *mockLogger) Infof(format string, args ...interface{}) {
+	m.logs = append(m.logs, fmt.Sprintf(format, args...))
+}
+
+func (m *mockLogger) Fatalf(format string, args ...interface{}) {
+	m.fatal = fmt.Sprintf(format, args...)
 }
 
 type mockRegistry struct {
@@ -94,6 +104,7 @@ func TestVerifySignatureCmd_Execute_Success(t *testing.T) {
 
 func TestVerifySignatureCmd_Execute_VerificationFails(t *testing.T) {
 	privateKey, _ := crypto.GenerateKey()
+	privateKeyHex := hex.EncodeToString(crypto.FromECDSA(privateKey))
 	hash := crypto.Keccak256Hash([]byte("mismatch"))
 	signature, _ := crypto.Sign(hash.Bytes(), privateKey)
 	sigBase64 := base64.StdEncoding.EncodeToString(signature)
@@ -111,9 +122,11 @@ func TestVerifySignatureCmd_Execute_VerificationFails(t *testing.T) {
 		publicKey: otherPubHex,
 	}
 
-	set := flag.NewFlagSet("test", 0)
-	_ = set.Set(repositoryLocationFlag.Name, "ghcr.io/user/container")
-	_ = set.Set(containerDigestFlag.Name, digestHex)
+	set := flagSet(map[string]string{
+		containerDigestFlag.Name:       digestHex,
+		repositoryLocationFlag.Name:    "ghcr.io/testing/registry-name",
+		flags.EcdsaPrivateKeyFlag.Name: privateKeyHex,
+	})
 	ctx := cli.NewContext(nil, set, nil)
 
 	cmd := verifySignatureCmd{registry: mockReg}

@@ -2,14 +2,15 @@ package container
 
 import (
 	"encoding/hex"
+	"testing"
+
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
+
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/google/go-containerregistry/pkg/name"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/urfave/cli/v2"
-	"testing"
 )
 
 func TestSignContainerCmd_Execute_Success(t *testing.T) {
