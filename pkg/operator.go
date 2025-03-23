@@ -11,7 +11,6 @@ func OperatorCmd(p utils.Prompter) *cli.Command {
 		Name:  "operator",
 		Usage: "Execute onchain operations for the operator",
 		Subcommands: []*cli.Command{
-			operator.KeysCmd(p),
 			operator.ConfigCmd(p),
 			operator.RegisterCmd(p),
 			operator.StatusCmd(p),
