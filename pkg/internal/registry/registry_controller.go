@@ -10,7 +10,7 @@ const (
 	EigenSignerAddressKey = "dev.eigen.signer.address"
 )
 
-type ContainerRegistry interface {
+type RegistryController interface {
 	PushSignature(
 		digestBytes []byte,
 		signature []byte,
@@ -18,5 +18,6 @@ type ContainerRegistry interface {
 		signerAddressHex string,
 		tag name.Tag,
 	) error
-	TagSignature(registry string, digest string) (name.Tag, error)
+	GetSignatureTag(registry string, digest string) (name.Tag, error)
+	GetSignatureComponents(tag name.Tag) (string, string, error)
 }

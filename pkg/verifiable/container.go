@@ -12,8 +12,8 @@ func NewContainerCmd(prompter utils.Prompter) *cli.Command {
 		Name:  "container",
 		Usage: "Manage operations related to container verification.",
 		Subcommands: []*cli.Command{
-			container.NewSignContainerCmd(prompter, registry.NewGithubContainerRegistry()),
-			container.NewVerifyContainerCmd(),
+			container.NewSignContainerCmd(prompter, registry.NewOciRegistryController()),
+			container.NewVerifyContainerCmd(registry.NewOciRegistryController()),
 		},
 	}
 

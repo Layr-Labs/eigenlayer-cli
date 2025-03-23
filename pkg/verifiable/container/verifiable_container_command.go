@@ -2,6 +2,7 @@ package container
 
 import (
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/command"
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
 
 	"github.com/urfave/cli/v2"
@@ -16,7 +17,7 @@ func NewVerifiableContainerCommand(
 	description string,
 	commandFlags []cli.Flag,
 ) *cli.Command {
-	withContainerFlags := append(commandFlags, &containerDigestFlag)
+	withContainerFlags := append(commandFlags, verifiableContainerCmdFlags()...)
 	sort.Sort(cli.FlagsByName(withContainerFlags))
 
 	c := &cli.Command{
@@ -38,4 +39,12 @@ func NewVerifiableContainerCommand(
 	}
 
 	return c
+}
+
+func verifiableContainerCmdFlags() []cli.Flag {
+	return []cli.Flag{
+		&flags.VerboseFlag,
+		&containerDigestFlag,
+		&repositoryLocationFlag,
+	}
 }

@@ -6,12 +6,10 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/google/go-containerregistry/pkg/authn"
 	"github.com/google/go-containerregistry/pkg/name"
 	"github.com/google/go-containerregistry/pkg/v1"
 	"github.com/google/go-containerregistry/pkg/v1/empty"
 	"github.com/google/go-containerregistry/pkg/v1/mutate"
-	"github.com/google/go-containerregistry/pkg/v1/remote"
 	"github.com/google/go-containerregistry/pkg/v1/static"
 	protobundle "github.com/sigstore/protobuf-specs/gen/pb-go/bundle/v1"
 	protocommon "github.com/sigstore/protobuf-specs/gen/pb-go/common/v1"
@@ -25,13 +23,15 @@ const (
 	sigstoreBundleMediaType = "application/vnd.dev.sigstore.bundle.v0.3+json"
 )
 
-type GithubContainerRegistry struct{}
-
-func NewGithubContainerRegistry() ContainerRegistry {
-	return GithubContainerRegistry{}
+type OciRegistryController struct {
+	registryClient RegistryClient
 }
 
-func (g GithubContainerRegistry) PushSignature(
+func NewOciRegistryController(client RegistryClient) RegistryController {
+	return OciRegistryController{registryClient: client}
+}
+
+func (g OciRegistryController) PushSignature(
 	digestBytes []byte,
 	signature []byte,
 	publicKeyHex string,
@@ -56,13 +56,38 @@ func (g GithubContainerRegistry) PushSignature(
 		return fmt.Errorf("failed to append layer: %w", err)
 	}
 
-	return remote.Write(tag, finalImage, remote.WithAuthFromKeychain(authn.DefaultKeychain))
+	return g.registryClient.Push(tag, finalImage)
 }
 
-func (g GithubContainerRegistry) TagSignature(location string, digest string) (name.Tag, error) {
+func (g OciRegistryController) GetSignatureTag(location string, digest string) (name.Tag, error) {
 	sigTag := fmt.Sprintf(signatureTagFormat, digest)
 	fullRef := fmt.Sprintf(locationTagFormat, location, sigTag)
 	return name.NewTag(fullRef)
+}
+
+func (g OciRegistryController) GetSignatureComponents(tag name.Tag) (string, string, error) {
+	desc, err := g.registryClient.Get(tag)
+	if err != nil {
+		return "", "", err
+	}
+
+	var man v1.Manifest
+	if err = json.Unmarshal(desc.Manifest, &man); err != nil {
+		return "", "", err
+	}
+	annotations := man.Annotations
+	signature, sigOk := annotations[EigenSignatureKey]
+	if !sigOk {
+		return "", "", fmt.Errorf("signature not found in annotations")
+	}
+	publicKey, keyOk := annotations[EigenPublicKey]
+	if !keyOk {
+		return "", "", fmt.Errorf("public key not found in annotations")
+	}
+	if len(publicKey) > 2 && publicKey[:2] == "0x" {
+		publicKey = publicKey[2:]
+	}
+	return signature, publicKey, nil
 }
 
 func newBundle(digestBytes []byte, signature []byte, pkHex string) *sgbundle.Bundle {

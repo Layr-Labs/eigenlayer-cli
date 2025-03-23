@@ -19,10 +19,4 @@ var (
 		Required: true,
 		EnvVars:  []string{"REPOSITORY_LOCATION"},
 	}
-	ecdsaPublicKeyFlag = cli.StringFlag{
-		Name:    "ecdsa-public-key",
-		Aliases: []string{"e"},
-		Usage:   "ECDSA public key to annotate releases with for verification by users.",
-		EnvVars: []string{"ECDSA_PUBLIC_KEY"},
-	}
 )
