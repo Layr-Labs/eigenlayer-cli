@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/google/go-containerregistry/pkg/name"
 	"github.com/google/go-containerregistry/pkg/v1"
 	"github.com/google/go-containerregistry/pkg/v1/remote"
@@ -38,24 +37,17 @@ func TestOciRegistryController_GetSignatureTag(t *testing.T) {
 }
 
 func TestOciRegistryController_GetSignatureComponents(t *testing.T) {
-	expectedSig := base64.StdEncoding.EncodeToString([]byte("toSign"))
+	expectedSig := base64.StdEncoding.EncodeToString([]byte("signed-bytes"))
 	expectedPubKey := "publicKey"
-
-	man := v1.Manifest{
-		Annotations: map[string]string{
-			EigenSignatureKey: expectedSig,
-			EigenPublicKey:    expectedPubKey,
-		},
-	}
+	digest := "a6eb5617ec3be5f0f523829e371ede989e8a3d15336a3030594d349fb14c92e8"
+	man := generateManifest(digest, expectedSig, expectedPubKey)
 	manBytes, _ := json.Marshal(man)
 
 	mockClient := RegistryClientFunc{
 		GetFunc: func(tag name.Tag) (*remote.Descriptor, error) {
 			return &remote.Descriptor{Manifest: manBytes}, nil
 		},
-		PushFunc: func(name.Tag, v1.Image) error {
-			return nil
-		},
+		PushFunc: func(name.Tag, v1.Image) error { return nil },
 	}
 
 	controller := NewOciRegistryController(mockClient)
@@ -84,8 +76,8 @@ func TestOciRegistryController_PushSignature(t *testing.T) {
 
 	controller := NewOciRegistryController(mockClient)
 
-	digest := crypto.Keccak256([]byte("test"))
-	sig := make([]byte, 65)
+	digest := []byte("a6eb5617ec3be5f0f523829e371ede989e8a3d15336a3030594d349fb14c92e8")
+	sig := []byte("1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d5e6f708192a3b4c5d6e71c")
 	pubKey := "publicKey"
 	signer := "signerAddress"
 	tag, _ := name.NewTag("ghcr.io/test/image:sha256-containerHash.sig")
@@ -94,9 +86,9 @@ func TestOciRegistryController_PushSignature(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, tag, calledTag)
 
-	cfg, err := calledImage.ConfigFile()
+	manifest, err := calledImage.Manifest()
 	assert.NoError(t, err)
-	annotations := cfg.Config.Labels
+	annotations := manifest.Annotations
 	assert.Equal(t, base64.StdEncoding.EncodeToString(sig), annotations[EigenSignatureKey])
 	assert.Equal(t, pubKey, annotations[EigenPublicKey])
 	assert.Equal(t, signer, annotations[EigenSignerAddressKey])
@@ -134,26 +126,29 @@ func TestOciRegistryController_GetSignatureComponents_FetchFails(t *testing.T) {
 }
 
 func TestOciRegistryController_GetSignatureComponents_MissingAnnotations(t *testing.T) {
+	expectedSig := base64.StdEncoding.EncodeToString([]byte("signed-bytes"))
+	expectedPubKey := "publicKey"
+	digest := "a6eb5617ec3be5f0f523829e371ede989e8a3d15336a3030594d349fb14c92e8"
 	tests := []struct {
 		name        string
-		annotations map[string]string
+		manifest    *v1.Manifest
 		expectError string
 	}{
 		{
 			name:        "missing signature",
-			annotations: map[string]string{EigenPublicKey: "abcd"},
-			expectError: "signature not found",
+			manifest:    generateManifest(digest, "", expectedPubKey),
+			expectError: "signature not found in annotations",
 		},
 		{
 			name:        "missing public key",
-			annotations: map[string]string{EigenSignatureKey: "xyz"},
-			expectError: "public key not found",
+			manifest:    generateManifest(digest, expectedSig, ""),
+			expectError: "public key not found in annotations",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			man := v1.Manifest{Annotations: tt.annotations}
+			man := tt.manifest
 			manBytes, _ := json.Marshal(man)
 
 			mockClient := RegistryClientFunc{
@@ -171,4 +166,29 @@ func TestOciRegistryController_GetSignatureComponents_MissingAnnotations(t *test
 			assert.Contains(t, err.Error(), tt.expectError)
 		})
 	}
+}
+
+func generateManifest(digest string, expectedSig string, expectedPublicKey string) *v1.Manifest {
+	man := v1.Manifest{
+		SchemaVersion: 2,
+		Config: v1.Descriptor{
+			MediaType: "application/vnd.oci.image.config.v1+json",
+			Digest: v1.Hash{
+				Algorithm: "sha256",
+				Hex:       digest,
+			},
+			Size: 123,
+		},
+		Layers: []v1.Descriptor{},
+	}
+
+	annotations := make(map[string]string)
+	if expectedSig != "" {
+		annotations[EigenSignatureKey] = expectedSig
+	}
+	if expectedPublicKey != "" {
+		annotations[EigenPublicKey] = expectedPublicKey
+	}
+	man.Annotations = annotations
+	return &man
 }
