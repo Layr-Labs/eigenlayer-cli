@@ -5,13 +5,11 @@ import (
 )
 
 const (
-	signatureTagFormat        = "sha256-%s.sig"
-	registryLocationTagFormat = "%s:%s"
+	expectedSignatureLength = 65
 )
 
 type SignMessageConfig struct {
 	SignerConfig       *eltypes.SignerConfig
 	RepositoryLocation string
 	ContainerDigest    string
-	EcdsaPublicKey     string
 }
