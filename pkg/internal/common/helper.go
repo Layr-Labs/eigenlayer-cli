@@ -612,13 +612,13 @@ func GetMessageSigner(
 		if err != nil {
 			return nil, common.Address{}, err
 		}
-		signer, err = signerv2.KeyStoreMessageSignerFn(signerCfg.KeystorePath, signerCfg.Password)
+		signer, err = KeyStoreMessageSignerFn(signerCfg.KeystorePath, signerCfg.Password)
 	case types.PrivateKeySigner:
 		signerCfg = &signerv2.Config{
 			PrivateKey: cfg.PrivateKey,
 		}
 		senderAddress = crypto.PubkeyToAddress(signerCfg.PrivateKey.PublicKey)
-		signer = signerv2.PrivateKeyMessageSignerFn(signerCfg.PrivateKey)
+		signer = PrivateKeyMessageSignerFn(signerCfg.PrivateKey)
 
 	default:
 		return nil, common.Address{}, fmt.Errorf("unsupported message signer type: %s", cfg.SignerType)
@@ -654,4 +654,18 @@ func getKeystoreSignerConfig(cfg *types.SignerConfig, p utils.Prompter) (*signer
 		KeystorePath: keyFullPath,
 		Password:     ecdsaPassword,
 	}, nil
+}
+
+func PrivateKeyMessageSignerFn(privateKey *ecdsa.PrivateKey) func([]byte) ([]byte, error) {
+	return func(message []byte) ([]byte, error) {
+		return crypto.Sign(message, privateKey)
+	}
+}
+
+func KeyStoreMessageSignerFn(path, password string) (func([]byte) ([]byte, error), error) {
+	privateKey, err := sdkEcdsa.ReadKey(path, password)
+	if err != nil {
+		return nil, err
+	}
+	return PrivateKeyMessageSignerFn(privateKey), nil
 }
