@@ -108,7 +108,6 @@ func getContainerSignerFlags() []cli.Flag {
 	cmdFlags := []cli.Flag{
 		&flags.PathToKeyStoreFlag,
 		&flags.EcdsaPrivateKeyFlag,
-		&flags.Web3SignerUrlFlag,
 	}
 	return cmdFlags
 }
