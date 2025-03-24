@@ -613,12 +613,6 @@ func GetMessageSigner(
 			return nil, common.Address{}, err
 		}
 		signer, err = signerv2.KeyStoreMessageSignerFn(signerCfg.KeystorePath, signerCfg.Password)
-	case types.Web3Signer:
-		signerCfg = &signerv2.Config{
-			Endpoint: cfg.Web3SignerConfig.Url,
-		}
-		senderAddress = common.HexToAddress(signerCfg.Address)
-		signer, err = signerv2.Web3MessageSignerFn(senderAddress, signerCfg.Endpoint)
 	case types.PrivateKeySigner:
 		signerCfg = &signerv2.Config{
 			PrivateKey: cfg.PrivateKey,
