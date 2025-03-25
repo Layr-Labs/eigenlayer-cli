@@ -48,6 +48,9 @@ func (g OciRegistryController) PushSignature(
 
 	sigBundle := newBundle(digestBytes, signature, publicKeyHex)
 	bundleBytes, err := json.Marshal(sigBundle)
+	if err != nil {
+		return err
+	}
 	layer := static.NewLayer(bundleBytes, sigstoreBundleMediaType)
 
 	annotatedImg := mutate.Annotations(empty.Image, annotations).(v1.Image)

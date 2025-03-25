@@ -614,6 +614,9 @@ func GetMessageSigner(
 			return nil, common.Address{}, err
 		}
 		signer, err = KeyStoreMessageSignerFn(signerCfg.KeystorePath, signerCfg.Password)
+		if err != nil {
+			return nil, common.Address{}, err
+		}
 	case types.PrivateKeySigner:
 		signerCfg = &signerv2.Config{
 			PrivateKey: cfg.PrivateKey,
