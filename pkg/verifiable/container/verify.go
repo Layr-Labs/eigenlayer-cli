@@ -58,7 +58,7 @@ func verifySignature(
 ) bool {
 	publicKey, err := getSignaturePublicKey(signatureBase64, containerDigest)
 	if err != nil {
-		logger.Fatalf("Failed to recover public key: %v", err)
+		logger.Infof("Failed to recover public key: %v", err)
 		return false
 	}
 	derivedPublicKey := hex.EncodeToString(crypto.FromECDSAPub(publicKey))
