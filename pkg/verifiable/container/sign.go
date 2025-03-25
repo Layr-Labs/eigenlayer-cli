@@ -91,7 +91,7 @@ func extractPublicKeyHexFromSignature(containerDigest string, sigBytes []byte) (
 
 	digestBytes, err := hex.DecodeString(containerDigest)
 	if err != nil {
-		return "", fmt.Errorf("failed to decode container digest: %w", err)
+		return "", fmt.Errorf("failed to recover public key: %w", err)
 	}
 	pubKey, err := crypto.SigToPub(digestBytes, sigBytes)
 	if err != nil {
