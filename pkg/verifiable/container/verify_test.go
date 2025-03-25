@@ -21,16 +21,11 @@ import (
 
 type mockLogger struct {
 	eigensdkLogger.Logger
-	logs  []string
-	fatal string
+	logs []string
 }
 
 func (m *mockLogger) Infof(format string, args ...interface{}) {
 	m.logs = append(m.logs, fmt.Sprintf(format, args...))
-}
-
-func (m *mockLogger) Fatalf(format string, args ...interface{}) {
-	m.fatal = fmt.Sprintf(format, args...)
 }
 
 type mockRegistry struct {
@@ -218,7 +213,7 @@ func TestVerifySignature_InvalidBase64Signature(t *testing.T) {
 
 	valid := verifySignature(logger, digest, "%invalid%", "publicKey")
 	assert.False(t, valid)
-	assert.Contains(t, logger.fatal, "Failed to recover public key")
+	assert.Contains(t, logger.logs[0], "Failed to recover public key")
 }
 
 func TestDefaultFlags(t *testing.T) {
