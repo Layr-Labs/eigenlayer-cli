@@ -567,12 +567,14 @@ func PopulateCallerAddress(
 	cliContext *cli.Context,
 	logger eigensdkLogger.Logger,
 	defaultAddress common.Address,
+	defaultName string,
 ) common.Address {
 	// TODO: these are copied across both callers of this method. Will clean this up in the CLI refactor of flags.
 	callerAddress := cliContext.String(flags.CallerAddressFlag.Name)
 	if IsEmptyString(callerAddress) {
 		logger.Infof(
-			"User access management delegation using caller address not invoked. Signing with: %s",
+			"Caller address not provided. Using %s as default address (%s)",
+			defaultName,
 			defaultAddress,
 		)
 
