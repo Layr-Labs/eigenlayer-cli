@@ -1,0 +1,13 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPattern": "/release-management-service/avs/[^/]+/release-keys"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": "{\"avsReleasePublicKeys\": [\"key1\", \"key2\", \"key3\"]}"
+  }
+}

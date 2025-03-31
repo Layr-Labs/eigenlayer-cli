@@ -1,0 +1,13 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPattern": "/release-management-service/operator/[^/]+/releases"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": "{\"operatorRequirements\":[{\"applicationName\":\"Test Application 1\",\"operatorSetId\":\"set-1\",\"description\":\"Test application for operator 1\",\"components\":[{\"name\":\"Component 1\",\"description\":\"First component\",\"location\":\"registry.example.com/component1\",\"latestArtifactId\":\"artifact-1\",\"releaseTimestamp\":\"2024-03-20T10:00:00Z\"},{\"name\":\"Component 2\",\"description\":\"Second component\",\"location\":\"registry.example.com/component2\",\"latestArtifactId\":\"artifact-2\",\"releaseTimestamp\":\"2024-03-20T11:00:00Z\"}]}]}"
+  }
+}
