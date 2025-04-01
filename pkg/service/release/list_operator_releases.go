@@ -61,7 +61,7 @@ func readAndValidateListOperatorReleasesConfig(
 ) (*listOperatorReleasesConfig, error) {
 	network := c.String(flags.NetworkFlag.Name)
 
-	operatorId := c.String(OperatorIdFlag.Name)
+	operatorId := c.String(flags.OperatorAddressFlag.Name)
 	if operatorId == "" {
 		return nil, fmt.Errorf("operator Id is required")
 	}
@@ -146,6 +146,6 @@ func getListOperatorReleasesFlags() []cli.Flag {
 	return []cli.Flag{
 		&flags.OutputTypeFlag,
 		&flags.OutputFileFlag,
-		&OperatorIdFlag,
+		&flags.OperatorAddressFlag,
 	}
 }

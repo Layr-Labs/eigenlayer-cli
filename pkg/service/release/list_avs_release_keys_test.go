@@ -13,11 +13,11 @@ import (
 func TestReadAndValidateListAvsReleaseKeysConfig_FullInput(t *testing.T) {
 	app := cli.NewApp()
 	set := flagSet(map[string]string{
-		flags.NetworkFlag.Name:     "holesky",
-		AvsIdFlag.Name:             "avs-123",
-		flags.EnvironmentFlag.Name: "testnet",
-		flags.OutputTypeFlag.Name:  "json",
-		flags.OutputFileFlag.Name:  "out.json",
+		flags.NetworkFlag.Name:      "holesky",
+		flags.AVSAddressesFlag.Name: "avs-123",
+		flags.EnvironmentFlag.Name:  "testnet",
+		flags.OutputTypeFlag.Name:   "json",
+		flags.OutputFileFlag.Name:   "out.json",
 	})
 	ctx := cli.NewContext(app, set, nil)
 
@@ -34,11 +34,11 @@ func TestReadAndValidateListAvsReleaseKeysConfig_FullInput(t *testing.T) {
 func TestReadAndValidateListAvsReleaseKeysConfig_DefaultEnv(t *testing.T) {
 	app := cli.NewApp()
 	set := flagSet(map[string]string{
-		flags.NetworkFlag.Name:     "holesky",
-		AvsIdFlag.Name:             "avs-456",
-		flags.EnvironmentFlag.Name: "",
-		flags.OutputTypeFlag.Name:  "json",
-		flags.OutputFileFlag.Name:  "",
+		flags.NetworkFlag.Name:      "holesky",
+		flags.AVSAddressesFlag.Name: "avs-456",
+		flags.EnvironmentFlag.Name:  "",
+		flags.OutputTypeFlag.Name:   "json",
+		flags.OutputFileFlag.Name:   "",
 	})
 	ctx := cli.NewContext(app, set, nil)
 
@@ -51,7 +51,7 @@ func TestReadAndValidateListAvsReleaseKeysConfig_MissingAvsId(t *testing.T) {
 	app := cli.NewApp()
 	set := flagSet(map[string]string{
 		flags.NetworkFlag.Name:     "holesky",
-		AvsIdFlag.Name:             "",
+		flags.AVSAddressFlag.Name:  "",
 		flags.EnvironmentFlag.Name: "testnet",
 		flags.OutputTypeFlag.Name:  "json",
 		flags.OutputFileFlag.Name:  "",

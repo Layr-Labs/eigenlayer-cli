@@ -77,11 +77,11 @@ func flagSet(values map[string]string) *flag.FlagSet {
 func TestReadAndValidateListOperatorReleasesConfig_FullInput(t *testing.T) {
 	app := cli.NewApp()
 	set := flagSet(map[string]string{
-		flags.NetworkFlag.Name:     "holesky",
-		OperatorIdFlag.Name:        "0xabc123",
-		flags.EnvironmentFlag.Name: "testnet",
-		flags.OutputTypeFlag.Name:  "json",
-		flags.OutputFileFlag.Name:  "out.json",
+		flags.NetworkFlag.Name:         "holesky",
+		flags.OperatorAddressFlag.Name: "0xabc123",
+		flags.EnvironmentFlag.Name:     "testnet",
+		flags.OutputTypeFlag.Name:      "json",
+		flags.OutputFileFlag.Name:      "out.json",
 	})
 	ctx := cli.NewContext(app, set, nil)
 
@@ -98,11 +98,11 @@ func TestReadAndValidateListOperatorReleasesConfig_FullInput(t *testing.T) {
 func TestReadAndValidateListOperatorReleasesConfig_DefaultEnv(t *testing.T) {
 	app := cli.NewApp()
 	set := flagSet(map[string]string{
-		flags.NetworkFlag.Name:     "holesky",
-		OperatorIdFlag.Name:        "0xdef456",
-		flags.EnvironmentFlag.Name: "",
-		flags.OutputTypeFlag.Name:  "json",
-		flags.OutputFileFlag.Name:  "out.json",
+		flags.NetworkFlag.Name:         "holesky",
+		flags.OperatorAddressFlag.Name: "0xdef456",
+		flags.EnvironmentFlag.Name:     "",
+		flags.OutputTypeFlag.Name:      "json",
+		flags.OutputFileFlag.Name:      "out.json",
 	})
 	ctx := cli.NewContext(app, set, nil)
 
@@ -114,11 +114,11 @@ func TestReadAndValidateListOperatorReleasesConfig_DefaultEnv(t *testing.T) {
 func TestReadAndValidateListOperatorReleasesConfig_MissingOperatorId(t *testing.T) {
 	app := cli.NewApp()
 	set := flagSet(map[string]string{
-		flags.NetworkFlag.Name:     "holesky",
-		OperatorIdFlag.Name:        "",
-		flags.EnvironmentFlag.Name: "testnet",
-		flags.OutputTypeFlag.Name:  "json",
-		flags.OutputFileFlag.Name:  "out.json",
+		flags.NetworkFlag.Name:         "holesky",
+		flags.OperatorAddressFlag.Name: "",
+		flags.EnvironmentFlag.Name:     "testnet",
+		flags.OutputTypeFlag.Name:      "json",
+		flags.OutputFileFlag.Name:      "out.json",
 	})
 	ctx := cli.NewContext(app, set, nil)
 

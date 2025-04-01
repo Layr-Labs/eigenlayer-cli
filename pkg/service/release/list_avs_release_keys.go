@@ -61,7 +61,7 @@ func (l *ListAvsReleaseKeysCmd) Execute(c *cli.Context) error {
 func readAndValidateListAvsReleaseKeysConfig(c *cli.Context) (*listAvsReleaseKeysConfig, error) {
 	network := c.String(flags.NetworkFlag.Name)
 
-	avsId := c.String(AvsIdFlag.Name)
+	avsId := c.String(flags.AVSAddressesFlag.Name)
 	if avsId == "" {
 		return nil, fmt.Errorf("AVS Id is required")
 	}
@@ -105,6 +105,6 @@ func getListAvsReleaseKeysFlags() []cli.Flag {
 	return []cli.Flag{
 		&flags.OutputTypeFlag,
 		&flags.OutputFileFlag,
-		&AvsIdFlag,
+		&flags.AVSAddressesFlag,
 	}
 }
