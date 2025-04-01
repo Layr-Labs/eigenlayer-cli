@@ -1,13 +1,18 @@
 package container
 
 import (
+	"context"
 	"crypto/ecdsa"
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/registry"
 	eigensdkLogger "github.com/Layr-Labs/eigensdk-go/logging"
+	"github.com/Layr-Labs/release-management-service-client/pkg/client"
+	"slices"
+	"time"
 
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/urfave/cli/v2"
@@ -25,14 +30,21 @@ func NewVerifyContainerCmd(registry registry.RegistryController) *cli.Command {
 		"Verify a container signature from Github Container Registry.",
 		"",
 		"",
-		[]cli.Flag{},
+		getVerifyCmdFlags(),
 	)
 }
 
 func (v verifySignatureCmd) Execute(cliCtx *cli.Context) error {
 	logger := common.GetLogger(cliCtx)
+	avsId := cliCtx.String(flags.AVSAddressesFlag.Name)
 	location := cliCtx.String(repositoryLocationFlag.Name)
 	digest := cliCtx.String(containerDigestFlag.Name)
+	environment := cliCtx.String(flags.EnvironmentFlag.Name)
+	clientConfig := client.NewClientConfig("", environment, 500*time.Millisecond, nil)
+	rmsClient, err := client.NewClient(clientConfig)
+	if err != nil {
+		return err
+	}
 	tag, err := v.registry.GetSignatureTag(location, digest)
 	if err != nil {
 		return err
@@ -44,6 +56,11 @@ func (v verifySignatureCmd) Execute(cliCtx *cli.Context) error {
 
 	logger.Debugf("Retrieved Signature: %s and Public Key: %s", signature, publicKey)
 	isVerified := verifySignature(logger, digest, signature, publicKey)
+	keys, err := rmsClient.ListAvsReleaseKeys(context.Background(), avsId)
+	if err != nil {
+		return err
+	}
+	isVerified = isVerified && slices.Contains(keys.Keys, publicKey)
 	if !isVerified {
 		return fmt.Errorf("container signature verification failed")
 	}
@@ -88,4 +105,12 @@ func getSignaturePublicKey(signatureBase64 string, containerDigest string) (*ecd
 	}
 
 	return crypto.SigToPub(digestBytes, signatureBytes)
+}
+
+func getVerifyCmdFlags() []cli.Flag {
+	return []cli.Flag{
+		&flags.EnvironmentFlag,
+		&flags.NetworkFlag,
+		&flags.AVSAddressesFlag,
+	}
 }
