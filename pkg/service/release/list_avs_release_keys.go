@@ -25,7 +25,7 @@ func NewListAvsReleaseKeysCmd(prompter utils.Prompter) *cli.Command {
 		delegateCommand,
 		"list-avs-release-keys",
 		"List valid keys used by AVSs to sign released artifacts",
-		"list-avs-release-keys --avs-id",
+		"list-avs-release-keys --avs-address",
 		"",
 		getListAvsReleaseKeysFlags(),
 	)

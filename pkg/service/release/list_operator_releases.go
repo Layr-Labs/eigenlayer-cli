@@ -26,7 +26,7 @@ func NewListOperatorReleasesCmd(prompter utils.Prompter) *cli.Command {
 		delegateCommand,
 		"list-operator-releases",
 		"List AVS application releases a given operator is registered to run",
-		"list-operator-releases [flags]",
+		"list-operator-releases --operator-address",
 		"",
 		getListOperatorReleasesFlags(),
 	)

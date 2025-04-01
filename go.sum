@@ -51,8 +51,6 @@ github.com/Layr-Labs/eigensdk-go v0.3.0 h1:Z4xhBDBW9JV0CCTZ3kuTCj53t4nB8OOVxhKxy
 github.com/Layr-Labs/eigensdk-go v0.3.0/go.mod h1:PIBT6xEoHR0mSADTfdQ+pu4LySlt0sr7UML0Wa6DKrM=
 github.com/Layr-Labs/protocol-apis v1.6.0 h1:1TTi4+t8Kq4YKsji7xa3CPGYf4fHXZZbbpt3GYQWZ78=
 github.com/Layr-Labs/protocol-apis v1.6.0/go.mod h1:zCirDItAbrnEv1kV1RTccY7eVSg0+da4/dFCXHyLNZQ=
-github.com/Layr-Labs/release-management-service-client v0.1.1-0.20250331233128-c7300f2ee27a h1:PiNkWU17RGh8UhZmC3GqCb4qLuiGBWZEkRjJhTv3+3Q=
-github.com/Layr-Labs/release-management-service-client v0.1.1-0.20250331233128-c7300f2ee27a/go.mod h1:7RYbjxbUMRv4tNmk/vkY6I15AvnGEqSH7ZUpQNLxgDs=
 github.com/Layr-Labs/release-management-service-client v0.1.1-0.20250331233608-247fb742c29a h1:kz1wVtNgj8lJE2ffsJM9xZH3Lv2Pbo7IkR+t/ghe+ig=
 github.com/Layr-Labs/release-management-service-client v0.1.1-0.20250331233608-247fb742c29a/go.mod h1:7RYbjxbUMRv4tNmk/vkY6I15AvnGEqSH7ZUpQNLxgDs=
 github.com/Microsoft/go-winio v0.6.2 h1:F2VQgta7ecxGYO8k3ZZz3RS8fVIXVxONVUPlNERoyfY=

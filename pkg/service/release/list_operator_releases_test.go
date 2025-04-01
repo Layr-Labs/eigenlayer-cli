@@ -17,11 +17,17 @@ type stubRMSClient struct {
 	listOperatorReleasesFunc func(ctx context.Context, operatorId string) (*model.ListOperatorRequirementsResponse, error)
 }
 
-func (s *stubRMSClient) ListOperatorReleases(ctx context.Context, operatorId string) (*model.ListOperatorRequirementsResponse, error) {
+func (s *stubRMSClient) ListOperatorReleases(
+	ctx context.Context,
+	operatorId string,
+) (*model.ListOperatorRequirementsResponse, error) {
 	return s.listOperatorReleasesFunc(ctx, operatorId)
 }
 
-func (s *stubRMSClient) ListAvsReleaseKeys(ctx context.Context, avsId string) (*model.ListAvsReleaseKeysResponse, error) {
+func (s *stubRMSClient) ListAvsReleaseKeys(
+	ctx context.Context,
+	avsId string,
+) (*model.ListAvsReleaseKeysResponse, error) {
 	panic("not implemented")
 }
 
