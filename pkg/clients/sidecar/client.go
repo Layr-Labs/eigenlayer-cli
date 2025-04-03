@@ -40,7 +40,7 @@ func NewSidecarRewardsClient(url string, opts ...gateway.ClientOption) (rewardsV
 				"x-sidecar-source": "eigenlayer-cli",
 			},
 		},
-		Timeout: 30 * time.Second,
+		Timeout: 300 * time.Second,
 	}
 
 	if len(opts) == 0 {
