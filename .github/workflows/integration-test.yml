@@ -181,7 +181,7 @@ jobs:
 
       - name: Run anvil chain
         run: |
-          nohup make start-anvil-with-contracts-deployed > nohup.out 2>&1 &
+          (make start-anvil-with-contracts-deployed 2>&1 | tee anvil.log) &
 
       - name: Install EigenLayer CLI
         uses: actions/checkout@v4
