@@ -16,8 +16,8 @@ github.com/Layr-Labs/eigenlayer-rewards-proofs v0.2.12 h1:G5Q1SnLmFbEjhOkky3vIHk
 github.com/Layr-Labs/eigenlayer-rewards-proofs v0.2.12/go.mod h1:OlJd1QjqEW53wfWG/lJyPCGvrXwWVEjPQsP4TV+gttQ=
 github.com/Layr-Labs/eigenpod-proofs-generation v0.0.14-stable.0.20240730152248-5c11a259293e h1:DvW0/kWHV9mZsbH2KOjEHKTSIONNPUj6X05FJvUohy4=
 github.com/Layr-Labs/eigenpod-proofs-generation v0.0.14-stable.0.20240730152248-5c11a259293e/go.mod h1:T7tYN8bTdca2pkMnz9G2+ZwXYWw5gWqQUIu4KLgC/vM=
-github.com/Layr-Labs/eigensdk-go v1.0.0-rc.0.0.20250414214032-af53ab28de19 h1:8t/qAYFa+A+lYnYJC0KipFtdjCbfsJbCX+/ydF32zAk=
-github.com/Layr-Labs/eigensdk-go v1.0.0-rc.0.0.20250414214032-af53ab28de19/go.mod h1:PIBT6xEoHR0mSADTfdQ+pu4LySlt0sr7UML0Wa6DKrM=
+github.com/Layr-Labs/eigensdk-go v0.3.1-0.20250414201412-5f34a0d48081 h1:iabkSI527rs1QB2LJBtzpj0QXdrdvGlVpR81BlKP0Js=
+github.com/Layr-Labs/eigensdk-go v0.3.1-0.20250414201412-5f34a0d48081/go.mod h1:PIBT6xEoHR0mSADTfdQ+pu4LySlt0sr7UML0Wa6DKrM=
 github.com/Layr-Labs/protocol-apis v1.6.0 h1:1TTi4+t8Kq4YKsji7xa3CPGYf4fHXZZbbpt3GYQWZ78=
 github.com/Layr-Labs/protocol-apis v1.6.0/go.mod h1:zCirDItAbrnEv1kV1RTccY7eVSg0+da4/dFCXHyLNZQ=
 github.com/Microsoft/go-winio v0.6.2 h1:F2VQgta7ecxGYO8k3ZZz3RS8fVIXVxONVUPlNERoyfY=

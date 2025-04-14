@@ -4,7 +4,7 @@ go 1.22.0
 
 toolchain go1.23.1
 
-replace github.com/Layr-Labs/eigensdk-go => github.com/Layr-Labs/eigensdk-go v1.0.0-rc.0.0.20250414214032-af53ab28de19
+replace github.com/Layr-Labs/eigensdk-go => github.com/Layr-Labs/eigensdk-go v0.3.1-0.20250414201412-5f34a0d48081
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
