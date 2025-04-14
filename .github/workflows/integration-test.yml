@@ -23,7 +23,7 @@ jobs:
         with:
             repository: layr-labs/eigensdk-go
             token: ${{ github.token }}
-            ref: a49314ba9ad58b25300f2e66927ade0e4559b226
+            ref: 5f34a0d48081f0ff1daa5cbd81666a136ac2a0e1
 
       - name: Run anvil chain
         run: |
@@ -96,7 +96,7 @@ jobs:
         with:
           repository: layr-labs/eigensdk-go
           token: ${{ github.token }}
-          ref: a49314ba9ad58b25300f2e66927ade0e4559b226
+          ref: 5f34a0d48081f0ff1daa5cbd81666a136ac2a0e1
       - name: Run anvil chain
         run: |
           nohup make start-anvil-with-contracts-deployed > nohup.out 2>&1 &
@@ -177,7 +177,7 @@ jobs:
         with:
           repository: layr-labs/eigensdk-go
           token: ${{ github.token }}
-          ref: a49314ba9ad58b25300f2e66927ade0e4559b226
+          ref: 5f34a0d48081f0ff1daa5cbd81666a136ac2a0e1
 
       - name: Run anvil chain
         run: |
