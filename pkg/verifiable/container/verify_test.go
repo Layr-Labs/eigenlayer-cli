@@ -4,16 +4,19 @@ import (
 	"crypto/ecdsa"
 	"encoding/base64"
 	"encoding/hex"
+	"errors"
 	"flag"
 	"fmt"
 	"testing"
 
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/registry"
 	eigensdkLogger "github.com/Layr-Labs/eigensdk-go/logging"
 
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/google/go-containerregistry/pkg/name"
 	"github.com/stretchr/testify/assert"
+	"github.com/urfave/cli/v2"
 )
 
 type mockLogger struct {
@@ -61,6 +64,110 @@ func (m *mockRegistry) GetSignatureTag(registry string, digest string) (name.Tag
 
 func (m *mockRegistry) GetSignatureComponents(tag name.Tag) (string, string, error) {
 	return m.signature, m.publicKey, m.sigCompErr
+}
+
+func TestVerifySignatureCmd_Execute_Success(t *testing.T) {
+	privateKey, _ := crypto.GenerateKey()
+	digest := "a6eb5617ec3be5f0f523829e371ede989e8a3d15336a3030594d349fb14c92e8"
+	digestBytes, err := hex.DecodeString(digest)
+	assert.NoError(t, err)
+	signature, err := crypto.Sign(digestBytes, privateKey)
+	assert.NoError(t, err)
+	sigBase64 := base64.StdEncoding.EncodeToString(signature)
+	pubHex := hex.EncodeToString(crypto.FromECDSAPub(&privateKey.PublicKey))
+
+	tag, err := name.NewTag("ghcr.io/user/container:sha256-" + digest)
+	assert.NoError(t, err)
+
+	mockReg := &mockRegistry{
+		tag:       tag,
+		signature: sigBase64,
+		publicKey: pubHex,
+	}
+
+	set := flagSet(map[string]string{
+		containerDigestFlag.Name:    digest,
+		repositoryLocationFlag.Name: "ghcr.io/testing/registry-name",
+	})
+	ctx := cli.NewContext(nil, set, nil)
+
+	cmd := verifySignatureCmd{registry: mockReg}
+	err = cmd.Execute(ctx)
+
+	assert.NoError(t, err)
+}
+
+func TestVerifySignatureCmd_Execute_VerificationFails(t *testing.T) {
+	privateKey, _ := crypto.GenerateKey()
+	privateKeyHex := hex.EncodeToString(crypto.FromECDSA(privateKey))
+	hash := crypto.Keccak256Hash([]byte("mismatch"))
+	signature, _ := crypto.Sign(hash.Bytes(), privateKey)
+	sigBase64 := base64.StdEncoding.EncodeToString(signature)
+	digestHex := hex.EncodeToString(hash.Bytes())
+
+	otherKey, _ := crypto.GenerateKey()
+	otherPubHex := hex.EncodeToString(crypto.FromECDSAPub(&otherKey.PublicKey))
+
+	tag, err := name.NewTag("ghcr.io/user/container:sha256-" + digestHex)
+	assert.NoError(t, err)
+
+	mockReg := &mockRegistry{
+		tag:       tag,
+		signature: sigBase64,
+		publicKey: otherPubHex,
+	}
+
+	set := flagSet(map[string]string{
+		containerDigestFlag.Name:       digestHex,
+		repositoryLocationFlag.Name:    "ghcr.io/testing/registry-name",
+		flags.EcdsaPrivateKeyFlag.Name: privateKeyHex,
+	})
+	ctx := cli.NewContext(nil, set, nil)
+
+	cmd := verifySignatureCmd{registry: mockReg}
+	err = cmd.Execute(ctx)
+
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "verification failed")
+}
+
+func TestVerifySignatureCmd_Execute_GetSignatureTagError(t *testing.T) {
+	digestHex := hex.EncodeToString(crypto.Keccak256([]byte("fail tag")))
+	mockReg := &mockRegistry{
+		tagErr: errors.New("failed to fetch tag"),
+	}
+
+	set := flag.NewFlagSet("test", 0)
+	_ = set.Set(repositoryLocationFlag.Name, "ghcr.io/user/container")
+	_ = set.Set(containerDigestFlag.Name, digestHex)
+	ctx := cli.NewContext(nil, set, nil)
+
+	cmd := verifySignatureCmd{registry: mockReg}
+	err := cmd.Execute(ctx)
+
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "failed to fetch tag")
+}
+
+func TestVerifySignatureCmd_Execute_GetSignatureComponentsError(t *testing.T) {
+	digestHex := hex.EncodeToString(crypto.Keccak256([]byte("fail components")))
+	tag, _ := name.NewTag("ghcr.io/user/container:sha256-" + digestHex)
+
+	mockReg := &mockRegistry{
+		tag:        tag,
+		sigCompErr: errors.New("component retrieval failed"),
+	}
+
+	set := flag.NewFlagSet("test", 0)
+	_ = set.Set(repositoryLocationFlag.Name, "ghcr.io/user/container")
+	_ = set.Set(containerDigestFlag.Name, digestHex)
+	ctx := cli.NewContext(nil, set, nil)
+
+	cmd := verifySignatureCmd{registry: mockReg}
+	err := cmd.Execute(ctx)
+
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "component retrieval failed")
 }
 
 func TestVerifySignature_ValidMatch(t *testing.T) {
@@ -122,7 +229,7 @@ func TestDefaultFlags(t *testing.T) {
 		}
 		assert.True(t, found, "Default flag not found in command.")
 	}
-	assert.NotEqualf(t, len(expectedFlags), len(actualFlags), "Extra flag found in verify command.")
+	assert.Equal(t, len(expectedFlags), len(actualFlags), "Extra flag found in verify command.")
 }
 
 func TestGetSignaturePublicKey_ValidInput(t *testing.T) {

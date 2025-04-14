@@ -45,7 +45,6 @@ func main() {
 	app.Commands = append(app.Commands, pkg.EigenPodCmd(prompter))
 	app.Commands = append(app.Commands, pkg.UserCmd(prompter))
 	app.Commands = append(app.Commands, pkg.NewVerifiableCmd(prompter))
-	app.Commands = append(app.Commands, pkg.NewServiceCmd(prompter))
 
 	if err := app.Run(os.Args); err != nil {
 		_, err := fmt.Fprintln(os.Stderr, err)

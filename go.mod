@@ -1,6 +1,8 @@
 module github.com/Layr-Labs/eigenlayer-cli
 
-go 1.24.1
+go 1.23.0
+
+toolchain go1.23.7
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
@@ -8,7 +10,6 @@ require (
 	github.com/Layr-Labs/eigenpod-proofs-generation v0.0.14-stable.0.20240730152248-5c11a259293e
 	github.com/Layr-Labs/eigensdk-go v0.3.0
 	github.com/Layr-Labs/protocol-apis v1.6.0
-	github.com/Layr-Labs/release-management-service-client v0.1.1-0.20250331233608-247fb742c29a
 	github.com/akuity/grpc-gateway-client v0.0.0-20240912082144-55a48e8b4b89
 	github.com/blang/semver/v4 v4.0.0
 	github.com/consensys/gnark-crypto v0.16.0
@@ -39,7 +40,6 @@ require (
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/StackExchange/wmi v1.2.1 // indirect
 	github.com/alevinval/sse v1.0.1 // indirect
-	github.com/apapsch/go-jsonmerge/v2 v2.0.0 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 // indirect
 	github.com/attestantio/go-eth2-client v0.19.9 // indirect
 	github.com/aws/aws-sdk-go-v2 v1.32.8 // indirect
@@ -153,7 +153,6 @@ require (
 	github.com/moby/term v0.5.0 // indirect
 	github.com/morikuni/aec v1.0.0 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
-	github.com/oapi-codegen/runtime v1.1.1 // indirect
 	github.com/oklog/ulid v1.3.1 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.0 // indirect
