@@ -53,7 +53,7 @@ var ChainMetadataMap = map[int64]types.ChainMetadata{
 		ELDelegationManagerAddress:    "0x39053D51B77DC0d36036Fc1fCc8Cb819df8Ef37A",
 		ELAVSDirectoryAddress:         "0x135dda560e946695d6f155dacafc6f1f25c1f5af",
 		ELRewardsCoordinatorAddress:   "0x7750d328b314EfFa365A0402CcfD489B80B0adda",
-		ELPermissionControllerAddress: "",
+		ELPermissionControllerAddress: "0x25E5F8B1E7aDf44518d35D5B2271f114e081f0E5",
 		WebAppUrl:                     "https://app.eigenlayer.xyz/operator",
 		SidecarHttpRpcURL:             "https://sidecar-rpc.eigenlayer.xyz/mainnet",
 	},
