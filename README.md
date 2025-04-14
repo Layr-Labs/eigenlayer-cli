@@ -130,18 +130,27 @@ sudo cp eigenlayer-cli/build/eigenlayer /usr/local/bin/
 Please refer to the full documentation [here](https://docs.eigenlayer.xyz/operator-guides/operator-installation).
 
 Links to specific sections are provided below.
-* [Create Keys](https://docs.eigenlayer.xyz/operator-guides/operator-installation#create-keys)
-* [Import Keys](https://docs.eigenlayer.xyz/operator-guides/operator-installation#import-keys)
-* [List Keys](https://docs.eigenlayer.xyz/operator-guides/operator-installation#list-keys)
-* [Export Keys](https://docs.eigenlayer.xyz/operator-guides/operator-installation#export-keys)
-* [Fund Wallet with ETH](https://docs.eigenlayer.xyz/operator-guides/operator-installation#fund-ecdsa-wallet)
-* [Register Operator](https://docs.eigenlayer.xyz/operator-guides/operator-installation#registration)
-* [Operator Status](https://docs.eigenlayer.xyz/operator-guides/operator-installation#checking-status-of-registration)
-* [Metadata Updates](https://docs.eigenlayer.xyz/operator-guides/operator-installation#metadata-updates)
-* [Frequently Asked Questions](https://docs.eigenlayer.xyz/operator-guides/operator-faq)
-* [Troubleshooting](https://docs.eigenlayer.xyz/operator-guides/troubleshooting)
+* [Create Keys](https://docs.eigenlayer.xyz/operators/howto/operator-installation#create-keys)
+* [Import Keys](https://docs.eigenlayer.xyz/operators/howto/operator-installation#import-keys)
+* [List Keys](https://docs.eigenlayer.xyz/operators/howto/operator-installation#list-keys)
+* [Export Keys](https://docs.eigenlayer.xyz/operators/howto/operator-installation#export-keys)
+* [Fund Wallet with ETH](https://docs.eigenlayer.xyz/operators/howto/operator-installation#fund-ecdsa-wallet)
+* [Register Operator](https://docs.eigenlayer.xyz/operators/howto/operator-installation#operator-configuration-and-registration)
+* [Operator Status](https://docs.eigenlayer.xyz/operators/howto/operator-installation#checking-status-of-registration)
+* [Metadata Updates](https://docs.eigenlayer.xyz/operators/howto/operator-installation#metadata-updates)
+* [Frequently Asked Questions](https://docs.eigenlayer.xyz/operators/reference/operator-faq)
+* [Troubleshooting](https://docs.eigenlayer.xyz/operators/howto/troubleshooting)
 
 If you see any issues in documentation please create an issue or PR [here](https://github.com/Layr-Labs/eigenlayer-docs)
+
+## Integration Testing
+Integration testing uses Anvil to generate a reproducible state for the network to be tested against. 
+
+### Forge & Anvil
+The CLI package leverages tooling from the [eigensdk-go](https://github.com/Layr-Labs/eigensdk-go) to run [Forge](https://github.com/foundry-rs/foundry/tree/master/crates/forge) tests against an [Anvil](https://github.com/foundry-rs/foundry/tree/master/crates/anvil) server based on a predefined network state.
+This allows the tests to run against a reproducible environment. See the [Run anvil chain](https://github.com/Layr-Labs/eigenlayer-cli/blob/master/.github/workflows/integration-test.yml#L28-L30)
+step in the integration test workflow. See the [eigensdk-go README.md - Anvil](https://github.com/Layr-Labs/eigensdk-go/blob/dev/README.md)
+for further discussion on how this environment state is generated and stored.
 
 ## Release Process
 To release a new version of the CLI, follow the steps below:
