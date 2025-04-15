@@ -68,7 +68,7 @@ func (r RegisterOperatorSetCmd) Execute(cCtx *cli.Context) error {
 			config.chainID,
 			logger,
 		)
-		
+
 		if err != nil {
 			return eigenSdkUtils.WrapError("failed to get EL writer", err)
 		}
