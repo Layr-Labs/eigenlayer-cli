@@ -16,10 +16,12 @@ type SetOperatorAVSSplitConfig struct {
 	Broadcast                 bool
 	OperatorAddress           gethcommon.Address
 	AVSAddress                gethcommon.Address
+	CallerAddress             gethcommon.Address
 	Split                     uint16
 	OutputType                string
 	OutputFile                string
 	IsSilent                  bool
+	OperatorSetId             int
 }
 
 type GetOperatorAVSSplitConfig struct {
@@ -30,4 +32,5 @@ type GetOperatorAVSSplitConfig struct {
 
 	OperatorAddress gethcommon.Address
 	AVSAddress      gethcommon.Address
+	OperatorSetId   int
 }

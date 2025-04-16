@@ -44,6 +44,7 @@ type SetClaimerConfig struct {
 	ChainID                   *big.Int
 	SignerConfig              *types.SignerConfig
 	EarnerAddress             gethcommon.Address
+	CallerAddress             gethcommon.Address
 	Output                    string
 	OutputType                string
 }

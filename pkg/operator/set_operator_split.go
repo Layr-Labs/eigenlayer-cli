@@ -2,15 +2,15 @@ package operator
 
 import (
 	"fmt"
-	"sort"
 
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/command"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/operator/split"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/rewards"
-	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
+	contractRewardsCoordinator "github.com/Layr-Labs/eigensdk-go/contracts/bindings/RewardsCoordinator"
 	"github.com/Layr-Labs/eigensdk-go/logging"
 	eigenSdkUtils "github.com/Layr-Labs/eigensdk-go/utils"
 	gethcommon "github.com/ethereum/go-ethereum/common"
@@ -19,25 +19,39 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-func SetOperatorSplitCmd(p utils.Prompter) *cli.Command {
-	var operatorSplitCmd = &cli.Command{
-		Name:  "set-rewards-split",
-		Usage: "Set operator rewards split",
-		Action: func(cCtx *cli.Context) error {
-			return SetOperatorSplit(cCtx, p, false)
-		},
-		After: telemetry.AfterRunAction(),
-		Flags: getSetOperatorSplitFlags(),
-	}
-
-	return operatorSplitCmd
+type SetOperatorSplitCmd struct {
+	prompter                utils.Prompter
+	isProgrammaticIncentive bool
+	isOperatorSet           bool
 }
 
-func SetOperatorSplit(cCtx *cli.Context, p utils.Prompter, isProgrammaticIncentive bool) error {
+func NewSetOperatorSplitCmd(p utils.Prompter, isProgrammaticIncentive bool, isOperatorSet bool) *cli.Command {
+	delegateCommand := &SetOperatorSplitCmd{
+		prompter:                p,
+		isProgrammaticIncentive: isProgrammaticIncentive,
+		isOperatorSet:           isOperatorSet,
+	}
+	setOperatorSplitCmd := command.NewWriteableCallDataCommand(
+		delegateCommand,
+		"set-rewards-split",
+		"Set operator rewards split",
+		"",
+		"",
+		getSetOperatorSplitFlags(),
+	)
+
+	return setOperatorSplitCmd
+}
+
+func (s SetOperatorSplitCmd) Execute(cCtx *cli.Context) error {
+	return SetOperatorSplit(cCtx, s.prompter, s.isProgrammaticIncentive, s.isOperatorSet)
+}
+
+func SetOperatorSplit(cCtx *cli.Context, p utils.Prompter, isProgrammaticIncentive bool, isOperatorSet bool) error {
 	ctx := cCtx.Context
 	logger := common.GetLogger(cCtx)
 
-	config, err := readAndValidateSetOperatorSplitConfig(cCtx, logger, isProgrammaticIncentive)
+	config, err := readAndValidateSetOperatorSplitConfig(cCtx, logger, isProgrammaticIncentive, isOperatorSet)
 	if err != nil {
 		return eigenSdkUtils.WrapError("failed to read and validate operator split config", err)
 	}
@@ -52,7 +66,7 @@ func SetOperatorSplit(cCtx *cli.Context, p utils.Prompter, isProgrammaticIncenti
 	if config.Broadcast {
 
 		eLWriter, err := common.GetELWriter(
-			config.OperatorAddress,
+			config.CallerAddress,
 			config.SignerConfig,
 			ethClient,
 			elcontracts.Config{
@@ -70,7 +84,13 @@ func SetOperatorSplit(cCtx *cli.Context, p utils.Prompter, isProgrammaticIncenti
 		logger.Infof("Broadcasting set operator transaction...")
 
 		var receipt *types.Receipt
-		if isProgrammaticIncentive {
+		if isOperatorSet {
+			operatorSet := contractRewardsCoordinator.OperatorSet{
+				Id:  uint32(config.OperatorSetId),
+				Avs: config.AVSAddress,
+			}
+			receipt, err = eLWriter.SetOperatorSetSplit(ctx, config.OperatorAddress, operatorSet, config.Split, true)
+		} else if isProgrammaticIncentive {
 			receipt, err = eLWriter.SetOperatorPISplit(ctx, config.OperatorAddress, config.Split, true)
 
 		} else {
@@ -83,7 +103,16 @@ func SetOperatorSplit(cCtx *cli.Context, p utils.Prompter, isProgrammaticIncenti
 		logger.Infof("Set operator transaction submitted successfully")
 		common.PrintTransactionInfo(receipt.TxHash.String(), config.ChainID)
 	} else {
-		noSendTxOpts := common.GetNoSendTxOpts(config.OperatorAddress)
+
+		noSendTxOpts := common.GetNoSendTxOpts(config.CallerAddress)
+		// If the caller is a smart contract, we can't estimate gas using geth
+		// since balance of contract can be 0, as it can be called by an EOA
+		// to claim. So we hardcode the gas limit to 150_000 so that we can
+		// create unsigned tx without gas limit estimation from contract bindings
+		if common.IsSmartContractAddress(config.CallerAddress, ethClient) {
+			// Caller is a smart contract
+			noSendTxOpts.GasLimit = 150_000
+		}
 		_, _, contractBindings, err := elcontracts.BuildClients(elcontracts.Config{
 			RewardsCoordinatorAddress: config.RewardsCoordinatorAddress,
 		}, ethClient, nil, logger, nil)
@@ -91,17 +120,14 @@ func SetOperatorSplit(cCtx *cli.Context, p utils.Prompter, isProgrammaticIncenti
 			return err
 		}
 
-		code, err := ethClient.CodeAt(ctx, config.OperatorAddress, nil)
-		if err != nil {
-			return eigenSdkUtils.WrapError("failed to get code at address", err)
-		}
-		if len(code) > 0 {
-			// Operator is a smart contract
-			noSendTxOpts.GasLimit = 150_000
-		}
-
 		var unsignedTx *types.Transaction
-		if isProgrammaticIncentive {
+		if isOperatorSet {
+			operatorSet := contractRewardsCoordinator.OperatorSet{
+				Id:  uint32(config.OperatorSetId),
+				Avs: config.AVSAddress,
+			}
+			unsignedTx, err = contractBindings.RewardsCoordinator.SetOperatorSetSplit(noSendTxOpts, config.OperatorAddress, operatorSet, config.Split)
+		} else if isProgrammaticIncentive {
 			unsignedTx, err = contractBindings.RewardsCoordinator.SetOperatorPISplit(noSendTxOpts, config.OperatorAddress, config.Split)
 		} else {
 			unsignedTx, err = contractBindings.RewardsCoordinator.SetOperatorAVSSplit(noSendTxOpts, config.OperatorAddress, config.AVSAddress, config.Split)
@@ -138,28 +164,22 @@ func SetOperatorSplit(cCtx *cli.Context, p utils.Prompter, isProgrammaticIncenti
 }
 
 func getSetOperatorSplitFlags() []cli.Flag {
-	baseFlags := []cli.Flag{
+	return []cli.Flag{
 		&flags.NetworkFlag,
 		&flags.ETHRpcUrlFlag,
 		&flags.OperatorAddressFlag,
 		&split.OperatorSplitFlag,
 		&rewards.RewardsCoordinatorAddressFlag,
 		&split.AVSAddressFlag,
-		&flags.BroadcastFlag,
-		&flags.OutputTypeFlag,
-		&flags.OutputFileFlag,
 		&flags.SilentFlag,
 	}
-
-	allFlags := append(baseFlags, flags.GetSignerFlags()...)
-	sort.Sort(cli.FlagsByName(allFlags))
-	return allFlags
 }
 
 func readAndValidateSetOperatorSplitConfig(
 	cCtx *cli.Context,
 	logger logging.Logger,
 	isProgrammaticIncentive bool,
+	isOperatorSet bool,
 ) (*split.SetOperatorAVSSplitConfig, error) {
 	network := cCtx.String(flags.NetworkFlag.Name)
 	rpcUrl := cCtx.String(flags.ETHRpcUrlFlag.Name)
@@ -182,11 +202,17 @@ func readAndValidateSetOperatorSplitConfig(
 
 	operatorAddress := gethcommon.HexToAddress(cCtx.String(flags.OperatorAddressFlag.Name))
 	logger.Infof("Using operator address: %s", operatorAddress.String())
+	callerAddress := common.PopulateCallerAddress(cCtx, logger, operatorAddress, flags.OperatorAddressFlag.Name)
 
 	avsAddress := gethcommon.HexToAddress(cCtx.String(split.AVSAddressFlag.Name))
 
 	if !isProgrammaticIncentive {
 		logger.Infof("Using AVS address: %s", avsAddress.String())
+	}
+
+	var operatorSetId int
+	if isOperatorSet {
+		operatorSetId = cCtx.Int(split.OperatorSetIdFlag.Name)
 	}
 
 	chainID := utils.NetworkNameToChainId(network)
@@ -208,7 +234,9 @@ func readAndValidateSetOperatorSplitConfig(
 		SignerConfig:              signerConfig,
 		OperatorAddress:           operatorAddress,
 		AVSAddress:                avsAddress,
+		CallerAddress:             callerAddress,
 		Split:                     uint16(opSplit),
+		OperatorSetId:             operatorSetId,
 		Broadcast:                 broadcast,
 		OutputType:                outputType,
 		OutputFile:                outputFile,

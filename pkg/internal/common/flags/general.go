@@ -104,4 +104,32 @@ var (
 		Usage:   "Input file for batch rewards claim",
 		EnvVars: []string{"BATCH_CLAIM_FILE"},
 	}
+
+	CSVFileFlag = cli.StringFlag{
+		Name:    "csv-file",
+		Aliases: []string{"csv"},
+		Usage:   "CSV file to read data from",
+		EnvVars: []string{"CSV_FILE"},
+	}
+
+	EnvironmentFlag = cli.StringFlag{
+		Name:    "environment",
+		Aliases: []string{"env"},
+		Usage:   "environment to use. Currently supports 'preprod' ,'testnet' and 'prod'. If not provided, it will be inferred based on network",
+		EnvVars: []string{"ENVIRONMENT"},
+	}
+
+	DelegationManagerAddressFlag = cli.StringFlag{
+		Name:    "delegation-manager-address",
+		Aliases: []string{"dma"},
+		Usage:   "Optional delegation manager address. This can be used if you are testing against your own deployment of eigenlayer contracts",
+		EnvVars: []string{"DELEGATION_MANAGER_ADDRESS"},
+	}
+
+	CallerAddressFlag = cli.StringFlag{
+		Name:    "caller-address",
+		Aliases: []string{"ca"},
+		Usage:   "Used to execute an action on behalf of another user. See User Access Management documents for more details.",
+		EnvVars: []string{"CALLER_ADDRESS"},
+	}
 )

@@ -16,7 +16,7 @@ func SetOperatorPISplitCmd(p utils.Prompter) *cli.Command {
 		Name:  "set-pi-split",
 		Usage: "Set operator programmatic incentives split",
 		Action: func(cCtx *cli.Context) error {
-			return SetOperatorSplit(cCtx, p, true)
+			return SetOperatorSplit(cCtx, p, true, false)
 		},
 		After: telemetry.AfterRunAction(),
 		Flags: getSetOperatorPISplitFlags(),

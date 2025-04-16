@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"errors"
 	"math/big"
 
@@ -56,4 +57,15 @@ func GetELWriter(
 	}
 
 	return eLWriter, nil
+}
+
+func IsSmartContractAddress(address gethcommon.Address, ethClient *ethclient.Client) bool {
+	code, err := ethClient.CodeAt(context.Background(), address, nil)
+	if err != nil {
+		// We return true here because we want to treat the address as a smart contract
+		// This is only used to gas estimation and creating unsigned transactions
+		// So it's fine if eth client return an error
+		return true
+	}
+	return len(code) > 0
 }
