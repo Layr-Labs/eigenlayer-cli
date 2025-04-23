@@ -43,6 +43,7 @@ const (
 	mainnet             = "mainnet"
 	testnet             = "testnet"
 	sepolia             = "sepolia"
+	hoodi               = "hoodi"
 	local               = "local"
 	selectorHexIdLength = 10
 	addressPrefix       = "0x"
@@ -633,6 +634,8 @@ func GetEnvFromNetwork(network string) string {
 		return mainnet
 	case utils.SepoliaNetworkName:
 		return sepolia
+	case utils.HoodiNetworkName:
+		return hoodi
 	default:
 		return local
 	}

@@ -24,6 +24,7 @@ const (
 	MainnetNetworkName = "mainnet"
 	HoleskyNetworkName = "holesky"
 	SepoliaNetworkName = "sepolia"
+	HoodiNetworkName   = "hoodi"
 	AnvilNetworkName   = "anvil"
 	UnknownNetworkName = "unknown"
 
