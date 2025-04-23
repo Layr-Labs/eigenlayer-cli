@@ -14,6 +14,7 @@ const (
 	MainnetChainId = 1
 	HoleskyChainId = 17000
 	SepoliaChainId = 11155111
+	HoodiChainId   = 560048
 	AnvilChainId   = 31337
 
 	CallDataOutputType string = "calldata"
@@ -29,6 +30,7 @@ const (
 	MainnetBlockExplorerUrl = "https://etherscan.io/"
 	HoleskyBlockExplorerUrl = "https://holesky.etherscan.io"
 	SepoliaBlockExplorerUrl = "https://sepolia.etherscan.io"
+	HoodiBlockExplorerUrl   = "https://hoodi.etherscan.io"
 )
 
 var (
