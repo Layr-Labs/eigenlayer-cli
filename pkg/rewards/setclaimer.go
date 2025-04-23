@@ -82,7 +82,7 @@ func (s SetClaimerCmd) Execute(cCtx *cli.Context) error {
 			return eigenSdkUtils.WrapError("failed to create unsigned tx", err)
 		}
 
-		if config.OutputType == string(common.OutputType_Calldata) {
+		if config.OutputType == utils.CallDataOutputType {
 			calldataHex := gethcommon.Bytes2Hex(unsignedTx.Data())
 			if !common.IsEmptyString(config.Output) {
 				err := common.WriteToFile([]byte(calldataHex), config.Output)
@@ -92,7 +92,7 @@ func (s SetClaimerCmd) Execute(cCtx *cli.Context) error {
 			} else {
 				fmt.Println(calldataHex)
 			}
-		} else if config.OutputType == string(common.OutputType_Pretty) {
+		} else if config.OutputType == utils.PrettyOutputType {
 			if !common.IsEmptyString(config.Output) {
 				fmt.Println("output file not supported for pretty output type")
 				fmt.Println()

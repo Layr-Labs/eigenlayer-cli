@@ -42,14 +42,16 @@ import (
 const (
 	mainnet             = "mainnet"
 	testnet             = "testnet"
+	sepolia             = "sepolia"
+	hoodi               = "hoodi"
 	local               = "local"
 	selectorHexIdLength = 10
 	addressPrefix       = "0x"
 )
 
 var ChainMetadataMap = map[int64]types.ChainMetadata{
-	MainnetChainId: {
-		BlockExplorerUrl:              "https://etherscan.io/tx",
+	utils.MainnetChainId: {
+		BlockExplorerUrl:              utils.MainnetBlockExplorerUrl,
 		ELDelegationManagerAddress:    "0x39053D51B77DC0d36036Fc1fCc8Cb819df8Ef37A",
 		ELAVSDirectoryAddress:         "0x135dda560e946695d6f155dacafc6f1f25c1f5af",
 		ELRewardsCoordinatorAddress:   "0x7750d328b314EfFa365A0402CcfD489B80B0adda",
@@ -57,8 +59,8 @@ var ChainMetadataMap = map[int64]types.ChainMetadata{
 		WebAppUrl:                     "https://app.eigenlayer.xyz/operator",
 		SidecarHttpRpcURL:             "https://sidecar-rpc.eigenlayer.xyz/mainnet",
 	},
-	HoleskyChainId: {
-		BlockExplorerUrl:              "https://holesky.etherscan.io/tx",
+	utils.HoleskyChainId: {
+		BlockExplorerUrl:              utils.HoleskyBlockExplorerUrl,
 		ELDelegationManagerAddress:    "0xA44151489861Fe9e3055d95adC98FbD462B948e7",
 		ELAVSDirectoryAddress:         "0x055733000064333CaDDbC92763c58BF0192fFeBf",
 		ELRewardsCoordinatorAddress:   "0xAcc1fb458a1317E886dB376Fc8141540537E68fE",
@@ -66,7 +68,25 @@ var ChainMetadataMap = map[int64]types.ChainMetadata{
 		WebAppUrl:                     "https://holesky.eigenlayer.xyz/operator",
 		SidecarHttpRpcURL:             "https://sidecar-rpc.eigenlayer.xyz/holesky",
 	},
-	AnvilChainId: {
+	utils.SepoliaChainId: {
+		BlockExplorerUrl:              utils.SepoliaBlockExplorerUrl,
+		ELDelegationManagerAddress:    "0xD4A7E1Bd8015057293f0D0A557088c286942e84b",
+		ELAVSDirectoryAddress:         "0xa789c91ECDdae96865913130B786140Ee17aF545",
+		ELRewardsCoordinatorAddress:   "0x5ae8152fb88c26ff9ca5C014c94fca3c68029349",
+		ELPermissionControllerAddress: "0x44632dfBdCb6D3E21EF613B0ca8A6A0c618F5a37",
+		WebAppUrl:                     "",
+		SidecarHttpRpcURL:             "",
+	},
+	utils.HoodiChainId: {
+		BlockExplorerUrl:              utils.HoodiBlockExplorerUrl,
+		ELDelegationManagerAddress:    "0x867837a9722C512e0862d8c2E15b8bE220E8b87d",
+		ELAVSDirectoryAddress:         "0xD58f6844f79eB1fbd9f7091d05f7cb30d3363926",
+		ELRewardsCoordinatorAddress:   "0x29e8572678e0c272350aa0b4B8f304E47EBcd5e7",
+		ELPermissionControllerAddress: "0xdcCF401fD121d8C542E96BC1d0078884422aFAD2",
+		WebAppUrl:                     "",
+		SidecarHttpRpcURL:             "",
+	},
+	utils.AnvilChainId: {
 		BlockExplorerUrl:              "",
 		ELDelegationManagerAddress:    "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
 		ELAVSDirectoryAddress:         "0x0165878A594ca255338adfa4d48449f69242Eb8F",
@@ -612,6 +632,10 @@ func GetEnvFromNetwork(network string) string {
 		return testnet
 	case utils.MainnetNetworkName:
 		return mainnet
+	case utils.SepoliaNetworkName:
+		return sepolia
+	case utils.HoodiNetworkName:
+		return hoodi
 	default:
 		return local
 	}

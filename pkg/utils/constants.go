@@ -13,12 +13,25 @@ const (
 
 	MainnetChainId = 1
 	HoleskyChainId = 17000
+	SepoliaChainId = 11155111
+	HoodiChainId   = 560048
 	AnvilChainId   = 31337
+
+	CallDataOutputType string = "calldata"
+	PrettyOutputType   string = "pretty"
+	JsonOutputType     string = "json"
 
 	MainnetNetworkName = "mainnet"
 	HoleskyNetworkName = "holesky"
+	SepoliaNetworkName = "sepolia"
+	HoodiNetworkName   = "hoodi"
 	AnvilNetworkName   = "anvil"
 	UnknownNetworkName = "unknown"
+
+	MainnetBlockExplorerUrl = "https://etherscan.io/"
+	HoleskyBlockExplorerUrl = "https://holesky.etherscan.io"
+	SepoliaBlockExplorerUrl = "https://sepolia.etherscan.io"
+	HoodiBlockExplorerUrl   = "https://hoodi.etherscan.io"
 )
 
 var (
