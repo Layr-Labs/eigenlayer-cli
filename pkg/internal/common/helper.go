@@ -42,7 +42,7 @@ import (
 const (
 	mainnet             = "mainnet"
 	testnet             = "testnet"
-	sepoliaTestnet0     = "sepolia-testnet-0"
+	sepolia             = "sepolia"
 	local               = "local"
 	selectorHexIdLength = 10
 	addressPrefix       = "0x"
@@ -632,7 +632,7 @@ func GetEnvFromNetwork(network string) string {
 	case utils.MainnetNetworkName:
 		return mainnet
 	case utils.SepoliaNetworkName:
-		return sepoliaTestnet0
+		return sepolia
 	default:
 		return local
 	}
