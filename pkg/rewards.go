@@ -11,8 +11,8 @@ func RewardsCmd(p utils.Prompter) *cli.Command {
 		Name:  "rewards",
 		Usage: "Execute onchain operations for the rewards",
 		Subcommands: []*cli.Command{
-			rewards.ClaimCmd(p),
-			rewards.SetClaimerCmd(p),
+			rewards.NewClaimCmd(p),
+			rewards.NewSetClaimerCmd(p),
 			rewards.ShowCmd(p),
 		},
 	}

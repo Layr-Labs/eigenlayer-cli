@@ -279,7 +279,7 @@ func readAndValidateConfig(cCtx *cli.Context, logger logging.Logger) (*ShowConfi
 	network := cCtx.String(flags.NetworkFlag.Name)
 	env := cCtx.String(EnvironmentFlag.Name)
 	if env == "" {
-		env = getEnvFromNetwork(network)
+		env = common.GetEnvFromNetwork(network)
 	}
 	logger.Debugf("Network: %s, Env: %s", network, env)
 	rewardsCoordinatorAddress := cCtx.String(RewardsCoordinatorAddressFlag.Name)

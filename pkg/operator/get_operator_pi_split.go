@@ -16,7 +16,7 @@ func GetOperatorPISplitCmd(p utils.Prompter) *cli.Command {
 		Name:  "get-pi-split",
 		Usage: "Get programmatic incentives rewards split",
 		Action: func(cCtx *cli.Context) error {
-			return GetOperatorSplit(cCtx, true)
+			return GetOperatorSplit(cCtx, true, false)
 		},
 		After: telemetry.AfterRunAction(),
 		Flags: getGetOperatorPISplitFlags(),

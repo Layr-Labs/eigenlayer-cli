@@ -7,9 +7,10 @@ import (
 	"fmt"
 	"math/big"
 	"os"
-	"sort"
 	"strings"
 	"time"
+
+	"gopkg.in/yaml.v2"
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/clients/sidecar"
 	"github.com/Layr-Labs/eigenlayer-rewards-proofs/pkg/claimgen"
@@ -17,15 +18,14 @@ import (
 	rewardsV1 "github.com/Layr-Labs/protocol-apis/gen/protos/eigenlayer/sidecar/v1/rewards"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/command"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
-	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
-	"gopkg.in/yaml.v2"
 
 	"github.com/Layr-Labs/eigenlayer-rewards-proofs/pkg/distribution"
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
-	rewardscoordinator "github.com/Layr-Labs/eigensdk-go/contracts/bindings/IRewardsCoordinator"
+	rewardscoordinator "github.com/Layr-Labs/eigensdk-go/contracts/bindings/RewardsCoordinator"
 	"github.com/Layr-Labs/eigensdk-go/logging"
 	eigenSdkUtils "github.com/Layr-Labs/eigensdk-go/utils"
 
@@ -42,32 +42,33 @@ type elChainReader interface {
 	GetRootIndexFromHash(ctx context.Context, hash [32]byte) (uint32, error)
 	GetCurrentClaimableDistributionRoot(
 		ctx context.Context,
-	) (rewardscoordinator.IRewardsCoordinatorDistributionRoot, error)
+	) (rewardscoordinator.IRewardsCoordinatorTypesDistributionRoot, error)
 	CurrRewardsCalculationEndTimestamp(ctx context.Context) (uint32, error)
 	GetCumulativeClaimed(ctx context.Context, earnerAddress, tokenAddress gethcommon.Address) (*big.Int, error)
 }
 
-func ClaimCmd(p utils.Prompter) *cli.Command {
-	var claimCmd = &cli.Command{
-		Name:  "claim",
-		Usage: "Claim rewards for any earner",
-		Action: func(cCtx *cli.Context) error {
-			return Claim(cCtx, p)
-		},
-		After: telemetry.AfterRunAction(),
-		Flags: getClaimFlags(),
-	}
+type ClaimCmd struct {
+	prompter utils.Prompter
+}
+
+func NewClaimCmd(p utils.Prompter) *cli.Command {
+	delegateCmd := &ClaimCmd{prompter: p}
+	claimCmd := command.NewWriteableCallDataCommand(
+		delegateCmd,
+		"claim",
+		"Claim rewards for any earner",
+		"",
+		"",
+		getClaimFlags(),
+	)
 
 	return claimCmd
 }
 
 func getClaimFlags() []cli.Flag {
-	baseFlags := []cli.Flag{
+	return []cli.Flag{
 		&flags.NetworkFlag,
 		&flags.ETHRpcUrlFlag,
-		&flags.OutputFileFlag,
-		&flags.OutputTypeFlag,
-		&flags.BroadcastFlag,
 		&EarnerAddressFlag,
 		&EnvironmentFlag,
 		&RecipientAddressFlag,
@@ -80,22 +81,18 @@ func getClaimFlags() []cli.Flag {
 		&flags.SilentFlag,
 		&flags.BatchClaimFile,
 	}
-
-	allFlags := append(baseFlags, flags.GetSignerFlags()...)
-	sort.Sort(cli.FlagsByName(allFlags))
-	return allFlags
 }
 
 func convertSidecarProofToContractProof(
 	proof *rewardsV1.Proof,
-) rewardscoordinator.IRewardsCoordinatorRewardsMerkleClaim {
+) rewardscoordinator.IRewardsCoordinatorTypesRewardsMerkleClaim {
 	var earnerTokenRoot [32]byte
 	copy(earnerTokenRoot[:], proof.EarnerLeaf.EarnerTokenRoot)
-	return rewardscoordinator.IRewardsCoordinatorRewardsMerkleClaim{
+	return rewardscoordinator.IRewardsCoordinatorTypesRewardsMerkleClaim{
 		RootIndex:       proof.RootIndex,
 		EarnerIndex:     proof.EarnerIndex,
 		EarnerTreeProof: proof.EarnerTreeProof,
-		EarnerLeaf: rewardscoordinator.IRewardsCoordinatorEarnerTreeMerkleLeaf{
+		EarnerLeaf: rewardscoordinator.IRewardsCoordinatorTypesEarnerTreeMerkleLeaf{
 			Earner:          gethcommon.HexToAddress(proof.EarnerLeaf.Earner),
 			EarnerTokenRoot: earnerTokenRoot,
 		},
@@ -258,7 +255,7 @@ func generateClaimPayload(
 	return proof.Proof, nil
 }
 
-func Claim(cCtx *cli.Context, p utils.Prompter) error {
+func (c ClaimCmd) Execute(cCtx *cli.Context) error {
 	ctx := cCtx.Context
 	logger := common.GetLogger(cCtx)
 
@@ -296,7 +293,7 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 	}
 
 	if config.BatchClaimFile != "" {
-		return batchClaim(ctx, logger, ethClient, elReader, config, p, rootIndex, sidecarClient, blockHeight)
+		return batchClaim(ctx, logger, ethClient, elReader, config, c.prompter, rootIndex, sidecarClient, blockHeight)
 	}
 
 	proof, err := generateClaimPayload(
@@ -315,7 +312,7 @@ func Claim(cCtx *cli.Context, p utils.Prompter) error {
 	}
 
 	proofs := []*rewardsV1.Proof{proof}
-	err = broadcastClaims(config, ethClient, logger, p, ctx, proofs)
+	err = broadcastClaims(config, ethClient, logger, c.prompter, ctx, proofs)
 
 	return err
 }
@@ -332,7 +329,7 @@ func broadcastClaims(
 		return fmt.Errorf("at least one claim is required")
 	}
 	// just-in-time convert proofs to the contract format.
-	elClaims := make([]rewardscoordinator.IRewardsCoordinatorRewardsMerkleClaim, 0)
+	elClaims := make([]rewardscoordinator.IRewardsCoordinatorTypesRewardsMerkleClaim, 0)
 	for _, proof := range proofs {
 		elClaim := convertSidecarProofToContractProof(proof)
 		elClaims = append(elClaims, elClaim)
@@ -379,16 +376,12 @@ func broadcastClaims(
 			return err
 		}
 
-		// If claimer is a smart contract, we can't estimate gas using geth
+		// If caller is a smart contract, we can't estimate gas using geth
 		// since balance of contract can be 0, as it can be called by an EOA
 		// to claim. So we hardcode the gas limit to 150_000 so that we can
 		// create unsigned tx without gas limit estimation from contract bindings
-		code, err := ethClient.CodeAt(ctx, config.ClaimerAddress, nil)
-		if err != nil {
-			return eigenSdkUtils.WrapError("failed to get code at address", err)
-		}
-		if len(code) > 0 {
-			// Claimer is a smart contract
+		if common.IsSmartContractAddress(config.ClaimerAddress, ethClient) {
+			// Caller is a smart contract
 			noSendTxOpts.GasLimit = 150_000
 		}
 		var unsignedTx *types.Transaction
@@ -401,7 +394,7 @@ func broadcastClaims(
 			return eigenSdkUtils.WrapError("failed to create unsigned tx", err)
 		}
 
-		if config.OutputType == string(common.OutputType_Calldata) {
+		if config.OutputType == utils.CallDataOutputType {
 			calldataHex := gethcommon.Bytes2Hex(unsignedTx.Data())
 
 			if !common.IsEmptyString(config.Output) {
@@ -413,7 +406,7 @@ func broadcastClaims(
 			} else {
 				fmt.Println(calldataHex)
 			}
-		} else if config.OutputType == string(common.OutputType_Json) {
+		} else if config.OutputType == utils.JsonOutputType {
 			for _, claim := range proofs {
 				solidityClaim := formatProofForSolidity(claim)
 				jsonData, err := json.MarshalIndent(solidityClaim, "", "  ")
@@ -563,11 +556,11 @@ func filterClaimableTokenAddresses(
 
 func convertClaimTokenLeaves(
 	claimTokenLeaves []*rewardsV1.TokenLeaf,
-) []rewardscoordinator.IRewardsCoordinatorTokenTreeMerkleLeaf {
-	var tokenLeaves []rewardscoordinator.IRewardsCoordinatorTokenTreeMerkleLeaf
+) []rewardscoordinator.IRewardsCoordinatorTypesTokenTreeMerkleLeaf {
+	var tokenLeaves []rewardscoordinator.IRewardsCoordinatorTypesTokenTreeMerkleLeaf
 	for _, claimTokenLeaf := range claimTokenLeaves {
 		earnings, _ := new(big.Int).SetString(claimTokenLeaf.CumulativeEarnings, 10)
-		tokenLeaves = append(tokenLeaves, rewardscoordinator.IRewardsCoordinatorTokenTreeMerkleLeaf{
+		tokenLeaves = append(tokenLeaves, rewardscoordinator.IRewardsCoordinatorTypesTokenTreeMerkleLeaf{
 			Token:              gethcommon.HexToAddress(claimTokenLeaf.Token),
 			CumulativeEarnings: earnings,
 		})
@@ -626,7 +619,7 @@ func readAndValidateClaimConfig(cCtx *cli.Context, logger logging.Logger) (*Clai
 	logger.Debugf("Using chain ID: %s", chainID.String())
 
 	if common.IsEmptyString(environment) {
-		environment = getEnvFromNetwork(network)
+		environment = common.GetEnvFromNetwork(network)
 	}
 	logger.Debugf("Using network %s and environment: %s", network, environment)
 
@@ -676,17 +669,6 @@ func getSidecarUrl(network string) string {
 		return ""
 	} else {
 		return chainMetadata.SidecarHttpRpcURL
-	}
-}
-
-func getEnvFromNetwork(network string) string {
-	switch network {
-	case utils.HoleskyNetworkName:
-		return "testnet"
-	case utils.MainnetNetworkName:
-		return "mainnet"
-	default:
-		return "local"
 	}
 }
 

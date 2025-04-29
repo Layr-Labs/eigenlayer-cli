@@ -3,6 +3,7 @@ package common
 import (
 	"context"
 	"crypto/ecdsa"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -14,8 +15,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/urfave/cli/v2"
-
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/types"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
@@ -23,6 +22,7 @@ import (
 	"github.com/Layr-Labs/eigensdk-go/aws/secretmanager"
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/fireblocks"
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/wallet"
+	"github.com/Layr-Labs/eigensdk-go/logging"
 	eigensdkLogger "github.com/Layr-Labs/eigensdk-go/logging"
 	"github.com/Layr-Labs/eigensdk-go/signerv2"
 	eigensdkTypes "github.com/Layr-Labs/eigensdk-go/types"
@@ -36,32 +36,64 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 
 	"github.com/fatih/color"
+	"github.com/urfave/cli/v2"
+)
+
+const (
+	mainnet             = "mainnet"
+	testnet             = "testnet"
+	sepolia             = "sepolia"
+	hoodi               = "hoodi"
+	local               = "local"
+	selectorHexIdLength = 10
+	addressPrefix       = "0x"
 )
 
 var ChainMetadataMap = map[int64]types.ChainMetadata{
-	MainnetChainId: {
-		BlockExplorerUrl:            "https://etherscan.io/tx",
-		ELDelegationManagerAddress:  "0x39053D51B77DC0d36036Fc1fCc8Cb819df8Ef37A",
-		ELAVSDirectoryAddress:       "0x135dda560e946695d6f155dacafc6f1f25c1f5af",
-		ELRewardsCoordinatorAddress: "0x7750d328b314EfFa365A0402CcfD489B80B0adda",
-		WebAppUrl:                   "https://app.eigenlayer.xyz/operator",
-		SidecarHttpRpcURL:           "https://sidecar-rpc.eigenlayer.xyz/mainnet",
+	utils.MainnetChainId: {
+		BlockExplorerUrl:              utils.MainnetBlockExplorerUrl,
+		ELDelegationManagerAddress:    "0x39053D51B77DC0d36036Fc1fCc8Cb819df8Ef37A",
+		ELAVSDirectoryAddress:         "0x135dda560e946695d6f155dacafc6f1f25c1f5af",
+		ELRewardsCoordinatorAddress:   "0x7750d328b314EfFa365A0402CcfD489B80B0adda",
+		ELPermissionControllerAddress: "0x25E5F8B1E7aDf44518d35D5B2271f114e081f0E5",
+		WebAppUrl:                     "https://app.eigenlayer.xyz/operator",
+		SidecarHttpRpcURL:             "https://sidecar-rpc.eigenlayer.xyz/mainnet",
 	},
-	HoleskyChainId: {
-		BlockExplorerUrl:            "https://holesky.etherscan.io/tx",
-		ELDelegationManagerAddress:  "0xA44151489861Fe9e3055d95adC98FbD462B948e7",
-		ELAVSDirectoryAddress:       "0x055733000064333CaDDbC92763c58BF0192fFeBf",
-		ELRewardsCoordinatorAddress: "0xAcc1fb458a1317E886dB376Fc8141540537E68fE",
-		WebAppUrl:                   "https://holesky.eigenlayer.xyz/operator",
-		SidecarHttpRpcURL:           "https://sidecar-rpc.eigenlayer.xyz/holesky",
+	utils.HoleskyChainId: {
+		BlockExplorerUrl:              utils.HoleskyBlockExplorerUrl,
+		ELDelegationManagerAddress:    "0xA44151489861Fe9e3055d95adC98FbD462B948e7",
+		ELAVSDirectoryAddress:         "0x055733000064333CaDDbC92763c58BF0192fFeBf",
+		ELRewardsCoordinatorAddress:   "0xAcc1fb458a1317E886dB376Fc8141540537E68fE",
+		ELPermissionControllerAddress: "0x598cb226B591155F767dA17AfE7A2241a68C5C10",
+		WebAppUrl:                     "https://holesky.eigenlayer.xyz/operator",
+		SidecarHttpRpcURL:             "https://sidecar-rpc.eigenlayer.xyz/holesky",
 	},
-	AnvilChainId: {
-		BlockExplorerUrl:            "",
-		ELDelegationManagerAddress:  "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
-		ELAVSDirectoryAddress:       "0x0165878A594ca255338adfa4d48449f69242Eb8F",
-		ELRewardsCoordinatorAddress: "0x610178dA211FEF7D417bC0e6FeD39F05609AD788",
-		WebAppUrl:                   "",
-		SidecarHttpRpcURL:           "",
+	utils.SepoliaChainId: {
+		BlockExplorerUrl:              utils.SepoliaBlockExplorerUrl,
+		ELDelegationManagerAddress:    "0xD4A7E1Bd8015057293f0D0A557088c286942e84b",
+		ELAVSDirectoryAddress:         "0xa789c91ECDdae96865913130B786140Ee17aF545",
+		ELRewardsCoordinatorAddress:   "0x5ae8152fb88c26ff9ca5C014c94fca3c68029349",
+		ELPermissionControllerAddress: "0x44632dfBdCb6D3E21EF613B0ca8A6A0c618F5a37",
+		WebAppUrl:                     "",
+		SidecarHttpRpcURL:             "",
+	},
+	utils.HoodiChainId: {
+		BlockExplorerUrl:              utils.HoodiBlockExplorerUrl,
+		ELDelegationManagerAddress:    "0x867837a9722C512e0862d8c2E15b8bE220E8b87d",
+		ELAVSDirectoryAddress:         "0xD58f6844f79eB1fbd9f7091d05f7cb30d3363926",
+		ELRewardsCoordinatorAddress:   "0x29e8572678e0c272350aa0b4B8f304E47EBcd5e7",
+		ELPermissionControllerAddress: "0xdcCF401fD121d8C542E96BC1d0078884422aFAD2",
+		WebAppUrl:                     "",
+		SidecarHttpRpcURL:             "",
+	},
+	utils.AnvilChainId: {
+		BlockExplorerUrl:              "",
+		ELDelegationManagerAddress:    "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
+		ELAVSDirectoryAddress:         "0x0165878A594ca255338adfa4d48449f69242Eb8F",
+		ELRewardsCoordinatorAddress:   "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+		ELPermissionControllerAddress: "0x3Aa5ebB10DC797CAC828524e59A333d0A371443c",
+		WebAppUrl:                     "",
+		SidecarHttpRpcURL:             "",
 	},
 }
 
@@ -321,6 +353,26 @@ func GetAVSDirectoryAddress(chainID *big.Int) (string, error) {
 	}
 }
 
+func GetDelegationManagerAddress(chainID *big.Int) (string, error) {
+	chainIDInt := chainID.Int64()
+	chainMetadata, ok := ChainMetadataMap[chainIDInt]
+	if !ok {
+		return "", fmt.Errorf("chain ID %d not supported", chainIDInt)
+	} else {
+		return chainMetadata.ELDelegationManagerAddress, nil
+	}
+}
+
+func GetPermissionControllerAddress(chainID *big.Int) (string, error) {
+	chainIDInt := chainID.Int64()
+	chainMetadata, ok := ChainMetadataMap[chainIDInt]
+	if !ok {
+		return "", fmt.Errorf("chain ID %d not supported", chainIDInt)
+	} else {
+		return chainMetadata.ELPermissionControllerAddress, nil
+	}
+}
+
 func GetTransactionLink(txHash string, chainId *big.Int) string {
 	chainIDInt := chainId.Int64()
 	chainMetadata, ok := ChainMetadataMap[chainIDInt]
@@ -480,7 +532,7 @@ func GetNoSendTxOpts(from common.Address) *bind.TransactOpts {
 }
 
 func Trim0x(s string) string {
-	return strings.TrimPrefix(s, "0x")
+	return strings.TrimPrefix(s, addressPrefix)
 }
 
 func Sign(digest []byte, cfg types.SignerConfig, p utils.Prompter) ([]byte, error) {
@@ -532,4 +584,59 @@ func Sign(digest []byte, cfg types.SignerConfig, p utils.Prompter) ([]byte, erro
 	}
 
 	return signed, nil
+}
+
+func ValidateAndConvertSelectorString(selector string) ([4]byte, error) {
+	if len(selector) != selectorHexIdLength || selector[:2] != addressPrefix {
+		return [4]byte{}, errors.New("selector must be a 4-byte hex string prefixed with '0x'")
+	}
+
+	decoded, err := hex.DecodeString(selector[2:])
+	if err != nil {
+		return [4]byte{}, eigenSdkUtils.WrapError("invalid hex encoding: %v", err)
+	}
+
+	if len(decoded) != 4 {
+		return [4]byte{}, fmt.Errorf("decoded selector must be 4 bytes, got %d bytes", len(decoded))
+	}
+
+	var selectorBytes [4]byte
+	copy(selectorBytes[:], decoded)
+
+	return selectorBytes, nil
+}
+
+func PopulateCallerAddress(
+	cliContext *cli.Context,
+	logger logging.Logger,
+	defaultAddress common.Address,
+	defaultName string,
+) common.Address {
+	// TODO: these are copied across both callers of this method. Will clean this up in the CLI refactor of flags.
+	callerAddress := cliContext.String(flags.CallerAddressFlag.Name)
+	if IsEmptyString(callerAddress) {
+		logger.Infof(
+			"Caller address not provided. Using %s as default address (%s)",
+			defaultName,
+			defaultAddress,
+		)
+
+		return defaultAddress
+	}
+	return common.HexToAddress(callerAddress)
+}
+
+func GetEnvFromNetwork(network string) string {
+	switch network {
+	case utils.HoleskyNetworkName:
+		return testnet
+	case utils.MainnetNetworkName:
+		return mainnet
+	case utils.SepoliaNetworkName:
+		return sepolia
+	case utils.HoodiNetworkName:
+		return hoodi
+	default:
+		return local
+	}
 }

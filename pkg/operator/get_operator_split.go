@@ -10,6 +10,7 @@ import (
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
+	contractRewardsCoordinator "github.com/Layr-Labs/eigensdk-go/contracts/bindings/RewardsCoordinator"
 	"github.com/Layr-Labs/eigensdk-go/logging"
 	eigenSdkUtils "github.com/Layr-Labs/eigensdk-go/utils"
 	gethcommon "github.com/ethereum/go-ethereum/common"
@@ -22,7 +23,7 @@ func GetOperatorSplitCmd(p utils.Prompter) *cli.Command {
 		Name:  "get-rewards-split",
 		Usage: "Get operator rewards split",
 		Action: func(cCtx *cli.Context) error {
-			return GetOperatorSplit(cCtx, false)
+			return GetOperatorSplit(cCtx, false, false)
 		},
 		After: telemetry.AfterRunAction(),
 		Flags: getGetOperatorSplitFlags(),
@@ -45,11 +46,12 @@ func getGetOperatorSplitFlags() []cli.Flag {
 	return baseFlags
 }
 
-func GetOperatorSplit(cCtx *cli.Context, isProgrammaticIncentive bool) error {
+func GetOperatorSplit(cCtx *cli.Context, isProgrammaticIncentive bool, isOperatorSet bool) error {
 	ctx := cCtx.Context
 	logger := common.GetLogger(cCtx)
 
-	config, err := readAndValidateGetOperatorSplitConfig(cCtx, logger, isProgrammaticIncentive)
+	config, err := readAndValidateGetOperatorSplitConfig(cCtx, logger, isProgrammaticIncentive, isOperatorSet)
+
 	if err != nil {
 		return eigenSdkUtils.WrapError("failed to read and validate operator split config", err)
 	}
@@ -76,7 +78,13 @@ func GetOperatorSplit(cCtx *cli.Context, isProgrammaticIncentive bool) error {
 	logger.Infof("Getting operator split...")
 
 	var split uint16
-	if isProgrammaticIncentive {
+	if isOperatorSet {
+		operatorSet := contractRewardsCoordinator.OperatorSet{
+			Id:  uint32(config.OperatorSetId),
+			Avs: config.AVSAddress,
+		}
+		split, err = elReader.GetOperatorSetSplit(ctx, config.OperatorAddress, operatorSet)
+	} else if isProgrammaticIncentive {
 		split, err = elReader.GetOperatorPISplit(ctx, config.OperatorAddress)
 	} else {
 		split, err = elReader.GetOperatorAVSSplit(ctx, config.OperatorAddress, config.AVSAddress)
@@ -94,6 +102,7 @@ func readAndValidateGetOperatorSplitConfig(
 	cCtx *cli.Context,
 	logger logging.Logger,
 	isProgrammaticIncentive bool,
+	isOperatorSet bool,
 ) (*split.GetOperatorAVSSplitConfig, error) {
 	network := cCtx.String(flags.NetworkFlag.Name)
 	rpcUrl := cCtx.String(flags.ETHRpcUrlFlag.Name)
@@ -117,6 +126,11 @@ func readAndValidateGetOperatorSplitConfig(
 		logger.Infof("Using AVS address: %s", avsAddress.String())
 	}
 
+	var operatorSetId int
+	if isOperatorSet {
+		operatorSetId = cCtx.Int(split.OperatorSetIdFlag.Name)
+	}
+
 	chainID := utils.NetworkNameToChainId(network)
 	logger.Debugf("Using chain ID: %s", chainID.String())
 
@@ -127,5 +141,6 @@ func readAndValidateGetOperatorSplitConfig(
 		ChainID:                   chainID,
 		OperatorAddress:           operatorAddress,
 		AVSAddress:                avsAddress,
+		OperatorSetId:             operatorSetId,
 	}, nil
 }
