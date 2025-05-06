@@ -17,6 +17,10 @@ func ChainIdToNetworkName(chainId int64) string {
 		return MainnetNetworkName
 	case HoleskyChainId:
 		return HoleskyNetworkName
+	case SepoliaChainId:
+		return SepoliaNetworkName
+	case HoodiChainId:
+		return HoodiNetworkName
 	case AnvilChainId:
 		return AnvilNetworkName
 	default:
@@ -30,6 +34,10 @@ func NetworkNameToChainId(networkName string) *big.Int {
 		return big.NewInt(MainnetChainId)
 	case HoleskyNetworkName:
 		return big.NewInt(HoleskyChainId)
+	case SepoliaNetworkName:
+		return big.NewInt(SepoliaChainId)
+	case HoodiNetworkName:
+		return big.NewInt(HoodiChainId)
 	case AnvilNetworkName:
 		return big.NewInt(AnvilChainId)
 	default:
