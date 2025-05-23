@@ -206,7 +206,7 @@ func readAndValidateSetOperatorSplitConfig(
 		return nil, fmt.Errorf("Empty operator address provided")
 	}
 
-	operatorAddress := gethcommon.HexToAddress(cCtx.String(operatorAddressString))
+	operatorAddress := gethcommon.HexToAddress(operatorAddressString)
 	logger.Infof("Using operator address: %s", operatorAddress.String())
 	callerAddress := common.PopulateCallerAddress(cCtx, logger, operatorAddress, operatorAddressString)
 
