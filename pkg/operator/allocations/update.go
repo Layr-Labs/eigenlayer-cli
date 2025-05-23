@@ -447,6 +447,11 @@ func readAndValidateUpdateFlags(cCtx *cli.Context, logger logging.Logger) (*upda
 	isSilent := cCtx.Bool(flags.SilentFlag.Name)
 
 	operatorAddress := cCtx.String(flags.OperatorAddressFlag.Name)
+	if common.IsEmptyString(operatorAddress) {
+		logger.Error("--operator-address flag must be set")
+		return nil, fmt.Errorf("Empty operator address provided")
+	}
+
 	callerAddress := cCtx.String(flags.CallerAddressFlag.Name)
 	if common.IsEmptyString(callerAddress) {
 		logger.Infof("Caller address not provided. Using operator address (%s) as caller address", operatorAddress)
