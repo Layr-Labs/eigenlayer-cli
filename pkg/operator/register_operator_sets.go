@@ -2,6 +2,7 @@ package operator
 
 import (
 	"fmt"
+	"math/big"
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/command"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
@@ -10,6 +11,7 @@ import (
 
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
 	allocationmanager "github.com/Layr-Labs/eigensdk-go/contracts/bindings/AllocationManager"
+	"github.com/Layr-Labs/eigensdk-go/crypto/bls"
 	"github.com/Layr-Labs/eigensdk-go/logging"
 	eigenSdkUtils "github.com/Layr-Labs/eigensdk-go/utils"
 
@@ -75,11 +77,12 @@ func (r RegisterOperatorSetCmd) Execute(cCtx *cli.Context) error {
 		}
 		receipt, err := eLWriter.RegisterForOperatorSets(
 			ctx,
-			config.callerAddress,
+			config.registryCoordinatorAddress,
 			elcontracts.RegistrationRequest{
 				OperatorAddress: config.operatorAddress,
 				AVSAddress:      config.avsAddress,
 				OperatorSetIds:  config.operatorSetIds,
+				BlsKeyPair:      config.blsKeyPair,
 				WaitForReceipt:  true,
 			})
 		if err != nil {
@@ -183,27 +186,55 @@ func readAndValidateRegisterOperatorSetsConfig(cCtx *cli.Context, logger logging
 		}
 	}
 
+	registryCoordinatorAddress := cCtx.String(flags.RegistryCoordinatorAddressFlag.Name)
+	if common.IsEmptyString(registryCoordinatorAddress) {
+		logger.Error("--registry-coordinator-address flag must be set")
+		return nil, fmt.Errorf("Empty registry coordinator address provided")
+	}
+
 	operatorSetIdsString := cCtx.Uint64Slice(flags.OperatorSetIdsFlag.Name)
 	operatorSetIds := make([]uint32, len(operatorSetIdsString))
 	for i, id := range operatorSetIdsString {
 		operatorSetIds[i] = uint32(id)
 	}
 
+	blsPrivateKey := cCtx.String(flags.BlsPrivateKeyFlag.Name)
+	if common.IsEmptyString(blsPrivateKey) {
+		logger.Error("--bls-private-key flag must be set")
+		return nil, fmt.Errorf("Empty BLS private key provided")
+	}
+
+	privateKeyBigInt := new(big.Int)
+	_, ok := privateKeyBigInt.SetString(blsPrivateKey, 10)
+	var blsKeyPair *bls.KeyPair
+	if ok {
+		blsKeyPair, err = bls.NewKeyPairFromString(blsPrivateKey)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if !ok {
+		logger.Error("failed to create BLS key pair")
+		return nil, fmt.Errorf("failed to create BLS key pair")
+	}
+
 	config := &RegisterConfig{
-		avsAddress:               avsAddress,
-		operatorSetIds:           operatorSetIds,
-		operatorAddress:          operatorAddress,
-		callerAddress:            callerAddress,
-		network:                  network,
-		environment:              environment,
-		broadcast:                broadcast,
-		rpcUrl:                   rpcUrl,
-		chainID:                  chainId,
-		signerConfig:             signerConfig,
-		output:                   output,
-		outputType:               outputType,
-		delegationManagerAddress: gethcommon.HexToAddress(delegationManagerAddress),
-		isSilent:                 isSilent,
+		avsAddress:                 avsAddress,
+		operatorSetIds:             operatorSetIds,
+		operatorAddress:            operatorAddress,
+		callerAddress:              callerAddress,
+		network:                    network,
+		environment:                environment,
+		broadcast:                  broadcast,
+		rpcUrl:                     rpcUrl,
+		chainID:                    chainId,
+		signerConfig:               signerConfig,
+		output:                     output,
+		outputType:                 outputType,
+		delegationManagerAddress:   gethcommon.HexToAddress(delegationManagerAddress),
+		isSilent:                   isSilent,
+		registryCoordinatorAddress: gethcommon.HexToAddress(registryCoordinatorAddress),
+		blsKeyPair:                 blsKeyPair,
 	}
 
 	return config, nil
@@ -220,5 +251,7 @@ func getRegistrationFlags() []cli.Flag {
 		&flags.OperatorSetIdsFlag,
 		&flags.DelegationManagerAddressFlag,
 		&flags.SilentFlag,
+		&flags.RegistryCoordinatorAddressFlag,
+		&flags.BlsPrivateKeyFlag,
 	}
 }
