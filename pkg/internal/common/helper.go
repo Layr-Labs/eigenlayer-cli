@@ -379,7 +379,7 @@ func GetTransactionLink(txHash string, chainId *big.Int) string {
 	if !ok {
 		return txHash
 	} else {
-		return fmt.Sprintf("%s/%s", chainMetadata.BlockExplorerUrl, txHash)
+		return fmt.Sprintf("%s/tx/%s", chainMetadata.BlockExplorerUrl, txHash)
 	}
 }
 
