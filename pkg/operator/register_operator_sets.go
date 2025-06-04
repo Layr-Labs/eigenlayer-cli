@@ -2,16 +2,15 @@ package operator
 
 import (
 	"fmt"
-	"math/big"
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/command"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common/flags"
+	"github.com/Layr-Labs/eigenlayer-cli/pkg/keys"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/elcontracts"
 	allocationmanager "github.com/Layr-Labs/eigensdk-go/contracts/bindings/AllocationManager"
-	"github.com/Layr-Labs/eigensdk-go/crypto/bls"
 	"github.com/Layr-Labs/eigensdk-go/logging"
 	eigenSdkUtils "github.com/Layr-Labs/eigensdk-go/utils"
 
@@ -204,18 +203,9 @@ func readAndValidateRegisterOperatorSetsConfig(cCtx *cli.Context, logger logging
 		return nil, fmt.Errorf("Empty BLS private key provided")
 	}
 
-	privateKeyBigInt := new(big.Int)
-	_, ok := privateKeyBigInt.SetString(blsPrivateKey, 10)
-	var blsKeyPair *bls.KeyPair
-	if ok {
-		blsKeyPair, err = bls.NewKeyPairFromString(blsPrivateKey)
-		if err != nil {
-			return nil, err
-		}
-	}
-	if !ok {
-		logger.Error("failed to create BLS key pair")
-		return nil, fmt.Errorf("failed to create BLS key pair")
+	blsKeyPair, err := keys.ParseBlsPrivateKey(blsPrivateKey)
+	if err != nil {
+		return nil, err
 	}
 
 	config := &RegisterConfig{
