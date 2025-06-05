@@ -118,7 +118,7 @@ func (d DeregisterOperatorSetsCmd) Execute(cCtx *cli.Context) error {
 			return eigenSdkUtils.WrapError("failed to create unsigned transaction", err)
 		}
 
-		if config.outputType == string(common.OutputType_Calldata) {
+		if config.outputType == utils.CallDataOutputType {
 			calldataHex := gethcommon.Bytes2Hex(unsignedTx.Data())
 			if !common.IsEmptyString(config.output) {
 				err = common.WriteToFile([]byte(calldataHex), config.output)
@@ -168,8 +168,14 @@ func readAndValidateDeregisterConfig(cCtx *cli.Context, logger logging.Logger) (
 	broadcast := cCtx.Bool(flags.BroadcastFlag.Name)
 	isSilent := cCtx.Bool(flags.SilentFlag.Name)
 
-	operatorAddress := gethcommon.HexToAddress(cCtx.String(flags.OperatorAddressFlag.Name))
-	callerAddress := common.PopulateCallerAddress(cCtx, logger, operatorAddress, flags.OperatorAddressFlag.Name)
+	operatorAddressString := cCtx.String(flags.OperatorAddressFlag.Name)
+	if common.IsEmptyString(operatorAddressString) {
+		logger.Error("--operator-address flag must be set")
+		return nil, fmt.Errorf("Empty operator address provided")
+	}
+
+	operatorAddress := gethcommon.HexToAddress(operatorAddressString)
+	callerAddress := common.PopulateCallerAddress(cCtx, logger, operatorAddress, operatorAddressString)
 	avsAddress := gethcommon.HexToAddress(cCtx.String(flags.AVSAddressFlag.Name))
 
 	// Get signerConfig

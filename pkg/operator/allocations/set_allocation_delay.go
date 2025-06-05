@@ -104,7 +104,7 @@ func setDelayAction(cCtx *cli.Context, p utils.Prompter) error {
 			return eigenSdkUtils.WrapError("failed to create unsigned tx", err)
 		}
 
-		if config.outputType == string(common.OutputType_Calldata) {
+		if config.outputType == utils.CallDataOutputType {
 			calldataHex := gethcommon.Bytes2Hex(unsignedTx.Data())
 			if !common.IsEmptyString(config.output) {
 				err = common.WriteToFile([]byte(calldataHex), config.output)
@@ -168,6 +168,11 @@ func readAndValidateAllocationDelayConfig(c *cli.Context, logger logging.Logger)
 	outputType := c.String(flags.OutputTypeFlag.Name)
 	broadcast := c.Bool(flags.BroadcastFlag.Name)
 	operatorAddress := c.String(flags.OperatorAddressFlag.Name)
+
+	if common.IsEmptyString(operatorAddress) {
+		logger.Error("--operator-address flag must be set")
+		return nil, fmt.Errorf("Empty operator address provided")
+	}
 
 	callerAddress := c.String(flags.CallerAddressFlag.Name)
 	if common.IsEmptyString(callerAddress) {

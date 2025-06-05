@@ -117,7 +117,7 @@ func printSetAppointeeResults(
 	if err != nil {
 		return eigenSdkUtils.WrapError("failed to create unsigned tx", err)
 	}
-	if config.OutputType == string(common.OutputType_Calldata) {
+	if config.OutputType == utils.CallDataOutputType {
 		calldataHex := gethcommon.Bytes2Hex(tx.Data())
 		if !common.IsEmptyString(config.OutputFile) {
 			err = common.WriteToFile([]byte(calldataHex), config.OutputFile)

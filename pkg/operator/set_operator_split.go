@@ -136,7 +136,7 @@ func SetOperatorSplit(cCtx *cli.Context, p utils.Prompter, isProgrammaticIncenti
 		if err != nil {
 			return eigenSdkUtils.WrapError("failed to create unsigned tx", err)
 		}
-		if config.OutputType == string(common.OutputType_Calldata) {
+		if config.OutputType == utils.CallDataOutputType {
 			calldataHex := gethcommon.Bytes2Hex(unsignedTx.Data())
 
 			if !common.IsEmptyString(config.OutputFile) {
@@ -200,9 +200,15 @@ func readAndValidateSetOperatorSplitConfig(
 	}
 	logger.Debugf("Using Rewards Coordinator address: %s", rewardsCoordinatorAddress)
 
-	operatorAddress := gethcommon.HexToAddress(cCtx.String(flags.OperatorAddressFlag.Name))
+	operatorAddressString := cCtx.String(flags.OperatorAddressFlag.Name)
+	if common.IsEmptyString(operatorAddressString) {
+		logger.Error("--operator-address flag must be set")
+		return nil, fmt.Errorf("Empty operator address provided")
+	}
+
+	operatorAddress := gethcommon.HexToAddress(operatorAddressString)
 	logger.Infof("Using operator address: %s", operatorAddress.String())
-	callerAddress := common.PopulateCallerAddress(cCtx, logger, operatorAddress, flags.OperatorAddressFlag.Name)
+	callerAddress := common.PopulateCallerAddress(cCtx, logger, operatorAddress, operatorAddressString)
 
 	avsAddress := gethcommon.HexToAddress(cCtx.String(split.AVSAddressFlag.Name))
 

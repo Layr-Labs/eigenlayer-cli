@@ -1,6 +1,7 @@
 package operator
 
 import (
+	"fmt"
 	"sort"
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
@@ -118,7 +119,13 @@ func readAndValidateGetOperatorSplitConfig(
 	}
 	logger.Debugf("Using Rewards Coordinator address: %s", rewardsCoordinatorAddress)
 
-	operatorAddress := gethcommon.HexToAddress(cCtx.String(flags.OperatorAddressFlag.Name))
+	operatorAddressString := cCtx.String(flags.OperatorAddressFlag.Name)
+	if common.IsEmptyString(operatorAddressString) {
+		logger.Error("--operator-address flag must be set")
+		return nil, fmt.Errorf("Empty operator address provided")
+	}
+	operatorAddress := gethcommon.HexToAddress(operatorAddressString)
+
 	logger.Infof("Using operator address: %s", operatorAddress.String())
 
 	avsAddress := gethcommon.HexToAddress(cCtx.String(split.AVSAddressFlag.Name))

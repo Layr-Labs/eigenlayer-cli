@@ -394,7 +394,7 @@ func broadcastClaims(
 			return eigenSdkUtils.WrapError("failed to create unsigned tx", err)
 		}
 
-		if config.OutputType == string(common.OutputType_Calldata) {
+		if config.OutputType == utils.CallDataOutputType {
 			calldataHex := gethcommon.Bytes2Hex(unsignedTx.Data())
 
 			if !common.IsEmptyString(config.Output) {
@@ -406,7 +406,7 @@ func broadcastClaims(
 			} else {
 				fmt.Println(calldataHex)
 			}
-		} else if config.OutputType == string(common.OutputType_Json) {
+		} else if config.OutputType == utils.JsonOutputType {
 			for _, claim := range proofs {
 				solidityClaim := formatProofForSolidity(claim)
 				jsonData, err := json.MarshalIndent(solidityClaim, "", "  ")
@@ -629,11 +629,6 @@ func readAndValidateClaimConfig(cCtx *cli.Context, logger logging.Logger) (*Clai
 		// We don't want to throw error since people can still use it to generate the claim
 		// without broadcasting it
 		logger.Debugf("Failed to get signer config: %s", err)
-	}
-
-	// TODO(shrimalmadhur): Fix to make sure correct S3 bucket is used. Clean up later
-	if network == utils.MainnetNetworkName {
-		network = "ethereum"
 	}
 
 	sidecarUrl := cCtx.String(SidecarUrlFlag.Name)
