@@ -24,13 +24,13 @@ func TestGetTransactionLink(t *testing.T) {
 			name:           "valid mainnet tx hash",
 			chainID:        big.NewInt(1),
 			txHash:         "0x123",
-			expectedTxLink: fmt.Sprintf("%s/%s", utils.MainnetBlockExplorerUrl, "0x123"),
+			expectedTxLink: fmt.Sprintf("%s/tx/%s", utils.MainnetBlockExplorerUrl, "0x123"),
 		},
 		{
 			name:           "valid holesky tx hash",
 			chainID:        big.NewInt(17000),
 			txHash:         "0x123",
-			expectedTxLink: fmt.Sprintf("%s/%s", utils.HoleskyBlockExplorerUrl, "0x123"),
+			expectedTxLink: fmt.Sprintf("%s/tx/%s", utils.HoleskyBlockExplorerUrl, "0x123"),
 		},
 		{
 			name:           "valid custom chain tx hash",

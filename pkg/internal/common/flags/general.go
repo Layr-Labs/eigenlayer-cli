@@ -132,4 +132,16 @@ var (
 		Usage:   "Used to execute an action on behalf of another user. See User Access Management documents for more details.",
 		EnvVars: []string{"CALLER_ADDRESS"},
 	}
+	RegistryCoordinatorAddressFlag = cli.StringFlag{
+		Name:    "registry-coordinator-address",
+		Aliases: []string{"rca"},
+		Usage:   "Address of the registry coordinator contract. This is required for registering an operator for operator sets",
+		EnvVars: []string{"REGISTRY_COORDINATOR_ADDRESS"},
+	}
+	BlsPrivateKeyFlag = cli.StringFlag{
+		Name:    "bls-private-key",
+		Aliases: []string{"bls"},
+		Usage:   "BLS private key of Operator for Operator Set registration",
+		EnvVars: []string{"BLS_PRIVATE_KEY"},
+	}
 )

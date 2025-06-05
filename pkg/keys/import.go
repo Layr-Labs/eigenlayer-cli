@@ -3,14 +3,12 @@ package keys
 import (
 	"crypto/ecdsa"
 	"fmt"
-	"math/big"
 	"strings"
 
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/internal/common"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/telemetry"
 	"github.com/Layr-Labs/eigenlayer-cli/pkg/utils"
 
-	"github.com/Layr-Labs/eigensdk-go/crypto/bls"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/urfave/cli/v2"
 )
@@ -104,29 +102,9 @@ This command will import keys in $HOME/.eigenlayer/operator_keys/ location
 				}
 				return saveEcdsaKey(keyName, p, privateKeyPair, insecure, stdInPassword, readFromPipe, "")
 			case KeyTypeBLS:
-				privateKeyBigInt := new(big.Int)
-				_, ok := privateKeyBigInt.SetString(privateKey, 10)
-				var blsKeyPair *bls.KeyPair
-				var err error
-				if ok {
-					fmt.Println("Importing from large integer")
-					blsKeyPair, err = bls.NewKeyPairFromString(privateKey)
-					if err != nil {
-						return err
-					}
-				} else {
-					// Try to parse as hex
-					fmt.Println("Importing from hex")
-					z := new(big.Int)
-					privateKey = common.Trim0x(privateKey)
-					_, ok := z.SetString(privateKey, 16)
-					if !ok {
-						return ErrInvalidHexPrivateKey
-					}
-					blsKeyPair, err = bls.NewKeyPairFromString(z.String())
-					if err != nil {
-						return err
-					}
+				blsKeyPair, err := ParseBlsPrivateKey(privateKey)
+				if err != nil {
+					return err
 				}
 				return saveBlsKey(keyName, p, blsKeyPair, insecure, stdInPassword, readFromPipe)
 			default:
