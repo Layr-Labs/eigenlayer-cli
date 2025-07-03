@@ -152,7 +152,6 @@ func batchClaim(
 			earnerAddr,
 			tokenAddrs,
 			sidecarClient,
-			blockHeight,
 		)
 
 		if err != nil {
@@ -170,13 +169,11 @@ func getClaimableRewardsForEarner(
 	ctx context.Context,
 	earnerAddress gethcommon.Address,
 	sidecarClient rewardsV1.RewardsGatewayClient,
-	blockHeight uint64,
 ) (map[gethcommon.Address]*big.Int, error) {
 	summarizedRewards, err := sidecarClient.GetSummarizedRewardsForEarner(
 		ctx,
 		&rewardsV1.GetSummarizedRewardsForEarnerRequest{
 			EarnerAddress: strings.ToLower(earnerAddress.String()),
-			BlockHeight:   &blockHeight,
 		},
 	)
 	if err != nil {
@@ -208,14 +205,13 @@ func generateClaimPayload(
 	earnerAddress gethcommon.Address,
 	tokenAddresses []gethcommon.Address,
 	sidecarClient rewardsV1.RewardsGatewayClient,
-	blockHeight uint64,
 ) (
 	*rewardsV1.Proof,
 	error,
 ) {
 	tokens := make([]string, 0)
 	if len(tokenAddresses) == 0 {
-		tokenMap, err := getClaimableRewardsForEarner(ctx, earnerAddress, sidecarClient, blockHeight)
+		tokenMap, err := getClaimableRewardsForEarner(ctx, earnerAddress, sidecarClient)
 		if err != nil {
 			return nil, eigenSdkUtils.WrapError("failed to get claimable rewards for earner", err)
 		}
@@ -304,7 +300,6 @@ func (c ClaimCmd) Execute(cCtx *cli.Context) error {
 		config.EarnerAddress,
 		config.TokenAddresses,
 		sidecarClient,
-		blockHeight,
 	)
 
 	if err != nil {
