@@ -23,6 +23,16 @@ func TestChainIdToNetworkName(t *testing.T) {
 			expected: "holesky",
 		},
 		{
+			name:     "hoodi",
+			chainId:  560048,
+			expected: "hoodi",
+		},
+		{
+			name:     "sepolia",
+			chainId:  11155111,
+			expected: "sepolia",
+		},
+		{
 			name:     "anvil",
 			chainId:  31337,
 			expected: "anvil",
@@ -52,6 +62,16 @@ func TestNetworkNameToChainId(t *testing.T) {
 			name:     "holesky",
 			network:  "holesky",
 			expected: 17000,
+		},
+		{
+			name:     "hoodi",
+			network:  "hoodi",
+			expected: 560048,
+		},
+		{
+			name:     "sepolia",
+			network:  "sepolia",
+			expected: 11155111,
 		},
 		{
 			name:     "anvil",

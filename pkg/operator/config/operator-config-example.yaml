@@ -33,7 +33,7 @@ signer_type: local_keystore
 # Full path to local ecdsa private key store file
 private_key_store_path: <path-to>/test.ecdsa.key.json
 
-# Chain ID: 1 for mainnet, 17000 for holesky, 31337 for local
+# Chain ID: 1 for mainnet, 17000 for holesky, 560048 for hoodi, 11155111 for sepolia,  31337 for local
 chain_id: 17000
 
 # If you are using Fireblocks as your signer, please provide the following details
