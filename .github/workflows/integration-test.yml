@@ -11,15 +11,32 @@ jobs:
     name: Integration Test - Local Keystore
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/setup-go@v4
+      - uses: step-security/harden-runner@ec9f2d5744a09debf3a187a3f4f675c53b671911
+        with:
+          egress-policy: block
+          allowed-endpoints: >
+            api.github.com:443
+            azure.archive.ubuntu.com:80
+            esm.ubuntu.com:443
+            ghcr.io:443
+            github.com:443
+            madhur-test-public.s3.us-east-2.amazonaws.com:443
+            objects.githubusercontent.com:443
+            packages.microsoft.com:443
+            pkg-containers.githubusercontent.com:443
+            proxy.golang.org:443
+            release-assets.githubusercontent.com:443
+            storage.googleapis.com:443
+            sum.golang.org:443
+      - uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
         with:
           go-version: '1.21'
       - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@v1
+        uses: foundry-rs/foundry-toolchain@8f1998e9878d786675189ef566a2e4bf24869773 # v1.2.0
         with:
             version: nightly-c4a984fbf2c48b793c8cd53af84f56009dd1070c
       - name: Checkout eigensdk-go
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
             repository: layr-labs/eigensdk-go
             token: ${{ github.token }}
@@ -29,7 +46,7 @@ jobs:
         run: |
           nohup make start-anvil-with-contracts-deployed > nohup.out 2>&1 &
       - name: Install EigenLayer CLI
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
             path: eigenlayer-cli
       - name: Install less
@@ -84,15 +101,34 @@ jobs:
     name: Integration Test - Web3 Signer
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/setup-go@v4
+      - uses: step-security/harden-runner@ec9f2d5744a09debf3a187a3f4f675c53b671911
+        with:
+          egress-policy: block
+          allowed-endpoints: >
+            api.github.com:443
+            auth.docker.io:443
+            azure.archive.ubuntu.com:80
+            esm.ubuntu.com:443
+            ghcr.io:443
+            github.com:443
+            madhur-test-public.s3.us-east-2.amazonaws.com:443
+            packages.microsoft.com:443
+            pkg-containers.githubusercontent.com:443
+            production.cloudflare.docker.com:443
+            proxy.golang.org:443
+            registry-1.docker.io:443
+            release-assets.githubusercontent.com:443
+            storage.googleapis.com:443
+            sum.golang.org:443
+      - uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
         with:
           go-version: '1.21'
       - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@v1
+        uses: foundry-rs/foundry-toolchain@8f1998e9878d786675189ef566a2e4bf24869773 # v1.2.0
         with:
           version: nightly-c4a984fbf2c48b793c8cd53af84f56009dd1070c
       - name: Checkout eigensdk-go
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           repository: layr-labs/eigensdk-go
           token: ${{ github.token }}
@@ -101,7 +137,7 @@ jobs:
         run: |
           nohup make start-anvil-with-contracts-deployed > nohup.out 2>&1 &
       - name: Install EigenLayer CLI
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           path: eigenlayer-cli
       - name: Install less
@@ -163,17 +199,29 @@ jobs:
     name: Integration Test - User Commands
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/setup-go@v4
+      - uses: step-security/harden-runner@ec9f2d5744a09debf3a187a3f4f675c53b671911
+        with:
+          egress-policy: block
+          allowed-endpoints: >
+            api.github.com:443
+            ghcr.io:443
+            github.com:443
+            pkg-containers.githubusercontent.com:443
+            proxy.golang.org:443
+            release-assets.githubusercontent.com:443
+            storage.googleapis.com:443
+            sum.golang.org:443
+      - uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
         with:
           go-version: '1.21'
 
       - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@v1
+        uses: foundry-rs/foundry-toolchain@8f1998e9878d786675189ef566a2e4bf24869773 # v1.2.0
         with:
           version: nightly-c4a984fbf2c48b793c8cd53af84f56009dd1070c
 
       - name: Checkout eigensdk-go
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           repository: layr-labs/eigensdk-go
           token: ${{ github.token }}
@@ -184,12 +232,12 @@ jobs:
           nohup make start-anvil-with-contracts-deployed > nohup.out 2>&1 &
 
       - name: Install EigenLayer CLI
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           path: eigenlayer-cli
 
       - name: Setup BATS
-        uses: mig4/setup-bats@v1
+        uses: mig4/setup-bats@af9a00deb21b5d795cabfeaa8d9060410377686d # v1.2.0
 
       - name: Install EigenLayer CLI
         run: |
